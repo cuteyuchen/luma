@@ -57,6 +57,7 @@ corepack pnpm pack:dry-run
 corepack pnpm --filter @luma/icons pack --dry-run
 corepack pnpm --filter @luma/core pack --dry-run
 corepack pnpm --filter @luma/vben-compat pack --dry-run
+corepack pnpm --filter create-luma-admin pack --dry-run
 ```
 
 检查 tarball 内容：
@@ -64,6 +65,7 @@ corepack pnpm --filter @luma/vben-compat pack --dry-run
 - 包含 `dist`。
 - 包含包内 `README.md`。
 - `@luma/core` 包含 `theme-chalk/index.scss`。
+- `create-luma-admin` 包含 `dist/cli.js` 和 `dist/index.js`。
 - 不包含 `apps/*`。
 - 不包含本地日志、IDE 文件和构建缓存。
 

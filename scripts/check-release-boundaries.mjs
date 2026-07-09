@@ -5,6 +5,7 @@ import process from 'node:process'
 /***********************基础路径*********************/
 const rootDir = process.cwd()
 const packageDirs = {
+  createLumaAdmin: join(rootDir, 'packages/create-luma-admin'),
   icons: join(rootDir, 'packages/icons'),
   core: join(rootDir, 'packages/core'),
   vbenCompat: join(rootDir, 'packages/vben-compat'),
@@ -97,9 +98,11 @@ function checkPublishPackage(name, dirPath) {
 const iconsPackage = checkPublishPackage('@luma/icons', packageDirs.icons)
 const corePackage = checkPublishPackage('@luma/core', packageDirs.core)
 const compatPackage = checkPublishPackage('@luma/vben-compat', packageDirs.vbenCompat)
+const createPackage = checkPublishPackage('create-luma-admin', packageDirs.createLumaAdmin)
 
 assert(corePackage.files?.includes('theme-chalk'), '@luma/core files 未包含 theme-chalk')
 assert(corePackage.exports?.['./theme-chalk/index.scss'], '@luma/core 未导出 theme-chalk/index.scss')
+assert(createPackage.bin?.['create-luma-admin'] === './dist/cli.js', 'create-luma-admin 缺少 bin.create-luma-admin')
 
 /***********************依赖边界*********************/
 const iconsAllDependencies = getDependencyNames(iconsPackage, [

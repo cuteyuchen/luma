@@ -1,0 +1,34 @@
+{
+  "name": "create-luma-admin",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Create a minimal Luma admin application.",
+  "keywords": [
+    "luma",
+    "vue",
+    "admin",
+    "scaffold",
+    "create"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "create-luma-admin": "./dist/cli.js"
+  },
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/clean-package-dist.mjs dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config ../../vitest.config.ts tests"
+  }
+}

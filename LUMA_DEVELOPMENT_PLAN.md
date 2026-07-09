@@ -18,6 +18,7 @@
 - 核心包：`@luma/core`
 - 图标包：`@luma/icons`
 - Vben 兼容包：`@luma/vben-compat`
+- 脚手架包：`create-luma-admin`
 - 后台模板/应用：`luma-admin`
 - 后续脚手架：`create-luma-admin` 或 `pnpm create luma-admin`
 
@@ -65,6 +66,14 @@ F:\my-project\luma
 │  ├─ package-boundaries.md
 │  └─ release-checklist.md
 ├─ packages
+│  ├─ create-luma-admin
+│  │  ├─ package.json
+│  │  ├─ tsconfig.json
+│  │  ├─ src
+│  │  │  ├─ cli.ts
+│  │  │  ├─ index.ts
+│  │  │  └─ scaffold.ts
+│  │  └─ tests
 │  ├─ icons
 │  │  ├─ package.json
 │  │  ├─ tsconfig.json
@@ -711,6 +720,7 @@ corepack pnpm pack:dry-run
 corepack pnpm --filter @luma/icons pack --dry-run
 corepack pnpm --filter @luma/core pack --dry-run
 corepack pnpm --filter @luma/vben-compat pack --dry-run
+corepack pnpm --filter create-luma-admin pack --dry-run
 ```
 
 **验收标准：**
@@ -718,6 +728,27 @@ corepack pnpm --filter @luma/vben-compat pack --dry-run
 - 包内容干净。
 - 公开 API 和文档中没有公司名。
 - 构建产物只包含预期文件。
+
+---
+
+## 阶段 9：脚手架
+
+**目标：** 提供可发布的 `create-luma-admin` 包，用于生成最小 Luma Admin 应用。
+
+**任务：**
+
+- [x] 新增 `packages/create-luma-admin`。
+- [x] 实现 `createLumaAdminProject`，生成 Vue 3、TypeScript、Vite、Element Plus、SCSS 模板。
+- [x] CLI 暴露 `create-luma-admin` 命令。
+- [x] 生成模板通过 `@luma/core` 和 `@luma/icons` 公开入口消费能力。
+- [x] 目标目录非空时拒绝覆盖已有文件。
+- [x] 增加脚手架测试、类型检查、构建和 dry-run 打包。
+
+**验收标准：**
+
+- `corepack pnpm --filter create-luma-admin test` 通过。
+- `corepack pnpm --filter create-luma-admin build` 通过。
+- `corepack pnpm --filter create-luma-admin pack --dry-run` 包含 `dist/cli.js`。
 
 ---
 

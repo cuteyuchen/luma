@@ -156,6 +156,8 @@ importers:
         specifier: ^4.5.0
         version: 4.6.4(vue@3.5.39(typescript@6.0.3))
 
+  packages/create-luma-admin: {}
+
   packages/icons:
     dependencies:
       '@iconify/vue':
