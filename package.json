@@ -11,13 +11,16 @@
     "typecheck": "pnpm --filter @luma/icons typecheck && pnpm --filter @luma/icons build && pnpm --filter @luma/core typecheck && pnpm --filter @luma/core build && pnpm --filter @luma/vben-compat typecheck",
     "test": "pnpm --filter @luma/icons test && pnpm --filter @luma/icons build && pnpm --filter @luma/core test && pnpm --filter @luma/core build && pnpm --filter @luma/vben-compat test",
     "lint": "eslint .",
+    "playground:dev": "pnpm build && pnpm --filter luma-playground dev",
+    "playground:build": "pnpm build && pnpm --filter luma-playground build",
+    "playground:preview": "pnpm --filter luma-playground preview",
     "admin:dev": "pnpm build && pnpm --filter luma-admin dev",
     "admin:build": "pnpm build && pnpm --filter luma-admin build",
     "admin:preview": "pnpm --filter luma-admin preview",
     "compat:build": "pnpm build && pnpm --filter luma-vben-compat-demo build",
     "pack:dry-run": "pnpm --filter @luma/icons pack --dry-run && pnpm --filter @luma/core pack --dry-run && pnpm --filter @luma/vben-compat pack --dry-run",
     "release:boundaries": "node scripts/check-release-boundaries.mjs",
-    "release:check": "pnpm lint && pnpm release:boundaries && pnpm test && pnpm typecheck && pnpm build && pnpm admin:build && pnpm compat:build && pnpm pack:dry-run"
+    "release:check": "pnpm lint && pnpm release:boundaries && pnpm test && pnpm typecheck && pnpm build && pnpm playground:build && pnpm admin:build && pnpm compat:build && pnpm pack:dry-run"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^8.2.0",

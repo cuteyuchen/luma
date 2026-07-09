@@ -83,10 +83,12 @@ const [, gridApi] = useVbenVxeGrid({
 
 ## 示例应用
 
+- `apps/playground`：通过公开包入口消费组件的开发预览应用。
 - `apps/luma-admin`：Luma 原生写法示例。
 - `apps/vben-compat-demo`：Vben 兼容写法示例。
 
 ```bash
+corepack pnpm playground:build
 corepack pnpm admin:build
 corepack pnpm compat:build
 ```
