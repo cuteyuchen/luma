@@ -14,6 +14,7 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
 
 - `@luma/icons` 不依赖 `@luma/core`。
 - `@luma/core` 不依赖 `@luma/vben-compat`。
+- Element Plus 保持为 `@luma/core` 的 peer dependency，Luma 不从零重写基础 UI 控件。
 - `@luma/core` 不默认依赖 VXE。
 - `@luma/core` 不默认引入多语言运行时。
 
@@ -25,10 +26,17 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
 corepack pnpm release:check
 ```
 
+其中 `release:boundaries` 会作为发布检查的一部分自动执行；如果只想快速检查包边界，可以单独运行：
+
+```bash
+corepack pnpm release:boundaries
+```
+
 拆开执行时也必须保持串行：
 
 ```bash
 corepack pnpm lint
+corepack pnpm release:boundaries
 corepack pnpm test
 corepack pnpm typecheck
 corepack pnpm build

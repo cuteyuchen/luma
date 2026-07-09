@@ -1,0 +1,178 @@
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { join, relative } from 'node:path'
+import process from 'node:process'
+
+/***********************基础路径*********************/
+const rootDir = process.cwd()
+const packageDirs = {
+  icons: join(rootDir, 'packages/icons'),
+  core: join(rootDir, 'packages/core'),
+  vbenCompat: join(rootDir, 'packages/vben-compat'),
+}
+
+const oldNamePattern = /guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage|GPagination/
+const textFilePattern = /\.(?:cjs|css|html|js|json|mjs|md|scss|ts|tsx|vue|yaml|yml)$/
+
+const errors = []
+
+/***********************通用工具*********************/
+function readJson(filePath) {
+  return JSON.parse(readFileSync(filePath, 'utf8'))
+}
+
+function assert(condition, message) {
+  if (!condition) {
+    errors.push(message)
+  }
+}
+
+function getDependencyNames(packageJson, fields) {
+  const names = new Set()
+
+  for (const field of fields) {
+    for (const name of Object.keys(packageJson[field] ?? {})) {
+      names.add(name)
+    }
+  }
+
+  return names
+}
+
+function hasDependency(packageJson, field, name) {
+  return Object.hasOwn(packageJson[field] ?? {}, name)
+}
+
+function walkFiles(dirPath, files = []) {
+  for (const entry of readdirSync(dirPath)) {
+    const filePath = join(dirPath, entry)
+    const stat = statSync(filePath)
+
+    if (stat.isDirectory()) {
+      if (!['dist', 'node_modules', '.git'].includes(entry)) {
+        walkFiles(filePath, files)
+      }
+    }
+    else if (textFilePattern.test(entry)) {
+      files.push(filePath)
+    }
+  }
+
+  return files
+}
+
+function findTextMatches(dirPath, pattern, ignoredRelativeFiles = new Set()) {
+  const matches = []
+
+  for (const filePath of walkFiles(dirPath)) {
+    const relativePath = relative(rootDir, filePath).replaceAll('\\', '/')
+
+    if (ignoredRelativeFiles.has(relativePath)) {
+      continue
+    }
+
+    const content = readFileSync(filePath, 'utf8')
+
+    if (pattern.test(content)) {
+      matches.push(relativePath)
+    }
+  }
+
+  return matches
+}
+
+/***********************包发布配置*********************/
+function checkPublishPackage(name, dirPath) {
+  const packageJsonPath = join(dirPath, 'package.json')
+  const readmePath = join(dirPath, 'README.md')
+  const packageJson = readJson(packageJsonPath)
+
+  assert(existsSync(readmePath), `${name} 缺少 README.md`)
+  assert(packageJson.publishConfig?.access === 'public', `${name} 缺少 publishConfig.access=public`)
+  assert(packageJson.files?.includes('README.md'), `${name} files 未包含 README.md`)
+  assert(packageJson.files?.includes('dist'), `${name} files 未包含 dist`)
+
+  return packageJson
+}
+
+const iconsPackage = checkPublishPackage('@luma/icons', packageDirs.icons)
+const corePackage = checkPublishPackage('@luma/core', packageDirs.core)
+const compatPackage = checkPublishPackage('@luma/vben-compat', packageDirs.vbenCompat)
+
+assert(corePackage.files?.includes('theme-chalk'), '@luma/core files 未包含 theme-chalk')
+assert(corePackage.exports?.['./theme-chalk/index.scss'], '@luma/core 未导出 theme-chalk/index.scss')
+
+/***********************依赖边界*********************/
+const iconsAllDependencies = getDependencyNames(iconsPackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
+const coreAllDependencies = getDependencyNames(corePackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
+const compatAllDependencies = getDependencyNames(compatPackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
+
+assert(!iconsAllDependencies.has('@luma/core'), '@luma/icons 不能依赖 @luma/core')
+assert(!iconsAllDependencies.has('@luma/vben-compat'), '@luma/icons 不能依赖 @luma/vben-compat')
+
+assert(hasDependency(corePackage, 'dependencies', '@luma/icons'), '@luma/core 应通过 dependencies 依赖 @luma/icons')
+assert(hasDependency(corePackage, 'peerDependencies', 'element-plus'), '@luma/core 应把 element-plus 放在 peerDependencies')
+assert(!hasDependency(corePackage, 'dependencies', 'element-plus'), '@luma/core 不能把 element-plus 放在 dependencies')
+assert(!coreAllDependencies.has('@luma/vben-compat'), '@luma/core 不能依赖 @luma/vben-compat')
+
+assert(hasDependency(compatPackage, 'dependencies', '@luma/core'), '@luma/vben-compat 应依赖 @luma/core')
+assert(!compatAllDependencies.has('element-plus'), '@luma/vben-compat 不应直接依赖 element-plus')
+
+for (const dependencyName of coreAllDependencies) {
+  assert(!/^@intlify\//.test(dependencyName), `@luma/core 不能默认依赖 ${dependencyName}`)
+}
+
+for (const forbiddenName of ['vue-i18n', 'vxe-table', 'vxe-pc-ui', 'xe-utils']) {
+  assert(!coreAllDependencies.has(forbiddenName), `@luma/core 不能默认依赖 ${forbiddenName}`)
+}
+
+/***********************源码边界*********************/
+const coreForbiddenMatches = findTextMatches(
+  join(packageDirs.core, 'src'),
+  /@luma\/vben-compat|vue-i18n|@intlify\/|vxe-table|vxe-pc-ui|xe-utils/,
+)
+
+for (const match of coreForbiddenMatches) {
+  errors.push(`@luma/core 源码出现禁止依赖标识：${match}`)
+}
+
+const appSourceAliasMatches = findTextMatches(
+  join(rootDir, 'apps'),
+  /\.\.\/\.\.\/packages|packages\/(?:icons|core|vben-compat)\/src|packages\\(?:icons|core|vben-compat)\\src/,
+)
+
+for (const match of appSourceAliasMatches) {
+  errors.push(`apps 应通过包名消费 @luma/*，不能直连包源码：${match}`)
+}
+
+const oldNameMatches = findTextMatches(rootDir, oldNamePattern, new Set([
+  'LUMA_DEVELOPMENT_PLAN.md',
+  'docs/release-checklist.md',
+  'scripts/check-release-boundaries.mjs',
+]))
+
+for (const match of oldNameMatches) {
+  errors.push(`公开源码或文档仍包含旧名称/旧别名：${match}`)
+}
+
+/***********************检查结果*********************/
+if (errors.length > 0) {
+  console.error('Luma 发布边界检查失败：')
+  for (const error of errors) {
+    console.error(`- ${error}`)
+  }
+  process.exit(1)
+}
+
+console.log('Luma 发布边界检查通过。')

@@ -11,6 +11,8 @@ Luma 按职责拆包，兼容层不能反向污染核心包。
 
 ## 初版约束
 
+- `@luma/core` 基于 Element Plus 组合后台框架能力，不从零重写基础 UI 控件。
+- Element Plus 必须保持为 `@luma/core` 的 peer dependency，不能放进普通 dependencies。
 - `@luma/core` 默认不引入多语言。
 - `@luma/core` 默认不依赖 VXE。
 - `@luma/icons` 必须能独立构建。
@@ -18,3 +20,13 @@ Luma 按职责拆包，兼容层不能反向污染核心包。
 - `apps/*` 只作为消费方验证，通过 workspace 包依赖使用 `@luma/*`，不直接 alias 到 `packages/*/src`。
 - `packages/*` 的公开入口必须能通过 `exports`、`types`、`main`、`module` 指向 `dist` 产物。
 - 样式统一使用 SCSS，包级样式入口必须能通过 package `exports` 被消费方引入。
+
+## 自动检查
+
+发布前运行：
+
+```bash
+corepack pnpm release:boundaries
+```
+
+这个脚本会检查包发布字段、依赖方向、Element Plus peer dependency、core 中禁止默认引入的 i18n/VXE 标识，以及示例应用是否绕过包名直连 `packages/*/src`。

@@ -675,6 +675,7 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
 ```
 
 - [x] 决定 `G*` 别名是临时兼容导出，还是首个公开版本前删除。
+- [x] 增加发布边界自动检查，防止 core 反向依赖兼容层、误引入 i18n/VXE 默认依赖，或把 Element Plus 放进普通 dependencies。
 - [ ] 确认 npm scope：
   - 优先确认 `@luma` 是否可用。
   - 如果不可用，再选择备用 scope。
