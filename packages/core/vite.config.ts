@@ -13,6 +13,7 @@ export default defineConfig({
       entry: {
         index: resolve(packageRoot, 'src/index.ts'),
         components: resolve(packageRoot, 'src/exports/components.ts'),
+        request: resolve(packageRoot, 'src/request/index.ts'),
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'cjs' ? 'cjs' : 'js'}`,
