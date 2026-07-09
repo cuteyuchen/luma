@@ -88,7 +88,17 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 
 ## npm scope
 
-当前按 `@luma` 规划。`corepack pnpm release:names` 已用于检查目标包名当前未在 registry 查询到，但这不能证明当前 npm 账号拥有或可创建 `@luma` scope。正式发布前需要用发布账号确认 scope 权限；如果不可用，再确定备用 scope。
+当前按 `@luma` 规划。`corepack pnpm release:names` 已用于检查目标包名当前未在 registry 查询到。
+
+scope 权限已用当前 npm 用户 `cuteyuchen` 确认：
+
+```bash
+npm whoami --registry=https://registry.npmjs.org
+npm org ls luma --registry=https://registry.npmjs.org
+npm access list packages @luma --registry=https://registry.npmjs.org
+```
+
+确认结果：当前账号是 `luma` 组织 owner，并且可以列出 `@luma` scope 下已有包。
 
 ## License
 
