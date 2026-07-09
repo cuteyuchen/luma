@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "description": "Luma lightweight Vue admin core components and services.",
+  "license": "MIT",
   "keywords": [
     "luma",
     "vue",
@@ -54,6 +55,7 @@
       "import": "./dist/theme.js",
       "require": "./dist/theme.cjs"
     },
+    "./style.css": "./dist/core.css",
     "./theme-chalk/index.scss": "./theme-chalk/index.scss"
   },
   "main": "./dist/index.cjs",

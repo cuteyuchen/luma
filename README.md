@@ -34,6 +34,7 @@ pnpm create luma-admin my-admin
 ```ts
 import { createLumaAdmin } from '@luma/core'
 import '@luma/core/theme-chalk/index.scss'
+import '@luma/core/style.css'
 import '@luma/icons/style.css'
 import App from './App.vue'
 

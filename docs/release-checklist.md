@@ -64,7 +64,7 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 
 - 包含 `dist`。
 - 包含包内 `README.md`。
-- `@luma/core` 包含 `theme-chalk/index.scss`。
+- `@luma/core` 包含 `theme-chalk/index.scss` 和 `dist/core.css`。
 - `create-luma-admin` 包含 `dist/cli.js` 和 `dist/index.js`。
 - 不包含 `apps/*`。
 - 不包含本地日志、IDE 文件和构建缓存。
@@ -84,4 +84,4 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 
 ## License
 
-正式发布前需要确认开源许可证，并把许可证写入根 `LICENSE` 和各包 `package.json`。这个决定属于项目所有者，当前不在代码里预设。
+当前使用 MIT License。发布边界检查会确认根目录 `LICENSE` 存在，并确认各发布包 `package.json` 的 `license` 字段为 `MIT`。

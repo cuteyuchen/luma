@@ -693,10 +693,10 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
   - 优先确认 `@luma` 是否可用。
   - 如果不可用，再选择备用 scope。
   - 当前 registry 查询 `@luma/core`、`@luma/icons`、`@luma/vben-compat`、`create-luma-admin` 返回 404；这只能说明包名查询不到，不能证明发布账号拥有或可创建 `@luma` scope。
-- [ ] 确认开源许可证：
-  - 确定 MIT、Apache-2.0 或其他许可证。
-  - 增加根目录 `LICENSE`。
-  - 在需要发布的包 `package.json` 中补充 `license` 字段。
+- [x] 确认开源许可证：
+  - [x] 确定使用 MIT。
+  - [x] 增加根目录 `LICENSE`。
+  - [x] 在需要发布的包 `package.json` 中补充 `license` 字段。
 - [x] 执行完整验证：
 
 ```bash

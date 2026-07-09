@@ -10,6 +10,7 @@ import ElementPlus from 'element-plus'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import '@luma/core/theme-chalk/index.scss'
+import '@luma/core/style.css'
 import '@luma/icons/style.css'
 import App from './App.vue'
 

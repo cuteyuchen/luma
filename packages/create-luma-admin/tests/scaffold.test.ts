@@ -52,6 +52,7 @@ describe('createLumaAdminProject', () => {
       expect(mainTs).toContain('import { createLumaAdmin } from \'@luma/core\'')
       expect(mainTs).toContain('import { router } from \'./router\'')
       expect(mainTs).toContain('import \'@luma/core/theme-chalk/index.scss\'')
+      expect(mainTs).toContain('import \'@luma/core/style.css\'')
       expect(mainTs).toContain('router,')
       expect(appVue).toContain('<script setup lang="ts">')
       expect(appVue).toContain('/***********************页面状态*********************/')

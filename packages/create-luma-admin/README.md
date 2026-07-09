@@ -20,7 +20,7 @@ pnpm dev
 
 - Vue 3 + TypeScript + Vite。
 - Element Plus 作为 UI 基础。
-- SCSS 样式入口。
+- `@luma/core/theme-chalk/index.scss`、`@luma/core/style.css` 和 SCSS 样式入口。
 - `createLumaAdmin` 应用启动代码。
 - `LumaLayout` 后台布局壳和 `LumaRouterView` 路由出口。
 - Vue Router hash 路由、菜单节点、权限守卫和 403 页面。
