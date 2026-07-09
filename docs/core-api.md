@@ -131,6 +131,23 @@ layout 只负责后台壳层结构和交互，不请求业务数据。
 
 这些函数用于把后端菜单节点转换为路由记录和侧边栏菜单。
 
+`createSidebarMenus` 支持通过回调过滤权限和角色，适合与 `createPermissionStore` 组合：
+
+```ts
+import { createPermissionStore } from '@luma/core/permission'
+import { createSidebarMenus, normalizeMenuNodes } from '@luma/core/router'
+
+const permissionStore = createPermissionStore({
+  permissions: ['dashboard:view'],
+  roles: ['admin'],
+})
+
+const menus = createSidebarMenus(normalizeMenuNodes(menuNodes), {
+  hasPermission: permissions => permissionStore.hasPermission(permissions, 'every'),
+  hasRole: roles => permissionStore.hasRole(roles, 'every'),
+})
+```
+
 ## Permission
 
 从 `@luma/core/permission` 导入：

@@ -1,5 +1,6 @@
 import type {
   CreateRouteRecordsOptions,
+  CreateSidebarMenusOptions,
   FindAccessibleMenuOptions,
   LumaRouteRecord,
   MenuNode,
@@ -9,6 +10,7 @@ import type {
 
 export type {
   CreateRouteRecordsOptions,
+  CreateSidebarMenusOptions,
   FindAccessibleMenuOptions,
   LumaRouteRecord,
   MenuNode,
@@ -135,15 +137,26 @@ function createRouteRecord(
 }
 
 /***********************侧边栏菜单*********************/
-export function createSidebarMenus(nodes: NormalizedMenuNode[]): SidebarMenuItem[] {
+export function createSidebarMenus(
+  nodes: NormalizedMenuNode[],
+  options: CreateSidebarMenusOptions = {},
+): SidebarMenuItem[] {
   return nodes
     .filter(node => node.visible)
-    .map(node => ({
-      children: createSidebarMenus(node.children),
-      icon: node.icon,
-      path: node.path,
-      title: node.title,
-    }))
+    .flatMap((node) => {
+      const children = createSidebarMenus(node.children, options)
+
+      if (!canAccessMenu(node, options) || (node.children.length > 0 && children.length === 0)) {
+        return []
+      }
+
+      return {
+        children,
+        icon: node.icon,
+        path: node.path,
+        title: node.title,
+      }
+    })
 }
 
 /***********************访问菜单查找*********************/

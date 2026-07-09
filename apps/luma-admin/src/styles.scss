@@ -37,3 +37,21 @@ body {
   font-size: 13px;
   font-weight: 700;
 }
+
+.luma-admin-page {
+  box-sizing: border-box;
+  padding: 32px;
+}
+
+.luma-admin-page__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.luma-admin-page__item {
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.6;
+}

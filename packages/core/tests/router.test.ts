@@ -134,6 +134,62 @@ describe('router menu helpers', () => {
     ])
   })
 
+  it('会按权限和角色生成可访问的侧边栏菜单', () => {
+    const sidebarMenus = createSidebarMenus(normalizeMenuNodes([
+      {
+        children: [
+          {
+            id: 'profile',
+            path: 'profile',
+            permissions: ['system:profile:view'],
+            title: '个人资料',
+          },
+          {
+            id: 'user',
+            path: 'user',
+            permissions: ['system:user:list'],
+            title: '用户管理',
+          },
+        ],
+        id: 'system',
+        path: '/system',
+        title: '系统管理',
+      },
+      {
+        children: [
+          {
+            id: 'audit-log',
+            path: 'audit-log',
+            roles: ['auditor'],
+            title: '审计日志',
+          },
+        ],
+        id: 'audit',
+        path: '/audit',
+        title: '审计中心',
+      },
+    ]), {
+      hasPermission: permissions => permissions.includes('system:profile:view'),
+      hasRole: roles => roles.includes('admin'),
+    })
+
+    expect(sidebarMenus).toEqual([
+      {
+        children: [
+          {
+            children: [],
+            icon: undefined,
+            path: '/system/profile',
+            title: '个人资料',
+          },
+        ],
+        icon: undefined,
+        path: '/system',
+        title: '系统管理',
+      },
+    ])
+  })
+
   it('会查找第一个有访问权的可见菜单', () => {
     const menus = normalizeMenuNodes([
       {

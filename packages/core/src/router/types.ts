@@ -51,6 +51,11 @@ export interface SidebarMenuItem {
   icon?: string
 }
 
+export interface CreateSidebarMenusOptions {
+  hasPermission?: (permissions: string[]) => boolean
+  hasRole?: (roles: string[]) => boolean
+}
+
 export interface FindAccessibleMenuOptions {
   hasPermission?: (permissions: string[]) => boolean
   hasRole?: (roles: string[]) => boolean

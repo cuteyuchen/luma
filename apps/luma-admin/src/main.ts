@@ -1,6 +1,7 @@
 import type { IconDefinition } from '@luma/icons'
 import { createLumaAdmin } from '@luma/core'
 import App from './App.vue'
+import { router } from './router'
 import '@luma/core/theme-chalk/index.scss'
 import '@luma/icons/style.css'
 import './styles.scss'
@@ -18,6 +19,7 @@ const localIcons: IconDefinition[] = [
 /***********************应用启动*********************/
 createLumaAdmin({
   rootComponent: App,
+  router,
   icons: {
     localSvg: localIcons,
   },
