@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import type {
-  PaginationChangePayload,
+  CrudTablePageChangePayload,
+  CrudTableResetPayload,
+  CrudTableSearchPayload,
   SchemaFormItem,
   SchemaFormModel,
   SchemaTableColumn,
   SchemaTableRow,
 } from '@luma/core/components'
 import {
+  LumaCrudTable,
   LumaIcon,
-  LumaPage,
-  LumaPagination,
-  LumaSchemaForm,
-  LumaSchemaTable,
 } from '@luma/core/components'
 import { shallowRef } from 'vue'
 
@@ -75,38 +74,47 @@ const page = shallowRef(1)
 const pageSize = shallowRef(10)
 const paginationMessage = shallowRef('当前展示示例数据')
 
-function handlePaginationChange(payload: PaginationChangePayload): void {
+function handleSearch(payload: CrudTableSearchPayload): void {
+  paginationMessage.value = `查询项目：${String(payload.name ?? '') || '全部'}`
+}
+
+function handleReset(_payload: CrudTableResetPayload): void {
+  paginationMessage.value = '已重置查询条件'
+}
+
+function handlePaginationChange(payload: CrudTablePageChangePayload): void {
   paginationMessage.value = `第 ${payload.page} 页，每页 ${payload.pageSize} 条`
 }
 </script>
 
 <template>
   <main class="luma-admin-home">
-    <LumaPage :title="title" :description="description">
+    <LumaCrudTable
+      v-model:query-model="formModel"
+      v-model:page="page"
+      v-model:page-size="pageSize"
+      class="luma-admin-home__crud"
+      :title="title"
+      :description="description"
+      :query-schemas="schemas"
+      :columns="tableColumns"
+      :rows="tableRows"
+      row-key="id"
+      :total="35"
+      :page-sizes="[10, 20]"
+      @search="handleSearch"
+      @reset="handleReset"
+      @page-change="handlePaginationChange"
+    >
       <template #actions>
         <LumaIcon name="app:dashboard" color="#1677ff" :size="36" />
       </template>
 
-      <div class="luma-admin-home__form">
-        <LumaSchemaForm v-model="formModel" :schemas="schemas" />
-      </div>
-
-      <div class="luma-admin-home__table">
-        <LumaSchemaTable row-key="id" :columns="tableColumns" :rows="tableRows" />
-      </div>
-
-      <footer class="luma-admin-home__pagination">
+      <template #default>
         <span class="luma-admin-home__pagination-text">
           {{ paginationMessage }}
         </span>
-        <LumaPagination
-          v-model:page="page"
-          v-model:page-size="pageSize"
-          :total="35"
-          :page-sizes="[10, 20]"
-          @change="handlePaginationChange"
-        />
-      </footer>
-    </LumaPage>
+      </template>
+    </LumaCrudTable>
   </main>
 </template>

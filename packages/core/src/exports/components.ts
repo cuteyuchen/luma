@@ -1,4 +1,14 @@
 export {
+  LumaCrudTable,
+} from '../components/crud-table'
+export type {
+  CrudTablePageChangePayload,
+  CrudTableProps,
+  CrudTableQueryModel,
+  CrudTableResetPayload,
+  CrudTableSearchPayload,
+} from '../components/crud-table'
+export {
   LumaPage,
 } from '../components/page'
 export {

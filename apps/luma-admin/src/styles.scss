@@ -21,24 +21,14 @@ body {
   box-sizing: border-box;
 }
 
-.luma-page {
+.luma-admin-home__crud {
   width: min(520px, 100%);
   box-shadow: 0 10px 30px rgb(15 23 42 / 8%);
 }
 
-.luma-admin-home__form,
-.luma-admin-home__table,
-.luma-admin-home__pagination {
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.luma-admin-home__pagination {
-  display: grid;
-  gap: 12px;
-}
-
 .luma-admin-home__pagination-text {
+  display: block;
+  padding-top: 12px;
   color: #6b7280;
   font-size: 13px;
 }
