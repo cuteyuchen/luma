@@ -17,6 +17,7 @@ const router = useRouter()
 
 const menus = computed(() => createAdminSidebarMenus())
 const tabs = computed(() => createAdminTabs(route.path))
+const routeViewKey = computed(() => route.fullPath)
 const activePath = computed({
   get: () => route.path,
   set: (path: string) => {
@@ -51,6 +52,14 @@ function handleTabChange(path: string): void {
       <span class="luma-admin-home__status">Mini</span>
     </template>
 
-    <LumaRouterView />
+    <LumaRouterView
+      :view-key="routeViewKey"
+      :progress="true"
+      :loading="true"
+      :cache="true"
+      :cache-max="8"
+      transition
+      transition-name="fade-side"
+    />
   </LumaLayout>
 </template>

@@ -11,4 +11,14 @@ describe('luma admin style entry', () => {
     expect(mainTs).toContain('import \'@luma/icons/style.css\'')
     expect(mainTs).toContain('import \'./styles.scss\'')
   })
+
+  it('会在应用壳中启用路由动画和缓存示例', async () => {
+    const appVue = await readFile(join(process.cwd(), 'src/App.vue'), 'utf8')
+
+    expect(appVue).toContain(':view-key="routeViewKey"')
+    expect(appVue).toContain('transition-name="fade-side"')
+    expect(appVue).toContain(':progress="true"')
+    expect(appVue).toContain(':loading="true"')
+    expect(appVue).toContain(':cache="true"')
+  })
 })

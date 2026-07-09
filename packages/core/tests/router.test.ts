@@ -3,8 +3,8 @@ import {
   createRouteRecords,
   createSidebarMenus,
   findFirstAccessibleMenu,
-  normalizeMenuRecords,
   normalizeMenuNodes,
+  normalizeMenuRecords,
 } from '../src/router'
 
 describe('router menu helpers', () => {

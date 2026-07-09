@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { defineComponent } from 'vue'
 import {
   LumaContent,
   LumaHeader,
@@ -152,5 +153,63 @@ describe('luma router view', () => {
 
     expect(wrapper.find('.luma-router-view').exists()).toBe(true)
     expect(wrapper.find('.router-view').text()).toBe('路由内容')
+  })
+
+  it('会支持路由切换动画、缓存和加载反馈', async () => {
+    vi.useFakeTimers()
+
+    const DemoView = defineComponent({
+      name: 'DemoView',
+      template: '<section class="demo-view">页面内容</section>',
+    })
+    const RouterViewStub = defineComponent({
+      name: 'RouterView',
+      setup(_props, { slots }) {
+        return () => slots.default?.({ Component: DemoView })
+      },
+    })
+
+    const wrapper = mount(LumaRouterView, {
+      global: {
+        stubs: {
+          'keep-alive': {
+            name: 'KeepAlive',
+            template: '<div class="keep-alive-stub"><slot /></div>',
+          },
+          'transition': {
+            name: 'Transition',
+            template: '<div class="transition-stub"><slot /></div>',
+          },
+          'RouterView': RouterViewStub,
+        },
+      },
+      props: {
+        cache: true,
+        cacheMax: 3,
+        loading: true,
+        progress: true,
+        transition: true,
+        transitionName: 'fade',
+        viewKey: 'dashboard',
+      },
+    })
+
+    expect(wrapper.find('.transition-stub').exists()).toBe(true)
+    expect(wrapper.find('.keep-alive-stub').exists()).toBe(true)
+    expect(wrapper.find('.demo-view').text()).toBe('页面内容')
+
+    await wrapper.setProps({ viewKey: 'project' })
+
+    expect(wrapper.find('.luma-router-view__progress').exists()).toBe(true)
+    expect(wrapper.find('.luma-router-view__loading').exists()).toBe(true)
+
+    vi.runAllTimers()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.luma-router-view__progress').exists()).toBe(false)
+    expect(wrapper.find('.luma-router-view__loading').exists()).toBe(false)
+
+    wrapper.unmount()
+    vi.useRealTimers()
   })
 })
