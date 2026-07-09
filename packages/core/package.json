@@ -1,0 +1,50 @@
+{
+  "name": "@luma/core",
+  "type": "module",
+  "version": "0.0.0",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./components": {
+      "types": "./dist/src/exports/components.d.ts",
+      "import": "./dist/components.js",
+      "require": "./dist/components.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "README.md",
+    "dist",
+    "theme-chalk"
+  ],
+  "scripts": {
+    "build": "vite build --config vite.config.ts && vue-tsc -p tsconfig.json --emitDeclarationOnly --outDir dist && node ../../scripts/clean-package-dist.mjs dist",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config ../../vitest.config.ts tests"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.11.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "peerDependenciesMeta": {
+    "element-plus": {
+      "optional": true
+    },
+    "pinia": {
+      "optional": true
+    },
+    "vue-router": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@luma/icons": "workspace:*"
+  }
+}
