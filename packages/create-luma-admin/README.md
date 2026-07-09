@@ -22,5 +22,9 @@ pnpm dev
 - Element Plus 作为 UI 基础。
 - SCSS 样式入口。
 - `createLumaAdmin` 应用启动代码。
-- `LumaLayout` 后台布局壳。
-- `LumaCrudTable` 最小示例页面。
+- `LumaLayout` 后台布局壳和 `LumaRouterView` 路由出口。
+- Vue Router hash 路由、菜单节点、权限守卫和 403 页面。
+- `LumaCrudTable` 工作台示例页面。
+- `createRequestClient` 请求封装示例。
+
+脚手架生成的项目只通过 `@luma/core`、`@luma/icons` 等公开包入口消费能力，不依赖 monorepo 内部源码路径。
