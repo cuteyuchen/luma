@@ -27,12 +27,38 @@ Luma 的 Vben 兼容层用于降低迁移成本，不追求完整复刻 Vben Adm
 - `getLumaSchemas()`：获取转换后的 Luma schema。
 - `getFormInstance()`：获取通过 `register` 绑定的表单实例。
 
+### `useVbenVxeGrid`
+
+当前支持常见 grid 配置转换到 `LumaCrudTable`：
+
+- `gridOptions.columns` 转为 Luma 表格 columns。
+- `field` 转为 `field`。
+- `title` / `label` 转为 `label`。
+- `width`、`align`、`formatter` 透传。
+- `hidden: true` 或 `visible: false` 转为隐藏列。
+- `type: 'checkbox'`、`type: 'radio'`、`type: 'seq'` 这类 VXE 专有辅助列初版会跳过。
+- `gridOptions.formOptions.schemas` 复用 `useVbenForm` 的 schema 适配规则。
+- `gridOptions.pagerConfig.pageSize` / `pageSizes` 转为分页配置。
+- `gridOptions.proxyConfig.ajax.query` 用于加载列表数据。
+- `proxyConfig.props.result`、`items` / `list`、`total` 可用于适配嵌套接口结果。
+
+`useVbenVxeGrid` 返回 `[register, gridApi]`，其中 `gridApi` 提供：
+
+- `crudTableProps`：可直接绑定给 `LumaCrudTable` 的 props。
+- `getLumaColumns()`：获取转换后的 Luma columns。
+- `getRows()` / `setRows(rows, total)`：读取或设置表格数据。
+- `getTotal()`：读取总数。
+- `getQueryModel()` / `setQueryModel(model)`：读取或设置查询模型。
+- `search(payload)` / `reload()` / `reset()`：触发查询、刷新和重置。
+- `handleSearch(payload)` / `handleReset(payload)` / `handlePageChange(payload)`：用于绑定 LumaCrudTable 事件。
+- `getGridInstance()`：获取通过 `register` 绑定的表格实例。
+
 ## 当前未支持
 
 - Vben 表单的完整校验规则映射。
 - 动态函数式 `ifShow`、`dynamicDisabled` 等高级运行时能力。
 - Vben 表单布局、栅格和复杂插槽协议。
-- `useVbenVxeGrid` 尚未实现。
+- VXE 原生渲染、高级编辑、虚拟滚动、导出、复杂 toolbar 和插槽协议。
 
 ## 迁移原则
 
