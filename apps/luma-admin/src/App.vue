@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { SchemaFormItem, SchemaFormModel } from '@luma/core/components'
-import { LumaIcon, LumaSchemaForm } from '@luma/core/components'
+import type { SchemaFormItem, SchemaFormModel, SchemaTableColumn, SchemaTableRow } from '@luma/core/components'
+import { LumaIcon, LumaSchemaForm, LumaSchemaTable } from '@luma/core/components'
 import { shallowRef } from 'vue'
 
 /***********************页面状态*********************/
@@ -36,6 +36,27 @@ const schemas: SchemaFormItem[] = [
     ],
   },
 ]
+
+/***********************表格配置*********************/
+const tableColumns: SchemaTableColumn[] = [
+  {
+    field: 'name',
+    label: '项目名称',
+  },
+  {
+    field: 'status',
+    label: '状态',
+    formatter: value => value === 'enabled' ? '启用' : '停用',
+  },
+]
+
+const tableRows: SchemaTableRow[] = [
+  {
+    id: 'demo-001',
+    name: 'Luma 示例项目',
+    status: 'enabled',
+  },
+]
 </script>
 
 <template>
@@ -55,6 +76,10 @@ const schemas: SchemaFormItem[] = [
 
       <div class="luma-admin-home__form">
         <LumaSchemaForm v-model="formModel" :schemas="schemas" />
+      </div>
+
+      <div class="luma-admin-home__table">
+        <LumaSchemaTable row-key="id" :columns="tableColumns" :rows="tableRows" />
       </div>
     </section>
   </main>
