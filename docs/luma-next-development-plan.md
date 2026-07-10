@@ -118,22 +118,22 @@ corepack pnpm --filter luma-admin build
 **源参考：** `src/services/theme/{GThemeSettingsPanel.vue,theme-color-presets.ts}`
 **落点：** 新建 `packages/core/src/theme/LumaThemeSettingsPanel.vue` + `theme/theme-color-presets.ts`，从 `@luma/core/theme` 导出。
 
-- [ ] 面板支持：明暗模式、主题色（预设色板）、圆角、侧边栏宽度、tabbar 开关、动画开关、布局模式切换。
-- [ ] 仅通过 props / `v-model:preferences` 控制，不依赖业务 store。
-- [ ] `packages/core/tests/theme-settings-panel.test.ts`。
-- [ ] **用真面板替换 admin `ThemeSettingsView.vue` 的本地占位。**
+- [x] 面板支持：明暗模式、主题色（预设色板 + 自定义取色）、圆角、侧边栏宽度、tabbar 开关（含缓存联动禁用）、动画开关、布局模式切换。
+- [x] 仅通过 props / `v-model:preferences` 控制并抛出 `change`，不依赖业务 store；新增 `themeColorPresets`。
+- [x] `packages/core/tests/theme-settings-panel.test.ts`。
+- [x] **用真面板替换 admin `ThemeSettingsView.vue` 的本地占位。**
 
 ### 4.2 布局增强
 
 **源参考：** `src/layout/{components/AppTopNav.vue,state/top-nav.ts}`
 **落点：** `packages/core/src/layout/`
 
-- [ ] 新增 `LumaTopNav` 组件。
-- [ ] 新增 `layout/state/top-nav.ts` 状态与 `active menu` 解析。
-- [ ] 布局模式：mixed-nav / top-nav / side-nav，菜单按布局拆分。
-- [ ] tab 最大数量与缓存策略。
-- [ ] maximize（内容区最大化）。
-- [ ] `packages/core/tests/layout.test.ts` 补齐。
+- [x] 新增 `LumaTopNav` 组件（horizontal 菜单，支持子菜单）。
+- [x] 新增 `layout/state/menu-layout.ts`：`includesMenuPath` / `resolveNavigationTarget` / `resolveActiveTopMenuPath` / `splitMenusByLayout`。
+- [x] 布局模式：mixed-nav / top-nav / sidebar-nav，`splitMenusByLayout` 按布局拆分顶部/侧栏菜单。
+- [x] tab 最大数量与缓存策略：`layout/state/tab-strategy.ts`（`appendTab` / `closeTab` / `resolveCachedTabPaths`，保留固定标签）。
+- [~] maximize（内容区最大化）：由 `resolveCachedTabPaths` 等状态 helper 支撑，最大化交互留待 admin 布局接入。
+- [x] `packages/core/tests/layout-nav.test.ts` 覆盖菜单拆分、tab 策略与 TopNav。
 
 **验证：**
 ```bash

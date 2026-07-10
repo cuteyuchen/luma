@@ -98,6 +98,13 @@ export const elementPlusStubs = {
     emits: ['update:modelValue'],
     template: '<section v-if="modelValue" class="el-dialog" :data-title="title"><slot /></section>',
   }),
+  ElDivider: defineComponent({
+    name: 'ElDivider',
+    props: {
+      direction: String,
+    },
+    template: '<div class="el-divider" :data-direction="direction"><slot /></div>',
+  }),
   ElInput: defineComponent({
     name: 'ElInput',
     props: {
@@ -225,6 +232,17 @@ export const elementPlusStubs = {
   ElScrollbar: defineComponent({
     name: 'ElScrollbar',
     template: '<div class="el-scrollbar"><slot /></div>',
+  }),
+  ElSlider: defineComponent({
+    name: 'ElSlider',
+    props: {
+      max: Number,
+      min: Number,
+      modelValue: Number,
+      step: Number,
+    },
+    emits: ['update:modelValue'],
+    template: '<input class="el-slider" type="range" :max="max" :min="min" :step="step" :value="modelValue ?? 0" @input="$emit(\'update:modelValue\', Number($event.target.value))">',
   }),
   ElSelect: defineComponent({
     name: 'ElSelect',

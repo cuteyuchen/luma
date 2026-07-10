@@ -2,6 +2,7 @@ export {
   applyThemePreferences,
   applyThemeToElement,
 } from './dom'
+export { default as LumaThemeSettingsPanel } from './LumaThemeSettingsPanel.vue'
 export {
   createDefaultPreferences,
   mergePreferences,
@@ -11,6 +12,12 @@ export {
 export {
   createThemeStore,
 } from './store'
+export {
+  themeColorPresets,
+} from './theme-color-presets'
+export type {
+  ThemeColorPreset,
+} from './theme-color-presets'
 export {
   defaultThemeState,
   resolveThemeTokens,
