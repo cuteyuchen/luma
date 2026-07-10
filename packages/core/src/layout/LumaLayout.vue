@@ -2,7 +2,7 @@
 import type { ComponentPublicInstance } from 'vue'
 import type { LumaLayoutMenuItem, LumaLayoutTabItem } from './types'
 import { ElContainer } from 'element-plus'
-import { computed, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef, useTemplateRef } from 'vue'
 import LumaContent from './LumaContent.vue'
 import LumaHeader from './LumaHeader.vue'
 import LumaSidebar from './LumaSidebar.vue'
@@ -18,6 +18,11 @@ const props = withDefaults(defineProps<{
   activeMenuPath?: string
   activeTopMenuPath?: string
   activeTabPath?: string
+  headerMenuAlign?: 'center' | 'left' | 'right'
+  headerMenuMaxWidth?: number | string
+  showTabIcons?: boolean
+  showTabMaximize?: boolean
+  tabsVisible?: boolean
   topMenuMode?: 'flat' | 'tree'
   sidebarWidth?: string
   collapsedSidebarWidth?: string
@@ -27,10 +32,15 @@ const props = withDefaults(defineProps<{
   activeTabPath: '',
   activeTopMenuPath: '',
   collapsedSidebarWidth: '64px',
+  headerMenuAlign: 'left',
+  headerMenuMaxWidth: '100%',
   headerHeight: '56px',
   menus: () => [],
   sidebarWidth: '220px',
+  showTabIcons: true,
+  showTabMaximize: true,
   tabs: () => [],
+  tabsVisible: true,
   topMenuMode: 'tree',
   topMenus: () => [],
 })
@@ -39,6 +49,11 @@ const emit = defineEmits<{
   menuSelect: [path: string]
   topMenuSelect: [path: string]
   tabChange: [path: string]
+  tabCloseAll: []
+  tabCloseLeft: [path: string]
+  tabCloseOthers: [path: string]
+  tabCloseRight: [path: string]
+  tabRefresh: [path: string]
   tabRemove: [path: string]
 }>()
 
@@ -47,6 +62,9 @@ const activeTabPathModel = defineModel<string>('activeTabPath')
 
 /***********************模板引用*********************/
 const layoutRef = useTemplateRef<ComponentPublicInstance>('layoutRef')
+const isMobileViewport = shallowRef(false)
+const mobileMenuOpen = shallowRef(false)
+let mobileMediaQuery: MediaQueryList | undefined
 
 /***********************布局状态*********************/
 const currentActiveTabPath = computed({
@@ -59,13 +77,43 @@ const currentActiveTabPath = computed({
 const hasTabs = computed(() => props.tabs.length > 0)
 const hasSidebar = computed(() => props.menus.length > 0)
 const hasTopMenus = computed(() => props.topMenus.length > 0)
+const mobileMenus = computed(() => hasTopMenus.value ? props.topMenus : props.menus)
+const hasMobileMenus = computed(() => mobileMenus.value.some(item => !item.hidden))
+
+function syncMobileViewport(event?: MediaQueryListEvent): void {
+  isMobileViewport.value = event?.matches ?? mobileMediaQuery?.matches ?? false
+
+  if (isMobileViewport.value) {
+    mobileMenuOpen.value = false
+  }
+}
+
+onMounted(() => {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return
+  }
+
+  mobileMediaQuery = window.matchMedia('(max-width: 768px)')
+  syncMobileViewport()
+  mobileMediaQuery.addEventListener?.('change', syncMobileViewport)
+})
+
+onBeforeUnmount(() => {
+  mobileMediaQuery?.removeEventListener?.('change', syncMobileViewport)
+})
 
 /***********************事件处理*********************/
 function handleToggleCollapse(): void {
+  if (isMobileViewport.value) {
+    mobileMenuOpen.value = !mobileMenuOpen.value
+    return
+  }
+
   collapsed.value = !collapsed.value
 }
 
 function handleMenuSelect(path: string): void {
+  mobileMenuOpen.value = false
   emit('menuSelect', path)
 }
 
@@ -95,14 +143,16 @@ defineExpose({
     :class="{
       'is-sidebar-collapsed': collapsed,
       'is-sidebar-hidden': !hasSidebar,
+      'is-mobile-menu-hidden': !mobileMenuOpen,
     }"
     direction="vertical"
   >
     <LumaHeader
       :title="title"
-      :collapsed="collapsed"
+      :collapsed="isMobileViewport ? !mobileMenuOpen : collapsed"
       :height="headerHeight"
-      :sidebar-enabled="hasSidebar"
+      :mobile-only-toggle="!hasSidebar && hasTopMenus"
+      :sidebar-enabled="hasSidebar || hasTopMenus"
       @toggle-collapse="handleToggleCollapse"
     >
       <template v-if="$slots.logo" #logo>
@@ -113,6 +163,8 @@ defineExpose({
         <LumaTopNav
           :menus="topMenus"
           :active-path="activeTopMenuPath"
+          :align="headerMenuAlign"
+          :max-width="headerMenuMaxWidth"
           :mode="topMenuMode"
           @select="handleTopMenuSelect"
         />
@@ -125,15 +177,17 @@ defineExpose({
 
     <ElContainer class="luma-layout__body">
       <button
-        v-if="hasSidebar"
+        v-if="hasMobileMenus"
         class="luma-layout__sidebar-scrim"
         type="button"
         aria-label="关闭侧边栏"
-        @click="collapsed = true"
+        @click="mobileMenuOpen = false"
       />
 
       <LumaSidebar
         v-if="hasSidebar"
+        class="luma-layout__desktop-sidebar"
+        aria-label="主菜单"
         :menus="menus"
         :active-path="activeMenuPath"
         :collapsed="collapsed"
@@ -142,12 +196,33 @@ defineExpose({
         @select="handleMenuSelect"
       />
 
-      <ElContainer class="luma-layout__main" direction="vertical">
+      <LumaSidebar
+        v-if="hasMobileMenus"
+        class="luma-layout__mobile-sidebar"
+        aria-label="移动菜单"
+        :aria-hidden="!mobileMenuOpen"
+        :inert="!mobileMenuOpen ? true : undefined"
+        :menus="mobileMenus"
+        :active-path="activeMenuPath"
+        :collapsed="false"
+        :width="sidebarWidth"
+        :collapsed-width="collapsedSidebarWidth"
+        @select="handleMenuSelect"
+      />
+
+      <ElContainer class="luma-layout__main" direction="vertical" data-layout-fullscreen-target>
         <LumaTabs
-          v-if="hasTabs"
+          v-if="hasTabs && tabsVisible"
           v-model:active-path="currentActiveTabPath"
           :tabs="tabs"
+          :show-icon="showTabIcons"
+          :show-maximize="showTabMaximize"
           @change="handleTabChange"
+          @close-all="emit('tabCloseAll')"
+          @close-left="emit('tabCloseLeft', $event)"
+          @close-others="emit('tabCloseOthers', $event)"
+          @close-right="emit('tabCloseRight', $event)"
+          @refresh="emit('tabRefresh', $event)"
           @remove="handleTabRemove"
         />
 
@@ -192,17 +267,26 @@ defineExpose({
   display: none;
 }
 
+.luma-layout__mobile-sidebar {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .luma-layout__body :deep(.luma-sidebar) {
+  .luma-layout__desktop-sidebar {
+    display: none;
+  }
+
+  .luma-layout__mobile-sidebar {
     position: absolute;
     inset: 0 auto 0 0;
-    z-index: 30;
+    z-index: var(--luma-z-drawer);
+    display: block;
     width: min(var(--luma-sidebar-width, 248px), 84vw) !important;
     box-shadow: var(--luma-shadow-base);
     transform: translateX(0);
   }
 
-  .luma-layout.is-sidebar-collapsed .luma-layout__body :deep(.luma-sidebar) {
+  .luma-layout.is-mobile-menu-hidden .luma-layout__mobile-sidebar {
     pointer-events: none;
     transform: translateX(-100%);
   }
@@ -210,7 +294,7 @@ defineExpose({
   .luma-layout__sidebar-scrim {
     position: absolute;
     inset: 0;
-    z-index: 20;
+    z-index: var(--luma-z-scrim);
     display: block;
     padding: 0;
     border: 0;
@@ -218,7 +302,7 @@ defineExpose({
     cursor: pointer;
   }
 
-  .luma-layout.is-sidebar-collapsed .luma-layout__sidebar-scrim {
+  .luma-layout.is-mobile-menu-hidden .luma-layout__sidebar-scrim {
     display: none;
   }
 

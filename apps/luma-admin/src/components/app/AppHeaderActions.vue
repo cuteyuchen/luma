@@ -88,8 +88,8 @@ function handleLogout(): void {
 }
 
 .luma-admin-header-actions :deep(.el-button) {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   margin: 0;
 }
 
@@ -131,6 +131,12 @@ function handleLogout(): void {
 
   .luma-admin-header-actions__user {
     padding: 0 2px;
+  }
+}
+
+@media (max-width: 420px) {
+  .luma-admin-header-actions__user {
+    display: none;
   }
 }
 </style>

@@ -6,6 +6,7 @@ export { default as LumaSidebar } from './LumaSidebar.vue'
 export { default as LumaTabs } from './LumaTabs.vue'
 export { default as LumaTopNav } from './LumaTopNav.vue'
 export {
+  findMenuItemByPath,
   includesMenuPath,
   resolveActiveTopMenuPath,
   resolveNavigationTarget,
@@ -17,7 +18,11 @@ export type {
 } from './state/menu-layout'
 export {
   appendTab,
+  closeAllTabs,
+  closeOtherTabs,
   closeTab,
+  closeTabsLeft,
+  closeTabsRight,
   resolveCachedTabPaths,
 } from './state/tab-strategy'
 export type {

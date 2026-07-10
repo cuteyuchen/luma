@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import type { ComponentPublicInstance } from 'vue'
+import type { ComponentPublicInstance, CSSProperties } from 'vue'
 import type { LumaLayoutMenuItem } from './types'
 import { LumaIcon } from '@luma/icons'
-import { ElMenu, ElMenuItem, ElSubMenu } from 'element-plus'
-import { useTemplateRef } from 'vue'
+import { ElMenu, ElMenuItem } from 'element-plus'
+import { computed, useTemplateRef } from 'vue'
+import LumaTopNavMenuItem from './LumaTopNavMenuItem.vue'
 
 /***********************属性定义*********************/
-withDefaults(defineProps<{
-  menus?: LumaLayoutMenuItem[]
+const props = withDefaults(defineProps<{
   activePath?: string
+  align?: 'center' | 'left' | 'right'
+  maxWidth?: number | string
+  menus?: LumaLayoutMenuItem[]
   mode?: 'flat' | 'tree'
 }>(), {
   activePath: '',
+  align: 'left',
+  maxWidth: '100%',
   menus: () => [],
   mode: 'tree',
 })
@@ -20,15 +25,16 @@ const emit = defineEmits<{
   select: [path: string]
 }>()
 
-/***********************模板引用*********************/
 const menuRef = useTemplateRef<ComponentPublicInstance>('menuRef')
+const visibleMenus = computed(() => props.menus.filter(item => !item.hidden))
+const menuStyle = computed<CSSProperties>(() => ({
+  '--luma-top-nav-max-width': typeof props.maxWidth === 'number' ? `${props.maxWidth}px` : props.maxWidth,
+}))
 
-/***********************事件处理*********************/
 function handleSelect(path: string): void {
   emit('select', path)
 }
 
-/***********************公开方法*********************/
 defineExpose({
   getMenuElement: () => menuRef.value?.$el as HTMLElement | undefined,
   getMenuInstance: () => menuRef.value,
@@ -39,33 +45,22 @@ defineExpose({
   <ElMenu
     ref="menuRef"
     class="luma-top-nav"
+    :class="`is-align-${align}`"
     mode="horizontal"
     :default-active="activePath"
-    :ellipsis="false"
+    :ellipsis="true"
+    :style="menuStyle"
   >
-    <template v-for="item in menus" :key="item.path">
-      <ElSubMenu v-if="mode === 'tree' && item.children?.length" :index="item.path">
-        <template #title>
-          <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
-          <span>{{ item.title }}</span>
-        </template>
-        <ElMenuItem
-          v-for="child in item.children"
-          :key="child.path"
-          :index="child.path"
-          @click="handleSelect(child.path)"
-        >
-          <LumaIcon v-if="child.icon" :name="child.icon" :size="16" />
-          {{ child.title }}
-        </ElMenuItem>
-      </ElSubMenu>
-      <ElMenuItem
-        v-else
-        :index="item.path"
-        @click="handleSelect(item.path)"
-      >
+    <template v-for="item in visibleMenus" :key="item.path">
+      <LumaTopNavMenuItem
+        v-if="mode === 'tree'"
+        :item="item"
+        @select="handleSelect"
+      />
+      <ElMenuItem v-else :index="item.path" @click="handleSelect(item.path)">
         <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
-        {{ item.title }}
+        <span>{{ item.title }}</span>
+        <span v-if="item.externalLink" class="luma-top-nav__external" aria-hidden="true">↗</span>
       </ElMenuItem>
     </template>
   </ElMenu>
@@ -74,10 +69,25 @@ defineExpose({
 <style scoped lang="scss">
 .luma-top-nav {
   flex: 1 1 auto;
+  width: 100%;
+  max-width: var(--luma-top-nav-max-width);
   min-width: 0;
   height: 100%;
   border-bottom: 0;
   background: transparent;
+}
+
+.luma-top-nav.is-align-left {
+  margin-right: auto;
+}
+
+.luma-top-nav.is-align-center {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.luma-top-nav.is-align-right {
+  margin-left: auto;
 }
 
 .luma-top-nav :deep(.el-menu-item),
@@ -91,15 +101,8 @@ defineExpose({
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .luma-top-nav {
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .luma-top-nav :deep(.el-menu-item),
-  .luma-top-nav :deep(.el-sub-menu__title) {
-    padding: 0 14px;
-  }
+.luma-top-nav__external {
+  color: var(--el-text-color-placeholder);
+  font-size: 12px;
 }
 </style>

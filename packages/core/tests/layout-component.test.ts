@@ -93,6 +93,42 @@ describe('luma layout', () => {
     expect(wrapper.emitted('update:collapsed')?.[0]).toEqual([true])
   })
 
+  it('移动端抽屉使用独立状态且不会修改桌面折叠偏好', async () => {
+    const listeners = new Set<(event: MediaQueryListEvent) => void>()
+    const mediaQuery = {
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.add(listener),
+      matches: true,
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.delete(listener),
+    }
+    vi.stubGlobal('matchMedia', vi.fn(() => mediaQuery))
+
+    const wrapper = mount(LumaLayout, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        collapsed: false,
+        menus,
+      },
+    })
+
+    expect(wrapper.classes()).toContain('is-mobile-menu-hidden')
+    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes('aria-hidden')).toBe('true')
+    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes()).toHaveProperty('inert')
+    await wrapper.find('[data-action="toggle-sidebar"]').trigger('click')
+    expect(wrapper.classes()).not.toContain('is-mobile-menu-hidden')
+    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes('aria-hidden')).toBe('false')
+    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes()).not.toHaveProperty('inert')
+    expect(wrapper.emitted('update:collapsed')).toBeUndefined()
+
+    await wrapper.find('.luma-layout__sidebar-scrim').trigger('click')
+    expect(wrapper.classes()).toContain('is-mobile-menu-hidden')
+
+    wrapper.unmount()
+    expect(listeners.size).toBe(0)
+    vi.unstubAllGlobals()
+  })
+
   it('会在传入顶部菜单时渲染顶部导航并透传选择事件', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
@@ -155,25 +191,59 @@ describe('luma sidebar', () => {
 })
 
 describe('luma tabs', () => {
-  it('会更新活动页签并透传关闭事件', async () => {
+  it('会使用可聚焦标签按钮更新活动页签并透传关闭事件', async () => {
     const wrapper = mount(LumaTabs, {
-      global: {
-        stubs: elementPlusStubs,
-      },
       props: {
         activePath: '/dashboard',
         tabs,
       },
     })
 
-    expect(wrapper.findComponent({ name: 'ElTabs' }).props('modelValue')).toBe('/dashboard')
+    const tabButtons = wrapper.findAll('[role="tab"]')
+    expect(tabButtons).toHaveLength(2)
+    expect(tabButtons[0]?.attributes('aria-selected')).toBe('true')
+    expect(tabButtons[0]?.attributes('tabindex')).toBe('0')
 
-    await wrapper.find('[data-action="change-tab"]').trigger('click')
-    await wrapper.find('[data-action="remove-tab"]').trigger('click')
+    await tabButtons[1]?.trigger('click')
+    await wrapper.find('[aria-label="关闭系统管理"]').trigger('click')
 
     expect(wrapper.emitted('update:activePath')?.[0]).toEqual(['/system'])
     expect(wrapper.emitted('change')?.[0]).toEqual(['/system'])
     expect(wrapper.emitted('remove')?.[0]).toEqual(['/system'])
+  })
+
+  it('支持键盘切换和右键菜单批量操作', async () => {
+    const wrapper = mount(LumaTabs, {
+      attachTo: document.body,
+      global: {
+        stubs: {
+          Teleport: true,
+        },
+      },
+      props: {
+        activePath: '/system',
+        tabs: [
+          { closable: false, path: '/dashboard', title: '工作台' },
+          { closable: true, path: '/system', title: '系统管理' },
+          { closable: true, path: '/project', title: '项目管理' },
+        ],
+      },
+    })
+
+    const tabButtons = wrapper.findAll('[role="tab"]')
+    await tabButtons[1]?.trigger('keydown', { key: 'ArrowRight' })
+    expect(wrapper.emitted('change')?.at(-1)).toEqual(['/project'])
+
+    await wrapper.findAll('.luma-tabs__item')[1]?.trigger('contextmenu', {
+      clientX: 120,
+      clientY: 80,
+    })
+    const closeOthers = wrapper.findAll('.luma-tabs-context-menu button')
+      .find(button => button.text().trim() === '关闭其他')
+    await closeOthers?.trigger('click')
+
+    expect(wrapper.emitted('closeOthers')?.[0]).toEqual(['/system'])
+    wrapper.unmount()
   })
 })
 

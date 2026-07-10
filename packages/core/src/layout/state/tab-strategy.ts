@@ -46,6 +46,32 @@ export function closeTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTab
   return tabs.filter(item => !(item.path === path && item.closable !== false))
 }
 
+export function closeTabsLeft(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+  const index = tabs.findIndex(tab => tab.path === path)
+  if (index <= 0) {
+    return [...tabs]
+  }
+
+  return tabs.filter((tab, currentIndex) => currentIndex >= index || tab.closable === false)
+}
+
+export function closeTabsRight(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+  const index = tabs.findIndex(tab => tab.path === path)
+  if (index === -1 || index >= tabs.length - 1) {
+    return [...tabs]
+  }
+
+  return tabs.filter((tab, currentIndex) => currentIndex <= index || tab.closable === false)
+}
+
+export function closeOtherTabs(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+  return tabs.filter(tab => tab.path === path || tab.closable === false)
+}
+
+export function closeAllTabs(tabs: LumaLayoutTabItem[]): LumaLayoutTabItem[] {
+  return tabs.filter(tab => tab.closable === false)
+}
+
 /**
  * 计算标签缓存的组件 keepAlive 名单：仅当开启缓存时返回需要缓存的路径集合。
  */

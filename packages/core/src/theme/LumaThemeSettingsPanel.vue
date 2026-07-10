@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import type { LumaLayoutMode, LumaPreferences, LumaPreferencesDefaults, ThemeMode } from './types'
+import type {
+  LumaHeaderMenuAlign,
+  LumaLayoutMode,
+  LumaPreferences,
+  LumaPreferencesDefaults,
+  LumaTransitionName,
+  ThemeMode,
+} from './types'
 import {
   ElButton,
   ElDivider,
@@ -50,6 +57,19 @@ const layoutModeOptions: { label: string, value: LumaLayoutMode }[] = [
   { label: '混合导航', value: 'mixed-nav' },
 ]
 
+const headerMenuAlignOptions: { label: string, value: LumaHeaderMenuAlign }[] = [
+  { label: '左对齐', value: 'left' },
+  { label: '居中', value: 'center' },
+  { label: '右对齐', value: 'right' },
+]
+
+const transitionNameOptions: { label: string, value: LumaTransitionName }[] = [
+  { label: '淡入淡出', value: 'fade' },
+  { label: '底部滑入', value: 'fade-bottom' },
+  { label: '侧向滑入', value: 'fade-side' },
+  { label: '缩放淡入', value: 'zoom-fade' },
+]
+
 /***********************偏好更新*********************/
 function update(patch: Parameters<typeof mergePreferences>[1]): void {
   const next = mergePreferences(preferences.value, patch, props.defaults)
@@ -93,6 +113,16 @@ const sidebarWidth = computed<number>({
   set: width => update({ sidebar: { width } }),
 })
 
+const headerMenuAlign = computed<LumaHeaderMenuAlign>({
+  get: () => preferences.value.header.menuAlign,
+  set: menuAlign => update({ header: { menuAlign } }),
+})
+
+const headerMenuMaxWidth = computed<number>({
+  get: () => preferences.value.header.menuMaxWidth,
+  set: menuMaxWidth => update({ header: { menuMaxWidth } }),
+})
+
 const tabbarEnable = computed<boolean>({
   get: () => preferences.value.tabbar.enable,
   set: enable => update({ tabbar: { enable } }),
@@ -103,9 +133,29 @@ const tabbarCache = computed<boolean>({
   set: cache => update({ tabbar: { cache } }),
 })
 
+const tabbarMaxCount = computed<number>({
+  get: () => preferences.value.tabbar.maxCount,
+  set: maxCount => update({ tabbar: { maxCount } }),
+})
+
+const tabbarShowIcon = computed<boolean>({
+  get: () => preferences.value.tabbar.showIcon,
+  set: showIcon => update({ tabbar: { showIcon } }),
+})
+
+const tabbarShowMaximize = computed<boolean>({
+  get: () => preferences.value.tabbar.showMaximize,
+  set: showMaximize => update({ tabbar: { showMaximize } }),
+})
+
 const transitionEnable = computed<boolean>({
   get: () => preferences.value.transition.enable,
   set: enable => update({ transition: { enable } }),
+})
+
+const transitionName = computed<LumaTransitionName>({
+  get: () => preferences.value.transition.name,
+  set: name => update({ transition: { name } }),
 })
 </script>
 
@@ -178,6 +228,29 @@ const transitionEnable = computed<boolean>({
 
     <ElDivider v-if="showLayout" />
 
+    <section v-if="showLayout" class="luma-theme-settings__section">
+      <h4 class="luma-theme-settings__title">
+        顶部菜单
+      </h4>
+      <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">对齐方式</span>
+        <ElSelect v-model="headerMenuAlign" class="luma-theme-settings__control">
+          <ElOption
+            v-for="option in headerMenuAlignOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </ElSelect>
+      </div>
+      <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">最大宽度</span>
+        <ElInputNumber v-model="headerMenuMaxWidth" :min="480" :max="1600" :step="20" />
+      </div>
+    </section>
+
+    <ElDivider v-if="showLayout" />
+
     <!-- 圆角与尺寸 -->
     <section class="luma-theme-settings__section">
       <h4 class="luma-theme-settings__title">
@@ -221,8 +294,31 @@ const transitionEnable = computed<boolean>({
         <ElSwitch v-model="tabbarCache" :disabled="!tabbarEnable" />
       </div>
       <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">显示图标</span>
+        <ElSwitch v-model="tabbarShowIcon" :disabled="!tabbarEnable" />
+      </div>
+      <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">最大化按钮</span>
+        <ElSwitch v-model="tabbarShowMaximize" :disabled="!tabbarEnable" />
+      </div>
+      <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">最大标签数</span>
+        <ElInputNumber v-model="tabbarMaxCount" :min="0" :max="30" :step="1" />
+      </div>
+      <div class="luma-theme-settings__row">
         <span class="luma-theme-settings__label">页面动画</span>
         <ElSwitch v-model="transitionEnable" />
+      </div>
+      <div class="luma-theme-settings__row">
+        <span class="luma-theme-settings__label">动画类型</span>
+        <ElSelect v-model="transitionName" class="luma-theme-settings__control" :disabled="!transitionEnable">
+          <ElOption
+            v-for="option in transitionNameOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </ElSelect>
       </div>
     </section>
 

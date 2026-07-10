@@ -6,6 +6,9 @@ import { computed } from 'vue'
 
 /***********************属性定义*********************/
 const props = defineProps<{
+  activePath?: string
+  collapsed?: boolean
+  depth?: number
   item: LumaLayoutMenuItem
 }>()
 
@@ -14,7 +17,8 @@ const emit = defineEmits<{
 }>()
 
 /***********************菜单状态*********************/
-const hasChildren = computed(() => Boolean(props.item.children?.length))
+const visibleChildren = computed(() => props.item.children?.filter(child => !child.hidden) ?? [])
+const hasChildren = computed(() => visibleChildren.value.length > 0)
 
 /***********************事件处理*********************/
 function handleSelect(path: string): void {
@@ -23,7 +27,12 @@ function handleSelect(path: string): void {
 </script>
 
 <template>
-  <ElSubMenu v-if="hasChildren" class="luma-sidebar-menu-item" :index="item.path">
+  <ElSubMenu
+    v-if="hasChildren"
+    class="luma-sidebar-menu-item"
+    :index="item.path"
+    :title="collapsed ? item.title : undefined"
+  >
     <template #title>
       <LumaIcon
         v-if="item.icon"
@@ -32,12 +41,16 @@ function handleSelect(path: string): void {
         :size="16"
       />
       <span class="luma-sidebar-menu-item__title">{{ item.title }}</span>
+      <span v-if="item.externalLink" class="luma-sidebar-menu-item__external" aria-hidden="true">↗</span>
     </template>
 
     <LumaSidebarMenuItem
-      v-for="child in item.children"
+      v-for="child in visibleChildren"
       :key="child.path"
       :item="child"
+      :active-path="activePath"
+      :collapsed="collapsed"
+      :depth="(depth ?? 0) + 1"
       @select="handleSelect"
     />
   </ElSubMenu>
@@ -46,6 +59,7 @@ function handleSelect(path: string): void {
     v-else
     class="luma-sidebar-menu-item"
     :index="item.path"
+    :title="collapsed ? item.title : undefined"
     @click="handleSelect(item.path)"
   >
     <LumaIcon
@@ -55,6 +69,7 @@ function handleSelect(path: string): void {
       :size="16"
     />
     <span class="luma-sidebar-menu-item__title">{{ item.title }}</span>
+    <span v-if="item.externalLink" class="luma-sidebar-menu-item__external" aria-hidden="true">↗</span>
   </ElMenuItem>
 </template>
 
@@ -66,5 +81,11 @@ function handleSelect(path: string): void {
 .luma-sidebar-menu-item__title {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.luma-sidebar-menu-item__external {
+  margin-left: auto;
+  color: var(--el-text-color-placeholder);
+  font-size: 12px;
 }
 </style>

@@ -3,14 +3,19 @@ import type { LumaLayoutTabItem } from '@luma/core/layout'
 import type { LumaPreferences } from '@luma/core/theme'
 import {
   appendTab,
+  closeAllTabs,
+  closeOtherTabs,
   closeTab,
+  closeTabsLeft,
+  closeTabsRight,
+  findMenuItemByPath,
   LumaLayout,
   LumaRouterView,
   resolveActiveTopMenuPath,
   resolveNavigationTarget,
   splitMenusByLayout,
 } from '@luma/core/layout'
-import { computed, onMounted, shallowRef, watch } from 'vue'
+import { computed, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeaderActions from './components/app/AppHeaderActions.vue'
 import AppSettingsDrawer from './components/app/AppSettingsDrawer.vue'
@@ -33,6 +38,7 @@ const preferences = adminPreferences
 const settingsVisible = shallowRef(false)
 const resolvedThemeMode = adminResolvedThemeMode
 const visitedTabs = shallowRef<LumaLayoutTabItem[]>([])
+const routeRefreshKey = shallowRef(0)
 
 /***********************路由状态*********************/
 const route = useRoute()
@@ -60,7 +66,7 @@ const menus = computed(() => preferences.value.sidebar.enable ? layoutMenus.valu
 const topMenus = computed(() => layoutMenus.value.topMenus)
 const tabs = computed(() => preferences.value.tabbar.enable ? visitedTabs.value : [])
 const topMenuMode = computed(() => preferences.value.app.layout === 'mixed-nav' ? 'flat' : 'tree')
-const routeViewKey = computed(() => route.fullPath)
+const routeViewKey = computed(() => `${route.fullPath}:${routeRefreshKey.value}`)
 const sidebarWidth = computed(() => `${preferences.value.sidebar.width}px`)
 const routeViewCache = computed(() => preferences.value.tabbar.enable && preferences.value.tabbar.cache)
 const userName = computed(() => currentUser.value?.name ?? '未登录')
@@ -72,12 +78,6 @@ const activePath = computed({
     }
   },
 })
-
-function isMobileViewport(): boolean {
-  return typeof window !== 'undefined'
-    && typeof window.matchMedia === 'function'
-    && window.matchMedia('(max-width: 768px)').matches
-}
 
 watch(
   () => route.path,
@@ -102,12 +102,6 @@ watch(
   },
   { immediate: true },
 )
-
-onMounted(() => {
-  if (isMobileViewport()) {
-    collapsed.value = true
-  }
-})
 
 /***********************偏好事件*********************/
 function handleToggleTheme(): void {
@@ -136,16 +130,19 @@ async function handleLogout(): Promise<void> {
 
 /***********************导航事件*********************/
 function handleMenuSelect(path: string): void {
-  activePath.value = path
+  const item = findMenuItemByPath(allMenus.value, path)
 
-  if (isMobileViewport()) {
-    collapsed.value = true
+  if (item?.externalLink) {
+    window.open(item.externalLink, '_blank', 'noopener,noreferrer')
+    return
   }
+
+  activePath.value = path
 }
 
 function handleTopMenuSelect(path: string): void {
   const topMenu = allMenus.value.find(menu => menu.path === path)
-  activePath.value = resolveNavigationTarget(topMenu) || path
+  handleMenuSelect(resolveNavigationTarget(topMenu) || path)
 }
 
 function handleTabChange(path: string): void {
@@ -171,6 +168,41 @@ function handleTabRemove(path: string): void {
     }
   }
 }
+
+function activateAfterBulkClose(nextTabs: LumaLayoutTabItem[], preferredPath?: string): void {
+  visitedTabs.value = nextTabs
+  const nextPath = preferredPath && nextTabs.some(tab => tab.path === preferredPath)
+    ? preferredPath
+    : nextTabs.at(-1)?.path ?? '/dashboard'
+
+  if (route.path !== nextPath) {
+    activePath.value = nextPath
+  }
+}
+
+function handleTabCloseLeft(path: string): void {
+  activateAfterBulkClose(closeTabsLeft(visitedTabs.value, path), path)
+}
+
+function handleTabCloseRight(path: string): void {
+  activateAfterBulkClose(closeTabsRight(visitedTabs.value, path), path)
+}
+
+function handleTabCloseOthers(path: string): void {
+  activateAfterBulkClose(closeOtherTabs(visitedTabs.value, path), path)
+}
+
+function handleTabCloseAll(): void {
+  activateAfterBulkClose(closeAllTabs(visitedTabs.value))
+}
+
+async function handleTabRefresh(path: string): Promise<void> {
+  if (path !== route.path) {
+    await router.push(path)
+  }
+
+  routeRefreshKey.value += 1
+}
 </script>
 
 <template>
@@ -193,13 +225,23 @@ function handleTabRemove(path: string): void {
     :menus="menus"
     :top-menus="topMenus"
     :top-menu-mode="topMenuMode"
+    :header-menu-align="preferences.header.menuAlign"
+    :header-menu-max-width="preferences.header.menuMaxWidth"
+    :show-tab-icons="preferences.tabbar.showIcon"
+    :show-tab-maximize="preferences.tabbar.showMaximize"
     :tabs="tabs"
+    :tabs-visible="preferences.tabbar.enable"
     :active-menu-path="activePath"
     :active-top-menu-path="activeTopMenuPath"
     :sidebar-width="sidebarWidth"
     @menu-select="handleMenuSelect"
     @top-menu-select="handleTopMenuSelect"
     @tab-change="handleTabChange"
+    @tab-close-all="handleTabCloseAll"
+    @tab-close-left="handleTabCloseLeft"
+    @tab-close-others="handleTabCloseOthers"
+    @tab-close-right="handleTabCloseRight"
+    @tab-refresh="handleTabRefresh"
     @tab-remove="handleTabRemove"
   >
     <template #headerActions>

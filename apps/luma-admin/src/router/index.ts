@@ -37,6 +37,7 @@ function flattenMenuTabs(menus: SidebarMenuItem[]): LumaLayoutTabItem[] {
     }
 
     return {
+      icon: menu.icon,
       path: menu.path,
       title: menu.title,
     }

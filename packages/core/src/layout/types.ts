@@ -2,6 +2,9 @@ export interface LumaLayoutMenuItem {
   path: string
   title: string
   children?: LumaLayoutMenuItem[]
+  externalLink?: string
+  externalTarget?: '_blank' | '_self'
+  hidden?: boolean
   icon?: string
 }
 
@@ -9,4 +12,5 @@ export interface LumaLayoutTabItem {
   path: string
   title: string
   closable?: boolean
+  icon?: string
 }

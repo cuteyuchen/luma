@@ -6,11 +6,37 @@ import type { LumaLayoutMenuItem } from '../types'
  * 判断菜单项（含子级）是否覆盖指定路径。
  */
 export function includesMenuPath(item: LumaLayoutMenuItem, path: string): boolean {
+  if (item.hidden) {
+    return false
+  }
+
   if (item.path === path) {
     return true
   }
 
   return item.children?.some(child => includesMenuPath(child, path)) ?? false
+}
+
+export function findMenuItemByPath(
+  menus: LumaLayoutMenuItem[],
+  path: string,
+): LumaLayoutMenuItem | undefined {
+  for (const item of menus) {
+    if (item.hidden) {
+      continue
+    }
+
+    if (item.path === path) {
+      return item
+    }
+
+    const matched = findMenuItemByPath(item.children ?? [], path)
+    if (matched) {
+      return matched
+    }
+  }
+
+  return undefined
 }
 
 /**
@@ -21,11 +47,13 @@ export function resolveNavigationTarget(item?: LumaLayoutMenuItem): string {
     return ''
   }
 
-  if (!item.children?.length) {
+  const children = item.children?.filter(child => !child.hidden) ?? []
+
+  if (children.length === 0) {
     return item.path
   }
 
-  return resolveNavigationTarget(item.children[0])
+  return resolveNavigationTarget(children[0])
 }
 
 /**
@@ -55,7 +83,8 @@ export interface SplitMenusByLayoutResult {
  * - mixed-nav：顶部为顶层项，侧栏为当前激活顶层项的子级。
  */
 export function splitMenusByLayout(options: SplitMenusByLayoutOptions): SplitMenusByLayoutResult {
-  const { activeTopMenuPath = '', layout, menus } = options
+  const { activeTopMenuPath = '', layout } = options
+  const menus = options.menus.filter(item => !item.hidden)
 
   if (layout === 'sidebar-nav') {
     return { sidebarMenus: menus, topMenus: [] }
@@ -69,7 +98,7 @@ export function splitMenusByLayout(options: SplitMenusByLayoutOptions): SplitMen
     ?? menus.find(item => includesMenuPath(item, activeTopMenuPath))
 
   return {
-    sidebarMenus: matchedTop?.children?.length ? matchedTop.children : [],
+    sidebarMenus: matchedTop?.children?.filter(item => !item.hidden) ?? [],
     topMenus: menus,
   }
 }

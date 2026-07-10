@@ -9,11 +9,13 @@ import LumaSidebarMenuItem from './LumaSidebarMenuItem.vue'
 const props = withDefaults(defineProps<{
   menus?: LumaLayoutMenuItem[]
   activePath?: string
+  ariaLabel?: string
   collapsed?: boolean
   width?: string
   collapsedWidth?: string
 }>(), {
   activePath: '',
+  ariaLabel: '侧边导航',
   collapsed: false,
   collapsedWidth: '64px',
   menus: () => [],
@@ -43,7 +45,7 @@ defineExpose({
 </script>
 
 <template>
-  <ElAside ref="asideRef" class="luma-sidebar" :width="asideWidth">
+  <ElAside ref="asideRef" class="luma-sidebar" :width="asideWidth" :aria-label="ariaLabel">
     <ElScrollbar class="luma-sidebar__scrollbar">
       <ElMenu
         class="luma-sidebar__menu"
@@ -51,9 +53,12 @@ defineExpose({
         :default-active="activePath"
       >
         <LumaSidebarMenuItem
-          v-for="item in menus"
+          v-for="item in menus.filter(menu => !menu.hidden)"
           :key="item.path"
           :item="item"
+          :active-path="activePath"
+          :collapsed="collapsed"
+          :depth="0"
           @select="handleSelect"
         />
       </ElMenu>

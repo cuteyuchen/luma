@@ -2,7 +2,12 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import {
   appendTab,
+  closeAllTabs,
+  closeOtherTabs,
   closeTab,
+  closeTabsLeft,
+  closeTabsRight,
+  findMenuItemByPath,
   includesMenuPath,
   LumaTopNav,
   resolveActiveTopMenuPath,
@@ -36,6 +41,23 @@ describe('menu layout helpers', () => {
   it('resolveNavigationTarget 会下钻到首个可导航子项', () => {
     expect(resolveNavigationTarget(menus[0])).toBe('/dashboard/analysis')
     expect(resolveNavigationTarget(menus[1])).toBe('/about')
+  })
+
+  it('会跳过隐藏菜单并支持递归查找外链项', () => {
+    const extendedMenus = [
+      {
+        children: [
+          { hidden: true, path: '/hidden', title: '隐藏页' },
+          { externalLink: 'https://example.com', path: '/docs', title: '文档' },
+        ],
+        path: '/help',
+        title: '帮助',
+      },
+    ]
+
+    expect(resolveNavigationTarget(extendedMenus[0])).toBe('/docs')
+    expect(findMenuItemByPath(extendedMenus, '/hidden')).toBeUndefined()
+    expect(findMenuItemByPath(extendedMenus, '/docs')?.externalLink).toBe('https://example.com')
   })
 
   it('resolveActiveTopMenuPath 会解析命中的顶层菜单', () => {
@@ -98,6 +120,20 @@ describe('tab strategy helpers', () => {
     expect(resolveCachedTabPaths(tabs)).toEqual(['/a', '/b'])
     expect(resolveCachedTabPaths(tabs, { enable: false })).toEqual([])
   })
+
+  it('批量关闭会保留固定标签和目标标签', () => {
+    const tabs = [
+      { closable: false, path: '/home', title: '首页' },
+      { path: '/a', title: 'A' },
+      { path: '/b', title: 'B' },
+      { path: '/c', title: 'C' },
+    ]
+
+    expect(closeTabsLeft(tabs, '/b').map(tab => tab.path)).toEqual(['/home', '/b', '/c'])
+    expect(closeTabsRight(tabs, '/b').map(tab => tab.path)).toEqual(['/home', '/a', '/b'])
+    expect(closeOtherTabs(tabs, '/b').map(tab => tab.path)).toEqual(['/home', '/b'])
+    expect(closeAllTabs(tabs).map(tab => tab.path)).toEqual(['/home'])
+  })
 })
 
 describe('luma top nav', () => {
@@ -114,5 +150,24 @@ describe('luma top nav', () => {
     await items.at(-1)?.trigger('click')
 
     expect(wrapper.emitted('select')?.at(-1)).toEqual(['/about'])
+  })
+
+  it('支持递归菜单、隐藏项、对齐和最大宽度', () => {
+    const wrapper = mount(LumaTopNav, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        align: 'center',
+        maxWidth: 720,
+        menus: [
+          ...menus,
+          { hidden: true, path: '/hidden', title: '隐藏页' },
+        ],
+      },
+    })
+
+    expect(wrapper.classes()).toContain('is-align-center')
+    expect(wrapper.attributes('style')).toContain('--luma-top-nav-max-width: 720px')
+    expect(wrapper.text()).not.toContain('隐藏页')
+    expect(wrapper.find('[data-menu-path="/dashboard/workplace"]').exists()).toBe(true)
   })
 })

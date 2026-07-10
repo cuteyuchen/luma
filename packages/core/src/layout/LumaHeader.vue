@@ -8,10 +8,12 @@ const props = withDefaults(defineProps<{
   title?: string
   collapsed?: boolean
   height?: string
+  mobileOnlyToggle?: boolean
   sidebarEnabled?: boolean
 }>(), {
   collapsed: false,
   height: '56px',
+  mobileOnlyToggle: false,
   sidebarEnabled: true,
 })
 
@@ -43,6 +45,7 @@ defineExpose({
       <ElButton
         v-if="sidebarEnabled"
         class="luma-header__toggle"
+        :class="{ 'is-mobile-only': mobileOnlyToggle }"
         text
         :aria-label="toggleLabel"
         data-action="toggle-sidebar"
@@ -71,7 +74,7 @@ defineExpose({
 <style scoped lang="scss">
 .luma-header {
   position: relative;
-  z-index: 40;
+  z-index: var(--luma-z-header);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,9 +95,13 @@ defineExpose({
 
 .luma-header__toggle {
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   margin-left: -8px;
+}
+
+.luma-header__toggle.is-mobile-only {
+  display: none;
 }
 
 .luma-header__toggle svg {
@@ -148,18 +155,11 @@ defineExpose({
   }
 
   .luma-header__navigation {
-    order: 3;
-    flex-basis: 100%;
-    height: 44px;
-    margin: 0 -12px;
-    padding: 0 12px;
-    border-top: 1px solid var(--el-border-color-lighter);
+    display: none;
   }
 
-  .luma-header:has(.luma-header__navigation) {
-    flex-wrap: wrap;
-    height: auto !important;
-    min-height: var(--luma-header-height, 56px);
+  .luma-header__toggle.is-mobile-only {
+    display: inline-flex;
   }
 
   .luma-header__left {

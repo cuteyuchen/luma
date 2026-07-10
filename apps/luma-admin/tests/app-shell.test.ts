@@ -15,9 +15,14 @@ const LayoutStub = defineComponent({
   props: {
     activeMenuPath: String,
     activeTopMenuPath: String,
+    headerMenuAlign: String,
+    headerMenuMaxWidth: [Number, String],
     menus: Array,
+    showTabIcons: Boolean,
+    showTabMaximize: Boolean,
     sidebarWidth: String,
     tabs: Array,
+    tabsVisible: Boolean,
     title: String,
     topMenus: Array,
     topMenuMode: String,
@@ -26,10 +31,15 @@ const LayoutStub = defineComponent({
     <section
       class="layout-stub"
       :data-menu-count="menus?.length ?? 0"
+      :data-header-menu-align="headerMenuAlign"
+      :data-header-menu-max-width="headerMenuMaxWidth"
+      :data-show-tab-icons="String(showTabIcons)"
+      :data-show-tab-maximize="String(showTabMaximize)"
       :data-sidebar-width="sidebarWidth"
       :data-title="title"
       :data-tab-count="tabs?.length ?? 0"
       :data-tab-paths="tabs?.map(tab => tab.path).join(',')"
+      :data-tabs-visible="String(tabsVisible)"
       :data-top-menu-mode="topMenuMode"
       :data-top-menu-count="topMenus?.length ?? 0"
     >
@@ -105,10 +115,15 @@ describe('app shell', () => {
     expect(wrapper.find('.layout-stub').attributes('data-title')).toBe('Luma Admin')
     expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('4')
     expect(wrapper.find('.layout-stub').attributes('data-menu-count')).toBe('13')
+    expect(wrapper.find('.layout-stub').attributes('data-header-menu-align')).toBe('left')
+    expect(wrapper.find('.layout-stub').attributes('data-header-menu-max-width')).toBe('960')
+    expect(wrapper.find('.layout-stub').attributes('data-show-tab-icons')).toBe('true')
+    expect(wrapper.find('.layout-stub').attributes('data-show-tab-maximize')).toBe('true')
     expect(wrapper.find('.layout-stub').attributes('data-sidebar-width')).toBe('248px')
     expect(wrapper.find('.layout-stub').attributes('data-tab-count')).toBe('2')
     expect(wrapper.find('.layout-stub').attributes('data-tab-paths')).toBe('/dashboard,/examples/overview')
     expect(wrapper.find('.layout-stub').attributes('data-top-menu-mode')).toBe('flat')
+    expect(wrapper.find('.layout-stub').attributes('data-tabs-visible')).toBe('true')
     expect(wrapper.find('[data-action="open-settings"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('超级管理员')
     expect(wrapper.find('.router-view-stub').attributes()).toMatchObject({
