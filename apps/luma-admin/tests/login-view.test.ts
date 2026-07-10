@@ -1,10 +1,10 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createMemoryHistory } from 'vue-router'
-import { elementPlusStubs } from '../../../packages/core/tests/helpers/element-plus-stubs'
 import { createAdminRouter } from '../src/router'
 import { currentUser, logout } from '../src/services/session'
 import LoginView from '../src/views/login/LoginView.vue'
+import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 describe('login view', () => {
   afterEach(async () => {

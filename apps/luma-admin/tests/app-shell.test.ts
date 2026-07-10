@@ -3,12 +3,12 @@ import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
 import { createMemoryHistory } from 'vue-router'
-import { elementPlusStubs } from '../../../packages/core/tests/helpers/element-plus-stubs'
 import App from '../src/App.vue'
 import AppSettingsDrawer from '../src/components/app/AppSettingsDrawer.vue'
 import { createAdminRouter } from '../src/router'
 import { createAdminPreferences, resetAdminSystemConfig } from '../src/services/preferences'
 import { login, logout } from '../src/services/session'
+import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 const LayoutStub = defineComponent({
   name: 'LumaLayout',

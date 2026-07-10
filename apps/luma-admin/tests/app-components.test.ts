@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
-import { elementPlusStubs } from '../../../packages/core/tests/helpers/element-plus-stubs'
 import AppHeaderActions from '../src/components/app/AppHeaderActions.vue'
 import AppSettingsDrawer from '../src/components/app/AppSettingsDrawer.vue'
 import { createAdminPreferences } from '../src/services/preferences'
+import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 const IconStub = defineComponent({
   name: 'LumaIcon',
