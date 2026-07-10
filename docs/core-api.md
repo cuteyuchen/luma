@@ -283,6 +283,11 @@ import { resolveSchemaTableCellDisplay } from '@luma/core/components'
 import type { CrudDataSource } from '@luma/core/components'
 import { LumaCrudTable } from '@luma/core/components'
 
+const querySchemas = [
+  { component: 'input', field: 'keyword', label: '关键词' },
+  { dictionary: 'status', field: 'status', label: '状态' },
+]
+
 const columns = [
   { field: 'name', label: '名称' },
   { field: 'status', label: '状态', dictionary: 'status' },
@@ -303,10 +308,19 @@ const dataSource: CrudDataSource = {
 <template>
   <LumaCrudTable
     title="项目列表"
-    row-key="id"
-    :columns="columns"
     :data-source="dataSource"
-    selection
+    :query="{
+      columns: 3,
+      collapsible: true,
+      schemas: querySchemas,
+    }"
+    :table="{
+      columns,
+      rowKey: 'id',
+      selection: true,
+      showColumnSettings: true,
+    }"
+    :toolbar="{ export: true }"
   />
 </template>
 ```
@@ -338,6 +352,28 @@ const dataSource: CrudDataSource = {
 ```
 
 `dataSource` 可选动作包括 `create`、`update`、`remove`、`removeMany`。配置 `formSchemas` 后，组件会提供新增、查看、编辑弹窗；配置 `selection` 后会提供批量删除入口。删除前可通过 `confirmRemove(rows)` 接入应用自己的确认逻辑。
+
+推荐使用六个配置对象组织复杂页面：
+
+- `query`：schemas、列数、折叠、label width 和查询文案。
+- `table`：columns、rowKey、selection、列设置、自动 resize 和操作列宽度。
+- `toolbar`：新增、批量删除、刷新、导出及对应文案。
+- `actions`：查看、编辑、删除的行级显示函数和文案。
+- `dialog`：标题、宽度、提交文案和脏表单关闭确认。
+- `pagination`：开关和 page sizes。
+
+旧的 `querySchemas`、`columns`、`rowKey`、`selection`、`pageSizes` 等扁平 props 在首个稳定版本前继续兼容；新配置与旧 props 同时存在时，新配置优先。
+
+组件会触发 `export` 和 `operation-error` 事件。`export` 返回当前查询模型和已选择行；列表或写操作失败时保留可恢复状态，列表错误区提供重试入口，弹窗保存失败不会自动关闭。
+
+公开方法包括：
+
+- `reload`、`isLoading`
+- `openCreate`、`openView`、`openEdit`
+- `removeRow`、`removeSelectedRows`
+- `getSelectedRows`、`getSelectedRowKeys`、`clearSelection`
+- `getQueryForm`、`getDialogForm`、`getTable`、`getCrudElement`
+- `toggleQuery`
 
 ### Dictionary
 
