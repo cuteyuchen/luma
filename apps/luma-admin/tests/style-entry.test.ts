@@ -16,9 +16,9 @@ describe('luma admin style entry', () => {
     const appVue = await readFile(join(process.cwd(), 'src/App.vue'), 'utf8')
 
     expect(appVue).toContain(':view-key="routeViewKey"')
-    expect(appVue).toContain('transition-name="fade-side"')
-    expect(appVue).toContain(':progress="true"')
-    expect(appVue).toContain(':loading="true"')
-    expect(appVue).toContain(':cache="true"')
+    expect(appVue).toContain(':transition-name="preferences.transition.name"')
+    expect(appVue).toContain(':progress="preferences.transition.progress"')
+    expect(appVue).toContain(':loading="preferences.transition.loading"')
+    expect(appVue).toContain(':cache="routeViewCache"')
   })
 })

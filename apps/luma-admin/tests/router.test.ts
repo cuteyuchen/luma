@@ -1,12 +1,18 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import {
   adminRouteRecords,
   createAdminRouter,
   createAdminSidebarMenus,
   permissionStore,
 } from '../src/router'
+import { adminSession, login, logout } from '../src/services/session'
 
 describe('luma admin router', () => {
+  afterEach(async () => {
+    await logout()
+  })
+
   it('示例路由配置使用标准 meta.authority 字段', () => {
     const examplesRoute = adminRouteRecords.find(route => route.path === '/examples')
     const projectRoute = adminRouteRecords.find(route => route.path === '/project')
@@ -144,11 +150,40 @@ describe('luma admin router', () => {
     ])
   })
 
-  it('有字典权限时可以访问字典示例路由', async () => {
-    permissionStore.setPermissions(['dashboard:view', 'examples:view', 'examples:dictionary'])
-    permissionStore.setRoles(['admin'])
+  it('未登录访问后台页面会跳转到登录页并携带 redirect', async () => {
+    const router = createAdminRouter(createMemoryHistory())
 
-    const router = createAdminRouter()
+    await router.push('/dashboard')
+    await router.isReady()
+
+    expect(router.currentRoute.value.path).toBe('/login')
+    expect(router.currentRoute.value.query.redirect).toBe('/dashboard')
+  })
+
+  it('登录页未登录时也可以直接访问', async () => {
+    const router = createAdminRouter(createMemoryHistory())
+
+    await router.push('/login')
+    await router.isReady()
+
+    expect(router.currentRoute.value.path).toBe('/login')
+  })
+
+  it('登录 admin 后可以访问工作台', async () => {
+    await login('admin')
+
+    const router = createAdminRouter(createMemoryHistory())
+
+    await router.push('/dashboard')
+    await router.isReady()
+
+    expect(router.currentRoute.value.path).toBe('/dashboard')
+  })
+
+  it('有字典权限时可以访问字典示例路由', async () => {
+    await login('admin')
+
+    const router = createAdminRouter(createMemoryHistory())
 
     await router.push('/examples/dictionary')
     await router.isReady()
@@ -157,10 +192,11 @@ describe('luma admin router', () => {
   })
 
   it('无受限示例权限时访问受限示例会跳转到 403', async () => {
+    adminSession.setToken('test-token')
     permissionStore.setPermissions(['dashboard:view', 'examples:view', 'examples:dictionary'])
     permissionStore.setRoles(['admin'])
 
-    const router = createAdminRouter()
+    const router = createAdminRouter(createMemoryHistory())
 
     await router.push('/examples/restricted')
     await router.isReady()
@@ -169,10 +205,9 @@ describe('luma admin router', () => {
   })
 
   it('无项目权限时访问项目路由会跳转到 403', async () => {
-    permissionStore.setPermissions(['dashboard:view', 'examples:view', 'examples:dictionary'])
-    permissionStore.setRoles(['admin'])
+    await login('guest')
 
-    const router = createAdminRouter()
+    const router = createAdminRouter(createMemoryHistory())
 
     await router.push('/project')
     await router.isReady()
@@ -181,10 +216,9 @@ describe('luma admin router', () => {
   })
 
   it('有项目权限时可以访问项目路由', async () => {
-    permissionStore.setPermissions(['dashboard:view', 'examples:view', 'examples:dictionary', 'project:list'])
-    permissionStore.setRoles(['admin'])
+    await login('operator')
 
-    const router = createAdminRouter()
+    const router = createAdminRouter(createMemoryHistory())
 
     await router.push('/project')
     await router.isReady()

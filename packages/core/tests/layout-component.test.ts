@@ -8,6 +8,7 @@ import {
   LumaRouterView,
   LumaSidebar,
   LumaTabs,
+  LumaTopNav,
 } from '../src/layout'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
@@ -90,6 +91,26 @@ describe('luma layout', () => {
     await wrapper.find('[data-action="toggle-sidebar"]').trigger('click')
 
     expect(wrapper.emitted('update:collapsed')?.[0]).toEqual([true])
+  })
+
+  it('会在传入顶部菜单时渲染顶部导航并透传选择事件', async () => {
+    const wrapper = mount(LumaLayout, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        activeTopMenuPath: '/system',
+        menus: [],
+        topMenus: menus,
+      },
+    })
+
+    expect(wrapper.findComponent(LumaTopNav).exists()).toBe(true)
+    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system')
+
+    await wrapper.find('[data-menu-path="/system/user"]').trigger('click')
+
+    expect(wrapper.emitted('topMenuSelect')?.[0]).toEqual(['/system/user'])
   })
 })
 
