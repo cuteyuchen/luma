@@ -130,6 +130,31 @@ export const exampleFormSchemas: SchemaFormItem[] = [
   },
 ]
 
+export const exampleCrudFormSchemas: SchemaFormItem[] = [
+  {
+    component: 'input',
+    field: 'name',
+    label: '名称',
+    rules: [{ required: true, message: '请输入名称' }],
+  },
+  {
+    dictionary: 'status',
+    field: 'status',
+    label: '状态',
+  },
+  {
+    component: 'radio',
+    dictionary: 'priority',
+    field: 'priority',
+    label: '优先级',
+  },
+  {
+    component: 'textarea',
+    field: 'remark',
+    label: '备注',
+  },
+]
+
 /***********************表格数据*********************/
 export const exampleTableColumns: SchemaTableColumn[] = [
   {

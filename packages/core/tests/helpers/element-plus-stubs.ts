@@ -89,6 +89,15 @@ export const elementPlusStubs = {
     emits: ['update:modelValue'],
     template: '<input class="el-date-editor" :disabled="disabled" :name="name" :placeholder="placeholder" :type="type || \'date\'" :value="Array.isArray(modelValue) ? modelValue.join(\',\') : modelValue ?? \'\'" @input="$emit(\'update:modelValue\', $event.target.value)">',
   }),
+  ElDialog: defineComponent({
+    name: 'ElDialog',
+    props: {
+      modelValue: Boolean,
+      title: String,
+    },
+    emits: ['update:modelValue'],
+    template: '<section v-if="modelValue" class="el-dialog" :data-title="title"><slot /></section>',
+  }),
   ElInput: defineComponent({
     name: 'ElInput',
     props: {

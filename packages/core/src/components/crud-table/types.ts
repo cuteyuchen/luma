@@ -10,11 +10,38 @@ export interface CrudTableSearchPayload extends SchemaFormModel {}
 
 export interface CrudTableResetPayload extends SchemaFormModel {}
 
+export interface CrudFetchParams<Query extends SchemaFormModel = SchemaFormModel> {
+  page: number
+  pageSize: number
+  query: Query
+}
+
+export interface CrudFetchResult<Row extends SchemaTableRow = SchemaTableRow> {
+  items: Row[]
+  total: number
+}
+
+export interface CrudDataSource<
+  Row extends SchemaTableRow = SchemaTableRow,
+  Query extends SchemaFormModel = SchemaFormModel,
+> {
+  create?: (model: Partial<Row>) => Promise<unknown>
+  fetch: (params: CrudFetchParams<Query>) => Promise<unknown>
+  parseResponse?: (response: unknown) => CrudFetchResult<Row>
+  remove?: (row: Row) => Promise<unknown>
+  removeMany?: (rows: Row[]) => Promise<unknown>
+  update?: (row: Row, model: Partial<Row>) => Promise<unknown>
+}
+
+export type CrudFormMode = 'create' | 'edit' | 'view'
+
 export interface CrudTableProps {
   title?: string
   description?: string
   querySchemas?: SchemaFormItem[]
+  formSchemas?: SchemaFormItem[]
   columns: SchemaTableColumn[]
+  dataSource?: CrudDataSource
   rows?: SchemaTableRow[]
   rowKey?: string | ((row: SchemaTableRow, index: number) => string | number)
   total?: number
@@ -24,4 +51,8 @@ export interface CrudTableProps {
   emptyText?: string
   searchText?: string
   resetText?: string
+  createText?: string
+  batchDeleteText?: string
+  selection?: boolean
+  confirmRemove?: (rows: SchemaTableRow[]) => boolean | Promise<boolean>
 }

@@ -2,6 +2,10 @@ export {
   LumaCrudTable,
 } from '../components/crud-table'
 export type {
+  CrudDataSource,
+  CrudFetchParams,
+  CrudFetchResult,
+  CrudFormMode,
   CrudTablePageChangePayload,
   CrudTableProps,
   CrudTableQueryModel,

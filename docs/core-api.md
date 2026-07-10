@@ -218,6 +218,7 @@ function handlePageChange(payload: SchemaTablePaginationChangePayload) {
 
 ```vue
 <script setup lang="ts">
+import type { CrudDataSource } from '@luma/core/components'
 import { LumaCrudTable } from '@luma/core/components'
 
 const columns = [
@@ -225,9 +226,16 @@ const columns = [
   { field: 'status', label: '状态', dictionary: 'status' },
 ]
 
-const rows = [
-  { id: 1, name: 'Luma', status: 'enabled' },
-]
+const dataSource: CrudDataSource = {
+  fetch: async () => {
+    return {
+      items: [
+        { id: 1, name: 'Luma', status: 'enabled' },
+      ],
+      total: 1,
+    }
+  },
+}
 </script>
 
 <template>
@@ -235,11 +243,39 @@ const rows = [
     title="项目列表"
     row-key="id"
     :columns="columns"
-    :rows="rows"
-    :total="1"
+    :data-source="dataSource"
+    selection
   />
 </template>
 ```
+
+`LumaCrudTable` 支持两种模式：
+
+- 受控模式：传入 `rows` / `total`，由应用侧管理数据。
+- 数据源模式：传入 `dataSource`，组件内部调用 `fetch`、维护 `rows` / `total` / `loading` / `error`。
+
+标准数据源响应固定为：
+
+```ts
+interface CrudFetchResult<Row> {
+  items: Row[]
+  total: number
+}
+```
+
+非标准响应不自动猜测字段，必须显式提供 `parseResponse`：
+
+```ts
+const dataSource: CrudDataSource = {
+  fetch: params => request('/api/projects', { params }),
+  parseResponse: response => ({
+    items: response.records,
+    total: response.count,
+  }),
+}
+```
+
+`dataSource` 可选动作包括 `create`、`update`、`remove`、`removeMany`。配置 `formSchemas` 后，组件会提供新增、查看、编辑弹窗；配置 `selection` 后会提供批量删除入口。删除前可通过 `confirmRemove(rows)` 接入应用自己的确认逻辑。
 
 ### Dictionary
 

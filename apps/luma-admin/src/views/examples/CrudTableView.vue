@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import type {
+  CrudDataSource,
+  CrudFetchParams,
+  CrudFetchResult,
   CrudTableResetPayload,
   CrudTableSearchPayload,
   PaginationChangePayload,
   SchemaFormModel,
+  SchemaTableRow,
 } from '@luma/core/components'
 import { LumaCrudTable } from '@luma/core/components'
 import { shallowRef } from 'vue'
 import {
   createExampleQueryModel,
+  exampleCrudFormSchemas,
   exampleQuerySchemas,
   exampleTableColumns,
   exampleTableRows,
@@ -19,6 +24,62 @@ const queryModel = shallowRef<SchemaFormModel>(createExampleQueryModel())
 const page = shallowRef(1)
 const pageSize = shallowRef(10)
 const message = shallowRef('等待 CRUD 操作')
+const rows = shallowRef<SchemaTableRow[]>([...exampleTableRows])
+
+/***********************远程数据源*********************/
+function filterRows(params: CrudFetchParams): CrudFetchResult {
+  const keyword = String(params.query.keyword ?? '').trim()
+  const status = String(params.query.status ?? '')
+  const priority = String(params.query.priority ?? '')
+  const filteredRows = rows.value.filter((row) => {
+    const matchKeyword = keyword ? String(row.name ?? '').includes(keyword) : true
+    const matchStatus = status ? row.status === status : true
+    const matchPriority = priority ? row.priority === priority : true
+
+    return matchKeyword && matchStatus && matchPriority
+  })
+  const start = (params.page - 1) * params.pageSize
+
+  return {
+    items: filteredRows.slice(start, start + params.pageSize),
+    total: filteredRows.length,
+  }
+}
+
+const dataSource: CrudDataSource = {
+  create(model) {
+    rows.value = [
+      {
+        id: `example-${Date.now()}`,
+        priority: model.priority ?? 'normal',
+        status: model.status ?? 'enabled',
+        ...model,
+      },
+      ...rows.value,
+    ]
+    message.value = '已新增一条数据'
+    return Promise.resolve({})
+  },
+  fetch(params) {
+    return Promise.resolve(filterRows(params))
+  },
+  remove(row) {
+    rows.value = rows.value.filter(item => item.id !== row.id)
+    message.value = `已删除：${String(row.name ?? '-')}`
+    return Promise.resolve({})
+  },
+  removeMany(selectedRows) {
+    const selectedIds = new Set(selectedRows.map(row => row.id))
+    rows.value = rows.value.filter(row => !selectedIds.has(row.id))
+    message.value = `已批量删除 ${selectedRows.length} 条`
+    return Promise.resolve({})
+  },
+  update(row, model) {
+    rows.value = rows.value.map(item => item.id === row.id ? { ...item, ...model } : item)
+    message.value = `已更新：${String(model.name ?? row.name ?? '-')}`
+    return Promise.resolve({})
+  },
+}
 
 /***********************事件处理*********************/
 function handleSearch(payload: CrudTableSearchPayload): void {
@@ -42,20 +103,15 @@ function handlePageChange(payload: PaginationChangePayload): void {
       v-model:page-size="pageSize"
       title="CRUD Table"
       :description="message"
+      :data-source="dataSource"
       :query-schemas="exampleQuerySchemas"
+      :form-schemas="exampleCrudFormSchemas"
       :columns="exampleTableColumns"
-      :rows="exampleTableRows"
       row-key="id"
-      :total="36"
+      selection
       @search="handleSearch"
       @reset="handleReset"
       @page-change="handlePageChange"
-    >
-      <template #actions>
-        <button class="luma-admin-example__button luma-admin-example__button--primary" type="button">
-          新增
-        </button>
-      </template>
-    </LumaCrudTable>
+    />
   </main>
 </template>
