@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
+import { h, nextTick } from 'vue'
 import { LumaSchemaTable } from '../src/components/schema-table'
+import { createDictionaryStore, dictionaryContextKey } from '../src/dictionary'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 describe('luma schema table', () => {
@@ -72,5 +74,124 @@ describe('luma schema table', () => {
     })
 
     expect(wrapper.findComponent({ name: 'ElTable' }).props('emptyText')).toBe('暂无项目')
+  })
+
+  it('会使用 dictionary 字段把表格值回显为 label', async () => {
+    const rows = [
+      {
+        id: 'row-1',
+        status: ['enabled', 'disabled'],
+      },
+    ]
+    const store = createDictionaryStore({
+      fetcher: async () => ({
+        items: [
+          { label: '启用', value: 'enabled' },
+          { label: '停用', value: 'disabled' },
+        ],
+      }),
+    })
+
+    const wrapper = mount(LumaSchemaTable, {
+      global: {
+        provide: {
+          [dictionaryContextKey as symbol]: {
+            store,
+          },
+        },
+        stubs: elementPlusStubs,
+      },
+      props: {
+        columns: [
+          {
+            dictionary: 'status',
+            field: 'status',
+            label: '状态',
+          },
+        ],
+        rowKey: 'id',
+        rows,
+      },
+    })
+
+    await Promise.resolve()
+    await wrapper.vm.$nextTick()
+
+    const formatter = wrapper.findComponent({ name: 'ElTableColumn' }).props('formatter') as
+      | ((row: Record<string, unknown>, column: unknown, value: unknown, index: number) => unknown)
+      | undefined
+
+    expect(formatter?.(rows[0], {}, ['enabled', 'disabled'], 0)).toBe('启用, 停用')
+  })
+
+  it('会渲染选择列、序号列、分页、透传属性并转发交互事件', async () => {
+    const rows = [
+      { id: 'row-1', name: 'Luma', status: 'enabled' },
+      { id: 'row-2', name: 'Admin', status: 'disabled' },
+    ]
+
+    const wrapper = mount(LumaSchemaTable, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        cellClassName: 'cell-class',
+        columns: [
+          {
+            componentProps: {
+              minWidth: 160,
+            },
+            field: 'name',
+            label: '名称',
+          },
+          {
+            authority: 'status:view',
+            field: 'status',
+            label: '状态',
+          },
+        ],
+        headerCellClassName: 'header-class',
+        loading: true,
+        page: 1,
+        pageSize: 10,
+        pageSizes: [10, 20],
+        pagination: true,
+        rowClassName: 'row-class',
+        rows,
+        selection: true,
+        showIndex: true,
+        tableProps: {
+          border: true,
+          stripe: true,
+        },
+        total: 32,
+      },
+      slots: {
+        actions: ({ row }) => h('button', { class: 'row-action', type: 'button' }, String(row?.id ?? '操作')),
+      },
+    })
+
+    const table = wrapper.findComponent({ name: 'ElTable' })
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+
+    expect(table.attributes('data-loading')).toBe('true')
+    expect(table.props('border')).toBe(true)
+    expect(table.props('stripe')).toBe(true)
+    expect(table.props('rowClassName')).toBe('row-class')
+    expect(table.props('cellClassName')).toBe('cell-class')
+    expect(table.props('headerCellClassName')).toBe('header-class')
+    expect(columns.map(item => item.props('type'))).toEqual(['selection', 'index', undefined, undefined, undefined])
+    expect(columns[2]?.props('minWidth')).toBe(160)
+    expect(wrapper.find('.row-action').exists()).toBe(true)
+
+    table.vm.$emit('selection-change', [rows[0]])
+    await nextTick()
+    expect(wrapper.emitted('selectionChange')?.at(-1)?.[0]).toEqual([rows[0]])
+
+    await wrapper.find('[data-action="next"]').trigger('click')
+    expect(wrapper.emitted('pageChange')?.at(-1)?.[0]).toEqual({
+      page: 2,
+      pageSize: 10,
+    })
   })
 })

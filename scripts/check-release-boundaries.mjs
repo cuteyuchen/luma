@@ -4,10 +4,12 @@ import process from 'node:process'
 
 /***********************基础路径*********************/
 const rootDir = process.cwd()
+const licensePath = join(rootDir, 'LICENSE')
 const packageDirs = {
   createLumaAdmin: join(rootDir, 'packages/create-luma-admin'),
   icons: join(rootDir, 'packages/icons'),
   core: join(rootDir, 'packages/core'),
+  charts: join(rootDir, 'packages/charts'),
   vbenCompat: join(rootDir, 'packages/vben-compat'),
 }
 
@@ -89,18 +91,29 @@ function checkPublishPackage(name, dirPath) {
 
   assert(existsSync(readmePath), `${name} 缺少 README.md`)
   assert(packageJson.publishConfig?.access === 'public', `${name} 缺少 publishConfig.access=public`)
+  assert(packageJson.license === 'MIT', `${name} license 应为 MIT`)
   assert(packageJson.files?.includes('README.md'), `${name} files 未包含 README.md`)
   assert(packageJson.files?.includes('dist'), `${name} files 未包含 dist`)
 
   return packageJson
 }
 
+/***********************许可证*********************/
+assert(existsSync(licensePath), '根目录缺少 LICENSE')
+if (existsSync(licensePath)) {
+  const licenseText = readFileSync(licensePath, 'utf8')
+
+  assert(licenseText.includes('MIT License'), 'LICENSE 不是 MIT License')
+}
+
 const iconsPackage = checkPublishPackage('@luma/icons', packageDirs.icons)
 const corePackage = checkPublishPackage('@luma/core', packageDirs.core)
+const chartsPackage = checkPublishPackage('@luma/charts', packageDirs.charts)
 const compatPackage = checkPublishPackage('@luma/vben-compat', packageDirs.vbenCompat)
 const createPackage = checkPublishPackage('create-luma-admin', packageDirs.createLumaAdmin)
 
 assert(corePackage.files?.includes('theme-chalk'), '@luma/core files 未包含 theme-chalk')
+assert(corePackage.exports?.['./style.css'] === './dist/core.css', '@luma/core 未导出 style.css')
 assert(corePackage.exports?.['./theme-chalk/index.scss'], '@luma/core 未导出 theme-chalk/index.scss')
 assert(createPackage.bin?.['create-luma-admin'] === './dist/cli.js', 'create-luma-admin 缺少 bin.create-luma-admin')
 
@@ -120,6 +133,11 @@ const compatAllDependencies = getDependencyNames(compatPackage, [
   'peerDependencies',
   'optionalDependencies',
 ])
+const chartsAllDependencies = getDependencyNames(chartsPackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
 
 assert(!iconsAllDependencies.has('@luma/core'), '@luma/icons 不能依赖 @luma/core')
 assert(!iconsAllDependencies.has('@luma/vben-compat'), '@luma/icons 不能依赖 @luma/vben-compat')
@@ -128,22 +146,27 @@ assert(hasDependency(corePackage, 'dependencies', '@luma/icons'), '@luma/core �
 assert(hasDependency(corePackage, 'peerDependencies', 'element-plus'), '@luma/core 应把 element-plus 放在 peerDependencies')
 assert(!hasDependency(corePackage, 'dependencies', 'element-plus'), '@luma/core 不能把 element-plus 放在 dependencies')
 assert(!coreAllDependencies.has('@luma/vben-compat'), '@luma/core 不能依赖 @luma/vben-compat')
+assert(!coreAllDependencies.has('@luma/charts'), '@luma/core 不能依赖 @luma/charts')
 
 assert(hasDependency(compatPackage, 'dependencies', '@luma/core'), '@luma/vben-compat 应依赖 @luma/core')
 assert(!compatAllDependencies.has('element-plus'), '@luma/vben-compat 不应直接依赖 element-plus')
+
+assert(hasDependency(chartsPackage, 'peerDependencies', 'echarts'), '@luma/charts 应把 echarts 放在 peerDependencies')
+assert(!hasDependency(chartsPackage, 'dependencies', 'echarts'), '@luma/charts 不能把 echarts 放在 dependencies')
+assert(!chartsAllDependencies.has('@luma/core'), '@luma/charts 不应依赖 @luma/core')
 
 for (const dependencyName of coreAllDependencies) {
   assert(!/^@intlify\//.test(dependencyName), `@luma/core 不能默认依赖 ${dependencyName}`)
 }
 
-for (const forbiddenName of ['vue-i18n', 'vxe-table', 'vxe-pc-ui', 'xe-utils']) {
+for (const forbiddenName of ['echarts', 'vue-echarts', 'vue-i18n', 'vxe-table', 'vxe-pc-ui', 'xe-utils']) {
   assert(!coreAllDependencies.has(forbiddenName), `@luma/core 不能默认依赖 ${forbiddenName}`)
 }
 
 /***********************源码边界*********************/
 const coreForbiddenMatches = findTextMatches(
   join(packageDirs.core, 'src'),
-  /@luma\/vben-compat|vue-i18n|@intlify\/|vxe-table|vxe-pc-ui|xe-utils/,
+  /@luma\/vben-compat|@luma\/charts|vue-i18n|@intlify\/|vxe-table|vxe-pc-ui|xe-utils|vue-echarts|from 'echarts'/,
 )
 
 for (const match of coreForbiddenMatches) {
@@ -161,6 +184,7 @@ for (const match of appSourceAliasMatches) {
 
 const oldNameMatches = findTextMatches(rootDir, oldNamePattern, new Set([
   'LUMA_DEVELOPMENT_PLAN.md',
+  'docs/luma-next-development-plan.md',
   'docs/release-checklist.md',
   'scripts/check-release-boundaries.mjs',
 ]))

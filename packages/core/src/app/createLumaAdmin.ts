@@ -1,9 +1,14 @@
 import type { CreateLumaAdminOptions, LumaAdminInstance } from './types'
 import { registerStaticLocalSvgIcons } from '@luma/icons'
 import { createApp } from 'vue'
+import { installDictionary } from '../dictionary'
 
 /***********************插件安装*********************/
 function installCorePlugins(app: LumaAdminInstance['app'], options: CreateLumaAdminOptions): void {
+  if (options.dictionary !== false) {
+    installDictionary(app, options.dictionary)
+  }
+
   if (options.router) {
     app.use(options.router)
   }

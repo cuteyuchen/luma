@@ -1,22 +1,71 @@
 <script setup lang="ts">
-import { LumaLayout, LumaRouterView } from '@luma/core/layout'
-import { computed, shallowRef } from 'vue'
+import type { ResolvedThemeMode } from '@luma/core/theme'
+import {
+  LumaLayout,
+  LumaRouterView,
+  resolveActiveTopMenuPath,
+  resolveNavigationTarget,
+  splitMenusByLayout,
+} from '@luma/core/layout'
+import { mergePreferences } from '@luma/core/theme'
+import { computed, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import AppHeaderActions from './components/app/AppHeaderActions.vue'
+import AppSettingsDrawer from './components/app/AppSettingsDrawer.vue'
 import {
   createAdminSidebarMenus,
   createAdminTabs,
 } from './router'
+import {
+  applyAdminPreferences,
+  createAdminPreferences,
+} from './services/preferences'
+import { currentUser, logout } from './services/session'
 
-/***********************页面状态*********************/
+/***********************基础状态*********************/
 const title = 'Luma Admin'
-const collapsed = shallowRef(false)
+const preferences = shallowRef(createAdminPreferences())
+const settingsVisible = shallowRef(false)
+const resolvedThemeMode = shallowRef<ResolvedThemeMode>('light')
 
 /***********************路由状态*********************/
 const route = useRoute()
 const router = useRouter()
+const isPublicLayout = computed(() => route.meta.layout === 'public')
 
-const menus = computed(() => createAdminSidebarMenus())
-const tabs = computed(() => createAdminTabs(route.path))
+/***********************偏好状态*********************/
+watch(
+  preferences,
+  (value) => {
+    resolvedThemeMode.value = applyAdminPreferences(value)
+  },
+  { immediate: true },
+)
+
+const collapsed = computed({
+  get: () => preferences.value.sidebar.collapsed,
+  set: (collapsed: boolean) => {
+    preferences.value = mergePreferences(preferences.value, {
+      sidebar: { collapsed },
+    })
+  },
+})
+
+/***********************菜单状态*********************/
+const allMenus = computed(() => createAdminSidebarMenus())
+const activeTopMenuPath = computed(() => resolveActiveTopMenuPath(allMenus.value, route.path))
+const layoutMenus = computed(() => splitMenusByLayout({
+  activeTopMenuPath: activeTopMenuPath.value,
+  layout: preferences.value.app.layout,
+  menus: allMenus.value,
+}))
+const menus = computed(() => preferences.value.sidebar.enable ? layoutMenus.value.sidebarMenus : [])
+const topMenus = computed(() => layoutMenus.value.topMenus)
+const tabs = computed(() => preferences.value.tabbar.enable ? createAdminTabs(route.path) : [])
+const routeViewKey = computed(() => route.fullPath)
+const sidebarWidth = computed(() => `${preferences.value.sidebar.width}px`)
+const routeViewCache = computed(() => preferences.value.tabbar.enable && preferences.value.tabbar.cache)
+const userName = computed(() => currentUser.value?.name ?? '未登录')
 const activePath = computed({
   get: () => route.path,
   set: (path: string) => {
@@ -26,9 +75,39 @@ const activePath = computed({
   },
 })
 
+/***********************偏好事件*********************/
+function handleToggleTheme(): void {
+  preferences.value = mergePreferences(preferences.value, {
+    theme: {
+      mode: resolvedThemeMode.value === 'dark' ? 'light' : 'dark',
+    },
+  })
+}
+
+function handleOpenSettings(): void {
+  settingsVisible.value = true
+}
+
+function handlePreferencesChange(): void {
+  // 偏好变化由 watch 统一应用到 DOM，这里保留事件入口便于后续持久化。
+}
+
+async function handleLogout(): Promise<void> {
+  await logout()
+
+  if (route.path !== '/login') {
+    await router.push('/login')
+  }
+}
+
 /***********************导航事件*********************/
 function handleMenuSelect(path: string): void {
   activePath.value = path
+}
+
+function handleTopMenuSelect(path: string): void {
+  const topMenu = allMenus.value.find(menu => menu.path === path)
+  activePath.value = resolveNavigationTarget(topMenu) || path
 }
 
 function handleTabChange(path: string): void {
@@ -37,20 +116,56 @@ function handleTabChange(path: string): void {
 </script>
 
 <template>
+  <LumaRouterView
+    v-if="isPublicLayout"
+    :view-key="routeViewKey"
+    :progress="preferences.transition.progress"
+    :loading="preferences.transition.loading"
+    :cache="false"
+    :cache-max="preferences.tabbar.maxCount"
+    :transition="preferences.transition.enable"
+    :transition-name="preferences.transition.name"
+  />
+
   <LumaLayout
+    v-else
     v-model:collapsed="collapsed"
     v-model:active-tab-path="activePath"
     :title="title"
     :menus="menus"
+    :top-menus="topMenus"
     :tabs="tabs"
     :active-menu-path="activePath"
+    :active-top-menu-path="activeTopMenuPath"
+    :sidebar-width="sidebarWidth"
     @menu-select="handleMenuSelect"
+    @top-menu-select="handleTopMenuSelect"
     @tab-change="handleTabChange"
   >
     <template #headerActions>
-      <span class="luma-admin-home__status">Mini</span>
+      <AppHeaderActions
+        :resolved-theme-mode="resolvedThemeMode"
+        :user-name="userName"
+        @logout="handleLogout"
+        @open-settings="handleOpenSettings"
+        @toggle-theme="handleToggleTheme"
+      />
     </template>
 
-    <LumaRouterView />
+    <LumaRouterView
+      :view-key="routeViewKey"
+      :progress="preferences.transition.progress"
+      :loading="preferences.transition.loading"
+      :cache="routeViewCache"
+      :cache-max="preferences.tabbar.maxCount"
+      :transition="preferences.transition.enable"
+      :transition-name="preferences.transition.name"
+    />
+
+    <AppSettingsDrawer
+      v-model:visible="settingsVisible"
+      v-model:preferences="preferences"
+      @change="handlePreferencesChange"
+    />
   </LumaLayout>
 </template>

@@ -1,4 +1,12 @@
-export type ThemeMode = 'dark' | 'light'
+export type ThemeMode = 'dark' | 'light' | 'system'
+export type ResolvedThemeMode = Exclude<ThemeMode, 'system'>
+export type LumaLayoutMode = 'mixed-nav' | 'sidebar-nav' | 'top-nav'
+export type LumaTransitionName = 'fade' | 'fade-bottom' | 'fade-side' | 'zoom-fade'
+export type LumaHeaderMenuAlign = 'center' | 'left' | 'right'
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends Record<string, unknown> ? DeepPartial<T[K]> : T[K]
+}
 
 export interface ThemeState {
   colorPrimary: string
@@ -9,6 +17,46 @@ export interface ThemeState {
 export type ThemeOptions = Partial<ThemeState>
 
 export type ThemeTokens = Record<`--luma-${string}`, string>
+
+export interface LumaPreferences {
+  app: {
+    layout: LumaLayoutMode
+  }
+  header: {
+    menuAlign: LumaHeaderMenuAlign
+    menuMaxWidth: number
+  }
+  sidebar: {
+    collapsed: boolean
+    enable: boolean
+    width: number
+  }
+  tabbar: {
+    cache: boolean
+    enable: boolean
+    maxCount: number
+    showIcon: boolean
+    showMaximize: boolean
+  }
+  theme: {
+    colorPrimary: string
+    mode: ThemeMode
+    radiusScale: number
+  }
+  transition: {
+    enable: boolean
+    loading: boolean
+    name: LumaTransitionName
+    progress: boolean
+  }
+}
+
+export type LumaPreferencesDefaults = DeepPartial<LumaPreferences>
+
+export interface ThemeRuntimeEnvironment {
+  document?: Document
+  matchMedia?: (query: string) => MediaQueryList
+}
 
 export interface ThemeStore {
   readonly state: ThemeState

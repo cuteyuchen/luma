@@ -32,6 +32,14 @@ corepack pnpm release:check
 corepack pnpm release:boundaries
 ```
 
+首次发布前还需要检查目标包名是否已被 npm registry 占用：
+
+```bash
+corepack pnpm release:names
+```
+
+这个命令只验证 `@luma/icons`、`@luma/core`、`@luma/vben-compat`、`create-luma-admin` 当前是否能在 registry 查询到；它不能证明发布账号拥有或可创建 `@luma` scope。
+
 拆开执行时也必须保持串行：
 
 ```bash
@@ -40,7 +48,6 @@ corepack pnpm release:boundaries
 corepack pnpm test
 corepack pnpm typecheck
 corepack pnpm build
-corepack pnpm playground:build
 corepack pnpm admin:build
 corepack pnpm compat:build
 ```
@@ -64,7 +71,7 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 
 - 包含 `dist`。
 - 包含包内 `README.md`。
-- `@luma/core` 包含 `theme-chalk/index.scss`。
+- `@luma/core` 包含 `theme-chalk/index.scss` 和 `dist/core.css`。
 - `create-luma-admin` 包含 `dist/cli.js` 和 `dist/index.js`。
 - 不包含 `apps/*`。
 - 不包含本地日志、IDE 文件和构建缓存。
@@ -80,8 +87,18 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 
 ## npm scope
 
-当前按 `@luma` 规划。`npm view @luma/core` 返回 404 只能说明包名当前未在 registry 查询到，不能证明当前 npm 账号拥有或可创建 `@luma` scope。正式发布前需要用发布账号确认 scope 权限；如果不可用，再确定备用 scope。
+当前按 `@luma` 规划。`corepack pnpm release:names` 已用于检查目标包名当前未在 registry 查询到。
+
+scope 权限已用当前 npm 用户 `cuteyuchen` 确认：
+
+```bash
+npm whoami --registry=https://registry.npmjs.org
+npm org ls luma --registry=https://registry.npmjs.org
+npm access list packages @luma --registry=https://registry.npmjs.org
+```
+
+确认结果：当前账号是 `luma` 组织 owner，并且可以列出 `@luma` scope 下已有包。
 
 ## License
 
-正式发布前需要确认开源许可证，并把许可证写入根 `LICENSE` 和各包 `package.json`。这个决定属于项目所有者，当前不在代码里预设。
+当前使用 MIT License。发布边界检查会确认根目录 `LICENSE` 存在，并确认各发布包 `package.json` 的 `license` 字段为 `MIT`。

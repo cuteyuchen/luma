@@ -1,56 +1,26 @@
 import type { LumaLayoutTabItem } from '@luma/core/layout'
-import type { MenuNode, SidebarMenuItem } from '@luma/core/router'
+import type { SidebarMenuItem } from '@luma/core/router'
 import type { Router, RouteRecordRaw, RouterHistory } from 'vue-router'
-import { createPermissionStore, setupPermissionGuard } from '@luma/core/permission'
+import { setupPermissionGuard } from '@luma/core/permission'
 import {
   createRouteRecords,
   createSidebarMenus,
   findFirstAccessibleMenu,
-  normalizeMenuNodes,
+  normalizeMenuRecords,
 } from '@luma/core/router'
 import { createRouter, createWebHashHistory } from 'vue-router'
-import DashboardView from '../views/dashboard/DashboardView.vue'
-import ForbiddenView from '../views/error/ForbiddenView.vue'
-import ProjectView from '../views/project/ProjectView.vue'
+import { permissionStore } from '../services/permission'
+import { isAuthenticated } from '../services/session'
+import { resolveRouteComponent } from './components'
+import { adminRouteRecords } from './routes'
 
-/***********************权限状态*********************/
-export const permissionStore = createPermissionStore({
-  permissions: ['dashboard:view'],
-  roles: ['admin'],
-})
+export { permissionStore } from '../services/permission'
+export { adminRouteRecords } from './routes'
 
-/***********************菜单配置*********************/
-export const adminMenuNodes: MenuNode[] = [
-  {
-    component: 'dashboard',
-    icon: 'app:dashboard',
-    id: 'dashboard',
-    order: 1,
-    path: '/dashboard',
-    permissions: ['dashboard:view'],
-    title: '工作台',
-  },
-  {
-    component: 'project',
-    icon: 'app:dashboard',
-    id: 'project',
-    order: 2,
-    path: '/project',
-    permissions: ['project:list'],
-    title: '项目管理',
-  },
-  {
-    component: 'forbidden',
-    id: 'forbidden',
-    path: '/403',
-    title: '无权限',
-    visible: false,
-  },
-]
+/***********************菜单状态*********************/
+export const normalizedAdminMenus = normalizeMenuRecords(adminRouteRecords)
 
-export const normalizedAdminMenus = normalizeMenuNodes(adminMenuNodes)
-
-/***********************菜单生成*********************/
+/***********************权限判断*********************/
 function hasPermission(permissions: string[]): boolean {
   return permissionStore.hasPermission(permissions, 'every')
 }
@@ -59,6 +29,7 @@ function hasRole(roles: string[]): boolean {
   return permissionStore.hasRole(roles, 'every')
 }
 
+/***********************菜单生成*********************/
 function flattenMenuTabs(menus: SidebarMenuItem[]): LumaLayoutTabItem[] {
   return menus.flatMap((menu) => {
     if (menu.children.length > 0) {
@@ -93,35 +64,38 @@ export function createAdminTabs(activePath?: string): LumaLayoutTabItem[] {
   return tabs
 }
 
-/***********************路由创建*********************/
-function resolveRouteComponent(component: string): RouteRecordRaw['component'] | undefined {
-  const components: Record<string, RouteRecordRaw['component']> = {
-    dashboard: DashboardView,
-    forbidden: ForbiddenView,
-    project: ProjectView,
-  }
-
-  return components[component]
-}
-
-function createRoutes(): RouteRecordRaw[] {
-  const firstAccessibleMenu = findFirstAccessibleMenu(normalizedAdminMenus, {
+export function resolveFirstAccessibleAdminPath(): string {
+  return findFirstAccessibleMenu(normalizedAdminMenus, {
     hasPermission,
     hasRole,
-  })
+  })?.path ?? '/403'
+}
+
+/***********************路由创建*********************/
+function createRoutes(): RouteRecordRaw[] {
   const menuRoutes = createRouteRecords(normalizedAdminMenus, {
     componentResolver: resolveRouteComponent,
   }) as RouteRecordRaw[]
 
   return [
     {
+      path: '/login',
+      component: () => import('../views/login/LoginView.vue'),
+      meta: {
+        hideInMenu: true,
+        layout: 'public',
+        requireLogin: false,
+        title: '登录',
+      },
+    },
+    {
       path: '/',
-      redirect: firstAccessibleMenu?.path ?? '/403',
+      redirect: () => resolveFirstAccessibleAdminPath(),
     },
     ...menuRoutes,
     {
       path: '/:pathMatch(.*)*',
-      redirect: firstAccessibleMenu?.path ?? '/403',
+      redirect: () => resolveFirstAccessibleAdminPath(),
     },
   ]
 }
@@ -133,9 +107,14 @@ export function createAdminRouter(history: RouterHistory = createWebHashHistory(
   })
 
   setupPermissionGuard(router, permissionStore, {
+    isAuthenticated,
+    loginPath: '/login',
     mode: 'every',
     noAccessRedirect: '/403',
+    redirectQueryKey: 'redirect',
+    requireLoginByDefault: true,
     roleMode: 'every',
+    whiteList: ['/login'],
   })
 
   return router

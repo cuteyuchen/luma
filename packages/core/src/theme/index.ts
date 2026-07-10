@@ -1,16 +1,38 @@
 export {
+  applyThemePreferences,
   applyThemeToElement,
 } from './dom'
+export { default as LumaThemeSettingsPanel } from './LumaThemeSettingsPanel.vue'
+export {
+  createDefaultPreferences,
+  mergePreferences,
+  normalizePreferences,
+  resolveThemeMode,
+} from './preferences'
 export {
   createThemeStore,
 } from './store'
+export {
+  themeColorPresets,
+} from './theme-color-presets'
+export type {
+  ThemeColorPreset,
+} from './theme-color-presets'
 export {
   defaultThemeState,
   resolveThemeTokens,
 } from './tokens'
 export type {
+  DeepPartial,
+  LumaHeaderMenuAlign,
+  LumaLayoutMode,
+  LumaPreferences,
+  LumaPreferencesDefaults,
+  LumaTransitionName,
+  ResolvedThemeMode,
   ThemeMode,
   ThemeOptions,
+  ThemeRuntimeEnvironment,
   ThemeState,
   ThemeStore,
   ThemeTokens,

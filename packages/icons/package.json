@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "description": "Luma independent icon registry and Vue icon components.",
+  "license": "MIT",
   "keywords": [
     "luma",
     "vue",

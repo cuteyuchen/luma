@@ -117,7 +117,6 @@ F:\my-project\luma
 │     │  └─ types.ts
 │     └─ tests
 └─ apps
-   ├─ playground
    ├─ luma-admin
    └─ vben-compat-demo
 ```
@@ -230,16 +229,16 @@ import { useVbenForm, useVbenVxeGrid } from '@luma/vben-compat';
 
 **任务：**
 
-- [ ] 创建根 `package.json`，包含 workspace 脚本。
-- [ ] 创建 `pnpm-workspace.yaml`，纳入 `packages/*` 和 `apps/*`。
-- [ ] 创建严格 TypeScript 基础配置。
-- [ ] 创建 Vitest 基础配置，支持 Vue 和包别名。
-- [ ] 创建 `docs/package-boundaries.md`，明确：
+- [x] 创建根 `package.json`，包含 workspace 脚本。
+- [x] 创建 `pnpm-workspace.yaml`，纳入 `packages/*` 和 `apps/*`。
+- [x] 创建严格 TypeScript 基础配置。
+- [x] 创建 Vitest 基础配置，支持 Vue 和包别名。
+- [x] 创建 `docs/package-boundaries.md`，明确：
   - `@luma/icons` 不依赖 `@luma/core`。
   - `@luma/core` 可以依赖 `@luma/icons`。
   - `@luma/vben-compat` 可以依赖 `@luma/core`。
   - `@luma/core` 不能依赖 `@luma/vben-compat`。
-- [ ] 执行：
+- [x] 执行：
 
 ```bash
 corepack pnpm install
@@ -293,15 +292,15 @@ corepack pnpm test
 
 **任务：**
 
-- [ ] 定义 `IconDefinition`、`IconGroupDefinition`、`IconKey`、`IconSource`、渐变相关类型。
-- [ ] 实现图标注册表状态，使用普通 TS 模块，不依赖 Vue 全局状态。
-- [ ] 实现 `registerIcons`、`registerIconGroups`、`resolveIconDefinition`、`getRegisteredIconDefinitions`。
-- [ ] 实现 `svgToDataUri`、`recolorSvgString`、`applySvgGradient`、`getIconDataUri`。
-- [ ] 实现 `registerStaticLocalSvgIcons`、`getStaticLocalSvgIconDefinitions`。
-- [ ] 实现 `LumaIcon`，支持 `name`、`icon`、`size`、`color`、`gradient`、`title`。
-- [ ] 注册表和渲染稳定后，再实现 `LumaIconPicker`、`LumaIconPickerDialog`。
-- [ ] 实现 `createStaticLocalSvgIconsPlugin`。
-- [ ] 执行：
+- [x] 定义 `IconDefinition`、`IconGroupDefinition`、`IconKey`、`IconSource`、渐变相关类型。
+- [x] 实现图标注册表状态，使用普通 TS 模块，不依赖 Vue 全局状态。
+- [x] 实现 `registerIcons`、`registerIconGroups`、`resolveIconDefinition`、`getRegisteredIconDefinitions`。
+- [x] 实现 `svgToDataUri`、`recolorSvgString`、`applySvgGradient`、`getIconDataUri`。
+- [x] 实现 `registerStaticLocalSvgIcons`、`getStaticLocalSvgIconDefinitions`。
+- [x] 实现 `LumaIcon`，支持 `name`、`icon`、`size`、`color`、`gradient`、`title`。
+- [x] 注册表和渲染稳定后，再实现 `LumaIconPicker`、`LumaIconPickerDialog`。
+- [x] 实现 `createStaticLocalSvgIconsPlugin`。
+- [x] 执行：
 
 ```bash
 corepack pnpm --filter @luma/icons test
@@ -341,8 +340,8 @@ corepack pnpm --filter @luma/icons build
 
 **任务：**
 
-- [ ] 定义主安装器 `createLumaAdmin`。
-- [ ] 支持基础 options：
+- [x] 定义主安装器 `createLumaAdmin`。
+- [x] 支持基础 options：
   - `rootComponent`
   - `rootProps`
   - `router`
@@ -351,12 +350,12 @@ corepack pnpm --filter @luma/icons build
   - `icons.localSvg`
   - `components`
   - `setup`
-- [ ] 只有传入 `icons.localSvg` 时，才通过 `@luma/icons` 注册业务本地图标。
-- [ ] Element Plus 保持 peer dependency。
-- [ ] Pinia 可选，但权限和主题 store 可以使用。
-- [ ] 不引入 i18n。
-- [ ] 不加入 Vben 兼容 API。
-- [ ] 执行：
+- [x] 只有传入 `icons.localSvg` 时，才通过 `@luma/icons` 注册业务本地图标。
+- [x] Element Plus 保持 peer dependency。
+- [x] Pinia 可选，但权限和主题 store 可以使用。
+- [x] 不引入 i18n。
+- [x] 不加入 Vben 兼容 API。
+- [x] 执行：
 
 ```bash
 corepack pnpm --filter @luma/core test
@@ -417,19 +416,19 @@ corepack pnpm --filter @luma/core build
 
 **任务：**
 
-- [ ] 先迁移 schema 类型定义。
-- [ ] 先写 schema 归一化测试，再迁移组件模板。
-- [ ] 迁移 `LumaSchemaForm`。
-- [ ] 迁移 `LumaSchemaTable`。
-- [ ] 迁移 `LumaCrudTable`。
-- [ ] 所有 Vue SFC 必须使用：
+- [x] 先迁移 schema 类型定义。
+- [x] 先写 schema 归一化测试，再迁移组件模板。
+- [x] 迁移 `LumaSchemaForm`。
+- [x] 迁移 `LumaSchemaTable`。
+- [x] 迁移 `LumaCrudTable`。
+- [x] 所有 Vue SFC 必须使用：
   - `<script setup lang="ts">`
   - 组合式 API
   - `useTemplateRef`
   - `/***********************状态定义*********************/` 这类功能分块注释
-- [ ] 组件中不写业务默认值。
-- [ ] 从 `@luma/core/components` 导出组件。
-- [ ] 执行：
+- [x] 组件中不写业务默认值。
+- [x] 从 `@luma/core/components` 导出组件。
+- [x] 执行：
 
 ```bash
 corepack pnpm --filter @luma/core test
@@ -466,38 +465,38 @@ corepack pnpm --filter @luma/core build
 
 **任务：**
 
-- [ ] 实现布局壳组件：
+- [x] 实现布局壳组件：
   - `LumaLayout`
   - `LumaHeader`
   - `LumaSidebar`
   - `LumaTabs`
   - `LumaContent`
   - `LumaRouterView`
-- [ ] layout 只负责壳层布局和交互，不请求业务数据。
-- [ ] 实现权限能力：
+- [x] layout 只负责壳层布局和交互，不请求业务数据。
+- [x] 实现权限能力：
   - `createPermissionStore`
   - `hasPermission`
   - `hasRole`
   - `createPermissionDirective`
   - `setupPermissionGuard`
-- [ ] 实现路由/菜单辅助：
+- [x] 实现路由/菜单辅助：
   - 后端菜单节点归一化
   - 路由记录生成
   - 侧边栏菜单生成
   - 查找第一个可访问菜单
-- [ ] 实现请求辅助：
+- [x] 实现请求辅助：
   - `createRequestClient`
   - token header 回调
   - 响应解析回调
   - 会话过期回调
   - 重复提交拦截
   - 可选缓存 helper
-- [ ] 实现简化主题运行时：
+- [x] 实现简化主题运行时：
   - 明暗模式
   - 主题色
   - 必要时支持紧凑布局
   - 不做多语言偏好
-- [ ] 执行：
+- [x] 执行：
 
 ```bash
 corepack pnpm --filter @luma/core test
@@ -534,19 +533,19 @@ corepack pnpm --filter @luma/core build
 
 **任务：**
 
-- [ ] 在 `docs/migration-from-vben.md` 中先写清楚兼容范围。
-- [ ] 实现 `useVbenForm` 适配器：
+- [x] 在 `docs/migration-from-vben.md` 中先写清楚兼容范围。
+- [x] 实现 `useVbenForm` 适配器：
   - 接收常见 Vben form options。
   - 转换为 `LumaSchemaForm` 配置。
   - 返回常见 Vben 使用方式需要的 register 函数和 methods。
-- [ ] 实现 `useVbenVxeGrid` 适配器：
+- [x] 实现 `useVbenVxeGrid` 适配器：
   - 接收常见 grid options。
   - 转换 columns、form config、proxy request、toolbar config、action column。
   - 驱动 `LumaCrudTable` 或共享 grid core。
-- [ ] 在文档中明确不支持的 Vben 高级能力。
-- [ ] VXE 依赖保持可选。
-- [ ] 如果后续必须真实使用 VXE 渲染，新增独立适配层，不让 `@luma/core` 依赖 VXE。
-- [ ] 执行：
+- [x] 在文档中明确不支持的 Vben 高级能力。
+- [x] VXE 依赖保持可选。
+- [x] 如果后续必须真实使用 VXE 渲染，新增独立适配层，不让 `@luma/core` 依赖 VXE。
+- [x] 执行：
 
 ```bash
 corepack pnpm --filter @luma/vben-compat test
@@ -572,14 +571,13 @@ corepack pnpm --filter @luma/vben-compat build
 
 **应用：**
 
-- `apps/playground`：组件和服务开发预览。
-- `apps/luma-admin`：干净的后台模板。
+- `apps/luma-admin`：原生写法示例和后台模板验证入口。
 - `apps/vben-compat-demo`：使用 Vben 兼容 API 的迁移示例。
 
 **任务：**
 
-- [x] 创建 `apps/playground`，通过 workspace 包名和 package exports 消费公开包入口。
-- [x] 创建 `apps/luma-admin`，使用：
+- [x] 在 `apps/luma-admin` 中通过 workspace 包名和 package exports 消费公开包入口。
+- [x] 在 `apps/luma-admin` 中使用：
   - `@luma/core`
   - `@luma/icons`
   - `LumaLayout`
@@ -597,8 +595,6 @@ corepack pnpm --filter @luma/vben-compat build
 ```json
 {
   "scripts": {
-    "playground:dev": "pnpm build && pnpm --filter luma-playground dev",
-    "playground:build": "pnpm build && pnpm --filter luma-playground build",
     "admin:dev": "pnpm build && pnpm --filter luma-admin dev",
     "admin:build": "pnpm build && pnpm --filter luma-admin build",
     "compat:build": "pnpm build && pnpm --filter luma-vben-compat-demo build"
@@ -609,7 +605,6 @@ corepack pnpm --filter @luma/vben-compat build
 - [x] 执行：
 
 ```bash
-corepack pnpm playground:build
 corepack pnpm admin:build
 corepack pnpm compat:build
 ```
@@ -617,13 +612,12 @@ corepack pnpm compat:build
 **验收标准：**
 
 - 原生后台模板可以构建。
-- Playground 可以构建。
 - Vben 兼容示例可以构建。
-- 三个示例应用都不需要多语言配置。
+- 两个示例应用都不需要多语言配置。
 
 **停止条件：**
 
-- 三个示例应用构建未通过前，不进入发布准备。
+- 两个示例应用构建未通过前，不进入发布准备。
 
 ---
 
@@ -689,9 +683,16 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
 
 - [x] 决定 `G*` 别名是临时兼容导出，还是首个公开版本前删除。
 - [x] 增加发布边界自动检查，防止 core 反向依赖兼容层、误引入 i18n/VXE 默认依赖，或把 Element Plus 放进普通 dependencies。
-- [ ] 确认 npm scope：
-  - 优先确认 `@luma` 是否可用。
-  - 如果不可用，再选择备用 scope。
+- [x] 确认 npm scope：
+  - [x] 增加 `corepack pnpm release:names`，用于检查目标包名是否已被 npm registry 占用。
+  - [x] 当前 registry 查询 `@luma/core`、`@luma/icons`、`@luma/vben-compat`、`create-luma-admin` 返回 404，目标包名当前未查询到。
+  - [x] 使用当前 npm 用户 `cuteyuchen` 确认拥有 `luma` 组织 owner 权限。
+  - [x] 当前账号可列出 `@luma` scope 下已有包，确认具备 scope 访问能力。
+  - [x] `@luma` 可用，不需要备用 scope。
+- [x] 确认开源许可证：
+  - [x] 确定使用 MIT。
+  - [x] 增加根目录 `LICENSE`。
+  - [x] 在需要发布的包 `package.json` 中补充 `license` 字段。
 - [x] 执行完整验证：
 
 ```bash
@@ -739,7 +740,7 @@ corepack pnpm --filter create-luma-admin pack --dry-run
 **任务：**
 
 - [x] 新增 `packages/create-luma-admin`。
-- [x] 实现 `createLumaAdminProject`，生成 Vue 3、TypeScript、Vite、Element Plus、SCSS 和 Luma Layout 模板。
+- [x] 实现 `createLumaAdminProject`，生成 Vue 3、TypeScript、Vite、Element Plus、SCSS、Luma Layout、路由权限和请求示例模板。
 - [x] CLI 暴露 `create-luma-admin` 命令。
 - [x] 生成模板通过 `@luma/core` 和 `@luma/icons` 公开入口消费能力。
 - [x] 目标目录非空时拒绝覆盖已有文件。

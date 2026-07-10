@@ -2,6 +2,10 @@ export {
   LumaCrudTable,
 } from '../components/crud-table'
 export type {
+  CrudDataSource,
+  CrudFetchParams,
+  CrudFetchResult,
+  CrudFormMode,
   CrudTablePageChangePayload,
   CrudTableProps,
   CrudTableQueryModel,
@@ -9,8 +13,21 @@ export type {
   CrudTableSearchPayload,
 } from '../components/crud-table'
 export {
+  LumaInfoTable,
+} from '../components/info-table'
+export type {
+  InfoTableItem,
+  InfoTableProps,
+} from '../components/info-table'
+export {
   LumaPage,
 } from '../components/page'
+export {
+  LumaPageLayout,
+} from '../components/page-layout'
+export type {
+  PageLayoutProps,
+} from '../components/page-layout'
 export {
   LumaPagination,
 } from '../components/pagination'
@@ -22,11 +39,16 @@ export {
 } from '../components/schema-form'
 export type {
   NormalizedSchemaFormItem,
+  SchemaFormAuthority,
   SchemaFormComponentType,
+  SchemaFormContext,
   SchemaFormItem,
+  SchemaFormMode,
   SchemaFormModel,
   SchemaFormOption,
   SchemaFormOptionValue,
+  SchemaFormRule,
+  SchemaFormStateResolver,
 } from '../components/schema-form'
 export {
   LumaSchemaTable,
@@ -34,9 +56,14 @@ export {
 export type {
   NormalizedSchemaTableColumn,
   SchemaTableAlign,
+  SchemaTableAuthority,
   SchemaTableCellFormatter,
+  SchemaTableClassName,
   SchemaTableColumn,
+  SchemaTableContext,
+  SchemaTablePaginationChangePayload,
   SchemaTableRow,
+  SchemaTableStateResolver,
 } from '../components/schema-table'
 export {
   LumaIcon,

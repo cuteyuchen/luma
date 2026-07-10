@@ -7,13 +7,16 @@ import LumaContent from './LumaContent.vue'
 import LumaHeader from './LumaHeader.vue'
 import LumaSidebar from './LumaSidebar.vue'
 import LumaTabs from './LumaTabs.vue'
+import LumaTopNav from './LumaTopNav.vue'
 
 /***********************属性定义*********************/
 const props = withDefaults(defineProps<{
   title?: string
   menus?: LumaLayoutMenuItem[]
+  topMenus?: LumaLayoutMenuItem[]
   tabs?: LumaLayoutTabItem[]
   activeMenuPath?: string
+  activeTopMenuPath?: string
   activeTabPath?: string
   sidebarWidth?: string
   collapsedSidebarWidth?: string
@@ -21,15 +24,18 @@ const props = withDefaults(defineProps<{
 }>(), {
   activeMenuPath: '',
   activeTabPath: '',
+  activeTopMenuPath: '',
   collapsedSidebarWidth: '64px',
   headerHeight: '56px',
   menus: () => [],
   sidebarWidth: '220px',
   tabs: () => [],
+  topMenus: () => [],
 })
 
 const emit = defineEmits<{
   menuSelect: [path: string]
+  topMenuSelect: [path: string]
   tabChange: [path: string]
   tabRemove: [path: string]
 }>()
@@ -49,6 +55,8 @@ const currentActiveTabPath = computed({
 })
 
 const hasTabs = computed(() => props.tabs.length > 0)
+const hasSidebar = computed(() => props.menus.length > 0)
+const hasTopMenus = computed(() => props.topMenus.length > 0)
 
 /***********************事件处理*********************/
 function handleToggleCollapse(): void {
@@ -57,6 +65,10 @@ function handleToggleCollapse(): void {
 
 function handleMenuSelect(path: string): void {
   emit('menuSelect', path)
+}
+
+function handleTopMenuSelect(path: string): void {
+  emit('topMenuSelect', path)
 }
 
 function handleTabChange(path: string): void {
@@ -77,6 +89,7 @@ defineExpose({
 <template>
   <ElContainer ref="layoutRef" class="luma-layout">
     <LumaSidebar
+      v-if="hasSidebar"
       :menus="menus"
       :active-path="activeMenuPath"
       :collapsed="collapsed"
@@ -100,6 +113,14 @@ defineExpose({
           <slot name="headerActions" />
         </template>
       </LumaHeader>
+
+      <LumaTopNav
+        v-if="hasTopMenus"
+        class="luma-layout__top-nav"
+        :menus="topMenus"
+        :active-path="activeTopMenuPath"
+        @select="handleTopMenuSelect"
+      />
 
       <LumaTabs
         v-if="hasTabs"
@@ -126,5 +147,11 @@ defineExpose({
 .luma-layout__main {
   min-width: 0;
   min-height: 0;
+}
+
+.luma-layout__top-nav {
+  padding: 0 16px;
+  border-bottom: 1px solid var(--el-border-color-light);
+  background: var(--el-bg-color);
 }
 </style>
