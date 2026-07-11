@@ -51,18 +51,22 @@ defineExpose({
     :ellipsis="true"
     :style="menuStyle"
   >
-    <template v-for="item in visibleMenus" :key="item.path">
-      <LumaTopNavMenuItem
-        v-if="mode === 'tree'"
-        :item="item"
-        @select="handleSelect"
-      />
-      <ElMenuItem v-else :index="item.path" @click="handleSelect(item.path)">
-        <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
-        <span>{{ item.title }}</span>
-        <span v-if="item.externalLink" class="luma-top-nav__external" aria-hidden="true">↗</span>
-      </ElMenuItem>
-    </template>
+    <LumaTopNavMenuItem
+      v-for="item in mode === 'tree' ? visibleMenus : []"
+      :key="`tree:${item.path}`"
+      :item="item"
+      @select="handleSelect"
+    />
+    <ElMenuItem
+      v-for="item in mode === 'flat' ? visibleMenus : []"
+      :key="`flat:${item.path}`"
+      :index="item.path"
+      @click="handleSelect(item.path)"
+    >
+      <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
+      <span>{{ item.title }}</span>
+      <span v-if="item.externalLink" class="luma-top-nav__external" aria-hidden="true">↗</span>
+    </ElMenuItem>
   </ElMenu>
 </template>
 

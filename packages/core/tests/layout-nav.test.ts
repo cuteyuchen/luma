@@ -170,4 +170,18 @@ describe('luma top nav', () => {
     expect(wrapper.text()).not.toContain('隐藏页')
     expect(wrapper.find('[data-menu-path="/dashboard/workplace"]').exists()).toBe(true)
   })
+
+  it('flat 模式会为每个顶级菜单渲染独立节点', () => {
+    const wrapper = mount(LumaTopNav, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        menus,
+        mode: 'flat',
+      },
+    })
+
+    expect(wrapper.findAll('.el-menu-item')).toHaveLength(2)
+    expect(wrapper.text()).toContain('仪表盘')
+    expect(wrapper.text()).toContain('关于')
+  })
 })
