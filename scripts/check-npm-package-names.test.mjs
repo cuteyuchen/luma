@@ -11,7 +11,9 @@ describe('getPublishPackageNames', () => {
     expect(getPublishPackageNames()).toEqual([
       '@luma/icons',
       '@luma/core',
+      '@luma/charts',
       '@luma/vben-compat',
+      '@luma/vite',
       'create-luma-admin',
     ])
   })
