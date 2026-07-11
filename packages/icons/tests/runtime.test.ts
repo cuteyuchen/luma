@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   applySvgGradient,
+  clearIconDataUriCache,
+  composeSvgIcons,
   getIconDataUri,
   recolorSvgString,
   registerIcons,
   svgToDataUri,
+  validateMonochromeSvg,
 } from '../src'
 
 describe('@luma/icons runtime', () => {
@@ -40,5 +43,27 @@ describe('@luma/icons runtime', () => {
     ])
 
     expect(getIconDataUri('app:data-uri')).toContain('data:image/svg+xml')
+    clearIconDataUriCache()
+    expect(getIconDataUri('app:data-uri')).toContain('data:image/svg+xml')
+  })
+
+  it('可以拒绝脚本、外部资源和固定颜色', () => {
+    expect(validateMonochromeSvg('<svg><script>alert(1)</script></svg>').valid).toBe(false)
+    expect(validateMonochromeSvg('<svg><path fill="#fff" /></svg>')).toEqual({
+      reason: '检测到固定颜色 #fff',
+      valid: false,
+    })
+    expect(validateMonochromeSvg('<svg><path fill="currentColor" /></svg>').valid).toBe(true)
+  })
+
+  it('可以把多个单色 SVG 合成为分层图标', () => {
+    const result = composeSvgIcons([
+      svgText,
+      '<svg viewBox="0 0 16 16"><circle fill="currentColor" cx="8" cy="8" r="2"/></svg>',
+    ])
+
+    expect(result).toContain('<svg viewBox="0 0 16 16">')
+    expect(result).toContain('data-luma-icon-layer="0"')
+    expect(result).toContain('data-luma-icon-layer="1"')
   })
 })

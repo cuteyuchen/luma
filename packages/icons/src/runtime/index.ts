@@ -1,4 +1,5 @@
 export {
+  clearIconDataUriCache,
   getGradientIconDataUri,
   getIconDataUri,
   getIconSvgText,
@@ -11,6 +12,9 @@ export {
 } from './static-local'
 export {
   applySvgGradient,
+  composeSvgIcons,
   recolorSvgString,
   svgToDataUri,
+  validateMonochromeSvg,
 } from './svg'
+export type { SvgValidationResult } from './svg'

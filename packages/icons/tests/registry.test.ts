@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  createComponentIconDefinitions,
+  createIconifyIconDefinitions,
   getRegisteredIconDefinitions,
+  getRegisteredIconGroups,
   registerIconGroups,
   registerIcons,
   resolveIconDefinition,
@@ -30,9 +33,27 @@ describe('@luma/icons registry', () => {
       {
         key: 'app',
         label: '应用',
+        order: 20,
+      },
+      {
+        key: 'base',
+        label: '基础',
+        order: 10,
       },
     ])
 
+    expect(getRegisteredIconGroups().slice(0, 2).map(group => group.key)).toEqual(['base', 'app'])
     expect(resolveIconDefinition('missing:key')).toBeUndefined()
+  })
+
+  it('可以批量创建组件和 Iconify 图标定义', () => {
+    const component = { name: 'MockIcon' }
+
+    expect(createComponentIconDefinitions('element-plus', { Edit: component })).toEqual([
+      expect.objectContaining({ component, key: 'element-plus:Edit', source: 'component' }),
+    ])
+    expect(createIconifyIconDefinitions('mdi', ['home'])).toEqual([
+      expect.objectContaining({ icon: 'home', key: 'mdi:home', source: 'iconify' }),
+    ])
   })
 })

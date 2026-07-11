@@ -1,6 +1,46 @@
 import type { IconGradientOptions, IconGradientStop } from '../types'
 
 const CURRENT_COLOR_PATTERN = /currentColor/g
+const SVG_ATTRIBUTE_COLOR_PATTERN = /(?:fill|stroke)=["']([^"']+)["']/gi
+
+export interface SvgValidationResult {
+  reason?: string
+  valid: boolean
+}
+
+export function validateMonochromeSvg(svgText: string): SvgValidationResult {
+  if (!/^\s*<svg\b[\s\S]*<\/svg>\s*$/i.test(svgText)) {
+    return { reason: '内容不是完整 SVG', valid: false }
+  }
+
+  if (/<script\b|\bon\w+\s*=|(?:href|src)=["']https?:/i.test(svgText)) {
+    return { reason: 'SVG 包含不安全的脚本或外部资源', valid: false }
+  }
+
+  for (const match of svgText.matchAll(SVG_ATTRIBUTE_COLOR_PATTERN)) {
+    const color = match[1]?.trim()
+    if (color && !['currentColor', 'inherit', 'none'].includes(color) && !color.startsWith('url(#')) {
+      return { reason: `检测到固定颜色 ${color}`, valid: false }
+    }
+  }
+
+  return { valid: true }
+}
+
+export function composeSvgIcons(svgTexts: string[]): string {
+  const validIcons = svgTexts.filter(svg => validateMonochromeSvg(svg).valid)
+  if (validIcons.length === 0) {
+    return ''
+  }
+
+  const firstAttributes = validIcons[0]!.match(/<svg\b([^>]*)>/i)?.[1]?.trim()
+  const layers = validIcons.map((svg, index) => {
+    const content = svg.replace(/^\s*<svg\b[^>]*>/i, '').replace(/<\/svg>\s*$/i, '')
+    return `<g data-luma-icon-layer="${index}">${content}</g>`
+  }).join('')
+
+  return `<svg${firstAttributes ? ` ${firstAttributes}` : ''}>${layers}</svg>`
+}
 
 /***********************SVG 编码*********************/
 export function svgToDataUri(svgText: string): string {

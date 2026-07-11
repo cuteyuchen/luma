@@ -15,12 +15,16 @@ export {
 } from './registry/groups'
 /***********************图标能力导出*********************/
 export {
+  createComponentIconDefinitions,
+  createIconifyIconDefinitions,
   getRegisteredIconDefinitions,
   registerIcons,
   resolveIconDefinition,
 } from './registry/icons'
 export {
   applySvgGradient,
+  clearIconDataUriCache,
+  composeSvgIcons,
   getGradientIconDataUri,
   getIconDataUri,
   getIconSvgText,
@@ -30,7 +34,9 @@ export {
   resolveAnyIconDefinition,
   resolveStaticLocalSvgIconDefinition,
   svgToDataUri,
+  validateMonochromeSvg,
 } from './runtime'
+export type { SvgValidationResult } from './runtime'
 export type {
   IconDefinition,
   IconGradientOptions,

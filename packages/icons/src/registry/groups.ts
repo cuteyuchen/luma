@@ -10,5 +10,8 @@ export function registerIconGroups(groups: IconGroupDefinition[]): void {
 
 /***********************分组读取*********************/
 export function getRegisteredIconGroups(): IconGroupDefinition[] {
-  return [...iconGroups.values()]
+  return [...iconGroups.values()].sort((left, right) =>
+    (left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER)
+    || left.label.localeCompare(right.label),
+  )
 }
