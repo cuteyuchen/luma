@@ -440,6 +440,7 @@ describe('router menu helpers', () => {
         name: 'Docs',
         externalLink: 'https://example.com/docs',
         meta: {
+          externalTarget: '_self',
           title: '外部文档',
           icon: 'app:link',
         },
@@ -453,6 +454,7 @@ describe('router menu helpers', () => {
 
     const sidebarMenus = createSidebarMenus(menus)
     expect(sidebarMenus[0]?.externalLink).toBe('https://example.com/docs')
+    expect(sidebarMenus[0]?.externalTarget).toBe('_self')
   })
 
   it('会按 meta.topMenu 拆分顶部菜单，未标记时回退为全部可访问一级菜单', () => {

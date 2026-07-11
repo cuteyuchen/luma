@@ -64,12 +64,14 @@ function writeStoredUser(user: AdminUser | null): void {
 }
 
 const currentUserState = shallowRef<AdminUser | null>(null)
+const sessionResetHandlers = new Set<() => void>()
 
 /***********************会话实例*********************/
 function clearCurrentSessionState(): void {
   currentUserState.value = null
   writeStoredUser(null)
   clearAdminAccess()
+  sessionResetHandlers.forEach(handler => handler())
 }
 
 export const adminSession = createAuthSession({
@@ -89,6 +91,12 @@ else {
 }
 
 export const currentUser = readonly(currentUserState)
+
+export function registerSessionResetHandler(handler: () => void): () => void {
+  sessionResetHandlers.add(handler)
+
+  return () => sessionResetHandlers.delete(handler)
+}
 
 /***********************权限同步*********************/
 export function syncSessionAccess(user: AdminUser | null = currentUserState.value): void {

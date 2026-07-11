@@ -1,5 +1,5 @@
 import { mergePreferences } from '@luma/core/theme'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
 import { createMemoryHistory } from 'vue-router'
@@ -113,7 +113,7 @@ describe('app shell', () => {
     })
 
     expect(wrapper.find('.layout-stub').attributes('data-title')).toBe('Luma Admin')
-    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('4')
+    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('5')
     expect(wrapper.find('.layout-stub').attributes('data-menu-count')).toBe('13')
     expect(wrapper.find('.layout-stub').attributes('data-header-menu-align')).toBe('left')
     expect(wrapper.find('.layout-stub').attributes('data-header-menu-max-width')).toBe('960')
@@ -169,7 +169,7 @@ describe('app shell', () => {
     wrapper.findComponent(AppSettingsDrawer).vm.$emit('update:preferences', topNavPreferences)
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('4')
+    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('5')
     expect(wrapper.find('.layout-stub').attributes('data-menu-count')).toBe('0')
     expect(wrapper.find('.layout-stub').attributes('data-top-menu-mode')).toBe('tree')
   })
@@ -218,9 +218,9 @@ describe('app shell', () => {
 
     await login('admin')
     await router.push('/system/user')
-    await wrapper.vm.$nextTick()
+    await flushPromises()
 
-    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('4')
+    expect(wrapper.find('.layout-stub').attributes('data-top-menu-count')).toBe('5')
     expect(wrapper.find('.layout-stub').attributes('data-menu-count')).toBe('5')
   })
 })

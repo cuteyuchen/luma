@@ -22,6 +22,7 @@ import AppSettingsDrawer from './components/app/AppSettingsDrawer.vue'
 import {
   createAdminSidebarMenus,
   createAdminTabs,
+  ensureAdminRoutes,
 } from './router'
 import {
   adminAppName,
@@ -55,7 +56,7 @@ const collapsed = computed({
 })
 
 /***********************菜单状态*********************/
-const allMenus = computed(() => currentUser.value ? createAdminSidebarMenus() : [])
+const allMenus = computed(() => currentUser.value ? createAdminSidebarMenus(router) : [])
 const activeTopMenuPath = computed(() => resolveActiveTopMenuPath(allMenus.value, route.path))
 const layoutMenus = computed(() => splitMenusByLayout({
   activeTopMenuPath: activeTopMenuPath.value,
@@ -86,7 +87,7 @@ watch(
       return
     }
 
-    const routeTabs = createAdminTabs(path)
+    const routeTabs = createAdminTabs(path, router)
     const currentTab = routeTabs.find(tab => tab.path === path)
 
     if (visitedTabs.value.length === 0) {
@@ -102,6 +103,15 @@ watch(
   },
   { immediate: true },
 )
+
+watch(currentUser, async (user) => {
+  if (!user) {
+    visitedTabs.value = []
+    return
+  }
+
+  await ensureAdminRoutes(router)
+}, { immediate: true })
 
 /***********************偏好事件*********************/
 function handleToggleTheme(): void {
@@ -132,8 +142,8 @@ async function handleLogout(): Promise<void> {
 function handleMenuSelect(path: string): void {
   const item = findMenuItemByPath(allMenus.value, path)
 
-  if (item?.externalLink) {
-    window.open(item.externalLink, '_blank', 'noopener,noreferrer')
+  if (item?.externalLink && item.externalTarget !== '_self') {
+    window.open(item.externalLink, item.externalTarget ?? '_blank', 'noopener,noreferrer')
     return
   }
 

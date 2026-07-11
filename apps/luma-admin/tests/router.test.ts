@@ -3,6 +3,8 @@ import { createMemoryHistory } from 'vue-router'
 import {
   createAdminRouter,
   createAdminSidebarMenus,
+  ensureAdminRoutes,
+  getAdminRouteNames,
   permissionStore,
 } from '../src/router'
 import { adminRouteRecords } from '../src/router/routes'
@@ -76,8 +78,10 @@ describe('luma admin router', () => {
 
   it('admin 会看到系统管理全量菜单', async () => {
     await login('admin')
+    const router = createAdminRouter(createMemoryHistory())
+    await ensureAdminRoutes(router)
 
-    expect(createAdminSidebarMenus()).toEqual([
+    expect(createAdminSidebarMenus(router)).toEqual([
       {
         children: [],
         icon: 'app:dashboard',
@@ -212,26 +216,34 @@ describe('luma admin router', () => {
         path: '/project',
         title: '项目管理',
       },
+      expect.objectContaining({
+        path: '/resources',
+        title: '外部资源',
+      }),
     ])
   })
 
   it('operator 只能看到字典系统菜单、项目和示例字典能力', async () => {
     await login('operator')
+    const router = createAdminRouter(createMemoryHistory())
+    await ensureAdminRoutes(router)
 
-    const menus = createAdminSidebarMenus()
+    const menus = createAdminSidebarMenus(router)
     const systemMenu = menus.find(menu => menu.path === '/system')
 
-    expect(menus.map(menu => menu.path)).toEqual(['/dashboard', '/system', '/examples', '/project'])
+    expect(menus.map(menu => menu.path)).toEqual(['/dashboard', '/system', '/examples', '/project', '/resources'])
     expect(systemMenu?.children.map(menu => menu.path)).toEqual(['/system/dict'])
   })
 
   it('guest 只能看到工作台和基础示例菜单', async () => {
     await login('guest')
+    const router = createAdminRouter(createMemoryHistory())
+    await ensureAdminRoutes(router)
 
-    const menus = createAdminSidebarMenus()
+    const menus = createAdminSidebarMenus(router)
     const examplesMenu = menus.find(menu => menu.path === '/examples')
 
-    expect(menus.map(menu => menu.path)).toEqual(['/dashboard', '/examples'])
+    expect(menus.map(menu => menu.path)).toEqual(['/dashboard', '/examples', '/resources'])
     expect(examplesMenu?.children.map(menu => menu.path)).not.toContain('/examples/dictionary')
     expect(examplesMenu?.children.map(menu => menu.path)).toEqual(expect.arrayContaining([
       '/examples/overview',
@@ -268,6 +280,77 @@ describe('luma admin router', () => {
     await router.isReady()
 
     expect(router.currentRoute.value.path).toBe('/dashboard')
+    expect(router.hasRoute('Dashboard')).toBe(true)
+  })
+
+  it('并发初始化只注册一份动态路由', async () => {
+    await login('admin')
+    const router = createAdminRouter(createMemoryHistory())
+
+    await Promise.all([
+      ensureAdminRoutes(router),
+      ensureAdminRoutes(router),
+      ensureAdminRoutes(router),
+    ])
+
+    const names = getAdminRouteNames(router)
+    expect(names.length).toBeGreaterThan(0)
+    expect(new Set(names).size).toBe(names.length)
+  })
+
+  it('刷新深层地址时会先注册菜单路由再恢复原地址', async () => {
+    await login('admin')
+    const router = createAdminRouter(createMemoryHistory())
+
+    await router.push('/system/user?source=refresh')
+    await router.isReady()
+
+    expect(router.currentRoute.value.fullPath).toBe('/system/user?source=refresh')
+    expect(router.currentRoute.value.name).toBe('SystemUser')
+  })
+
+  it('未知地址会进入独立 404 页面', async () => {
+    await login('admin')
+    const router = createAdminRouter(createMemoryHistory())
+
+    await router.push('/missing/deep-page')
+    await router.isReady()
+
+    expect(router.currentRoute.value.path).toBe('/404')
+    expect(router.currentRoute.value.name).toBe('AdminNotFound')
+  })
+
+  it('菜单外链同时支持新窗口和站内内嵌策略', async () => {
+    await login('guest')
+    const router = createAdminRouter(createMemoryHistory())
+    await ensureAdminRoutes(router)
+
+    const resources = createAdminSidebarMenus(router).find(menu => menu.path === '/resources')
+
+    expect(resources?.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        externalTarget: '_blank',
+        path: '/resources/docs',
+      }),
+      expect.objectContaining({
+        externalTarget: '_self',
+        path: '/resources/preview',
+      }),
+    ]))
+  })
+
+  it('登出后会移除动态路由并清空菜单', async () => {
+    await login('admin')
+    const router = createAdminRouter(createMemoryHistory())
+    await ensureAdminRoutes(router)
+
+    expect(router.hasRoute('SystemUser')).toBe(true)
+
+    await logout()
+
+    expect(router.hasRoute('SystemUser')).toBe(false)
+    expect(getAdminRouteNames(router)).toEqual([])
+    expect(createAdminSidebarMenus(router)).toEqual([])
   })
 
   it('有字典权限时可以访问字典示例路由', async () => {

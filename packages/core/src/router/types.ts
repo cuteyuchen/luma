@@ -14,6 +14,7 @@ export interface LumaRouteMeta {
   authority?: LumaRouteAuthority
   roles?: LumaRouteAuthority
   externalLink?: string
+  externalTarget?: '_blank' | '_self'
   topMenu?: boolean
   [key: string]: unknown
 }
@@ -129,6 +130,7 @@ export interface SidebarMenuItem {
   children: SidebarMenuItem[]
   icon?: string
   externalLink?: string
+  externalTarget?: '_blank' | '_self'
 }
 
 export interface CreateSidebarMenusOptions {

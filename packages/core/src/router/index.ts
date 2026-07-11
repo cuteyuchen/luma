@@ -315,7 +315,12 @@ export function createSidebarMenus(
 
       return {
         children,
-        externalLink: node.externalLink,
+        ...(node.externalLink
+          ? {
+              externalLink: node.externalLink,
+              externalTarget: node.meta.externalTarget === '_self' ? '_self' as const : '_blank' as const,
+            }
+          : {}),
         icon: node.icon,
         path: node.path,
         title: node.title,

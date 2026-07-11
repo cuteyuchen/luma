@@ -258,12 +258,38 @@ export const adminRouteRecords: LumaMenuRecord[] = [
     },
   },
   {
-    component: 'error/forbidden',
-    name: 'Forbidden',
-    path: '/403',
+    children: [
+      {
+        externalLink: 'https://element-plus.org/zh-CN/',
+        name: 'ExternalDocs',
+        path: 'docs',
+        meta: {
+          externalTarget: '_blank',
+          icon: 'app:examples',
+          order: 1,
+          title: '外部文档',
+        },
+      },
+      {
+        component: 'shared/external-frame',
+        externalLink: 'https://example.com/',
+        name: 'ExternalPreview',
+        path: 'preview',
+        meta: {
+          externalTarget: '_self',
+          icon: 'app:examples',
+          order: 2,
+          title: '内嵌页面',
+        },
+      },
+    ],
+    name: 'Resources',
+    path: '/resources',
+    redirect: '/resources/preview',
     meta: {
-      hideInMenu: true,
-      title: '无权限',
+      icon: 'app:examples',
+      order: 5,
+      title: '外部资源',
     },
   },
 ]

@@ -5,7 +5,7 @@ import { ElButton, ElForm, ElFormItem, ElInput, ElOption, ElSelect } from 'eleme
 import { computed, reactive, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { adminAccountOptions } from '../../api/auth'
-import { resolveFirstAccessibleAdminPath } from '../../router'
+import { ensureAdminRoutes, resolveFirstAccessibleAdminPath } from '../../router'
 import { login } from '../../services/session'
 
 /***********************路由状态*********************/
@@ -45,7 +45,7 @@ function resolveRedirectPath(): string {
     return target
   }
 
-  return resolveFirstAccessibleAdminPath()
+  return resolveFirstAccessibleAdminPath(router)
 }
 
 /***********************登录提交*********************/
@@ -69,6 +69,7 @@ async function handleSubmit(): Promise<void> {
       password: form.password,
       username: form.username,
     })
+    await ensureAdminRoutes(router)
     await router.push(resolveRedirectPath())
   }
   catch (error) {
