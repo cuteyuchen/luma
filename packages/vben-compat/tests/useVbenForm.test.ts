@@ -162,4 +162,29 @@ describe('useVbenForm', () => {
 
     expect(formApi.schemaFormProps.value.schemas[0]?.field).toBe('name')
   })
+
+  it('同步常用数字、选择、日期和状态控件', () => {
+    const schemas = adaptVbenFormSchemas([
+      { component: 'InputNumber', fieldName: 'count', label: '数量' },
+      { component: 'Switch', fieldName: 'enabled', label: '启用' },
+      { component: 'DatePicker', componentProps: { type: 'datetime' }, fieldName: 'createdAt', label: '创建时间' },
+      { component: 'DatePicker.RangePicker', fieldName: 'range', label: '日期范围' },
+      { component: 'RadioGroup', fieldName: 'role', label: '角色' },
+      { component: 'CheckboxGroup', fieldName: 'permissions', label: '权限' },
+      { component: 'TreeSelect', fieldName: 'parentId', label: '上级' },
+      { component: 'Input.Password', fieldName: 'password', label: '密码' },
+    ])
+
+    expect(schemas.map(schema => schema.component)).toEqual([
+      'number',
+      'switch',
+      'datetime',
+      'daterange',
+      'radio',
+      'checkbox',
+      'tree-select',
+      'input',
+    ])
+    expect(schemas.at(-1)?.props).toMatchObject({ type: 'password' })
+  })
 })

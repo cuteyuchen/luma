@@ -24,6 +24,7 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
   const rows = shallowRef<SchemaTableRow[]>([])
   const total = shallowRef(0)
   const loading = shallowRef(false)
+  const error = shallowRef<unknown>()
   const page = shallowRef(1)
   const pageSize = shallowRef(10)
   const queryModel = reactive<CrudTableQueryModel>({})
@@ -71,60 +72,75 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
     loading.value = nextLoading
   }
 
-  function reload(): void {
+  function clearError(): void {
+    error.value = undefined
+  }
+
+  async function reload(): Promise<boolean> {
     const query = gridOptions.value.proxyConfig?.ajax?.query
 
     if (!query) {
-      return
+      clearError()
+      return true
     }
 
     loading.value = true
+    clearError()
 
-    Promise.resolve(query({
-      ...getQueryModel(),
-      page: page.value,
-      pageSize: pageSize.value,
-    }))
-      .then((result) => {
-        const tableResult = adaptVbenGridProxyResult(result, gridOptions.value)
-        setRows(tableResult.rows, tableResult.total)
+    try {
+      const result = await query({
+        ...getQueryModel(),
+        page: page.value,
+        pageSize: pageSize.value,
       })
-      .finally(() => {
-        loading.value = false
-      })
+      const tableResult = adaptVbenGridProxyResult(result, gridOptions.value)
+      setRows(tableResult.rows, tableResult.total)
+      return true
+    }
+    catch (nextError) {
+      error.value = nextError
+      gridOptions.value.onError?.(nextError)
+      return false
+    }
+    finally {
+      loading.value = false
+    }
   }
 
-  function search(payload: CrudTableQueryModel = getQueryModel()): void {
+  function search(payload: CrudTableQueryModel = getQueryModel()): Promise<boolean> {
     setQueryModel(payload)
     page.value = 1
-    reload()
+    return reload()
   }
 
-  function reset(): void {
+  function reset(): Promise<boolean> {
     setQueryModel({})
     page.value = 1
-    reload()
+    return reload()
   }
 
-  function handleSearch(payload: CrudTableQueryModel = getQueryModel()): void {
-    search(payload)
+  function handleSearch(payload: CrudTableQueryModel = getQueryModel()): Promise<boolean> {
+    return search(payload)
   }
 
-  function handleReset(payload: CrudTableQueryModel = {}): void {
+  function handleReset(payload: CrudTableQueryModel = {}): Promise<boolean> {
     setQueryModel(payload)
     page.value = 1
-    reload()
+    return reload()
   }
 
-  function handlePageChange(payload: CrudTablePageChangePayload): void {
+  function handlePageChange(payload: CrudTablePageChangePayload): Promise<boolean> {
     page.value = payload.page
     pageSize.value = payload.pageSize
-    reload()
+    return reload()
   }
 
   const crudTableProps = computed<LumaCrudTableCompatProps>(() => ({
     'columns': lumaColumns.value,
-    'emptyText': gridOptions.value.emptyText,
+    'actions': gridOptions.value.actions,
+    'emptyText': error.value instanceof Error
+      ? error.value.message
+      : error.value ? String(error.value) : gridOptions.value.emptyText,
     'loading': loading.value,
     'onPageChange': handlePageChange,
     'onReset': handleReset,
@@ -147,6 +163,13 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
     'rows': rows.value,
     'searchText': gridOptions.value.formOptions?.submitText ?? gridOptions.value.searchText,
     'title': gridOptions.value.title,
+    'toolbar': gridOptions.value.toolbarConfig,
+    'table': {
+      ...gridOptions.value.tableConfig,
+      columns: lumaColumns.value,
+      rowKey: gridOptions.value.rowKey,
+      selection: gridOptions.value.columns?.some(column => column.type === 'checkbox'),
+    },
     'total': total.value,
   }))
 
@@ -154,6 +177,8 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
     register,
     {
       crudTableProps,
+      clearError,
+      getError: () => error.value,
       getGridInstance: () => gridInstance.value,
       getLumaColumns: () => lumaColumns.value,
       getQueryModel,

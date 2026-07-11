@@ -113,11 +113,9 @@ describe('useVbenVxeGrid', () => {
       },
     })
 
-    gridApi.search({
+    await gridApi.search({
       keyword: 'Lu',
     })
-    await Promise.resolve()
-    await Promise.resolve()
 
     expect(query).toHaveBeenCalledWith({
       keyword: 'Lu',
@@ -185,5 +183,58 @@ describe('useVbenVxeGrid', () => {
     }
 
     expect(gridApi.getLumaColumns()[0]?.field).toBe('status')
+  })
+
+  it('会映射工具栏、操作列、勾选列和表格配置', () => {
+    const [, gridApi] = useVbenVxeGrid({
+      gridOptions: {
+        actions: { edit: true, remove: false, view: true },
+        columns: [
+          { field: 'selection', type: 'checkbox' },
+          { field: 'name', title: '名称' },
+        ],
+        tableConfig: { autoResize: true, showColumnSettings: true },
+        toolbarConfig: { export: true, refresh: true },
+      },
+    })
+
+    expect(gridApi.crudTableProps.value.toolbar).toEqual({ export: true, refresh: true })
+    expect(gridApi.crudTableProps.value.actions).toEqual({ edit: true, remove: false, view: true })
+    expect(gridApi.crudTableProps.value.table).toMatchObject({
+      autoResize: true,
+      selection: true,
+      showColumnSettings: true,
+    })
+  })
+
+  it('失败时恢复 loading 并保留可清理的错误状态', async () => {
+    const onError = vi.fn()
+    const failure = new Error('查询失败')
+    const [, gridApi] = useVbenVxeGrid({
+      gridOptions: {
+        onError,
+        proxyConfig: {
+          ajax: {
+            query: () => Promise.reject(failure),
+          },
+        },
+      },
+    })
+
+    await expect(gridApi.reload()).resolves.toBe(false)
+    expect(gridApi.getError()).toBe(failure)
+    expect(gridApi.crudTableProps.value.loading).toBe(false)
+    expect(gridApi.crudTableProps.value.emptyText).toBe('查询失败')
+    expect(onError).toHaveBeenCalledWith(failure)
+
+    gridApi.clearError()
+    expect(gridApi.getError()).toBeUndefined()
+  })
+
+  it('异常嵌套响应支持数字字符串总数', () => {
+    expect(adaptVbenGridProxyResult(
+      { payload: { rows: [{ id: 1 }], total: '12' } },
+      { proxyConfig: { props: { result: 'payload' } } },
+    )).toEqual({ rows: [{ id: 1 }], total: 12 })
   })
 })

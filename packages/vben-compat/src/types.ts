@@ -13,12 +13,20 @@ import type {
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 
 export type VbenFormComponent
-  = | 'Hidden'
+  = | 'CheckboxGroup'
+    | 'DatePicker'
+    | 'DatePicker.RangePicker'
+    | 'Hidden'
     | 'Input'
+    | 'InputNumber'
     | 'Input.Password'
     | 'Input.TextArea'
+    | 'RadioGroup'
     | 'Select'
+    | 'Switch'
     | 'Textarea'
+    | 'TreeSelect'
+    | 'Upload'
     | (string & {})
 
 export interface VbenFormRule {
@@ -107,6 +115,23 @@ export interface VbenGridFormOptions {
   submitText?: string
 }
 
+export interface VbenGridToolbarConfig {
+  batchDelete?: boolean
+  batchDeleteText?: string
+  create?: boolean
+  createText?: string
+  export?: boolean
+  exportText?: string
+  refresh?: boolean
+  refreshText?: string
+}
+
+export interface VbenGridTableConfig {
+  actionWidth?: number | string
+  autoResize?: boolean
+  showColumnSettings?: boolean
+}
+
 export interface VbenGridProxyParams extends CrudTableQueryModel {
   page: number
   pageSize: number
@@ -135,6 +160,7 @@ export interface VbenGridProxyConfig {
 }
 
 export interface VbenGridOptions {
+  actions?: CrudTableProps['actions']
   columns?: VbenGridColumn[]
   emptyText?: string
   formOptions?: VbenGridFormOptions
@@ -143,7 +169,10 @@ export interface VbenGridOptions {
   resetText?: string
   rowKey?: CrudTableProps['rowKey']
   searchText?: string
+  tableConfig?: VbenGridTableConfig
   title?: string
+  toolbarConfig?: VbenGridToolbarConfig
+  onError?: (error: unknown) => void
 }
 
 export interface UseVbenVxeGridOptions extends VbenGridOptions {
@@ -170,16 +199,18 @@ export type VbenGridRegister = (gridInstance?: unknown) => void
 export interface VbenGridApi {
   crudTableProps: ComputedRef<LumaCrudTableCompatProps>
   getGridInstance: () => unknown
+  getError: () => unknown
   getLumaColumns: () => SchemaTableColumn[]
   getRows: () => SchemaTableRow[]
   getTotal: () => number
   getQueryModel: () => CrudTableQueryModel
-  handlePageChange: (payload: CrudTablePageChangePayload) => void
-  handleReset: (payload?: CrudTableQueryModel) => void
-  handleSearch: (payload?: CrudTableQueryModel) => void
-  reload: () => void
-  reset: () => void
-  search: (payload?: CrudTableQueryModel) => void
+  clearError: () => void
+  handlePageChange: (payload: CrudTablePageChangePayload) => Promise<boolean>
+  handleReset: (payload?: CrudTableQueryModel) => Promise<boolean>
+  handleSearch: (payload?: CrudTableQueryModel) => Promise<boolean>
+  reload: () => Promise<boolean>
+  reset: () => Promise<boolean>
+  search: (payload?: CrudTableQueryModel) => Promise<boolean>
   setLoading: (loading: boolean) => void
   setRows: (rows: SchemaTableRow[], total?: number) => void
   setQueryModel: (model: CrudTableQueryModel) => void

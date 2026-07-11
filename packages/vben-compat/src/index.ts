@@ -36,4 +36,6 @@ export type {
   VbenGridProxyParams,
   VbenGridProxyResult,
   VbenGridRegister,
+  VbenGridTableConfig,
+  VbenGridToolbarConfig,
 } from './types'

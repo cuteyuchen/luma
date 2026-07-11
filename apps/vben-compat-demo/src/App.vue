@@ -120,6 +120,14 @@ const [, gridApi] = useVbenVxeGrid({
       pageSize: 10,
       pageSizes: [10, 20],
     },
+    tableConfig: {
+      autoResize: true,
+      showColumnSettings: true,
+    },
+    toolbarConfig: {
+      export: true,
+      refresh: true,
+    },
     proxyConfig: {
       ajax: {
         query: (params) => {
@@ -146,7 +154,7 @@ const [, gridApi] = useVbenVxeGrid({
   },
 })
 
-gridApi.reload()
+void gridApi.reload()
 
 /***********************事件处理*********************/
 function handleFormModelUpdate(model: SchemaFormModel): void {

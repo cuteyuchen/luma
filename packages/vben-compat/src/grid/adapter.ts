@@ -74,7 +74,16 @@ function toRows(value: unknown): SchemaTableRow[] | undefined {
 }
 
 function toTotal(value: unknown): number | undefined {
-  return typeof value === 'number' ? value : undefined
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const total = Number(value)
+    return Number.isFinite(total) ? total : undefined
+  }
+
+  return undefined
 }
 
 export function adaptVbenGridProxyResult(
@@ -99,7 +108,7 @@ export function adaptVbenGridProxyResult(
     ?? toRows(source.records)
     ?? toRows(source.rows)
     ?? []
-  const total = readRecordValue<number>(source, resultProps?.total)
+  const total = toTotal(readRecordValue<unknown>(source, resultProps?.total))
     ?? toTotal(source.total)
     ?? toTotal(source.totalCount)
     ?? rows.length
