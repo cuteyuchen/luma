@@ -8,6 +8,9 @@
 - 工作区版本：`0.0.0`。
 - 当前分支：`master`。
 - 当前已知最近提交：
+  - `5e00157 feat(request): 完善接口适配与会话刷新`
+  - `e5f7923 fix(layout): 修复顶部菜单重复节点标识`
+  - `36d0e00 docs(project): 更新阶段六实施记录`
   - `5e233e3 feat(router): 完成后端菜单与动态路由闭环`
   - `d48f913 docs(project): 更新阶段五实施记录`
   - `145a005 refactor(core): 重构 CRUD 表格工作流`
@@ -37,7 +40,7 @@
 | 4 Page 与 Schema | 已完成 | `2bb2a4e` |
 | 5 CRUD 工作流 | 已完成 | `145a005` |
 | 6 后端菜单与动态路由 | 已完成 | `5e233e3` |
-| 7 Request/Auth 与适配层 | 待开始 | - |
+| 7 Request/Auth 与适配层 | 已完成 | `5e00157` |
 | 8 Admin 系统页面 | 待开始 | - |
 | 9 图标、图表、兼容与 Vite | 待开始 | - |
 | 10 脚手架、性能与发布 | 待开始 | - |
@@ -301,7 +304,13 @@ Token 刷新规则：
 - 完成刷新 Token 单飞和一次重放。
 - 公司异常字段只出现在 Admin adapter 配置。
 
-提交：`feat(request): 完善接口适配与会话刷新`。
+实施结果：Core 新增标准 `ApiEnvelope<T>`、`PageResult<T>`、`AuthSessionData` 及响应、分页、会话 parser；`RequestError.kind` 统一覆盖 network、http、business、session、duplicate、cancelled。GET 在认证刷新成功后默认最多重放一次，写请求必须显式设置 `retryOnAuthRefresh: true` 且请求体可重放；显式 Authorization 不进入自动刷新。并发过期请求共享同一个刷新 Promise，刷新失败统一清理访问凭据、刷新凭据、用户、权限、菜单、动态路由和标签。
+
+Admin 新增集中 adapter，`statusCode/result/resultMsg`、`access_token/refresh_token/expire_time`、`records/totalNum`、`menuName/authCode/url` 等异常字段不进入 Core 或页面组件。Services 页面展示业务会话码识别、Token 刷新、GET 重放、分页转换和错误分类。浏览器验收期间同时修复了 mixed-nav flat 顶部菜单重复 vnode key，提交为 `e5f7923`。
+
+验收结果：全仓库测试通过（Core 153 项、Admin 62 项），全包类型检查、Core/Admin 构建、Lint、发布边界和差异检查通过。浏览器实测 Services 请求经过 2 次 fetch 后成功，显示“已单飞刷新并重放”；375/768/1024/1440px 无页面级横向溢出，最终控制台 0 error / 0 warning。现有 Admin 大包警告继续保留至阶段 10 分包处理。
+
+提交：`5e00157 feat(request): 完善接口适配与会话刷新`。
 
 ### 阶段 8：Admin 系统页面与示例区
 

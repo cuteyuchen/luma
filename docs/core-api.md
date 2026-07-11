@@ -485,11 +485,35 @@ registry.reset()
 
 权限能力只处理通用权限判断，不绑定具体业务接口。
 
+## Auth
+
+从 `@luma/core/auth` 导入：
+
+- `createAuthSession`
+- `parseAuthSession`
+
+标准会话固定为 `{ accessToken, refreshToken?, expiresAt? }`。字段异常由应用 adapter 映射，会话实例负责持久化与一次清除访问、刷新凭据：
+
+```ts
+const session = createAuthSession({ storage: localStorage })
+const data = parseAuthSession(rawResponse, {
+  fieldNames: {
+    accessToken: 'access_token',
+    refreshToken: 'refresh_token',
+    expiresAt: 'expire_time',
+  },
+})
+
+session.setSession(data)
+```
+
 ## Request
 
 从 `@luma/core/request` 导入：
 
 - `createRequestClient`
+- `createStandardResponseParser`
+- `parsePageResult`
 - `RequestError`
 
 ```ts
@@ -497,15 +521,18 @@ import { createRequestClient } from '@luma/core/request'
 
 const request = createRequestClient({
   baseURL: '/api',
-  getToken: () => localStorage.getItem('token') ?? undefined,
-  onResponse: ({ data }) => data,
-  onSessionExpired: () => {
-    localStorage.removeItem('token')
+  getToken: () => session.getToken() || undefined,
+  authRefresh: {
+    refresh: async () => {
+      session.setSession(await refreshSession(session.getRefreshToken()))
+    },
   },
+  onResponse: createStandardResponseParser(),
+  onSessionExpired: () => session.handleSessionExpired(),
 })
 ```
 
-请求 token、响应解析和会话过期通过回调接入，业务错误码由应用侧决定。
+HTTP 401 或 parser 产生的 `kind: 'session'` 会进入认证刷新。并发请求共享同一个刷新 Promise；GET 默认允许最多重放一次，POST/PUT/PATCH/DELETE 必须逐请求显式设置 `retryOnAuthRefresh: true`。`RequestError.kind` 可用于统一区分 `network`、`http`、`business`、`session`、`duplicate` 与 `cancelled`，业务字段和状态码仍由应用 adapter 决定。
 
 ## Theme
 
