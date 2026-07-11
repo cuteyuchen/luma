@@ -33,6 +33,7 @@ describe('createLumaAdminProject', () => {
       const requestExample = await readFile(join(targetDir, 'src/composables/useMockRequestExample.ts'), 'utf8')
       const requestPanel = await readFile(join(targetDir, 'src/components/request/RequestExamplePanel.vue'), 'utf8')
       const stylesScss = await readFile(join(targetDir, 'src/styles.scss'), 'utf8')
+      const viteConfig = await readFile(join(targetDir, 'vite.config.ts'), 'utf8')
 
       expect(result.createdFiles).toEqual([
         'index.html',
@@ -102,6 +103,8 @@ describe('createLumaAdminProject', () => {
       expect(stylesScss).toContain('.luma-admin-home')
       expect(stylesScss).toContain('.luma-admin-page')
       expect(stylesScss).toContain('.luma-admin-login')
+      expect(viteConfig).toContain('codeSplitting')
+      expect(viteConfig).toContain('vendor-element-plus')
     }
     finally {
       await rm(tempDir, { force: true, recursive: true })
