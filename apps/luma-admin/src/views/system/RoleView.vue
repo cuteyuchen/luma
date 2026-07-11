@@ -13,7 +13,7 @@ import type {
   SystemRoleRecord,
 } from '../../api/system'
 import { LumaCrudTable } from '@luma/core/components'
-import { ElButton, ElDialog, ElMessage, ElMessageBox, ElTree } from 'element-plus'
+import { ElAlert, ElButton, ElDialog, ElMessage, ElMessageBox, ElTree } from 'element-plus'
 import { nextTick, onMounted, shallowRef, useTemplateRef } from 'vue'
 import {
   createSystemRole,
@@ -50,6 +50,9 @@ const pageSize = shallowRef(10)
 const permissionTree = shallowRef<SystemPermissionTreeNode[]>([])
 const authorizationVisible = shallowRef(false)
 const authorizingRole = shallowRef<SystemRoleRecord>()
+const authorizationLoading = shallowRef(false)
+const authorizationSaving = shallowRef(false)
+const authorizationError = shallowRef('')
 
 /***********************Schema 配置*********************/
 const querySchemas: SchemaFormItem[] = [
@@ -200,16 +203,27 @@ function collectPermissionCodes(nodes: SystemPermissionTreeNode[], result = new 
 
 async function openAuthorize(row: SchemaTableRow): Promise<void> {
   const role = toRoleRecord(row)
-  const [tree, permissions] = await Promise.all([
-    fetchSystemPermissionTree(),
-    fetchSystemRolePermissions(role.code),
-  ])
-
   authorizingRole.value = role
-  permissionTree.value = tree
   authorizationVisible.value = true
-  await nextTick()
-  permissionTreeRef.value?.setCheckedKeys(permissions)
+  authorizationLoading.value = true
+  authorizationError.value = ''
+
+  try {
+    const [tree, permissions] = await Promise.all([
+      fetchSystemPermissionTree(),
+      fetchSystemRolePermissions(role.code),
+    ])
+
+    permissionTree.value = tree
+    await nextTick()
+    permissionTreeRef.value?.setCheckedKeys(permissions)
+  }
+  catch (error) {
+    authorizationError.value = error instanceof Error ? error.message : '角色权限加载失败'
+  }
+  finally {
+    authorizationLoading.value = false
+  }
 }
 
 async function saveRolePermissions(): Promise<void> {
@@ -219,15 +233,26 @@ async function saveRolePermissions(): Promise<void> {
     return
   }
 
-  const knownPermissions = collectPermissionCodes(permissionTree.value)
-  const checkedKeys = [
-    ...permissionTreeRef.value.getCheckedKeys(false),
-    ...permissionTreeRef.value.getHalfCheckedKeys(),
-  ].map(String).filter(permission => knownPermissions.has(permission))
+  authorizationSaving.value = true
+  authorizationError.value = ''
 
-  await updateSystemRolePermissions(role.code, checkedKeys)
-  authorizationVisible.value = false
-  ElMessage.success('角色权限已保存，相关账号下次登录时生效')
+  try {
+    const knownPermissions = collectPermissionCodes(permissionTree.value)
+    const checkedKeys = [
+      ...permissionTreeRef.value.getCheckedKeys(false),
+      ...permissionTreeRef.value.getHalfCheckedKeys(),
+    ].map(String).filter(permission => knownPermissions.has(permission))
+
+    await updateSystemRolePermissions(role.code, checkedKeys)
+    authorizationVisible.value = false
+    ElMessage.success('角色权限已保存，相关账号下次登录时生效')
+  }
+  catch (error) {
+    authorizationError.value = error instanceof Error ? error.message : '角色权限保存失败'
+  }
+  finally {
+    authorizationSaving.value = false
+  }
 }
 
 onMounted(() => {
@@ -302,8 +327,17 @@ onMounted(() => {
       :title="`角色授权：${authorizingRole?.name ?? ''}`"
       width="560px"
     >
+      <ElAlert
+        v-if="authorizationError"
+        class="luma-admin-page__operation-error"
+        :title="authorizationError"
+        type="error"
+        show-icon
+        :closable="false"
+      />
       <ElTree
         ref="permissionTreeRef"
+        v-loading="authorizationLoading"
         :data="permissionTree"
         node-key="id"
         show-checkbox
@@ -311,13 +345,15 @@ onMounted(() => {
         :props="{ children: 'children', label: 'label' }"
       />
       <template #footer>
-        <ElButton native-type="button" @click="authorizationVisible = false">
+        <ElButton native-type="button" :disabled="authorizationSaving" @click="authorizationVisible = false">
           取消
         </ElButton>
         <ElButton
           type="primary"
           native-type="button"
           data-action="save-role-permissions"
+          :disabled="authorizationLoading"
+          :loading="authorizationSaving"
           @click="saveRolePermissions"
         >
           保存授权

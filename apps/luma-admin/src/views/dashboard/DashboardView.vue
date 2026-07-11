@@ -1,154 +1,235 @@
 <script setup lang="ts">
-import type {
-  CrudTablePageChangePayload,
-  CrudTableResetPayload,
-  CrudTableSearchPayload,
-  SchemaFormItem,
-  SchemaFormModel,
-  SchemaTableColumn,
-  SchemaTableRow,
-} from '@luma/core/components'
+import type { SchemaTableColumn, SchemaTableRow } from '@luma/core/components'
+import type { DictionaryOption } from '@luma/core/dictionary'
+import type { SystemMenuRecord } from '../../api/system'
+import { LumaPage, LumaSchemaTable } from '@luma/core/components'
+import { ElAlert, ElButton } from 'element-plus'
+import { computed, onMounted, shallowRef } from 'vue'
+import { useRouter } from 'vue-router'
 import {
-  LumaCrudTable,
-  LumaIcon,
-} from '@luma/core/components'
-import { onMounted, shallowRef } from 'vue'
-import RequestExamplePanel from '../../components/request/RequestExamplePanel.vue'
-import { useMockRequestExample } from '../../composables/useMockRequestExample'
+  fetchDictionaryTypes,
+  fetchSystemMenus,
+  fetchSystemRoleOptions,
+  fetchSystemRoles,
+  fetchSystemUsers,
+} from '../../api/system'
+import { currentUser } from '../../services/session'
 
-/***********************页面状态*********************/
-const title = 'Luma Admin'
-const description = '轻量 Vue Admin 框架基线已启动'
+interface DashboardMetric {
+  label: string
+  value: number
+  description: string
+}
 
-/***********************表单配置*********************/
-const formModel = shallowRef<SchemaFormModel>({
-  id: 'demo-001',
-  name: 'Luma 示例项目',
-  status: 'enabled',
-})
+const router = useRouter()
+const loading = shallowRef(false)
+const error = shallowRef('')
+const metrics = shallowRef<DashboardMetric[]>([])
+const recentUsers = shallowRef<SchemaTableRow[]>([])
+const roleOptions = shallowRef<DictionaryOption[]>([])
 
-const schemas: SchemaFormItem[] = [
-  {
-    field: 'id',
-    label: 'ID',
-    component: 'hidden',
-  },
-  {
-    field: 'name',
-    label: '项目名称',
-    component: 'input',
-    placeholder: '请输入项目名称',
-  },
-  {
-    field: 'status',
-    label: '状态',
-    component: 'select',
-    options: [
-      { label: '启用', value: 'enabled' },
-      { label: '停用', value: 'disabled' },
-    ],
-  },
-]
+const todayText = new Intl.DateTimeFormat('zh-CN', {
+  dateStyle: 'full',
+}).format(new Date())
 
-/***********************表格配置*********************/
-const tableColumns: SchemaTableColumn[] = [
-  {
-    field: 'name',
-    label: '项目名称',
-  },
-  {
-    field: 'status',
-    label: '状态',
-    formatter: value => value === 'enabled' ? '启用' : '停用',
-  },
-]
+const title = computed(() => `欢迎回来，${currentUser.value?.name ?? '管理员'}`)
+const quickActions = computed(() => [
+  { authority: 'system:user:list', label: '用户管理', path: '/system/user' },
+  { authority: 'system:role:list', label: '角色授权', path: '/system/role' },
+  { authority: 'system:menu:list', label: '菜单配置', path: '/system/menu' },
+  { authority: 'system:dict:list', label: '字典维护', path: '/system/dict' },
+].filter(action => currentUser.value?.permissions.includes(action.authority)))
 
-const tableRows: SchemaTableRow[] = [
-  {
-    id: 'demo-001',
-    name: 'Luma 示例项目',
-    status: 'enabled',
-  },
-]
+const userColumns = computed<SchemaTableColumn[]>(() => [
+  { field: 'username', label: '用户名', minWidth: 140 },
+  { field: 'nickname', label: '昵称', minWidth: 140 },
+  { field: 'role', label: '角色', minWidth: 120, options: roleOptions.value },
+  { dictionary: 'status', field: 'status', label: '状态', width: 100 },
+  { field: 'createdAt', label: '创建时间', width: 130 },
+])
 
-/***********************分页状态*********************/
-const page = shallowRef(1)
-const pageSize = shallowRef(10)
-const paginationMessage = shallowRef('当前展示示例数据')
+function countMenus(items: SystemMenuRecord[]): number {
+  return items.reduce((total, item) =>
+    total + (item.type === 'button' ? 0 : 1) + countMenus(item.children ?? []), 0)
+}
 
-/***********************请求示例*********************/
-const {
-  authorizationHeader,
-  lastUrl,
-  loadProjectSummary,
-  loading: requestLoading,
-  message: requestMessage,
-  projectName,
-  projectStatus,
-  sessionExpiredCount,
-  status: requestStatus,
-  tokenInjected,
-} = useMockRequestExample()
+async function loadWorkspace(): Promise<void> {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const [users, roles, menus, dictionaries, rolesForSelect] = await Promise.all([
+      fetchSystemUsers({ page: 1, pageSize: 5, query: {} }),
+      fetchSystemRoles({ page: 1, pageSize: 1, query: {} }),
+      fetchSystemMenus(),
+      fetchDictionaryTypes(),
+      fetchSystemRoleOptions(),
+    ])
+
+    metrics.value = [
+      { description: '后台账号总量', label: '用户', value: users.total },
+      { description: '可分配角色数量', label: '角色', value: roles.total },
+      { description: '目录与页面节点', label: '菜单', value: countMenus(menus) },
+      { description: '可复用字典类型', label: '字典', value: dictionaries.length },
+    ]
+    recentUsers.value = users.items as unknown as SchemaTableRow[]
+    roleOptions.value = rolesForSelect
+  }
+  catch (reason) {
+    error.value = reason instanceof Error ? reason.message : '工作台数据加载失败'
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+function navigate(path: string): void {
+  void router.push(path)
+}
 
 onMounted(() => {
-  void loadProjectSummary()
+  void loadWorkspace()
 })
-
-/***********************事件处理*********************/
-function handleSearch(payload: CrudTableSearchPayload): void {
-  paginationMessage.value = `查询项目：${String(payload.name ?? '') || '全部'}`
-}
-
-function handleReset(_payload: CrudTableResetPayload): void {
-  paginationMessage.value = '已重置查询条件'
-}
-
-function handlePaginationChange(payload: CrudTablePageChangePayload): void {
-  paginationMessage.value = `第 ${payload.page} 页，每页 ${payload.pageSize} 条`
-}
 </script>
 
 <template>
-  <main class="luma-admin-home">
-    <LumaCrudTable
-      v-model:query-model="formModel"
-      v-model:page="page"
-      v-model:page-size="pageSize"
-      class="luma-admin-home__crud"
-      :title="title"
-      :description="description"
-      :query-schemas="schemas"
-      :columns="tableColumns"
-      :rows="tableRows"
-      row-key="id"
-      :total="35"
-      :page-sizes="[10, 20]"
-      @search="handleSearch"
-      @reset="handleReset"
-      @page-change="handlePaginationChange"
-    >
+  <main class="luma-admin-workspace">
+    <LumaPage :title="title" :description="`${todayText} · 这里汇总当前后台运行与管理状态。`" :loading="loading">
       <template #actions>
-        <LumaIcon name="app:dashboard" color="var(--el-color-primary)" :size="36" />
+        <ElButton native-type="button" :loading="loading" @click="loadWorkspace">
+          刷新数据
+        </ElButton>
       </template>
 
-      <template #default>
-        <span class="luma-admin-home__pagination-text">
-          {{ paginationMessage }}
-        </span>
-      </template>
-    </LumaCrudTable>
+      <ElAlert
+        v-if="error"
+        :title="error"
+        type="error"
+        show-icon
+        :closable="false"
+      >
+        <template #default>
+          <ElButton link type="primary" native-type="button" @click="loadWorkspace">
+            重新加载
+          </ElButton>
+        </template>
+      </ElAlert>
 
-    <RequestExamplePanel
-      :authorization-header="authorizationHeader"
-      :last-url="lastUrl"
-      :loading="requestLoading"
-      :message="requestMessage"
-      :project-name="projectName"
-      :project-status="projectStatus"
-      :session-expired-count="sessionExpiredCount"
-      :status="requestStatus"
-      :token-injected="tokenInjected"
-      @refresh="loadProjectSummary"
-    />
+      <section class="luma-admin-workspace__metrics" aria-label="后台指标">
+        <article v-for="metric in metrics" :key="metric.label" class="luma-admin-workspace__metric">
+          <span>{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+          <small>{{ metric.description }}</small>
+        </article>
+      </section>
+    </LumaPage>
+
+    <section class="luma-admin-workspace__columns">
+      <LumaPage title="最近用户" description="最近创建的后台账号，完整操作请进入用户管理。">
+        <template #actions>
+          <ElButton
+            v-if="currentUser?.permissions.includes('system:user:list')"
+            link
+            type="primary"
+            native-type="button"
+            @click="navigate('/system/user')"
+          >
+            查看全部
+          </ElButton>
+        </template>
+        <LumaSchemaTable :columns="userColumns" :rows="recentUsers" row-key="id" :show-column-settings="false" />
+      </LumaPage>
+
+      <LumaPage title="快捷入口" description="根据当前账号权限展示常用管理动作。">
+        <div v-if="quickActions.length" class="luma-admin-workspace__actions">
+          <ElButton
+            v-for="action in quickActions"
+            :key="action.path"
+            native-type="button"
+            @click="navigate(action.path)"
+          >
+            {{ action.label }}
+          </ElButton>
+        </div>
+        <p v-else class="luma-admin-workspace__empty">
+          当前账号暂无系统管理入口。
+        </p>
+      </LumaPage>
+    </section>
   </main>
 </template>
+
+<style scoped lang="scss">
+.luma-admin-workspace {
+  display: grid;
+  gap: var(--luma-page-gutter);
+}
+
+.luma-admin-workspace__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.luma-admin-workspace__metric {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: var(--luma-radius-large);
+  background: var(--el-fill-color-blank);
+}
+
+.luma-admin-workspace__metric span,
+.luma-admin-workspace__metric small,
+.luma-admin-workspace__empty {
+  color: var(--el-text-color-secondary);
+}
+
+.luma-admin-workspace__metric strong {
+  color: var(--el-text-color-primary);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.luma-admin-workspace__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: var(--luma-page-gutter);
+  min-width: 0;
+}
+
+.luma-admin-workspace__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.luma-admin-workspace__actions :deep(.el-button) {
+  min-height: 44px;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .luma-admin-workspace__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .luma-admin-workspace__columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .luma-admin-workspace__metrics,
+  .luma-admin-workspace__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .luma-admin-workspace__metric {
+    padding: 16px;
+  }
+}
+</style>

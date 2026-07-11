@@ -226,6 +226,7 @@ describe('system mock api', () => {
     })
     const menu = await createSystemMenu({
       component: 'audit/index',
+      name: 'AuditIndex',
       order: 1,
       parentId: directory.id,
       path: 'index',
@@ -248,6 +249,13 @@ describe('system mock api', () => {
       type: 'button',
     })
 
+    let runtimeMenus = await loadAdminMenus()
+    expect(findRuntimeMenu(runtimeMenus, '/audit/index')).toMatchObject({
+      component: 'audit/index',
+      name: 'AuditIndex',
+      title: '审计日志',
+    })
+
     await updateSystemMenu(menu.id, {
       component: 'audit/index',
       path: 'index',
@@ -260,6 +268,10 @@ describe('system mock api', () => {
       permission: 'audit:view',
       title: '审计记录',
     })
+    runtimeMenus = await loadAdminMenus()
+    expect(findRuntimeMenu(runtimeMenus, '/audit/index')).toMatchObject({
+      title: '审计记录',
+    })
 
     const tree = await fetchSystemPermissionTree()
     expect(findPermission(tree, 'audit:export')?.label).toBe('导出审计日志')
@@ -268,6 +280,8 @@ describe('system mock api', () => {
     menus = await fetchSystemMenus()
     expect(findMenu(menus, directory.id)).toBeUndefined()
     expect(findMenu(menus, button.id)).toBeUndefined()
+    runtimeMenus = await loadAdminMenus()
+    expect(findRuntimeMenu(runtimeMenus, '/audit/index')).toBeUndefined()
   })
 
   it('支持字典类型和字典项维护并生成标准 options', async () => {
@@ -339,6 +353,20 @@ function findPermission(tree: Awaited<ReturnType<typeof fetchSystemPermissionTre
       return node
     }
     const child = node.children ? findPermission(node.children, permission) : undefined
+    if (child) {
+      return child
+    }
+  }
+
+  return undefined
+}
+
+function findRuntimeMenu(menus: Awaited<ReturnType<typeof loadAdminMenus>>, path: string): Awaited<ReturnType<typeof loadAdminMenus>>[number] | undefined {
+  for (const menu of menus) {
+    if (menu.path === path) {
+      return menu
+    }
+    const child = findRuntimeMenu(menu.children, path)
     if (child) {
       return child
     }

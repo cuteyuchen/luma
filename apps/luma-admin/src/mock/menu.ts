@@ -1,24 +1,26 @@
-import type { LumaMenuRecord } from '@luma/core/router'
-import { adminRouteRecords } from '../router/routes'
+import type { SystemMenuRecord } from './system'
+import { mockFetchSystemMenus } from './system'
 
-function toCompanyMenu(record: LumaMenuRecord): Record<string, unknown> {
-  const meta = record.meta ?? {}
+function toCompanyMenu(record: SystemMenuRecord): Record<string, unknown> {
+  const children = record.children?.filter(child => child.type !== 'button').map(toCompanyMenu)
+  const authority = record.permissions?.length
+    ? record.permissions
+    : record.permission ? [record.permission] : undefined
 
   return {
-    authCode: meta.authority,
-    menuIcon: meta.icon,
-    menuName: meta.title,
+    authCode: authority,
+    menuIcon: record.icon,
+    menuName: record.title,
+    menuType: record.type,
     meta: {
-      ...meta,
-      authority: undefined,
-      icon: undefined,
-      order: undefined,
-      title: undefined,
+      externalTarget: record.externalTarget,
+      hideInMenu: record.hidden,
     },
-    nodes: record.children?.map(toCompanyMenu),
-    routeName: record.name,
+    nodes: children,
+    redirect: record.redirect,
+    routeName: record.name || record.id,
     routePath: record.path,
-    sortNo: meta.order,
+    sortNo: record.order,
     url: record.externalLink,
     viewPath: record.component,
   }
@@ -26,8 +28,10 @@ function toCompanyMenu(record: LumaMenuRecord): Record<string, unknown> {
 
 /***********************菜单接口模拟*********************/
 export async function mockLoadAdminMenus(): Promise<Record<string, unknown>> {
+  const menus = await mockFetchSystemMenus()
+
   return {
-    result: adminRouteRecords.map(toCompanyMenu),
+    result: menus.filter(menu => menu.type !== 'button').map(toCompanyMenu),
     resultMsg: 'ok',
     statusCode: '0000',
   }

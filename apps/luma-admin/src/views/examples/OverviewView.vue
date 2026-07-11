@@ -1,30 +1,53 @@
 <script setup lang="ts">
-import { LumaInfoTable, LumaPage, LumaSchemaTable } from '@luma/core/components'
-import { exampleTableColumns, exampleTableRows, frameworkInfoItems } from './example-data'
+import type { SchemaTableColumn, SchemaTableRow } from '@luma/core/components'
+import { LumaPage, LumaSchemaTable } from '@luma/core/components'
+import { ElButton } from 'element-plus'
+import { useRouter } from 'vue-router'
 
-/***********************指标数据*********************/
-const metrics = [
-  { label: '公开包', value: '4' },
-  { label: '示例页', value: '12' },
-  { label: '字典响应', value: 'items' },
+const router = useRouter()
+
+const capabilityRows: SchemaTableRow[] = [
+  { entry: '@luma/core/layout', id: 1, route: '/examples/page-layout', status: 'stable', title: '应用壳与页面布局' },
+  { entry: '@luma/core/components', id: 2, route: '/examples/schema-form', status: 'stable', title: 'Schema Form' },
+  { entry: '@luma/core/components', id: 3, route: '/examples/schema-table', status: 'stable', title: 'Schema Table' },
+  { entry: '@luma/core/components', id: 4, route: '/examples/crud-table', status: 'stable', title: 'CRUD 工作流' },
+  { entry: '@luma/core/dictionary', id: 5, route: '/examples/dictionary', status: 'stable', title: '字典与颜色标签' },
+  { entry: '@luma/core/request', id: 6, route: '/examples/services', status: 'stable', title: '请求、适配与会话刷新' },
+  { entry: '@luma/charts', id: 7, route: '/examples/chart-panel', status: 'enhancing', title: '图表面板' },
 ]
+
+const columns: SchemaTableColumn[] = [
+  { field: 'title', label: '能力', minWidth: 190 },
+  { field: 'entry', label: '公开入口', minWidth: 220 },
+  {
+    field: 'status',
+    label: '状态',
+    options: [
+      { label: '稳定', value: 'stable' },
+      { label: '持续增强', value: 'enhancing' },
+    ],
+    width: 110,
+  },
+]
+
+function openCapability(row: SchemaTableRow): void {
+  void router.push(String(row.route))
+}
 </script>
 
 <template>
   <main class="luma-admin-example">
-    <section class="luma-admin-example__metrics">
-      <article v-for="metric in metrics" :key="metric.label" class="luma-admin-example__metric">
-        <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
-      </article>
-    </section>
-
-    <LumaPage title="框架信息" description="通过真实 admin 路由验证 Luma 包能力。">
-      <LumaInfoTable :items="frameworkInfoItems" :columns="2" label-width="96px" />
-    </LumaPage>
-
-    <LumaPage title="字典回显" description="状态与优先级由内置字典能力翻译。">
-      <LumaSchemaTable :columns="exampleTableColumns" :rows="exampleTableRows" row-key="id" />
+    <LumaPage
+      title="公开能力索引"
+      description="按公开包入口查看当前可复用能力；示例只演示公共 API，不承载公司字段或页面私有实现。"
+    >
+      <LumaSchemaTable :columns="columns" :rows="capabilityRows" row-key="id" action-width="120">
+        <template #actions="{ row }">
+          <ElButton link type="primary" native-type="button" @click="openCapability(row)">
+            查看示例
+          </ElButton>
+        </template>
+      </LumaSchemaTable>
     </LumaPage>
   </main>
 </template>

@@ -1,4 +1,6 @@
 import type { DictionaryOption } from '@luma/core/dictionary'
+import type { LumaMenuRecord } from '@luma/core/router'
+import { adminRouteRecords } from '../router/routes'
 import {
   adminPermissionCodes,
   deleteMockRolePermissions,
@@ -90,25 +92,34 @@ export type SystemMenuType = 'button' | 'directory' | 'menu'
 export interface SystemMenuRecord {
   children?: SystemMenuRecord[]
   component: string
+  externalLink?: string
+  externalTarget?: '_blank' | '_self'
   hidden: boolean
   icon: string
   id: string
   order: number
+  name?: string
   parentId: string
   path: string
   permission: string
+  permissions?: string[]
+  redirect?: string
   title: string
   type: SystemMenuType
 }
 
 export interface SaveSystemMenuInput {
   component?: unknown
+  externalLink?: unknown
+  externalTarget?: unknown
   hidden?: unknown
   icon?: unknown
   order?: unknown
+  name?: unknown
   parentId?: unknown
   path?: unknown
   permission?: unknown
+  redirect?: unknown
   title?: unknown
   type?: unknown
 }
@@ -231,7 +242,7 @@ const initialSystemRoles: SystemRoleRecord[] = [
   },
 ]
 
-const initialSystemMenus: SystemMenuRecord[] = [
+const initialPermissionMenuSeed: SystemMenuRecord[] = [
   {
     component: 'dashboard/index',
     hidden: false,
@@ -381,6 +392,77 @@ const initialSystemMenus: SystemMenuRecord[] = [
     type: 'directory',
   },
 ]
+
+function collectButtonSeeds(
+  menus: SystemMenuRecord[],
+  result = new Map<string, SystemMenuRecord[]>(),
+): Map<string, SystemMenuRecord[]> {
+  menus.forEach((menu) => {
+    const buttons = menu.children?.filter(child => child.type === 'button') ?? []
+
+    if (menu.component && buttons.length > 0) {
+      result.set(menu.component, buttons)
+    }
+
+    if (menu.children) {
+      collectButtonSeeds(menu.children.filter(child => child.type !== 'button'), result)
+    }
+  })
+
+  return result
+}
+
+function normalizeRouteAuthority(authority: unknown): string[] {
+  if (Array.isArray(authority)) {
+    return authority.map(String).filter(Boolean)
+  }
+
+  return authority ? [String(authority)] : []
+}
+
+function createSystemMenusFromRoutes(
+  routes: LumaMenuRecord[],
+  buttonSeeds: Map<string, SystemMenuRecord[]>,
+  parentId = '',
+): SystemMenuRecord[] {
+  return routes.map((route, index) => {
+    const id = `route-${route.name ?? `${parentId || 'root'}-${index}`}`
+    const permissions = normalizeRouteAuthority(route.meta?.authority)
+    const routeChildren = createSystemMenusFromRoutes(route.children ?? [], buttonSeeds, id)
+    const buttonChildren = (route.component ? buttonSeeds.get(route.component) : undefined)?.map(button => ({
+      ...button,
+      parentId: id,
+    })) ?? []
+    const externalLink = route.externalLink
+      ?? (typeof route.meta?.externalLink === 'string' ? route.meta.externalLink : undefined)
+
+    const children = [...routeChildren, ...buttonChildren]
+
+    return {
+      ...(children.length > 0 ? { children } : {}),
+      component: route.component ?? '',
+      externalLink,
+      externalTarget: externalLink ? (route.meta?.externalTarget === '_self' ? '_self' : '_blank') : undefined,
+      hidden: route.meta?.hideInMenu === true,
+      icon: typeof route.meta?.icon === 'string' ? route.meta.icon : '',
+      id,
+      name: route.name,
+      order: typeof route.meta?.order === 'number' ? route.meta.order : index,
+      parentId,
+      path: route.path,
+      permission: permissions[0] ?? '',
+      permissions,
+      redirect: typeof route.redirect === 'string' ? route.redirect : '',
+      title: typeof route.meta?.title === 'string' ? route.meta.title : route.name ?? route.path,
+      type: route.children?.length && !route.component && !externalLink ? 'directory' : 'menu',
+    }
+  })
+}
+
+const initialSystemMenus = createSystemMenusFromRoutes(
+  adminRouteRecords,
+  collectButtonSeeds(initialPermissionMenuSeed),
+)
 
 const initialDictionaryTypes: SystemDictionaryTypeRecord[] = [
   {
@@ -549,6 +631,9 @@ function resolveMenuInput(input: SaveSystemMenuInput): Omit<SystemMenuRecord, 'c
   const parentId = normalizeText(input.parentId)
   const path = type === 'button' ? '' : normalizeText(input.path)
   const component = type === 'menu' ? normalizeText(input.component) : ''
+  const externalLink = type === 'menu' ? normalizeText(input.externalLink) : ''
+  const permissionText = normalizeText(input.permission)
+  const permissions = permissionText.split(',').map(item => item.trim()).filter(Boolean)
 
   if (!title) {
     throw new Error('菜单标题不能为空')
@@ -558,18 +643,23 @@ function resolveMenuInput(input: SaveSystemMenuInput): Omit<SystemMenuRecord, 'c
     throw new Error('目录和菜单必须填写路径')
   }
 
-  if (type === 'menu' && !component) {
-    throw new Error('菜单必须填写组件')
+  if (type === 'menu' && !component && !externalLink) {
+    throw new Error('菜单必须填写组件或外链地址')
   }
 
   return {
     component,
+    externalLink,
+    externalTarget: input.externalTarget === '_self' ? '_self' : '_blank',
     hidden: type === 'button' ? true : input.hidden === true,
     icon: type === 'button' ? '' : normalizeText(input.icon),
+    name: type === 'button' ? '' : normalizeText(input.name),
     order: Number.isFinite(Number(input.order)) ? Number(input.order) : 0,
     parentId,
     path,
-    permission: normalizeText(input.permission),
+    permission: permissions[0] ?? '',
+    permissions,
+    redirect: type === 'directory' ? normalizeText(input.redirect) : '',
     title,
     type,
   }
@@ -624,9 +714,20 @@ function sortMenus(menus: SystemMenuRecord[]): SystemMenuRecord[] {
     }))
 }
 
-function createPermissionTreeFromMenus(menus: SystemMenuRecord[]): SystemPermissionTreeNode[] {
+function createPermissionTreeFromMenus(
+  menus: SystemMenuRecord[],
+  seenPermissions = new Set<string>(),
+): SystemPermissionTreeNode[] {
   return menus.flatMap((menu) => {
-    const children = menu.children ? createPermissionTreeFromMenus(menu.children) : []
+    const children = menu.children ? createPermissionTreeFromMenus(menu.children, seenPermissions) : []
+
+    if (menu.permission && seenPermissions.has(menu.permission)) {
+      return children
+    }
+
+    if (menu.permission) {
+      seenPermissions.add(menu.permission)
+    }
 
     if (!menu.permission && children.length === 0) {
       return []

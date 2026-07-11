@@ -32,11 +32,12 @@ import {
   patchAdminPreferences,
 } from './services/preferences'
 import { currentUser, logout } from './services/session'
+import { adminSettingsVisible, openAdminSettings } from './services/settings'
 
 /***********************基础状态*********************/
 const title = adminAppName
 const preferences = adminPreferences
-const settingsVisible = shallowRef(false)
+const settingsVisible = adminSettingsVisible
 const resolvedThemeMode = adminResolvedThemeMode
 const visitedTabs = shallowRef<LumaLayoutTabItem[]>([])
 const routeRefreshKey = shallowRef(0)
@@ -123,7 +124,7 @@ function handleToggleTheme(): void {
 }
 
 function handleOpenSettings(): void {
-  settingsVisible.value = true
+  openAdminSettings()
 }
 
 function handlePreferencesChange(nextPreferences: LumaPreferences): void {
