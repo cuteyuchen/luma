@@ -34,12 +34,13 @@ function handleSelect(path: string): void {
     :title="collapsed ? item.title : undefined"
   >
     <template #title>
-      <LumaIcon
+      <i
         v-if="item.icon"
         class="luma-sidebar-menu-item__icon"
-        :name="item.icon"
-        :size="16"
-      />
+        aria-hidden="true"
+      >
+        <LumaIcon :name="item.icon" :size="16" />
+      </i>
       <span class="luma-sidebar-menu-item__title">{{ item.title }}</span>
       <span v-if="item.externalLink" class="luma-sidebar-menu-item__external" aria-hidden="true">↗</span>
     </template>
@@ -62,12 +63,13 @@ function handleSelect(path: string): void {
     :title="collapsed ? item.title : undefined"
     @click="handleSelect(item.path)"
   >
-    <LumaIcon
+    <i
       v-if="item.icon"
       class="luma-sidebar-menu-item__icon"
-      :name="item.icon"
-      :size="16"
-    />
+      aria-hidden="true"
+    >
+      <LumaIcon :name="item.icon" :size="16" />
+    </i>
     <span class="luma-sidebar-menu-item__title">{{ item.title }}</span>
     <span v-if="item.externalLink" class="luma-sidebar-menu-item__external" aria-hidden="true">↗</span>
   </ElMenuItem>
@@ -75,7 +77,12 @@ function handleSelect(path: string): void {
 
 <style scoped lang="scss">
 .luma-sidebar-menu-item__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
   margin-right: 8px;
+  font-style: normal;
 }
 
 .luma-sidebar-menu-item__title {

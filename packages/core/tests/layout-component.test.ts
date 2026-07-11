@@ -11,6 +11,7 @@ import {
   LumaTabs,
   LumaTopNav,
 } from '../src/layout'
+import { createDefaultPreferences } from '../src/theme'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 const menus = [
@@ -43,6 +44,10 @@ const tabs = [
   },
 ]
 
+function createLayoutPreferences(layout: 'mixed-nav' | 'sidebar-nav' | 'top-nav' = 'sidebar-nav') {
+  return createDefaultPreferences({ app: { layout } })
+}
+
 describe('luma layout', () => {
   it('会组合 Element Plus 布局、头部、侧边栏、页签和内容区', () => {
     const wrapper = mount(LumaLayout, {
@@ -59,6 +64,7 @@ describe('luma layout', () => {
         activeMenuPath: '/dashboard',
         activeTabPath: '/dashboard',
         menus,
+        preferences: createLayoutPreferences(),
         tabs,
         title: 'Luma Admin',
       },
@@ -78,20 +84,20 @@ describe('luma layout', () => {
     expect(wrapper.find('.layout-body').text()).toBe('页面内容')
   })
 
-  it('头部折叠按钮会通过 layout 更新 collapsed', async () => {
+  it('头部折叠按钮会由 layout 抛出统一切换事件', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
-        collapsed: false,
         menus,
+        preferences: createLayoutPreferences(),
       },
     })
 
     await wrapper.find('[data-action="toggle-sidebar"]').trigger('click')
 
-    expect(wrapper.emitted('update:collapsed')?.[0]).toEqual([true])
+    expect(wrapper.emitted('toggleSidebar')?.[0]).toEqual([])
   })
 
   it('移动端抽屉使用独立状态且不会修改桌面折叠偏好', async () => {
@@ -108,8 +114,8 @@ describe('luma layout', () => {
         stubs: elementPlusStubs,
       },
       props: {
-        collapsed: false,
         menus,
+        preferences: createLayoutPreferences(),
       },
     })
 
@@ -120,7 +126,7 @@ describe('luma layout', () => {
     expect(wrapper.classes()).not.toContain('is-mobile-menu-hidden')
     expect(wrapper.find('.luma-layout__mobile-sidebar').attributes('aria-hidden')).toBe('false')
     expect(wrapper.find('.luma-layout__mobile-sidebar').attributes()).not.toHaveProperty('inert')
-    expect(wrapper.emitted('update:collapsed')).toBeUndefined()
+    expect(wrapper.emitted('toggleSidebar')).toBeUndefined()
 
     await wrapper.find('.luma-layout__sidebar-scrim').trigger('click')
     expect(wrapper.classes()).toContain('is-mobile-menu-hidden')
@@ -130,42 +136,68 @@ describe('luma layout', () => {
     vi.unstubAllGlobals()
   })
 
-  it('会在传入顶部菜单时渲染顶部导航并透传选择事件', async () => {
+  it('顶部导航会从完整菜单树自动渲染并透传最终导航目标', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
-        activeTopMenuPath: '/system',
-        menus: [],
-        topMenus: menus,
+        activeMenuPath: '/system/user',
+        menus,
+        preferences: createLayoutPreferences('top-nav'),
       },
     })
 
     expect(wrapper.findComponent(LumaTopNav).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system')
+    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system/user')
     expect(wrapper.find('.luma-header__navigation').exists()).toBe(true)
 
     await wrapper.find('[data-menu-path="/system/user"]').trigger('click')
 
     expect(wrapper.emitted('topMenuSelect')?.[0]).toEqual(['/system/user'])
+    expect(wrapper.emitted('menuSelect')?.[0]).toEqual(['/system/user'])
   })
 
-  it('混合导航会把一级菜单渲染为可直接切换的平级入口', () => {
+  it('混合导航会自动拆分菜单并把一级菜单下钻到首个子项', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
-        menus: menus[1]!.children,
-        topMenuMode: 'flat',
-        topMenus: menus,
+        activeMenuPath: '/system/user',
+        menus,
+        preferences: createLayoutPreferences('mixed-nav'),
       },
     })
 
     expect(wrapper.findComponent(LumaTopNav).props('mode')).toBe('flat')
     expect(wrapper.find('[data-menu-path="/system"]').exists()).toBe(true)
     expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+
+    await wrapper.find('[data-menu-path="/system"]').trigger('click')
+    expect(wrapper.emitted('menuSelect')?.at(-1)).toEqual(['/system/user'])
+  })
+
+  it('混合导航会随一级菜单是否有子级自动隐藏和显示侧栏', async () => {
+    const wrapper = mount(LumaLayout, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        activeMenuPath: '/dashboard',
+        menus,
+        preferences: createLayoutPreferences('mixed-nav'),
+      },
+    })
+
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+
+    await wrapper.setProps({ activeMenuPath: '/system/user' })
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(true)
+    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+
+    await wrapper.setProps({ activeMenuPath: '/dashboard' })
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
   })
 
   it('路由驱动模式会解析访问标签、限制数量并在关闭后进入 fallback', async () => {
@@ -191,6 +223,7 @@ describe('luma layout', () => {
       },
       props: {
         fixedTabs: [{ path: '/dashboard', title: '工作台' }],
+        preferences: createLayoutPreferences(),
         routeDriven: true,
         tabFallbackPath: '/dashboard',
         tabMaxCount: 2,
@@ -291,6 +324,28 @@ describe('luma tabs', () => {
 
     expect(wrapper.emitted('closeOthers')?.[0]).toEqual(['/system'])
     wrapper.unmount()
+  })
+
+  it('折叠状态使用不会被 Element Plus 隐藏的图标容器', () => {
+    const wrapper = mount(LumaSidebar, {
+      global: {
+        stubs: {
+          ...elementPlusStubs,
+          LumaIcon: {
+            name: 'LumaIcon',
+            template: '<svg class="luma-icon-stub" />',
+          },
+        },
+      },
+      props: {
+        collapsed: true,
+        menus,
+      },
+    })
+
+    const icon = wrapper.find('.luma-sidebar-menu-item__icon')
+    expect(icon.element.tagName).toBe('I')
+    expect(icon.find('.luma-icon-stub').exists()).toBe(true)
   })
 })
 

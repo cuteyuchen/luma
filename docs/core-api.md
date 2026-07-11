@@ -433,7 +433,15 @@ createLumaAdmin({
 - `LumaContent`
 - `LumaRouterView`
 
-layout 只负责后台壳层结构和交互，不请求业务数据。`LumaLayout` 默认保持受控模式；启用 `route-driven` 后会从当前 Vue Router 路由创建访问标签，并支持：
+layout 只负责后台壳层结构和交互，不请求业务数据。`LumaLayout` 接收完整 `menus` 与 `preferences`，并根据 `preferences.app.layout` 自动决定菜单显示位置：
+
+- `sidebar-nav`：完整菜单树显示在侧栏。
+- `top-nav`：完整菜单树显示在顶栏。
+- `mixed-nav`：顶栏显示一级菜单，侧栏自动显示当前一级菜单的子菜单。
+
+应用层不需要创建或传入 `topMenus`，也不需要自行计算顶栏激活项和侧栏菜单。点击 mixed-nav 一级菜单时，Layout 会自动解析首个可导航子项并通过 `menu-select` 输出最终路径。
+
+启用 `route-driven` 后，Layout 还会从当前 Vue Router 路由创建访问标签，并支持：
 
 - `route-tab-filter` / `route-tab-resolver`：过滤并解析路由标签。
 - `fixed-tabs`：注入不可关闭的固定标签。

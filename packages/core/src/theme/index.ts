@@ -8,8 +8,10 @@ export {
   createDefaultPreferences,
   mergePreferences,
   normalizePreferences,
+  resolvePreferenceAvailability,
   resolveThemeMode,
 } from './preferences'
+export type { PreferenceAvailability } from './preferences'
 export { createPreferencesStore } from './preferences-store'
 export {
   createThemeStore,

@@ -55,6 +55,21 @@ describe('luma theme settings panel', () => {
     expect((cacheSwitch?.element as HTMLInputElement).disabled).toBe(true)
   })
 
+  it('顶部导航保留侧栏偏好入口但禁用当前无效的折叠设置', async () => {
+    const wrapper = mount(LumaThemeSettingsPanel, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        preferences: createDefaultPreferences({ app: { layout: 'top-nav' } }),
+      },
+    })
+
+    await wrapper.findAll('.luma-theme-settings__tab')[2]?.trigger('click')
+    const switches = wrapper.findAll('.el-switch')
+
+    expect((switches[3]?.element as HTMLInputElement).disabled).toBe(false)
+    expect((switches[4]?.element as HTMLInputElement).disabled).toBe(true)
+  })
+
   it('showLayout 为 false 时不渲染布局模式切换', () => {
     const wrapper = mount(LumaThemeSettingsPanel, {
       global: { stubs: elementPlusStubs },

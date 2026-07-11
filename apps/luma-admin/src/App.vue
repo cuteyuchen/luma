@@ -6,9 +6,6 @@ import {
   findMenuItemByPath,
   LumaLayout,
   LumaRouterView,
-  resolveActiveTopMenuPath,
-  resolveNavigationTarget,
-  splitMenusByLayout,
 } from '@luma/core/layout'
 import { computed, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -41,29 +38,10 @@ const route = useRoute()
 const router = useRouter()
 const isPublicLayout = computed(() => route.meta.layout === 'public')
 
-const collapsed = computed({
-  get: () => preferences.value.sidebar.collapsed,
-  set: (collapsed: boolean) => {
-    patchAdminPreferences({
-      sidebar: { collapsed },
-    })
-  },
-})
-
 /***********************菜单状态*********************/
 const allMenus = computed(() => currentUser.value ? createAdminSidebarMenus(router) : [])
-const activeTopMenuPath = computed(() => resolveActiveTopMenuPath(allMenus.value, route.path))
-const layoutMenus = computed(() => splitMenusByLayout({
-  activeTopMenuPath: activeTopMenuPath.value,
-  layout: preferences.value.app.layout,
-  menus: allMenus.value,
-}))
-const menus = computed(() => preferences.value.sidebar.enable ? layoutMenus.value.sidebarMenus : [])
-const topMenus = computed(() => layoutMenus.value.topMenus)
 const fixedTabs = computed<LumaLayoutTabItem[]>(() => createAdminTabs(undefined, router))
-const topMenuMode = computed(() => preferences.value.app.layout === 'mixed-nav' ? 'flat' : 'tree')
 const routeViewKey = computed(() => `${route.fullPath}:${routeRefreshKey.value}`)
-const sidebarWidth = computed(() => `${preferences.value.sidebar.width}px`)
 const routeViewCache = computed(() => preferences.value.tabbar.enable && preferences.value.tabbar.cache)
 const userName = computed(() => currentUser.value?.name ?? '未登录')
 const activePath = computed({
@@ -120,9 +98,10 @@ function handleMenuSelect(path: string): void {
   activePath.value = path
 }
 
-function handleTopMenuSelect(path: string): void {
-  const topMenu = allMenus.value.find(menu => menu.path === path)
-  handleMenuSelect(resolveNavigationTarget(topMenu) || path)
+function handleToggleSidebar(): void {
+  patchAdminPreferences({
+    sidebar: { collapsed: !preferences.value.sidebar.collapsed },
+  })
 }
 
 function handleTabChange(path: string): void {
@@ -172,27 +151,17 @@ async function handleTabRefresh(path: string): Promise<void> {
 
   <LumaLayout
     v-else
-    v-model:collapsed="collapsed"
     v-model:active-tab-path="activePath"
     :title="title"
-    :menus="menus"
-    :top-menus="topMenus"
-    :top-menu-mode="topMenuMode"
-    :header-menu-align="preferences.header.menuAlign"
-    :header-menu-max-width="preferences.header.menuMaxWidth"
-    :show-tab-icons="preferences.tabbar.showIcon"
-    :show-tab-maximize="preferences.tabbar.showMaximize"
+    :menus="allMenus"
+    :preferences="preferences"
     route-driven
     :fixed-tabs="fixedTabs"
     :route-tab-resolver="resolveAdminRouteTab"
     tab-fallback-path="/dashboard"
-    :tab-max-count="preferences.tabbar.maxCount"
-    :tabs-visible="preferences.tabbar.enable"
     :active-menu-path="activePath"
-    :active-top-menu-path="activeTopMenuPath"
-    :sidebar-width="sidebarWidth"
     @menu-select="handleMenuSelect"
-    @top-menu-select="handleTopMenuSelect"
+    @toggle-sidebar="handleToggleSidebar"
     @tab-change="handleTabChange"
     @tab-refresh="handleTabRefresh"
   >

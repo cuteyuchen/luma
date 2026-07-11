@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { LumaPreferences } from '@luma/core/theme'
 import { LumaThemeSettingsPanel } from '@luma/core/theme'
+import { LumaIcon } from '@luma/icons'
 import { ElDrawer } from 'element-plus'
 import { computed } from 'vue'
 
@@ -49,6 +50,12 @@ function handleReset(nextPreferences: LumaPreferences): void {
     append-to-body
     destroy-on-close
   >
+    <template #header>
+      <div class="luma-admin-settings-drawer__title">
+        <LumaIcon name="luma:settings" :size="20" />
+        <span>主题与布局设置</span>
+      </div>
+    </template>
     <LumaThemeSettingsPanel
       :defaults="defaults"
       :preferences="preferences"
@@ -78,6 +85,15 @@ function handleReset(nextPreferences: LumaPreferences): void {
   min-height: 0;
   padding: 20px 24px 24px;
   overflow: hidden;
+}
+
+.luma-admin-settings-drawer__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 @media (max-width: 640px) {

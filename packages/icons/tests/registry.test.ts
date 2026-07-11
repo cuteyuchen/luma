@@ -10,6 +10,13 @@ import {
 } from '../src'
 
 describe('@luma/icons registry', () => {
+  it('会预注册框架通用图标', () => {
+    expect(resolveIconDefinition('luma:sun')).toMatchObject({ label: '浅色模式' })
+    expect(resolveIconDefinition('luma:moon')).toMatchObject({ label: '深色模式' })
+    expect(resolveIconDefinition('luma:monitor')).toMatchObject({ label: '跟随系统' })
+    expect(resolveIconDefinition('luma:settings')).toBeTruthy()
+  })
+
   it('注册图标后可以按 key 同步解析', () => {
     registerIcons([
       {

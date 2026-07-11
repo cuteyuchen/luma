@@ -6,6 +6,14 @@ import type {
   ThemeRuntimeEnvironment,
 } from './types'
 
+export interface PreferenceAvailability {
+  headerMenuAlign: boolean
+  headerMenuMaxWidth: boolean
+  sidebarCollapsed: boolean
+  sidebarWidth: boolean
+  tabbarCache: boolean
+}
+
 const SYSTEM_THEME_QUERY = '(prefers-color-scheme: dark)'
 
 /***********************默认偏好*********************/
@@ -109,6 +117,19 @@ export function mergePreferences(
     tabbar: mergeSection(normalizedCurrent.tabbar, next.tabbar),
     theme: mergeSection(normalizedCurrent.theme, next.theme),
     transition: mergeSection(normalizedCurrent.transition, next.transition),
+  }
+}
+
+export function resolvePreferenceAvailability(preferences: LumaPreferences): PreferenceAvailability {
+  const headerMenuEnabled = preferences.app.layout !== 'sidebar-nav'
+  const sidebarEnabled = preferences.app.layout !== 'top-nav' && preferences.sidebar.enable
+
+  return {
+    headerMenuAlign: headerMenuEnabled,
+    headerMenuMaxWidth: headerMenuEnabled,
+    sidebarCollapsed: sidebarEnabled,
+    sidebarWidth: sidebarEnabled,
+    tabbarCache: preferences.tabbar.enable,
   }
 }
 

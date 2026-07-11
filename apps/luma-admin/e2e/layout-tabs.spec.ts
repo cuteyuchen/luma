@@ -13,11 +13,19 @@ test('设置、标签页和移动布局可以完整操作并持久化', async ({
 
   await page.getByRole('button', { name: '主题与布局设置' }).click()
   await page.getByRole('tab', { name: '主题', exact: true }).click()
+  await expect(page.locator('.luma-theme-settings__mode-card .luma-icon')).toHaveCount(3)
+  await expect(page.locator('.luma-theme-settings__mode-card > span').last()).toHaveCSS('white-space', 'nowrap')
+  await expect(page.locator('.luma-theme-settings__color-card > span').first()).toHaveCSS('white-space', 'nowrap')
   await page.getByRole('button', { name: '深色', exact: true }).click()
   await expect(page.locator('html')).toHaveClass(/dark/)
 
   await page.getByRole('tab', { name: '布局', exact: true }).click()
   await page.getByRole('button', { name: '顶部导航', exact: true }).click()
+  await expect(page.locator('.luma-layout')).toHaveAttribute('data-layout', 'top-nav')
+  await expect.poll(async () => page.evaluate(() => {
+    const stored = localStorage.getItem('luma-admin:preferences')
+    return stored ? JSON.parse(stored).app?.layout : undefined
+  })).toBe('top-nav')
   await page.reload()
   await expect(page.locator('html')).toHaveClass(/dark/)
   await expect(page.getByRole('navigation', { name: '主导航' })).toBeVisible()
@@ -42,6 +50,47 @@ test('三种桌面布局在 768、1024、1440px 均无页面级溢出', async ({
 
     await page.getByRole('button', { name: '关闭此对话框' }).click()
   }
+})
+
+test('侧栏折叠后仍显示已注册的菜单图标', async ({ page }) => {
+  await loginAsAdmin(page)
+  await page.getByRole('button', { name: '主题与布局设置' }).click()
+  await page.getByRole('tab', { name: '布局', exact: true }).click()
+  await page.getByRole('button', { name: '侧边导航', exact: true }).click()
+  await page.getByRole('button', { name: '关闭此对话框' }).click()
+  await page.getByRole('button', { name: '收起侧边栏' }).click()
+
+  const icon = page.locator('.luma-layout__desktop-sidebar .luma-sidebar-menu-item__icon .luma-icon').first()
+  await expect(icon).toBeVisible()
+  await expect(icon).toHaveCSS('width', '16px')
+  await expect(icon).toHaveCSS('height', '16px')
+})
+
+test('混合导航会根据一级菜单子级动态显示和隐藏侧栏', async ({ page }) => {
+  await loginAsAdmin(page)
+  const sidebar = page.locator('.luma-layout__desktop-sidebar')
+
+  await expect(sidebar).toHaveCount(0)
+  await page.getByRole('menuitem', { name: '系统管理', exact: true }).click()
+  await expect(sidebar).toBeVisible()
+  await expect(sidebar).toHaveCSS('transition-duration', /.+/)
+
+  await page.getByRole('menuitem', { name: '工作台', exact: true }).click()
+  await expect(sidebar).toHaveCount(0)
+})
+
+test('主题设置页和抽屉共享自适应图标卡片布局', async ({ page }) => {
+  await loginAsAdmin(page)
+  await openTopMenu(page, '功能示例')
+  await page.getByRole('menuitem', { name: '主题与动画', exact: true }).click()
+
+  const panel = page.locator('.luma-admin-example__theme-panel')
+  await expect(panel).toBeVisible()
+  expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(340)
+
+  await panel.getByRole('tab', { name: '主题', exact: true }).click()
+  await expect(panel.locator('.luma-theme-settings__mode-card .luma-icon')).toHaveCount(3)
+  await expect(panel.locator('.luma-theme-settings__color-card > span').first()).toHaveCSS('white-space', 'nowrap')
 })
 
 test('系统主题和 reduced-motion 偏好会应用到真实页面', async ({ page }) => {

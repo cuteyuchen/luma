@@ -5,6 +5,7 @@ import {
   LumaThemeSettingsPanel,
   resolveThemeMode,
 } from '@luma/core/theme'
+import { LumaIcon } from '@luma/icons'
 import { ElButton, ElTag } from 'element-plus'
 import { computed } from 'vue'
 import {
@@ -48,6 +49,9 @@ const previewStyle = computed(() => ({
 <template>
   <main class="luma-admin-example">
     <LumaPage title="主题与动画" description="使用 LumaThemeSettingsPanel 驱动主题、动画和布局偏好。">
+      <template #actions>
+        <LumaIcon name="luma:palette" :size="22" title="主题设置" />
+      </template>
       <div class="theme-entry">
         <div><strong>全局偏好设置</strong><p>内嵌面板与右侧设置抽屉共享同一份偏好，修改后会立即作用于当前系统。</p></div><ElButton type="primary" @click="openAdminSettings">
           打开右侧全局设置
@@ -88,7 +92,8 @@ const previewStyle = computed(() => ({
 .theme-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;margin-bottom:20px;border:1px solid var(--el-color-primary-light-7);border-radius:10px;background:var(--el-color-primary-light-9)}.theme-entry p{margin:6px 0 0;color:var(--el-text-color-secondary)}
 
 .luma-admin-example__theme-panel {
-  flex: 0 0 260px;
+  flex: 0 1 380px;
+  width: min(100%, 380px);
   padding: 16px;
   border: 1px solid var(--el-border-color-light);
   border-radius: 8px;

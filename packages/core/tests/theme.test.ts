@@ -6,6 +6,7 @@ import {
   createPreferencesStore,
   createThemeStore,
   mergePreferences,
+  resolvePreferenceAvailability,
   resolveThemeMode,
   resolveThemeTokens,
 } from '../src/theme'
@@ -148,6 +149,26 @@ describe('theme runtime', () => {
     expect(element.style.getPropertyValue('--luma-header-height')).toBe('64px')
     expect(element.style.getPropertyValue('--luma-tabbar-height')).toBe('40px')
     expect(element.style.getPropertyValue('--luma-sidebar-width')).toBe('280px')
+  })
+
+  it('会按布局模式统一解析设置项可用性', () => {
+    expect(resolvePreferenceAvailability(createDefaultPreferences({
+      app: { layout: 'sidebar-nav' },
+    }))).toMatchObject({
+      headerMenuAlign: false,
+      headerMenuMaxWidth: false,
+      sidebarCollapsed: true,
+      sidebarWidth: true,
+      tabbarCache: true,
+    })
+
+    expect(resolvePreferenceAvailability(createDefaultPreferences({
+      app: { layout: 'top-nav' },
+    }))).toMatchObject({
+      headerMenuAlign: true,
+      sidebarCollapsed: false,
+      sidebarWidth: false,
+    })
   })
 
   it('偏好 Store 会持久化、重置并清理损坏缓存', () => {

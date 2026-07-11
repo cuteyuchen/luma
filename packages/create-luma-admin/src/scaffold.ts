@@ -202,8 +202,6 @@ import type { LumaPreferences } from '@luma/core/theme'
 import {
   LumaLayout,
   LumaRouterView,
-  resolveActiveTopMenuPath,
-  splitMenusByLayout,
 } from '@luma/core/layout'
 import { computed, shallowRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -226,23 +224,9 @@ const settingsVisible = shallowRef(false)
 const route = useRoute()
 const router = useRouter()
 const isPublicLayout = computed(() => route.meta.layout === 'public')
-const collapsed = computed({
-  get: () => adminPreferences.value.sidebar.collapsed,
-  set: collapsed => patchAdminPreferences({ sidebar: { collapsed } }),
-})
-
 const allMenus = computed(() => createAdminSidebarMenus())
-const activeTopMenuPath = computed(() => resolveActiveTopMenuPath(allMenus.value, route.path))
-const layoutMenus = computed(() => splitMenusByLayout({
-  activeTopMenuPath: activeTopMenuPath.value,
-  layout: adminPreferences.value.app.layout,
-  menus: allMenus.value,
-}))
-const menus = computed(() => adminPreferences.value.sidebar.enable ? layoutMenus.value.sidebarMenus : [])
-const topMenus = computed(() => layoutMenus.value.topMenus)
-const tabs = computed(() => adminPreferences.value.tabbar.enable ? createAdminTabs(route.path) : [])
+const tabs = computed(() => createAdminTabs(route.path))
 const routeViewKey = computed(() => route.fullPath)
-const topMenuMode = computed(() => adminPreferences.value.app.layout === 'mixed-nav' ? 'flat' : 'tree')
 const activePath = computed({
   get: () => route.path,
   set: (path: string) => {
@@ -255,6 +239,12 @@ const activePath = computed({
 /***********************导航事件*********************/
 function handleMenuSelect(path: string): void {
   activePath.value = path
+}
+
+function handleToggleSidebar(): void {
+  patchAdminPreferences({
+    sidebar: { collapsed: !adminPreferences.value.sidebar.collapsed },
+  })
 }
 
 function handleTabChange(path: string): void {
@@ -289,23 +279,14 @@ async function handleLogout(): Promise<void> {
 
   <LumaLayout
     v-else
-    v-model:collapsed="collapsed"
     v-model:active-tab-path="activePath"
     :title="title"
-    :menus="menus"
-    :top-menus="topMenus"
+    :menus="allMenus"
+    :preferences="adminPreferences"
     :tabs="tabs"
     :active-menu-path="activePath"
-    :active-top-menu-path="activeTopMenuPath"
-    :header-menu-align="adminPreferences.header.menuAlign"
-    :header-menu-max-width="adminPreferences.header.menuMaxWidth"
-    :show-tab-icons="adminPreferences.tabbar.showIcon"
-    :show-tab-maximize="adminPreferences.tabbar.showMaximize"
-    :sidebar-width="\`\${adminPreferences.sidebar.width}px\`"
-    :tabs-visible="adminPreferences.tabbar.enable"
-    :top-menu-mode="topMenuMode"
     @menu-select="handleMenuSelect"
-    @top-menu-select="handleMenuSelect"
+    @toggle-sidebar="handleToggleSidebar"
     @tab-change="handleTabChange"
   >
     <template #headerActions>

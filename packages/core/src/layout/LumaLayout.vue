@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import type { LumaPreferences } from '../theme/types'
 import type {
   LumaLayoutMenuItem,
   LumaLayoutRouteTabFilter,
@@ -16,6 +17,12 @@ import LumaSidebar from './LumaSidebar.vue'
 import LumaTabs from './LumaTabs.vue'
 import LumaTopNav from './LumaTopNav.vue'
 import {
+  findMenuItemByPath,
+  resolveActiveTopMenuPath,
+  resolveNavigationTarget,
+  splitMenusByLayout,
+} from './state/menu-layout'
+import {
   appendTab,
   closeAllTabs,
   closeOtherTabs,
@@ -28,51 +35,32 @@ import {
 const props = withDefaults(defineProps<{
   title?: string
   menus?: LumaLayoutMenuItem[]
-  topMenus?: LumaLayoutMenuItem[]
+  preferences: LumaPreferences
   tabs?: LumaLayoutTabItem[]
   activeMenuPath?: string
-  activeTopMenuPath?: string
   activeTabPath?: string
-  headerMenuAlign?: 'center' | 'left' | 'right'
-  headerMenuMaxWidth?: number | string
-  showTabIcons?: boolean
-  showTabMaximize?: boolean
-  tabsVisible?: boolean
   routeDriven?: boolean
   routeTabFilter?: LumaLayoutRouteTabFilter
   routeTabResolver?: LumaLayoutRouteTabResolver
   tabFallbackPath?: string
   tabMaxCount?: number
   fixedTabs?: LumaLayoutTabItem[]
-  topMenuMode?: 'flat' | 'tree'
-  sidebarWidth?: string
-  collapsedSidebarWidth?: string
   headerHeight?: string
 }>(), {
   activeMenuPath: '',
   activeTabPath: '',
-  activeTopMenuPath: '',
-  collapsedSidebarWidth: '64px',
-  headerMenuAlign: 'left',
-  headerMenuMaxWidth: '100%',
   headerHeight: '64px',
   menus: () => [],
-  sidebarWidth: '280px',
-  showTabIcons: true,
-  showTabMaximize: true,
   fixedTabs: () => [],
   routeDriven: false,
   tabFallbackPath: '',
-  tabMaxCount: 0,
   tabs: () => [],
-  tabsVisible: true,
-  topMenuMode: 'tree',
-  topMenus: () => [],
 })
 
 const emit = defineEmits<{
   menuSelect: [path: string]
   topMenuSelect: [path: string]
+  toggleSidebar: []
   tabChange: [path: string]
   tabCloseAll: []
   tabCloseLeft: [path: string]
@@ -82,7 +70,6 @@ const emit = defineEmits<{
   tabRemove: [path: string]
 }>()
 
-const collapsed = defineModel<boolean>('collapsed', { default: false })
 const activeTabPathModel = defineModel<string>('activeTabPath')
 const injectedRoute = inject(routeLocationKey, undefined)
 const injectedRouter = inject(routerKey, undefined)
@@ -92,6 +79,7 @@ const layoutRef = useTemplateRef<ComponentPublicInstance>('layoutRef')
 const isMobileViewport = shallowRef(false)
 const mobileMenuOpen = shallowRef(false)
 const routeTabs = shallowRef<LumaLayoutTabItem[]>([])
+const resolvedTabMaxCount = computed(() => props.tabMaxCount ?? props.preferences.tabbar.maxCount)
 let mobileMediaQuery: MediaQueryList | undefined
 
 /***********************布局状态*********************/
@@ -130,7 +118,7 @@ function syncRouteTabs(route: RouteLocationNormalizedLoaded): void {
   routeTabs.value = appendTab(
     [...normalizeFixedTabs(), ...routeTabs.value.filter(item => !props.fixedTabs.some(tab => tab.path === item.path))],
     tab,
-    { maxCount: props.tabMaxCount },
+    { maxCount: resolvedTabMaxCount.value },
   )
 }
 
@@ -158,9 +146,32 @@ const currentActiveTabPath = computed({
 
 const currentTabs = computed(() => props.routeDriven ? routeTabs.value : props.tabs)
 const hasTabs = computed(() => currentTabs.value.length > 0)
-const hasSidebar = computed(() => props.menus.length > 0)
-const hasTopMenus = computed(() => props.topMenus.length > 0)
-const mobileMenus = computed(() => hasTopMenus.value ? props.topMenus : props.menus)
+const collapsed = computed(() => props.preferences.sidebar.collapsed)
+const resolvedActiveMenuPath = computed(() => props.activeMenuPath || injectedRoute?.path || currentActiveTabPath.value)
+const resolvedActiveTopMenuPath = computed(() => resolveActiveTopMenuPath(props.menus, resolvedActiveMenuPath.value))
+const resolvedMenus = computed(() => {
+  const menus = splitMenusByLayout({
+    activeTopMenuPath: resolvedActiveTopMenuPath.value,
+    layout: props.preferences.app.layout,
+    menus: props.menus,
+  })
+
+  return {
+    ...menus,
+    sidebarMenus: props.preferences.sidebar.enable ? menus.sidebarMenus : [],
+  }
+})
+const sidebarMenus = computed(() => resolvedMenus.value.sidebarMenus)
+const topMenus = computed(() => resolvedMenus.value.topMenus)
+const hasSidebar = computed(() => sidebarMenus.value.length > 0)
+const hasTopMenus = computed(() => topMenus.value.length > 0)
+const resolvedTopMenuMode = computed(() => props.preferences.app.layout === 'mixed-nav' ? 'flat' : 'tree')
+const resolvedTopMenuActivePath = computed(() => (
+  props.preferences.app.layout === 'top-nav'
+    ? resolvedActiveMenuPath.value
+    : resolvedActiveTopMenuPath.value
+))
+const mobileMenus = computed(() => hasTopMenus.value ? topMenus.value : sidebarMenus.value)
 const hasMobileMenus = computed(() => mobileMenus.value.some(item => !item.hidden))
 
 function syncMobileViewport(event?: MediaQueryListEvent): void {
@@ -186,7 +197,7 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  () => [props.routeDriven, props.tabMaxCount, props.fixedTabs] as const,
+  () => [props.routeDriven, resolvedTabMaxCount.value, props.fixedTabs] as const,
   () => {
     if (!props.routeDriven) {
       routeTabs.value = []
@@ -198,7 +209,7 @@ watch(
     let nextTabs = [...fixedTabs]
 
     for (const tab of routeTabs.value.filter(tab => !fixedPaths.has(tab.path))) {
-      nextTabs = appendTab(nextTabs, tab, { maxCount: props.tabMaxCount })
+      nextTabs = appendTab(nextTabs, tab, { maxCount: resolvedTabMaxCount.value })
     }
 
     routeTabs.value = nextTabs
@@ -223,7 +234,7 @@ function handleToggleCollapse(): void {
     return
   }
 
-  collapsed.value = !collapsed.value
+  emit('toggleSidebar')
 }
 
 function handleMenuSelect(path: string): void {
@@ -232,7 +243,11 @@ function handleMenuSelect(path: string): void {
 }
 
 function handleTopMenuSelect(path: string): void {
+  const item = findMenuItemByPath(props.menus, path)
+  const target = resolveNavigationTarget(item) || path
+
   emit('topMenuSelect', path)
+  handleMenuSelect(target)
 }
 
 function handleTabChange(path: string): void {
@@ -298,6 +313,7 @@ defineExpose({
   <ElContainer
     ref="layoutRef"
     class="luma-layout"
+    :data-layout="preferences.app.layout"
     :class="{
       'is-sidebar-collapsed': collapsed,
       'is-sidebar-hidden': !hasSidebar,
@@ -321,10 +337,10 @@ defineExpose({
       <template v-if="hasTopMenus" #navigation>
         <LumaTopNav
           :menus="topMenus"
-          :active-path="activeTopMenuPath"
-          :align="headerMenuAlign"
-          :max-width="headerMenuMaxWidth"
-          :mode="topMenuMode"
+          :active-path="resolvedTopMenuActivePath"
+          :align="preferences.header.menuAlign"
+          :max-width="preferences.header.menuMaxWidth"
+          :mode="resolvedTopMenuMode"
           @select="handleTopMenuSelect"
         />
       </template>
@@ -343,17 +359,19 @@ defineExpose({
         @click="mobileMenuOpen = false"
       />
 
-      <LumaSidebar
-        v-if="hasSidebar"
-        class="luma-layout__desktop-sidebar"
-        aria-label="主菜单"
-        :menus="menus"
-        :active-path="activeMenuPath"
-        :collapsed="collapsed"
-        :width="sidebarWidth"
-        :collapsed-width="collapsedSidebarWidth"
-        @select="handleMenuSelect"
-      />
+      <Transition name="luma-layout-sidebar" appear>
+        <LumaSidebar
+          v-if="hasSidebar"
+          class="luma-layout__desktop-sidebar"
+          aria-label="主菜单"
+          :menus="sidebarMenus"
+          :active-path="resolvedActiveMenuPath"
+          :collapsed="collapsed"
+          :width="`${preferences.sidebar.width}px`"
+          collapsed-width="64px"
+          @select="handleMenuSelect"
+        />
+      </Transition>
 
       <LumaSidebar
         v-if="hasMobileMenus"
@@ -362,20 +380,20 @@ defineExpose({
         :aria-hidden="!mobileMenuOpen"
         :inert="!mobileMenuOpen ? true : undefined"
         :menus="mobileMenus"
-        :active-path="activeMenuPath"
+        :active-path="resolvedActiveMenuPath"
         :collapsed="false"
-        :width="sidebarWidth"
-        :collapsed-width="collapsedSidebarWidth"
+        :width="`${preferences.sidebar.width}px`"
+        collapsed-width="64px"
         @select="handleMenuSelect"
       />
 
       <ElContainer class="luma-layout__main" direction="vertical" data-layout-fullscreen-target>
         <LumaTabs
-          v-if="hasTabs && tabsVisible"
+          v-if="hasTabs && preferences.tabbar.enable"
           v-model:active-path="currentActiveTabPath"
           :tabs="currentTabs"
-          :show-icon="showTabIcons"
-          :show-maximize="showTabMaximize"
+          :show-icon="preferences.tabbar.showIcon"
+          :show-maximize="preferences.tabbar.showMaximize"
           @change="handleTabChange"
           @close-all="handleTabCloseAll"
           @close-left="handleTabCloseLeft"
@@ -430,6 +448,30 @@ defineExpose({
   display: none;
 }
 
+.luma-layout-sidebar-enter-active,
+.luma-layout-sidebar-leave-active {
+  overflow: hidden;
+  transition:
+    width var(--luma-motion-duration-base) var(--luma-easing-standard),
+    flex-basis var(--luma-motion-duration-base) var(--luma-easing-standard),
+    opacity var(--luma-motion-duration-fast) ease,
+    transform var(--luma-motion-duration-base) var(--luma-easing-standard),
+    border-color var(--luma-motion-duration-fast) ease;
+}
+
+.luma-layout-sidebar-leave-active {
+  pointer-events: none;
+}
+
+.luma-layout-sidebar-enter-from,
+.luma-layout-sidebar-leave-to {
+  width: 0 !important;
+  flex-basis: 0 !important;
+  opacity: 0;
+  border-right-color: transparent;
+  transform: translateX(-12px);
+}
+
 @media (max-width: 768px) {
   .luma-layout__desktop-sidebar {
     display: none;
@@ -471,7 +513,9 @@ defineExpose({
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .luma-layout__body :deep(.luma-sidebar) {
+  .luma-layout__body :deep(.luma-sidebar),
+  .luma-layout-sidebar-enter-active,
+  .luma-layout-sidebar-leave-active {
     transition: none;
   }
 }

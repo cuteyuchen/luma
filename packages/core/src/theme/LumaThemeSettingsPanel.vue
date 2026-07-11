@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { LumaHeaderMenuAlign, LumaLayoutMode, LumaPreferences, LumaPreferencesDefaults, LumaTransitionName, ThemeMode } from './types'
+import { LumaIcon } from '@luma/icons'
 import { ElButton, ElInputNumber, ElSlider, ElSwitch } from 'element-plus'
 import { computed, ref } from 'vue'
-import { createDefaultPreferences, mergePreferences } from './preferences'
+import { createDefaultPreferences, mergePreferences, resolvePreferenceAvailability } from './preferences'
 import { themeColorPresets } from './theme-color-presets'
 
 const props = withDefaults(defineProps<{
@@ -21,10 +22,10 @@ const emit = defineEmits<{
 const preferences = defineModel<LumaPreferences>('preferences', { required: true })
 const activeTab = ref<'common' | 'layout' | 'theme'>('common')
 
-const themeModeOptions: { label: string, value: ThemeMode }[] = [
-  { label: '浅色', value: 'light' },
-  { label: '深色', value: 'dark' },
-  { label: '跟随系统', value: 'system' },
+const themeModeOptions: { icon: string, label: string, value: ThemeMode }[] = [
+  { icon: 'luma:sun', label: '浅色', value: 'light' },
+  { icon: 'luma:moon', label: '深色', value: 'dark' },
+  { icon: 'luma:monitor', label: '跟随系统', value: 'system' },
 ]
 const layoutModeOptions: { label: string, value: LumaLayoutMode }[] = [
   { label: '侧边导航', value: 'sidebar-nav' },
@@ -51,9 +52,7 @@ const settingsTabs = computed(() => [
   { label: '主题', value: 'theme' as const },
   ...(props.showLayout ? [{ label: '布局', value: 'layout' as const }] : []),
 ])
-const hasHeaderMenu = computed(() => preferences.value.app.layout !== 'sidebar-nav')
-const hasSidebar = computed(() => preferences.value.app.layout !== 'top-nav' && preferences.value.sidebar.enable)
-const hasTabbar = computed(() => preferences.value.tabbar.enable)
+const availability = computed(() => resolvePreferenceAvailability(preferences.value))
 
 function update(patch: Parameters<typeof mergePreferences>[1]): void {
   const next = mergePreferences(preferences.value, patch, props.defaults)
@@ -122,7 +121,7 @@ function setColor(color: string): void {
               :class="{ 'is-active': preferences.theme.mode === item.value }" :aria-pressed="preferences.theme.mode === item.value"
               @click="update({ theme: { mode: item.value } })"
             >
-              <span class="luma-theme-settings__mode-icon" :class="`is-${item.value}`" aria-hidden="true"><i /></span><span>{{ item.label }}</span>
+              <LumaIcon class="luma-theme-settings__mode-icon" :name="item.icon" :size="24" /><span>{{ item.label }}</span>
             </button>
           </div>
         </section>
@@ -160,34 +159,55 @@ function setColor(color: string): void {
               :class="[{ 'is-active': preferences.app.layout === item.value }, `is-${item.value}`]"
               :aria-pressed="preferences.app.layout === item.value" @click="update({ app: { layout: item.value } })"
             >
-              <span class="luma-theme-settings__layout-preview"><i class="header" /><i class="sidebar" /><i class="content" /></span><span>{{ item.label }}</span>
+              <svg class="luma-theme-settings__layout-preview" viewBox="0 0 160 92" aria-hidden="true" focusable="false">
+                <rect class="is-background" x="1" y="1" width="158" height="90" rx="10" />
+                <template v-if="item.value === 'sidebar-nav'">
+                  <rect class="is-strong" x="8" y="8" width="30" height="76" rx="6" />
+                  <rect x="46" y="12" width="106" height="14" rx="5" />
+                  <rect x="46" y="36" width="49" height="40" rx="6" />
+                  <rect x="103" y="36" width="49" height="40" rx="6" />
+                </template>
+                <template v-else-if="item.value === 'top-nav'">
+                  <rect class="is-strong" x="8" y="8" width="144" height="14" rx="6" />
+                  <rect x="8" y="32" width="144" height="14" rx="5" />
+                  <rect x="8" y="56" width="68" height="24" rx="6" />
+                  <rect x="84" y="56" width="68" height="24" rx="6" />
+                </template>
+                <template v-else>
+                  <rect class="is-strong" x="8" y="8" width="144" height="14" rx="6" />
+                  <rect class="is-medium" x="8" y="28" width="26" height="56" rx="6" />
+                  <rect x="44" y="32" width="108" height="14" rx="5" />
+                  <rect x="44" y="56" width="50" height="24" rx="6" />
+                  <rect x="102" y="56" width="50" height="24" rx="6" />
+                </template>
+              </svg><span>{{ item.label }}</span>
             </button>
           </div>
         </section>
         <section class="luma-theme-settings__section">
           <h4>顶栏</h4>
-          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !hasHeaderMenu }">
+          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !availability.headerMenuAlign }">
             <span>菜单位置</span>
             <div class="luma-theme-settings__segments">
-              <button v-for="item in alignOptions" :key="item.value" type="button" :disabled="!hasHeaderMenu" :aria-pressed="preferences.header.menuAlign === item.value" :class="{ 'is-active': preferences.header.menuAlign === item.value }" @click="update({ header: { menuAlign: item.value } })">
+              <button v-for="item in alignOptions" :key="item.value" type="button" :disabled="!availability.headerMenuAlign" :aria-pressed="preferences.header.menuAlign === item.value" :class="{ 'is-active': preferences.header.menuAlign === item.value }" @click="update({ header: { menuAlign: item.value } })">
                 {{ item.label }}
               </button>
             </div>
           </div>
-          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !hasHeaderMenu }">
-            <span>菜单最大宽度</span><ElSlider :model-value="preferences.header.menuMaxWidth" :disabled="!hasHeaderMenu" :min="480" :max="1440" :step="40" @update:model-value="update({ header: { menuMaxWidth: Number($event) } })" /><ElInputNumber :model-value="preferences.header.menuMaxWidth" :disabled="!hasHeaderMenu" :min="480" :max="1440" :step="40" @update:model-value="update({ header: { menuMaxWidth: Number($event) } })" />
+          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !availability.headerMenuMaxWidth }">
+            <span>菜单最大宽度</span><ElSlider :model-value="preferences.header.menuMaxWidth" :disabled="!availability.headerMenuMaxWidth" :min="480" :max="1440" :step="40" @update:model-value="update({ header: { menuMaxWidth: Number($event) } })" /><ElInputNumber :model-value="preferences.header.menuMaxWidth" :disabled="!availability.headerMenuMaxWidth" :min="480" :max="1440" :step="40" @update:model-value="update({ header: { menuMaxWidth: Number($event) } })" />
           </div>
         </section>
         <section class="luma-theme-settings__section">
           <h4>侧边栏</h4>
           <div class="luma-theme-settings__row">
-            <span>显示侧边栏</span><ElSwitch :model-value="preferences.sidebar.enable" :disabled="preferences.app.layout === 'top-nav'" @update:model-value="update({ sidebar: { enable: Boolean($event) } })" />
+            <span>显示侧边栏</span><ElSwitch :model-value="preferences.sidebar.enable" @update:model-value="update({ sidebar: { enable: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
-            <span>折叠菜单</span><ElSwitch :model-value="preferences.sidebar.collapsed" :disabled="!hasSidebar" @update:model-value="update({ sidebar: { collapsed: Boolean($event) } })" />
+            <span>折叠菜单</span><ElSwitch :model-value="preferences.sidebar.collapsed" :disabled="!availability.sidebarCollapsed" @update:model-value="update({ sidebar: { collapsed: Boolean($event) } })" />
           </div>
-          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !hasSidebar }">
-            <span>宽度</span><ElSlider :model-value="preferences.sidebar.width" :disabled="!hasSidebar" :min="200" :max="320" :step="8" @update:model-value="update({ sidebar: { width: Number($event) } })" /><ElInputNumber :model-value="preferences.sidebar.width" :disabled="!hasSidebar" :min="200" :max="320" :step="8" @update:model-value="update({ sidebar: { width: Number($event) } })" />
+          <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !availability.sidebarWidth }">
+            <span>宽度</span><ElSlider :model-value="preferences.sidebar.width" :disabled="!availability.sidebarWidth" :min="200" :max="320" :step="8" @update:model-value="update({ sidebar: { width: Number($event) } })" /><ElInputNumber :model-value="preferences.sidebar.width" :disabled="!availability.sidebarWidth" :min="200" :max="320" :step="8" @update:model-value="update({ sidebar: { width: Number($event) } })" />
           </div>
         </section>
         <section class="luma-theme-settings__section">
@@ -196,16 +216,16 @@ function setColor(color: string): void {
             <span>启用标签栏</span><ElSwitch :model-value="preferences.tabbar.enable" @update:model-value="update({ tabbar: { enable: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
-            <span>页面缓存</span><ElSwitch :model-value="preferences.tabbar.cache" :disabled="!hasTabbar" @update:model-value="update({ tabbar: { cache: Boolean($event) } })" />
+            <span>页面缓存</span><ElSwitch :model-value="preferences.tabbar.cache" :disabled="!availability.tabbarCache" @update:model-value="update({ tabbar: { cache: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
-            <span>显示标签图标</span><ElSwitch :model-value="preferences.tabbar.showIcon" :disabled="!hasTabbar" @update:model-value="update({ tabbar: { showIcon: Boolean($event) } })" />
+            <span>显示标签图标</span><ElSwitch :model-value="preferences.tabbar.showIcon" @update:model-value="update({ tabbar: { showIcon: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
-            <span>显示最大化按钮</span><ElSwitch :model-value="preferences.tabbar.showMaximize" :disabled="!hasTabbar" @update:model-value="update({ tabbar: { showMaximize: Boolean($event) } })" />
+            <span>显示最大化按钮</span><ElSwitch :model-value="preferences.tabbar.showMaximize" @update:model-value="update({ tabbar: { showMaximize: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
-            <span>最大标签数</span><ElInputNumber :model-value="preferences.tabbar.maxCount" :disabled="!hasTabbar" :min="0" :max="30" @update:model-value="update({ tabbar: { maxCount: Number($event ?? 0) } })" />
+            <span>最大标签数</span><ElInputNumber :model-value="preferences.tabbar.maxCount" :min="0" :max="30" @update:model-value="update({ tabbar: { maxCount: Number($event ?? 0) } })" />
           </div>
         </section>
       </div>
@@ -213,14 +233,14 @@ function setColor(color: string): void {
 
     <div class="luma-theme-settings__actions">
       <ElButton class="luma-theme-settings__reset" plain @click="resetPreferences">
-        恢复默认
+        <LumaIcon name="luma:reset" :size="16" />恢复默认
       </ElButton>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.luma-theme-settings { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; color: var(--el-text-color-primary); }
+.luma-theme-settings { container-type: inline-size; display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; color: var(--el-text-color-primary); }
 .luma-theme-settings__tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--el-fill-color-light); border-radius: 10px; }
 .luma-theme-settings__tab { min-height: 40px; border: 0; border-radius: 7px; color: var(--el-text-color-regular); cursor: pointer; background: transparent; transition: color .2s, background-color .2s, box-shadow .2s; }
 .luma-theme-settings__tab.is-active { color: var(--el-color-primary); background: var(--el-bg-color); box-shadow: var(--el-box-shadow-lighter); }
@@ -235,34 +255,30 @@ h4 { margin: 0; font-size: 14px; font-weight: 650; }
 .luma-theme-settings__row.is-stacked :deep(.el-input-number) { grid-column: 2; grid-row: 2; width: 112px; }
 .is-disabled { opacity: .48; }
 .luma-theme-settings__card-grid, .luma-theme-settings__layout-grid, .luma-theme-settings__transition-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
-.luma-theme-settings__card-grid.is-three { grid-template-columns: repeat(3, 1fr); }
+.luma-theme-settings__card-grid.is-three { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
 button { font: inherit; }
 .luma-theme-settings__mode-card, .luma-theme-settings__layout-card, .luma-theme-settings__transition-card { display: flex; min-height: 78px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--el-border-color-light); border-radius: 10px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-bg-color); transition: border-color .2s, color .2s, background-color .2s, transform .2s; }
 .luma-theme-settings__mode-card:hover, .luma-theme-settings__layout-card:hover, .luma-theme-settings__transition-card:hover { border-color: var(--el-color-primary-light-5); }
 .luma-theme-settings__mode-card.is-active, .luma-theme-settings__layout-card.is-active, .luma-theme-settings__transition-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
 .luma-theme-settings__mode-card:focus-visible, .luma-theme-settings__layout-card:focus-visible, .luma-theme-settings__transition-card:focus-visible, .luma-theme-settings__tab:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
-.luma-theme-settings__mode-icon { position: relative; width: 24px; height: 24px; border: 2px solid currentColor; border-radius: 50%; }
-.luma-theme-settings__mode-icon.is-dark { background: currentColor; box-shadow: inset 7px -3px 0 var(--el-bg-color); }
-.luma-theme-settings__mode-icon.is-system { border-radius: 4px; }
-.luma-theme-settings__mode-icon.is-system::after { position: absolute; right: 4px; bottom: -5px; left: 4px; height: 2px; content: ''; background: currentColor; }
-.luma-theme-settings__mode-icon.is-light::before, .luma-theme-settings__mode-icon.is-light::after { position: absolute; inset: -6px 9px; content: ''; background: currentColor; }
-.luma-theme-settings__mode-icon.is-light::after { transform: rotate(90deg); }
-.luma-theme-settings__color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.luma-theme-settings__mode-icon { flex: none; }
+.luma-theme-settings__mode-card > span:last-child { white-space: nowrap; word-break: keep-all; }
+.luma-theme-settings__color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; }
 .luma-theme-settings__color-card { position: relative; display: flex; min-height: 54px; align-items: center; gap: 8px; padding: 8px; overflow: hidden; border: 1px solid var(--el-border-color-light); border-radius: 9px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-bg-color); }
 .luma-theme-settings__color-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); }
 .luma-theme-settings__color-card i { width: 22px; height: 22px; flex: none; border-radius: 6px; }
 .luma-theme-settings__color-card i.is-custom { background: linear-gradient(135deg, #3b82f6, #8b5cf6 50%, #ef4444); }
+.luma-theme-settings__color-card > span { min-width: 0; white-space: nowrap; word-break: keep-all; }
 .luma-theme-settings__color-card input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .luma-theme-settings__radius-grid, .luma-theme-settings__segments { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .luma-theme-settings__radius-grid button, .luma-theme-settings__segments button { min-height: 36px; border: 1px solid var(--el-border-color-light); border-radius: 7px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-fill-color-light); }
 .luma-theme-settings__radius-grid button.is-active, .luma-theme-settings__segments button.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
 .luma-theme-settings__segments { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
-.luma-theme-settings__layout-preview { position: relative; width: 100%; height: 48px; border: 1px solid var(--el-border-color-light); border-radius: 6px; background: var(--el-fill-color-lighter); }
-.luma-theme-settings__layout-preview i { position: absolute; display: block; border-radius: 3px; background: var(--el-color-primary-light-7); }
-.luma-theme-settings__layout-preview .header { top: 5px; right: 5px; left: 5px; height: 8px; }
-.luma-theme-settings__layout-preview .sidebar { top: 17px; bottom: 5px; left: 5px; width: 18%; }
-.luma-theme-settings__layout-preview .content { top: 17px; right: 5px; bottom: 5px; left: 27%; }
-.is-sidebar-nav .header { left: 27%; }.is-sidebar-nav .sidebar { top: 5px; }.is-top-nav .sidebar { display: none; }.is-top-nav .content { left: 5px; }
+.luma-theme-settings__layout-preview { width: 100%; height: auto; color: var(--el-color-primary); }
+.luma-theme-settings__layout-preview rect { fill: var(--el-fill-color); stroke: color-mix(in srgb, var(--el-border-color) 80%, transparent); stroke-width: 1; }
+.luma-theme-settings__layout-preview rect.is-background { fill: var(--el-fill-color-lighter); }
+.luma-theme-settings__layout-preview rect.is-medium { fill: var(--el-color-primary-light-7); stroke: var(--el-color-primary-light-5); }
+.luma-theme-settings__layout-preview rect.is-strong { fill: var(--el-color-primary-light-5); stroke: var(--el-color-primary-light-3); }
 .luma-theme-settings__transition-preview { position: relative; width: 58px; height: 42px; border-radius: 6px; background: var(--el-fill-color-light); }
 .luma-theme-settings__transition-preview i { position: absolute; inset: 7px 10px; border-radius: 5px; background: var(--el-color-primary-light-5); opacity: .3; }
 .luma-theme-settings__transition-preview i:last-child { opacity: 1; }
@@ -272,11 +288,11 @@ button { font: inherit; }
 .luma-theme-settings__transition-card:not(:disabled).is-zoom-fade i:last-child { animation: luma-settings-zoom 2.4s infinite; }
 .luma-theme-settings__transition-card:disabled { cursor: not-allowed; opacity: .45; }
 .luma-theme-settings__actions { flex: none; padding-top: 16px; border-top: 1px solid var(--el-border-color-lighter); background: var(--el-bg-color); }
-.luma-theme-settings__reset { width: 100%; min-height: 40px; }
+.luma-theme-settings__reset { width: 100%; min-height: 40px; gap: 8px; }
 @keyframes luma-settings-side { 0%, 20%, 100% { opacity: 0; transform: translateX(-10px); } 40%, 80% { opacity: 1; transform: translateX(0); } }
 @keyframes luma-settings-fade { 0%, 20%, 100% { opacity: 0; } 40%, 80% { opacity: 1; } }
 @keyframes luma-settings-bottom { 0%, 20%, 100% { opacity: 0; transform: translateY(8px); } 40%, 80% { opacity: 1; transform: translateY(0); } }
 @keyframes luma-settings-zoom { 0%, 20%, 100% { opacity: 0; transform: scale(.82); } 40%, 80% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .luma-theme-settings *, .luma-theme-settings *::before, .luma-theme-settings *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; } }
-@media (max-width: 420px) { .luma-theme-settings__color-grid, .luma-theme-settings__card-grid.is-three { grid-template-columns: repeat(2, 1fr); } }
+@container (max-width: 300px) { .luma-theme-settings__layout-grid, .luma-theme-settings__transition-grid { grid-template-columns: 1fr; } }
 </style>

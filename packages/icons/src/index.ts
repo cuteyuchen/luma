@@ -1,6 +1,10 @@
+import { builtinIconDefinitions } from './builtin-icons'
 import LumaIcon from './components/LumaIcon.vue'
 import LumaIconPicker from './components/LumaIconPicker.vue'
 import LumaIconPickerDialog from './components/LumaIconPickerDialog.vue'
+import { registerIcons } from './registry/icons'
+
+registerIcons(builtinIconDefinitions)
 
 /***********************组件导出*********************/
 export {
@@ -8,6 +12,8 @@ export {
   LumaIconPicker,
   LumaIconPickerDialog,
 }
+
+export { builtinIconDefinitions }
 
 export {
   getRegisteredIconGroups,
