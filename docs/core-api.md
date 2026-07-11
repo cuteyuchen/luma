@@ -566,3 +566,33 @@ preferences.dispose()
 ```
 
 Store 会清理损坏缓存、补齐新增默认字段，并只在主题模式为 `system` 时监听系统主题变化。
+
+## 可选生态包
+
+下列能力不进入 `@luma/core` 默认依赖：
+
+- `@luma/icons`：响应式图标 registry、选择器、单色 SVG 校验/合成和 data URI 缓存，详见 `docs/icons.md`。
+- `@luma/charts`：`LumaChart` 与 `LumaChartPanel`；面板支持查询、表格替代视图、导出、错误恢复和无障碍摘要。
+- `@luma/vben-compat`：Vben 高频表单/Grid 写法到 Luma Schema/CRUD 的迁移适配，详见 `docs/migration-from-vben.md`。
+- `@luma/vite`：组件 resolver、工作区 source/dist alias 和可选 Devtools 接线。
+
+```ts
+import {
+  createLumaAliases,
+  createLumaComponentResolver,
+  resolveLumaDevtoolsPlugin,
+} from '@luma/vite'
+
+const aliases = createLumaAliases({
+  workspaceRoot: process.cwd(),
+  target: 'source',
+})
+
+const resolver = createLumaComponentResolver({ importStyle: true })
+const devtools = resolveLumaDevtoolsPlugin({
+  enabled: import.meta.env.DEV,
+  factory: () => installedDevtoolsPlugin(),
+})
+```
+
+`@luma/vite` 不安装自动导入或 Devtools 实现，也不提供 1920px 到 viewport 的全局转换。

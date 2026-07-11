@@ -1,6 +1,6 @@
 # @luma/vben-compat
 
-Luma 的 Vben 常用写法兼容层，当前支持 `useVbenForm` 和 `useVbenVxeGrid` 的常用子集。
+Luma 的 Vben 常用写法兼容层，支持 `useVbenForm` 常用控件映射，以及 `useVbenVxeGrid` 的 proxy、toolbar、actions、错误状态和可等待刷新流程。
 
 ```ts
 import { useVbenForm, useVbenVxeGrid } from '@luma/vben-compat'

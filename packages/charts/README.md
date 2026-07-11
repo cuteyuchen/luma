@@ -16,12 +16,26 @@ import '@luma/charts/style.css'
 ```
 
 ```vue
-<LumaChartPanel title="访问趋势" :options="options" height="320px" />
+<LumaChartPanel
+  v-model:view="view"
+  title="访问趋势"
+  :options="options"
+  :error="error"
+  summary="最近七天访问趋势"
+  show-view-toggle
+  show-export
+  height="320px"
+  @retry="reload"
+  @export="handleExport"
+>
+  <template #query>查询条件</template>
+  <template #table>可访问的数据表格</template>
+</LumaChartPanel>
 ```
 
 ## 导出
 
-- `LumaChart`：基础图表组件，透传 ECharts `options`，容器自适应。
-- `LumaChartPanel`：带标题、loading、空状态与操作插槽的面板。
+- `LumaChart`：基础图表组件，透传 ECharts `options`，容器自适应，并默认响应 reduced-motion。
+- `LumaChartPanel`：支持查询区、图表/表格切换、导出、重试、loading/empty/error 和无障碍摘要的工作流面板。
 - `useChartResize`：监听容器尺寸变化并触发图表 resize。
 - `resolveChartPanelStyle`：图表区/表格区宽度到 CSS 变量的映射。

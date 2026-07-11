@@ -12,6 +12,12 @@ Luma 的 Vben 兼容层用于降低迁移成本，不追求完整复刻 Vben Adm
 - `Input`、`Input.Password` 转为 `input`。
 - `Input.TextArea`、`Textarea` 转为 `textarea`。
 - `Select` 转为 `select`。
+- `InputNumber` 转为 `number`。
+- `Switch` 转为 `switch`。
+- `DatePicker` 按 `componentProps.type` 转为 `date`、`datetime` 或 `daterange`。
+- `DatePicker.RangePicker` 转为 `daterange`。
+- `RadioGroup`、`CheckboxGroup` 转为 `radio`、`checkbox`。
+- `TreeSelect`、`Upload` 转为 `tree-select`、`upload`。
 - `Hidden` 转为 `hidden`。
 - `componentProps.placeholder` 转为 `placeholder`。
 - `componentProps.options` 转为 `options`。
@@ -36,11 +42,13 @@ Luma 的 Vben 兼容层用于降低迁移成本，不追求完整复刻 Vben Adm
 - `title` / `label` 转为 `label`。
 - `width`、`align`、`formatter` 透传。
 - `hidden: true` 或 `visible: false` 转为隐藏列。
-- `type: 'checkbox'`、`type: 'radio'`、`type: 'seq'` 这类 VXE 专有辅助列初版会跳过。
+- `type: 'checkbox'` 转为 Luma selection；`type: 'radio'`、`type: 'seq'` 等未对应到 Luma 公共模型的辅助列会跳过。
 - `gridOptions.formOptions.schemas` 复用 `useVbenForm` 的 schema 适配规则。
 - `gridOptions.pagerConfig.pageSize` / `pageSizes` 转为分页配置。
 - `gridOptions.proxyConfig.ajax.query` 用于加载列表数据。
 - `proxyConfig.props.result`、`items` / `list`、`total` 可用于适配嵌套接口结果。
+- `toolbarConfig` 转为 CRUD toolbar，`actions` 转为行级操作，`tableConfig` 转为列设置和自动 resize 等表格配置。
+- total 支持有限数字字符串归一化；其他公司异常字段仍应在应用 adapter 处理。
 
 `useVbenVxeGrid` 返回 `[register, gridApi]`，其中 `gridApi` 提供：
 
@@ -49,9 +57,10 @@ Luma 的 Vben 兼容层用于降低迁移成本，不追求完整复刻 Vben Adm
 - `getRows()` / `setRows(rows, total)`：读取或设置表格数据。
 - `getTotal()`：读取总数。
 - `getQueryModel()` / `setQueryModel(model)`：读取或设置查询模型。
-- `search(payload)` / `reload()` / `reset()`：触发查询、刷新和重置。
+- `search(payload)` / `reload()` / `reset()`：触发查询、刷新和重置，并返回 `Promise<boolean>` 供调用方等待结果。
 - `handleSearch(payload)` / `handleReset(payload)` / `handlePageChange(payload)`：用于绑定 LumaCrudTable 事件。
 - `getGridInstance()`：获取通过 `register` 绑定的表格实例。
+- `getError()` / `clearError()`：读取和清理最近一次加载错误；`gridOptions.onError` 可统一接收失败。
 
 ## 最小迁移示例
 
@@ -99,7 +108,7 @@ pnpm compat:build
 - Vben 表单的完整校验规则映射。
 - 动态函数式 `ifShow`、`dynamicDisabled` 等高级运行时能力。
 - Vben 表单布局、栅格和复杂插槽协议。
-- VXE 原生渲染、高级编辑、虚拟滚动、导出、复杂 toolbar 和插槽协议。
+- VXE 原生渲染、高级编辑、虚拟滚动和复杂 toolbar 插槽协议。
 
 ## 迁移原则
 
