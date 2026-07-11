@@ -11,4 +11,6 @@ dist-*
 !.env.example
 .idea/
 .playwright-cli/
+.playwright-results/
+playwright-report/
 .playwright-mcp/
