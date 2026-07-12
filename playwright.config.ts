@@ -22,12 +22,25 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },
-  webServer: {
-    command: 'node ../../node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173',
-    cwd: 'apps/luma-admin',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    url: 'http://127.0.0.1:4173',
-  },
+  webServer: [
+    {
+      command: 'pnpm dev',
+      cwd: 'apps/luma-mock-api',
+      env: {
+        MOCK_LOGIN_RATE_LIMIT: '1000',
+        MOCK_RATE_LIMIT: '10000',
+      },
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      url: 'http://127.0.0.1:5320/api/status',
+    },
+    {
+      command: 'node ../../node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173',
+      cwd: 'apps/luma-admin',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      url: 'http://127.0.0.1:4173',
+    },
+  ],
   workers: 1,
 })

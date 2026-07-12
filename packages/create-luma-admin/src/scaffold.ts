@@ -2,6 +2,7 @@ import { mkdir, readdir, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 
 export interface CreateLumaAdminProjectOptions {
+  apiMode?: 'http' | 'local'
   name: string
   targetDir: string
 }
@@ -193,6 +194,56 @@ const framework = createLumaAdmin({
 })
 
 await framework.mount('#app')
+`
+}
+
+function createHttpRequestTs(): string {
+  return `import { createRequestClient } from '@luma/core/request'
+
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+
+export const publicRequest = createRequestClient({ baseURL })
+
+export function createAuthenticatedRequest(getToken: () => string | undefined) {
+  return createRequestClient({
+    baseURL,
+    getToken,
+  })
+}
+`
+}
+
+function createHttpAuthApiTs(): string {
+  return `import { publicRequest } from './request'
+
+export interface LoginInput {
+  password: string
+  username: string
+}
+
+export function login(input: LoginInput) {
+  return publicRequest.post('/auth/login', { body: { ...input } })
+}
+
+export function refreshSession(refreshToken: string) {
+  return publicRequest.post('/auth/refresh', { body: { refreshToken } })
+}
+`
+}
+
+function createApiContractMd(): string {
+  return `# HTTP API 接入
+
+项目通过 \`VITE_API_BASE_URL\` 配置接口地址。业务项目应在应用层定义响应字段、状态码、登录字段和菜单字段映射，不要把业务协议写入 \`@luma/core\`。
+
+建议后端至少提供：
+
+- \`POST /auth/login\`
+- \`POST /auth/refresh\`
+- 当前用户和权限接口
+- 动态菜单接口
+
+生产环境推荐使用同域 \`/api\` 反向代理；跨域部署时填写完整 HTTPS 地址。
 `
 }
 
@@ -1446,8 +1497,8 @@ body {
 `
 }
 
-function createTemplateFiles(projectName: string): TemplateFile[] {
-  return [
+function createTemplateFiles(projectName: string, apiMode: 'http' | 'local'): TemplateFile[] {
+  const files: TemplateFile[] = [
     { path: 'index.html', content: createIndexHtml() },
     { path: 'package.json', content: createPackageJson(projectName) },
     { path: 'src/App.vue', content: createAppVue() },
@@ -1469,6 +1520,18 @@ function createTemplateFiles(projectName: string): TemplateFile[] {
     { path: 'tsconfig.json', content: createTsConfig() },
     { path: 'vite.config.ts', content: createViteConfig() },
   ]
+
+  if (apiMode === 'http') {
+    files.push(
+      { path: '.env.development', content: 'VITE_API_BASE_URL=/api\n' },
+      { path: '.env.production.example', content: 'VITE_API_BASE_URL=/api\n' },
+      { path: 'API-CONTRACT.md', content: createApiContractMd() },
+      { path: 'src/services/auth-api.ts', content: createHttpAuthApiTs() },
+      { path: 'src/services/request.ts', content: createHttpRequestTs() },
+    )
+  }
+
+  return files
 }
 
 /***********************目录写入*********************/
@@ -1499,7 +1562,7 @@ export async function createLumaAdminProject(
 ): Promise<CreateLumaAdminProjectResult> {
   const targetDir = resolve(options.targetDir)
   const projectName = resolveProjectName(options)
-  const templateFiles = createTemplateFiles(projectName)
+  const templateFiles = createTemplateFiles(projectName, options.apiMode ?? 'local')
 
   await assertEmptyTargetDir(targetDir)
 

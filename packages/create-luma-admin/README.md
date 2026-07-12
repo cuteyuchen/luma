@@ -6,7 +6,10 @@
 
 ```bash
 pnpm create luma-admin my-admin
+pnpm create luma-admin my-admin-http --api-mode http
 ```
+
+`--api-mode local` 是默认模式，保留浏览器内请求示例；`--api-mode http` 会额外生成接口环境变量、标准请求客户端、登录刷新示例和 `API-CONTRACT.md`，但不会生成完整业务后端。
 
 生成后执行：
 

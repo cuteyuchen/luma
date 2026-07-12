@@ -4,14 +4,25 @@ import process from 'node:process'
 import { createLumaAdminProject } from './scaffold.js'
 
 /***********************参数解析*********************/
+function resolveApiMode(argv: string[]): 'http' | 'local' {
+  const inline = argv.find(argument => argument.startsWith('--api-mode='))?.split('=')[1]
+  const optionIndex = argv.indexOf('--api-mode')
+  const value = inline ?? (optionIndex >= 0 ? argv[optionIndex + 1] : undefined) ?? 'local'
+  if (value !== 'http' && value !== 'local')
+    throw new Error('--api-mode 仅支持 local 或 http')
+  return value
+}
+
 function resolveTargetDir(argv: string[]): string {
-  return resolve(process.cwd(), argv[2] ?? 'luma-admin')
+  const target = argv.slice(2).find(argument => !argument.startsWith('--') && argument !== 'http' && argument !== 'local')
+  return resolve(process.cwd(), target ?? 'luma-admin')
 }
 
 /***********************命令执行*********************/
 async function main(): Promise<void> {
   const targetDir = resolveTargetDir(process.argv)
   const result = await createLumaAdminProject({
+    apiMode: resolveApiMode(process.argv),
     name: basename(targetDir),
     targetDir,
   })

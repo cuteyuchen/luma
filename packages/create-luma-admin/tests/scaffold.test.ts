@@ -132,4 +132,31 @@ describe('createLumaAdminProject', () => {
       await rm(tempDir, { force: true, recursive: true })
     }
   })
+
+  it('http 模式会生成接口环境变量和接入示例', async () => {
+    const tempDir = await createTempDir()
+    const targetDir = join(tempDir, 'http-admin')
+
+    try {
+      const result = await createLumaAdminProject({ apiMode: 'http', name: 'http-admin', targetDir })
+      const requestService = await readFile(join(targetDir, 'src/services/request.ts'), 'utf8')
+      const authApi = await readFile(join(targetDir, 'src/services/auth-api.ts'), 'utf8')
+      const contract = await readFile(join(targetDir, 'API-CONTRACT.md'), 'utf8')
+
+      expect(result.createdFiles).toEqual(expect.arrayContaining([
+        '.env.development',
+        '.env.production.example',
+        'API-CONTRACT.md',
+        'src/services/auth-api.ts',
+        'src/services/request.ts',
+      ]))
+      expect(requestService).toContain('VITE_API_BASE_URL')
+      expect(requestService).toContain('createAuthenticatedRequest')
+      expect(authApi).toContain('/auth/refresh')
+      expect(contract).toContain('业务协议写入 `@luma/core`')
+    }
+    finally {
+      await rm(tempDir, { force: true, recursive: true })
+    }
+  })
 })
