@@ -1,28 +1,27 @@
 import type { AuthSessionData } from '@luma/core/auth'
-import type { AdminLoginRequest, AdminUser } from '../mock/auth'
-import { adminAccountOptions, mockLogin, mockRefreshSession } from '../mock/auth'
-import { parseAdminLoginResponse, parseAdminResponse, parseAdminSession } from './adapters'
+import type { AdminAccountPreset, AdminLoginRequest, AdminUser } from './types'
+import { adminPublicRequest, adminRequest } from '../services/request'
+import { parseAdminSession } from './adapters'
 
-export interface AdminLoginResult {
-  session: AuthSessionData
-  user: AdminUser
-}
+export interface AdminLoginResult { session: AuthSessionData, user: AdminUser }
 
-/***********************账号预设*********************/
-export { adminAccountOptions }
-export type {
-  AdminAccountKey,
-  AdminAccountPreset,
-  AdminLoginRequest,
-  AdminUser,
-} from '../mock/auth'
+export const adminAccountOptions: AdminAccountPreset[] = [
+  { description: '拥有系统管理、项目和示例区全部访问能力', key: 'admin', label: '超级管理员', password: 'luma123', username: 'admin' },
+  { description: '负责项目、字典和常用运营工作，不具备系统管理权限', key: 'operator', label: '运营人员', password: 'luma123', username: 'operator' },
+  { description: '仅可访问工作台和基础示例，无系统管理操作权限', key: 'guest', label: '访客账号', password: 'luma123', username: 'guest' },
+]
 
-/***********************登录接口*********************/
+export type { AdminAccountKey, AdminAccountPreset, AdminLoginRequest, AdminUser } from './types'
+
 export async function loginAdmin(payload: AdminLoginRequest): Promise<AdminLoginResult> {
-  return parseAdminLoginResponse(await mockLogin(payload))
+  const result = await adminPublicRequest.post<Record<string, unknown>>('/auth/login', { body: { ...payload } })
+  return { session: parseAdminSession(result), user: result.user as AdminUser }
 }
 
 export async function refreshAdminSession(refreshToken: string): Promise<AuthSessionData> {
-  const result = parseAdminResponse<Record<string, unknown>>(await mockRefreshSession(refreshToken))
-  return parseAdminSession(result)
+  return parseAdminSession(await adminPublicRequest.post('/auth/refresh', { body: { refreshToken } }))
+}
+
+export async function logoutAdmin(): Promise<void> {
+  await adminRequest.post('/auth/logout')
 }

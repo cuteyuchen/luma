@@ -8,7 +8,7 @@ test('登录后加载权限菜单并正确处理 403、404 与退出', async ({ 
 
   await page.getByTestId('login-submit').click()
   await expect(page).toHaveURL(/#\/system\/user$/)
-  await expect(page.getByRole('heading', { name: '用户管理' })).toBeVisible()
+  await expect(page.getByText('用户管理', { exact: true }).last()).toBeVisible()
 
   await page.goto('/#/examples/restricted')
   await expect(page).toHaveURL(/#\/403$/)
@@ -29,7 +29,7 @@ test('admin 可以在动态菜单间导航', async ({ page }) => {
   await openTopMenu(page, '系统管理')
   await page.getByRole('menuitem', { name: '角色管理', exact: true }).click()
   await expect(page).toHaveURL(/#\/system\/role$/)
-  await expect(page.getByRole('heading', { name: '角色管理' })).toBeVisible()
+  await expect(page.getByText('角色管理', { exact: true }).last()).toBeVisible()
 })
 
 test('operator 和 guest 按各自权限加载动态菜单', async ({ page }) => {

@@ -1,27 +1,15 @@
 import type { AdminSystemConfig } from './preferences'
-import {
-  getAdminSystemConfig,
-  resetAdminSystemConfig,
-  updateAdminSystemConfig,
-} from './preferences'
+import { updateAdminSystemConfig } from './preferences'
+import { adminRequest } from './request'
 
 export async function fetchAdminSystemConfig(): Promise<AdminSystemConfig> {
-  return getAdminSystemConfig()
+  return updateAdminSystemConfig(await adminRequest.get('/system/config'))
 }
 
 export async function saveAdminSystemConfig(config: AdminSystemConfig): Promise<AdminSystemConfig> {
-  const previous = getAdminSystemConfig()
-
-  try {
-    return updateAdminSystemConfig(config)
-  }
-  catch (error) {
-    updateAdminSystemConfig(previous)
-    throw error
-  }
+  return updateAdminSystemConfig(await adminRequest.put('/system/config', { body: { ...config }, retryOnAuthRefresh: true }))
 }
 
 export async function restoreAdminSystemConfig(): Promise<AdminSystemConfig> {
-  resetAdminSystemConfig()
-  return getAdminSystemConfig()
+  return updateAdminSystemConfig(await adminRequest.post('/system/config/restore', { retryOnAuthRefresh: true }))
 }

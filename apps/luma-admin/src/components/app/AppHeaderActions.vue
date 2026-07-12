@@ -16,7 +16,7 @@ const emit = defineEmits<{
   logout: []
   openProfile: []
   openSettings: []
-  toggleTheme: []
+  toggleTheme: [event: MouseEvent]
 }>()
 
 /***********************显示状态*********************/
@@ -24,8 +24,8 @@ const themeToggleTitle = computed(() => props.resolvedThemeMode === 'dark' ? '�
 const userInitial = computed(() => props.userName.trim().slice(0, 1).toUpperCase() || '管')
 
 /***********************事件处理*********************/
-function handleToggleTheme(): void {
-  emit('toggleTheme')
+function handleToggleTheme(event: MouseEvent): void {
+  emit('toggleTheme', event)
 }
 
 function handleOpenSettings(): void {

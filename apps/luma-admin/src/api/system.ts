@@ -1,11 +1,9 @@
 import type { DictionaryOption } from '@luma/core/dictionary'
 import type {
-  SaveSystemMenuInput as MockSaveSystemMenuInput,
-  SaveSystemUserInput as MockSaveSystemUserInput,
-  SystemMenuRecord as MockSystemMenuRecord,
-  SystemPermissionTreeNode as MockSystemPermissionTreeNode,
-  SystemUserListParams as MockSystemUserListParams,
-  SystemUserRecord as MockSystemUserRecord,
+  AdminPageTransport,
+  RawSystemMenuRecord,
+  RawSystemPermissionTreeNode,
+  RawSystemUserRecord,
   SaveSystemDictionaryItemInput,
   SaveSystemDictionaryTypeInput,
   SaveSystemOrganizationInput,
@@ -17,41 +15,9 @@ import type {
   SystemRoleListResult,
   SystemRoleRecord,
   SystemUserPasswordResetResult,
-} from '../mock/system'
-import {
-  mockCreateDictionaryItem,
-  mockCreateDictionaryType,
-  mockCreateSystemMenu,
-  mockCreateSystemOrganization,
-  mockCreateSystemRole,
-  mockCreateSystemUser,
-  mockDeleteDictionaryItem,
-  mockDeleteDictionaryType,
-  mockDeleteSystemMenu,
-  mockDeleteSystemOrganization,
-  mockDeleteSystemRole,
-  mockDeleteSystemUser,
-  mockFetchDictionaryItems,
-  mockFetchDictionaryOptions,
-  mockFetchDictionaryTypes,
-  mockFetchSystemMenus,
-  mockFetchSystemOrganizations,
-  mockFetchSystemPermissionTree,
-  mockFetchSystemRoleOptions,
-  mockFetchSystemRolePermissions,
-  mockFetchSystemRoles,
-  mockFetchSystemUsers,
-  mockResetSystemUserPassword,
-  mockUpdateDictionaryItem,
-  mockUpdateDictionaryType,
-  mockUpdateSystemMenu,
-  mockUpdateSystemOrganization,
-  mockUpdateSystemRole,
-  mockUpdateSystemRolePermissions,
-  mockUpdateSystemUser,
-  mockUpdateSystemUserRoles,
-  mockUpdateSystemUserStatus,
-} from '../mock/system'
+  SystemUserStatus,
+} from './types'
+import { adminRequest } from '../services/request'
 
 export type {
   SaveSystemDictionaryItemInput,
@@ -69,256 +35,161 @@ export type {
   SystemRoleStatus,
   SystemUserPasswordResetResult,
   SystemUserStatus,
-} from '../mock/system'
+} from './types'
 
-export interface SystemUserRecord {
-  createdAt: string
-  id: string
-  nickname: string
-  phone: string
-  roles: string[]
-  status: MockSystemUserRecord['status']
-  username: string
-}
+export interface SystemUserRecord extends Omit<RawSystemUserRecord, 'role'> {}
+export interface SystemUserQuery { keyword?: string, role?: string, roles?: string, status?: SystemUserStatus | '' }
+export interface SystemUserListParams { page: number, pageSize: number, query?: SystemUserQuery }
+export interface SystemUserListResult { items: SystemUserRecord[], total: number }
+export interface SaveSystemUserInput { nickname?: unknown, phone?: unknown, roles?: unknown, status?: unknown, username?: unknown }
+export interface SystemPermissionTreeNode { children?: SystemPermissionTreeNode[], id: string, label: string, permissions: string[] }
+export interface SystemMenuRecord extends Omit<RawSystemMenuRecord, 'children' | 'permission' | 'permissions'> { children?: SystemMenuRecord[], permissions: string[] }
+export interface SaveSystemMenuInput { component?: unknown, externalLink?: unknown, externalTarget?: unknown, hidden?: unknown, icon?: unknown, name?: unknown, order?: unknown, parentId?: unknown, path?: unknown, permissions?: unknown, redirect?: unknown, title?: unknown, type?: unknown }
 
-export interface SystemUserQuery {
-  keyword?: string
-  roles?: string
-  status?: MockSystemUserRecord['status'] | ''
-}
-
-export interface SystemUserListParams {
-  page: number
-  pageSize: number
-  query?: SystemUserQuery
-}
-
-export interface SystemUserListResult {
-  items: SystemUserRecord[]
-  total: number
-}
-
-export interface SaveSystemUserInput {
-  nickname?: unknown
-  phone?: unknown
-  roles?: unknown
-  status?: unknown
-  username?: unknown
-}
-
-export interface SystemPermissionTreeNode {
-  children?: SystemPermissionTreeNode[]
-  id: string
-  label: string
-  permissions: string[]
-}
-
-export interface SystemMenuRecord {
-  children?: SystemMenuRecord[]
-  component: string
-  externalLink?: string
-  externalTarget?: '_blank' | '_self'
-  hidden: boolean
-  icon: string
-  id: string
-  name?: string
-  order: number
-  parentId: string
-  path: string
-  permissions: string[]
-  redirect?: string
-  title: string
-  type: MockSystemMenuRecord['type']
-}
-
-export interface SaveSystemMenuInput {
-  component?: unknown
-  externalLink?: unknown
-  externalTarget?: unknown
-  hidden?: unknown
-  icon?: unknown
-  name?: unknown
-  order?: unknown
-  parentId?: unknown
-  path?: unknown
-  permissions?: unknown
-  redirect?: unknown
-  title?: unknown
-  type?: unknown
-}
-
-function toSystemUserRecord(record: MockSystemUserRecord): SystemUserRecord {
+function toSystemUserRecord(record: RawSystemUserRecord): SystemUserRecord {
   const { role: _legacyRole, ...standardRecord } = record
   return { ...standardRecord, roles: [...record.roles] }
 }
 
-function toSystemMenuRecord(record: MockSystemMenuRecord): SystemMenuRecord {
-  const { permission: legacyPermission, ...standardRecord } = record
+function toSystemMenuRecord(record: RawSystemMenuRecord): SystemMenuRecord {
+  const { permission, permissions, children, ...rest } = record
   return {
-    ...standardRecord,
-    children: record.children?.map(toSystemMenuRecord),
-    permissions: record.permissions?.length
-      ? [...record.permissions]
-      : legacyPermission ? [legacyPermission] : [],
+    ...rest,
+    children: children?.map(toSystemMenuRecord),
+    permissions: permissions?.length ? [...permissions] : permission ? [permission] : [],
   }
 }
 
-function toSystemPermissionTreeNode(node: MockSystemPermissionTreeNode): SystemPermissionTreeNode {
-  return {
-    children: node.children?.map(toSystemPermissionTreeNode),
-    id: node.id,
-    label: node.label,
-    permissions: node.permission ? [node.permission] : [],
-  }
+function toPermissionNode(node: RawSystemPermissionTreeNode): SystemPermissionTreeNode {
+  return { children: node.children?.map(toPermissionNode), id: node.id, label: node.label, permissions: node.permission ? [node.permission] : [] }
 }
 
 export async function fetchSystemUsers(params: SystemUserListParams): Promise<SystemUserListResult> {
-  const transportParams: MockSystemUserListParams = {
-    page: params.page,
-    pageSize: params.pageSize,
-    query: {
-      keyword: params.query?.keyword,
-      role: params.query?.roles,
-      status: params.query?.status,
-    },
-  }
-  const result = await mockFetchSystemUsers(transportParams)
-  return { items: result.items.map(toSystemUserRecord), total: result.total }
+  const result = await adminRequest.get<AdminPageTransport<RawSystemUserRecord>>('/system/users', {
+    query: { page: params.page, pageSize: params.pageSize, keyword: params.query?.keyword, roles: params.query?.roles ?? params.query?.role, status: params.query?.status },
+  })
+  return { items: result.records.map(toSystemUserRecord), total: result.totalNum }
 }
 
 export async function createSystemUser(input: SaveSystemUserInput): Promise<SystemUserRecord> {
-  return toSystemUserRecord(await mockCreateSystemUser(input as MockSaveSystemUserInput))
+  return toSystemUserRecord(await adminRequest.post('/system/users', { body: { ...input } }))
 }
 
 export async function updateSystemUser(id: string, input: SaveSystemUserInput): Promise<SystemUserRecord> {
-  return toSystemUserRecord(await mockUpdateSystemUser(id, input as MockSaveSystemUserInput))
+  return toSystemUserRecord(await adminRequest.put(`/system/users/${id}`, { body: { ...input }, retryOnAuthRefresh: true }))
 }
 
-export async function updateSystemUserStatus(id: string, status: SystemUserRecord['status']): Promise<SystemUserRecord> {
-  return toSystemUserRecord(await mockUpdateSystemUserStatus(id, status))
+export async function updateSystemUserStatus(id: string, status: SystemUserStatus): Promise<SystemUserRecord> {
+  return toSystemUserRecord(await adminRequest.patch(`/system/users/${id}/status`, { body: { status }, retryOnAuthRefresh: true }))
 }
 
 export async function updateSystemUserRoles(id: string, roles: string[]): Promise<SystemUserRecord> {
-  return toSystemUserRecord(await mockUpdateSystemUserRoles(id, roles))
+  return toSystemUserRecord(await adminRequest.put(`/system/users/${id}/roles`, { body: { roles }, retryOnAuthRefresh: true }))
 }
 
 export function resetSystemUserPassword(id: string): Promise<SystemUserPasswordResetResult> {
-  return mockResetSystemUserPassword(id)
+  return adminRequest.post(`/system/users/${id}/reset-password`, { retryOnAuthRefresh: true })
 }
 
-export function deleteSystemUser(id: string): Promise<void> {
-  return mockDeleteSystemUser(id)
+export async function deleteSystemUser(id: string): Promise<void> {
+  await adminRequest.delete(`/system/users/${id}`, { retryOnAuthRefresh: true })
 }
 
 export function fetchSystemRoleOptions(): Promise<DictionaryOption[]> {
-  return mockFetchSystemRoleOptions()
+  return adminRequest.get('/system/roles/options')
 }
-
-export function fetchSystemRoles(params: SystemRoleListParams): Promise<SystemRoleListResult> {
-  return mockFetchSystemRoles(params)
+export async function fetchSystemRoles(params: SystemRoleListParams): Promise<SystemRoleListResult> {
+  const result = await adminRequest.get<AdminPageTransport<SystemRoleRecord>>('/system/roles', { query: { page: params.page, pageSize: params.pageSize, keyword: params.query?.keyword, status: params.query?.status } })
+  return { items: result.records, total: result.totalNum }
 }
-
 export function createSystemRole(input: SaveSystemRoleInput): Promise<SystemRoleRecord> {
-  return mockCreateSystemRole(input)
+  return adminRequest.post('/system/roles', { body: { ...input } })
 }
 
 export function updateSystemRole(id: string, input: SaveSystemRoleInput): Promise<SystemRoleRecord> {
-  return mockUpdateSystemRole(id, input)
+  return adminRequest.put(`/system/roles/${id}`, { body: { ...input }, retryOnAuthRefresh: true })
 }
 
-export function deleteSystemRole(id: string): Promise<void> {
-  return mockDeleteSystemRole(id)
+export async function deleteSystemRole(id: string): Promise<void> {
+  await adminRequest.delete(`/system/roles/${id}`, { retryOnAuthRefresh: true })
 }
 
 export async function fetchSystemPermissionTree(): Promise<SystemPermissionTreeNode[]> {
-  return (await mockFetchSystemPermissionTree()).map(toSystemPermissionTreeNode)
+  return (await adminRequest.get<RawSystemPermissionTreeNode[]>('/system/permissions/tree')).map(toPermissionNode)
 }
 
 export function fetchSystemRolePermissions(roleCode: string): Promise<string[]> {
-  return mockFetchSystemRolePermissions(roleCode)
+  return adminRequest.get(`/system/roles/${roleCode}/permissions`)
 }
 
 export function updateSystemRolePermissions(roleCode: string, permissions: string[]): Promise<string[]> {
-  return mockUpdateSystemRolePermissions(roleCode, permissions)
+  return adminRequest.put(`/system/roles/${roleCode}/permissions`, { body: { permissions }, retryOnAuthRefresh: true })
 }
 
 export function fetchSystemOrganizations(): Promise<SystemOrganizationRecord[]> {
-  return mockFetchSystemOrganizations()
+  return adminRequest.get('/system/organizations')
 }
 
 export function createSystemOrganization(input: SaveSystemOrganizationInput): Promise<SystemOrganizationRecord> {
-  return mockCreateSystemOrganization(input)
+  return adminRequest.post('/system/organizations', { body: { ...input } })
 }
 
-export function updateSystemOrganization(
-  id: string,
-  input: SaveSystemOrganizationInput,
-): Promise<SystemOrganizationRecord> {
-  return mockUpdateSystemOrganization(id, input)
+export function updateSystemOrganization(id: string, input: SaveSystemOrganizationInput): Promise<SystemOrganizationRecord> {
+  return adminRequest.put(`/system/organizations/${id}`, { body: { ...input }, retryOnAuthRefresh: true })
 }
 
-export function deleteSystemOrganization(id: string): Promise<void> {
-  return mockDeleteSystemOrganization(id)
+export async function deleteSystemOrganization(id: string): Promise<void> {
+  await adminRequest.delete(`/system/organizations/${id}`, { retryOnAuthRefresh: true })
 }
 
 export async function fetchSystemMenus(): Promise<SystemMenuRecord[]> {
-  return (await mockFetchSystemMenus()).map(toSystemMenuRecord)
+  return (await adminRequest.get<RawSystemMenuRecord[]>('/system/menus')).map(toSystemMenuRecord)
 }
 
 export async function createSystemMenu(input: SaveSystemMenuInput): Promise<SystemMenuRecord> {
-  return toSystemMenuRecord(await mockCreateSystemMenu(input as MockSaveSystemMenuInput))
+  return toSystemMenuRecord(await adminRequest.post('/system/menus', { body: { ...input } }))
 }
 
 export async function updateSystemMenu(id: string, input: SaveSystemMenuInput): Promise<SystemMenuRecord> {
-  return toSystemMenuRecord(await mockUpdateSystemMenu(id, input as MockSaveSystemMenuInput))
+  return toSystemMenuRecord(await adminRequest.put(`/system/menus/${id}`, { body: { ...input }, retryOnAuthRefresh: true }))
 }
 
-export function deleteSystemMenu(id: string): Promise<void> {
-  return mockDeleteSystemMenu(id)
+export async function deleteSystemMenu(id: string): Promise<void> {
+  await adminRequest.delete(`/system/menus/${id}`, { retryOnAuthRefresh: true })
 }
 
 export function fetchDictionaryTypes(): Promise<SystemDictionaryTypeRecord[]> {
-  return mockFetchDictionaryTypes()
+  return adminRequest.get('/system/dictionaries/types')
 }
 
-export function createDictionaryType(
-  input: SaveSystemDictionaryTypeInput,
-): Promise<SystemDictionaryTypeRecord> {
-  return mockCreateDictionaryType(input)
+export function createDictionaryType(input: SaveSystemDictionaryTypeInput): Promise<SystemDictionaryTypeRecord> {
+  return adminRequest.post('/system/dictionaries/types', { body: { ...input } })
 }
 
-export function updateDictionaryType(
-  id: string,
-  input: SaveSystemDictionaryTypeInput,
-): Promise<SystemDictionaryTypeRecord> {
-  return mockUpdateDictionaryType(id, input)
+export function updateDictionaryType(id: string, input: SaveSystemDictionaryTypeInput): Promise<SystemDictionaryTypeRecord> {
+  return adminRequest.put(`/system/dictionaries/types/${id}`, { body: { ...input }, retryOnAuthRefresh: true })
 }
 
-export function deleteDictionaryType(id: string): Promise<void> {
-  return mockDeleteDictionaryType(id)
+export async function deleteDictionaryType(id: string): Promise<void> {
+  await adminRequest.delete(`/system/dictionaries/types/${id}`, { retryOnAuthRefresh: true })
 }
 
 export function fetchDictionaryItems(typeCode: string): Promise<SystemDictionaryItemRecord[]> {
-  return mockFetchDictionaryItems(typeCode)
+  return adminRequest.get('/system/dictionaries/items', { query: { typeCode } })
 }
 
-export function createDictionaryItem(
-  input: SaveSystemDictionaryItemInput,
-): Promise<SystemDictionaryItemRecord> {
-  return mockCreateDictionaryItem(input)
+export function createDictionaryItem(input: SaveSystemDictionaryItemInput): Promise<SystemDictionaryItemRecord> {
+  return adminRequest.post('/system/dictionaries/items', { body: { ...input } })
 }
 
-export function updateDictionaryItem(
-  id: string,
-  input: SaveSystemDictionaryItemInput,
-): Promise<SystemDictionaryItemRecord> {
-  return mockUpdateDictionaryItem(id, input)
+export function updateDictionaryItem(id: string, input: SaveSystemDictionaryItemInput): Promise<SystemDictionaryItemRecord> {
+  return adminRequest.put(`/system/dictionaries/items/${id}`, { body: { ...input }, retryOnAuthRefresh: true })
 }
 
-export function deleteDictionaryItem(id: string): Promise<void> {
-  return mockDeleteDictionaryItem(id)
+export async function deleteDictionaryItem(id: string): Promise<void> {
+  await adminRequest.delete(`/system/dictionaries/items/${id}`, { retryOnAuthRefresh: true })
 }
 
 export function fetchDictionaryOptions(dictionary: string): Promise<DictionaryOption[]> {
-  return mockFetchDictionaryOptions(dictionary)
+  return adminRequest.get(`/system/dictionaries/options/${encodeURIComponent(dictionary)}`)
 }

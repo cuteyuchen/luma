@@ -9,8 +9,13 @@ dist-*
 .env
 .env.*
 !.env.example
+!apps/luma-admin/.env.development
+!apps/luma-admin/.env.production.example
+.nitro/
+.output/
 .idea/
 .playwright-cli/
 .playwright-results/
 playwright-report/
 .playwright-mcp/
+output

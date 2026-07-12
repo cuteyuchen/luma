@@ -119,6 +119,7 @@ pnpm release:check
 - [开发路线图](docs/development-roadmap.md)
 - [架构说明](docs/architecture.md)
 - [Core API](docs/core-api.md)
+- [Mock API 与线上 Demo 部署](docs/mock-api.md)
 - [图标系统](docs/icons.md)
 - [包边界](docs/package-boundaries.md)
 - [发布检查清单](docs/release-checklist.md)

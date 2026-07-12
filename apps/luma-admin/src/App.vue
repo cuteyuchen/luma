@@ -11,6 +11,7 @@ import { computed, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeaderActions from './components/app/AppHeaderActions.vue'
 import AppSettingsDrawer from './components/app/AppSettingsDrawer.vue'
+import LumaBrand from './components/app/LumaBrand.vue'
 import {
   createAdminSidebarMenus,
   createAdminTabs,
@@ -25,6 +26,7 @@ import {
 } from './services/preferences'
 import { currentUser, logout } from './services/session'
 import { adminSettingsVisible, openAdminSettings } from './services/settings'
+import { runAdminThemeTransition } from './services/theme-transition'
 
 /***********************基础状态*********************/
 const title = adminAppName
@@ -62,12 +64,14 @@ watch(currentUser, async (user) => {
 }, { immediate: true })
 
 /***********************偏好事件*********************/
-function handleToggleTheme(): void {
-  patchAdminPreferences({
-    theme: {
-      mode: resolvedThemeMode.value === 'dark' ? 'light' : 'dark',
-    },
-  })
+function handleToggleTheme(event: MouseEvent): void {
+  void runAdminThemeTransition(() => {
+    patchAdminPreferences({
+      theme: {
+        mode: resolvedThemeMode.value === 'dark' ? 'light' : 'dark',
+      },
+    })
+  }, event)
 }
 
 function handleOpenSettings(): void {
@@ -81,6 +85,11 @@ function handleOpenProfile(): void {
 }
 
 function handlePreferencesChange(nextPreferences: LumaPreferences): void {
+  if (nextPreferences.theme.mode !== preferences.value.theme.mode) {
+    void runAdminThemeTransition(() => patchAdminPreferences(nextPreferences))
+    return
+  }
+
   patchAdminPreferences(nextPreferences)
 }
 
@@ -171,6 +180,10 @@ async function handleTabRefresh(path: string): Promise<void> {
     @tab-change="handleTabChange"
     @tab-refresh="handleTabRefresh"
   >
+    <template #logo>
+      <LumaBrand compact />
+    </template>
+
     <template #headerActions>
       <AppHeaderActions
         :resolved-theme-mode="resolvedThemeMode"

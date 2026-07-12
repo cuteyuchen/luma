@@ -1,7 +1,7 @@
 import type { AuthSessionData } from '@luma/core/auth'
 import type { ParseStandardResponseOptions } from '@luma/core/request'
 import type { MenuRecordFieldNames, NormalizedMenuNode } from '@luma/core/router'
-import type { AdminUser } from '../mock/auth'
+import type { AdminUser } from './types'
 import { parseAuthSession } from '@luma/core/auth'
 import { parsePageResult, parseStandardResponse } from '@luma/core/request'
 import { normalizeMenuRecords } from '@luma/core/router'
@@ -123,7 +123,11 @@ export function parseAdminLoginResponse(response: unknown): { session: AuthSessi
 }
 
 export function parseAdminMenuResponse(response: unknown): NormalizedMenuNode[] {
-  return normalizeMenuRecords(parseAdminResponse<Record<string, unknown>[]>(response), {
+  return parseAdminMenuData(parseAdminResponse<Record<string, unknown>[]>(response))
+}
+
+export function parseAdminMenuData(records: Record<string, unknown>[]): NormalizedMenuNode[] {
+  return normalizeMenuRecords(records, {
     fieldNames: companyMenuFieldNames,
   })
 }

@@ -1,7 +1,7 @@
 import type { AdminAccountKey, AdminLoginRequest, AdminUser } from '../api/auth'
 import { createAuthSession } from '@luma/core/auth'
 import { readonly, shallowRef } from 'vue'
-import { adminAccountOptions, loginAdmin } from '../api/auth'
+import { adminAccountOptions, loginAdmin, logoutAdmin } from '../api/auth'
 import { clearAdminAccess, syncAdminAccess } from './permission'
 
 const tokenStorageKey = 'luma-admin:token'
@@ -156,5 +156,14 @@ export async function login(payload: AdminAccountKey | AdminLoginRequest): Promi
 }
 
 export async function logout(): Promise<void> {
-  await adminSession.logout()
+  try {
+    if (adminSession.isAuthenticated())
+      await logoutAdmin()
+  }
+  catch {
+    // 服务端会话可能已过期；本地会话仍必须清理。
+  }
+  finally {
+    await adminSession.logout()
+  }
 }
