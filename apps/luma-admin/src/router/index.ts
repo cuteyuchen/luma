@@ -187,6 +187,20 @@ function createStaticRoutes(): RouteRecordRaw[] {
       redirect: '/dashboard',
     },
     {
+      path: '/cockpit/:cockpitId?',
+      name: 'AdminCockpit',
+      component: () => import('../cockpit/CockpitView.vue'),
+      meta: {
+        hideInMenu: true,
+        hideInTab: true,
+        // layout: public 仅用于绕过 Admin 壳层
+        layout: 'public',
+        // 静态路由不经 authority→permissions 转换，需直接声明 permissions
+        permissions: ['cockpit:view'],
+        title: '驾驶舱',
+      },
+    },
+    {
       path: '/403',
       name: 'AdminForbidden',
       component: () => import('../views/error/ForbiddenView.vue'),

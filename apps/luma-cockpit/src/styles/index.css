@@ -1,0 +1,28 @@
+/***********************独立应用品牌与全局样式*********************/
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #0b0e14;
+  color: #e5eaf3;
+}
+
+/* 独立应用通过 CSS 变量覆盖 @luma/cockpit 基础 token 完成品牌定制 */
+.luma-cockpit {
+  --luma-cockpit-accent: #2dd4bf;
+  --luma-cockpit-bg: #0b0e14;
+}

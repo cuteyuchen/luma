@@ -10,6 +10,7 @@ const packageDirs = {
   icons: join(rootDir, 'packages/icons'),
   core: join(rootDir, 'packages/core'),
   charts: join(rootDir, 'packages/charts'),
+  cockpit: join(rootDir, 'packages/cockpit'),
   vbenCompat: join(rootDir, 'packages/vben-compat'),
   vite: join(rootDir, 'packages/vite'),
 }
@@ -110,6 +111,7 @@ if (existsSync(licensePath)) {
 const iconsPackage = checkPublishPackage('@luma/icons', packageDirs.icons)
 const corePackage = checkPublishPackage('@luma/core', packageDirs.core)
 const chartsPackage = checkPublishPackage('@luma/charts', packageDirs.charts)
+const cockpitPackage = checkPublishPackage('@luma/cockpit', packageDirs.cockpit)
 const compatPackage = checkPublishPackage('@luma/vben-compat', packageDirs.vbenCompat)
 const vitePackage = checkPublishPackage('@luma/vite', packageDirs.vite)
 const createPackage = checkPublishPackage('create-luma-admin', packageDirs.createLumaAdmin)
@@ -118,6 +120,11 @@ assert(corePackage.files?.includes('theme-chalk'), '@luma/core files 未包含 t
 assert(corePackage.exports?.['./style.css'] === './dist/core.css', '@luma/core 未导出 style.css')
 assert(corePackage.exports?.['./theme-chalk/index.scss'], '@luma/core 未导出 theme-chalk/index.scss')
 assert(createPackage.bin?.['create-luma-admin'] === './dist/cli.js', 'create-luma-admin 缺少 bin.create-luma-admin')
+
+assert(cockpitPackage.exports?.['./style.css'] === './dist/cockpit.css', '@luma/cockpit 未导出 style.css')
+assert(cockpitPackage.exports?.['./runtime'], '@luma/cockpit 未导出 runtime 入口')
+assert(cockpitPackage.exports?.['./designer'], '@luma/cockpit 未导出 designer 入口')
+assert(cockpitPackage.exports?.['./registry'], '@luma/cockpit 未导出 registry 入口')
 
 /***********************依赖边界*********************/
 const iconsAllDependencies = getDependencyNames(iconsPackage, [
@@ -162,6 +169,21 @@ assert(hasDependency(chartsPackage, 'peerDependencies', 'echarts'), '@luma/chart
 assert(!hasDependency(chartsPackage, 'dependencies', 'echarts'), '@luma/charts 不能把 echarts 放在 dependencies')
 assert(!chartsAllDependencies.has('@luma/core'), '@luma/charts 不应依赖 @luma/core')
 assert(viteAllDependencies.size === 0, '@luma/vite 不应引入强制运行时依赖')
+
+/***********************@luma/cockpit 依赖边界*********************/
+const cockpitAllDependencies = getDependencyNames(cockpitPackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
+
+assert(hasDependency(cockpitPackage, 'dependencies', '@luma/core'), '@luma/cockpit 应通过 dependencies 依赖 @luma/core')
+assert(hasDependency(cockpitPackage, 'peerDependencies', 'vue'), '@luma/cockpit 应把 vue 放在 peerDependencies')
+assert(!cockpitAllDependencies.has('@luma/charts'), '@luma/cockpit 不能依赖 @luma/charts')
+assert(!coreAllDependencies.has('@luma/cockpit'), '@luma/core 不能反向依赖 @luma/cockpit')
+for (const forbiddenName of ['echarts', 'vue-echarts', 'openlayers', 'ol', 'cesium', 'mapbox-gl', 'leaflet']) {
+  assert(!cockpitAllDependencies.has(forbiddenName), `@luma/cockpit 不能依赖 ${forbiddenName}`)
+}
 
 for (const dependencyName of coreAllDependencies) {
   assert(!/^@intlify\//.test(dependencyName), `@luma/core 不能默认依赖 ${dependencyName}`)

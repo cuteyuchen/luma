@@ -28,8 +28,12 @@ interface DomainSnapshot {
   system: MockSystemState
 }
 
+/** 驾驶舱配置以通用 JSON 结构存储，mock 不感知 @luma/cockpit 内部模型 */
+export type CockpitConfigRecord = Record<string, unknown>
+
 export interface Sandbox {
   config: AdminSystemConfig
+  cockpitConfig: CockpitConfigRecord
   createdAt: number
   id: string
   lastAccessedAt: number
@@ -42,6 +46,49 @@ const initialConfig: AdminSystemConfig = {
   layout: 'mixed-nav',
   tabbarEnable: true,
   transitionEnable: true,
+}
+
+/**
+ * 中性默认驾驶舱配置，用于演示真实 HTTP 加载/保存流程。
+ * 名称保持中性，不含任何行业术语。
+ */
+const initialCockpitConfig: CockpitConfigRecord = {
+  schemaVersion: 1,
+  id: 'admin-demo-cockpit',
+  title: '应用驾驶舱',
+  activeCategoryId: 'category-a',
+  categories: [
+    {
+      id: 'category-a',
+      label: '分类 A',
+      visible: true,
+      activePageId: 'page-a',
+      pages: [
+        {
+          id: 'page-a',
+          title: '页面 A',
+          center: { id: 'center-a', type: 'stub-center' },
+          left: {
+            columns: [
+              {
+                id: 'col-a',
+                width: 1,
+                containers: [
+                  {
+                    id: 'ct-a',
+                    height: 1,
+                    mode: 'single',
+                    widgets: [{ id: 'w-a', type: 'stub-widget', title: '示例模块', visible: true }],
+                  },
+                ],
+              },
+            ],
+          },
+          right: { columns: [] },
+        },
+      ],
+    },
+  ],
 }
 
 function capture(): DomainSnapshot {
@@ -96,6 +143,7 @@ export function createSandbox(id: string): Sandbox {
   const now = Date.now()
   const sandbox: Sandbox = {
     config: clone(initialConfig),
+    cockpitConfig: clone(initialCockpitConfig),
     createdAt: now,
     id,
     lastAccessedAt: now,
@@ -123,6 +171,7 @@ export function resetSandbox(id: string): void {
   const sandbox = getSandbox(id)
   sandbox.snapshot = clone(seed)
   sandbox.config = clone(initialConfig)
+  sandbox.cockpitConfig = clone(initialCockpitConfig)
 }
 
 export function cleanupSandboxes(): void {

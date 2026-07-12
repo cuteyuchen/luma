@@ -78,6 +78,12 @@ function handleOpenSettings(): void {
   openAdminSettings()
 }
 
+function handleOpenCockpit(): void {
+  if (route.path !== '/cockpit') {
+    void router.push('/cockpit')
+  }
+}
+
 function handleOpenProfile(): void {
   if (route.path !== '/profile') {
     void router.push('/profile')
@@ -189,6 +195,7 @@ async function handleTabRefresh(path: string): Promise<void> {
         :resolved-theme-mode="resolvedThemeMode"
         :user-name="userName"
         @logout="handleLogout"
+        @open-cockpit="handleOpenCockpit"
         @open-profile="handleOpenProfile"
         @open-settings="handleOpenSettings"
         @toggle-theme="handleToggleTheme"

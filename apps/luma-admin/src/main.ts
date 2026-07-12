@@ -100,6 +100,12 @@ const localIcons: IconDefinition[] = [
     source: 'local-svg',
     svgText: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 3h2v16h14v2H5a2 2 0 0 1-2-2V3h2Zm5 13H8V9h2v7Zm4 0h-2V5h2v11Zm4 0h-2v-5h2v5Z"/></svg>',
   },
+  {
+    key: 'app:cockpit',
+    label: '驾驶舱',
+    source: 'local-svg',
+    svgText: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 1.5 5l1.6-1.1A7 7 0 0 1 5 12a7 7 0 0 1 14 0 7 7 0 0 1-1.1 3.9l1.6 1.1A9 9 0 0 0 21 12a9 9 0 0 0-9-9Zm0 5a1.5 1.5 0 0 0-1.5 1.5c0 .4.16.77.42 1.04l-1.3 3.2 3.02-1.86A1.5 1.5 0 0 0 12 8Z"/></svg>',
+  },
 ]
 
 /***********************应用启动*********************/

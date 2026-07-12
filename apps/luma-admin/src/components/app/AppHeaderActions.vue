@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   logout: []
+  openCockpit: []
   openProfile: []
   openSettings: []
   toggleTheme: [event: MouseEvent]
@@ -30,6 +31,10 @@ function handleToggleTheme(event: MouseEvent): void {
 
 function handleOpenSettings(): void {
   emit('openSettings')
+}
+
+function handleOpenCockpit(): void {
+  emit('openCockpit')
 }
 
 function handleOpenProfile(): void {
@@ -52,6 +57,18 @@ function handleLogout(): void {
       @click="handleToggleTheme"
     >
       <LumaIcon name="app:theme" :size="16" />
+    </ElButton>
+
+    <ElButton
+      v-authority="'cockpit:view'"
+      circle
+      text
+      title="驾驶舱"
+      aria-label="进入驾驶舱"
+      data-action="open-cockpit"
+      @click="handleOpenCockpit"
+    >
+      <LumaIcon name="app:cockpit" :size="16" />
     </ElButton>
 
     <ElButton

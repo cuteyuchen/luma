@@ -1,0 +1,68 @@
+{
+  "name": "@luma/cockpit",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Luma generic cockpit orchestration framework: layout runtime, component registry, designer and message bus.",
+  "license": "MIT",
+  "keywords": [
+    "luma",
+    "vue",
+    "cockpit",
+    "dashboard",
+    "layout"
+  ],
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/src/runtime/index.d.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    },
+    "./designer": {
+      "types": "./dist/src/designer/index.d.ts",
+      "import": "./dist/designer.js",
+      "require": "./dist/designer.cjs"
+    },
+    "./registry": {
+      "types": "./dist/src/registry/index.d.ts",
+      "import": "./dist/registry.js",
+      "require": "./dist/registry.cjs"
+    },
+    "./style.css": "./dist/cockpit.css"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build --config vite.config.ts && vue-tsc -p tsconfig.json --emitDeclarationOnly --outDir dist && node ../../scripts/clean-package-dist.mjs dist",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config ../../vitest.config.ts tests"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.11.0",
+    "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "element-plus": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@luma/core": "workspace:*"
+  }
+}
