@@ -1,6 +1,8 @@
 /***********************独立应用品牌与全局样式*********************/
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
+  --standalone-bg-light: #f3f7fc;
+  --standalone-bg-dark: #07111f;
 }
 
 * {
@@ -17,12 +19,35 @@ body,
 
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: #0b0e14;
-  color: #e5eaf3;
+  background: var(--standalone-bg-light);
+  color: var(--el-text-color-primary, #1f2d3d);
+}
+
+:root[data-luma-theme='dark'] body {
+  background: var(--standalone-bg-dark);
+  color: var(--el-text-color-primary, #e5edf7);
 }
 
 /* 独立应用通过 CSS 变量覆盖 @luma/cockpit 基础 token 完成品牌定制 */
 .luma-cockpit {
-  --luma-cockpit-accent: #2dd4bf;
-  --luma-cockpit-bg: #0b0e14;
+  --luma-cockpit-accent: var(--el-color-primary, #1677ff);
+  --luma-cockpit-bg: linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%);
+  font-family: inherit;
+}
+
+:root[data-luma-theme='dark'] .luma-cockpit {
+  --luma-cockpit-bg: radial-gradient(circle at 50% 20%, rgb(22 119 255 / 16%), transparent 32%), #07111f;
+}
+
+button {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
 }

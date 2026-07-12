@@ -8,6 +8,20 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/vue') || id.includes('/@vue/'))
+            return 'vendor-vue'
+          if (id.includes('node_modules/element-plus'))
+            return 'vendor-element-plus'
+          if (id.includes('node_modules/echarts') || id.includes('node_modules/vue-echarts'))
+            return 'vendor-echarts'
+          if (id.includes('/packages/core/') || id.includes('/packages/icons/') || id.includes('/packages/charts/'))
+            return 'vendor-luma'
+        },
+      },
+    },
   },
   resolve: {
     alias: {

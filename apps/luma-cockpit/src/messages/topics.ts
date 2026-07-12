@@ -4,8 +4,24 @@
 export const cockpitTopics = {
   nodeSelected: 'standalone:node-selected',
   centerReady: 'standalone:center-ready',
+  sceneRegionFocus: 'scene:region-focus',
+  scenePointFocus: 'scene:point-focus',
+  sceneFilterChange: 'scene:filter-change',
+  sceneSelectionChange: 'scene:selection-change',
 } as const
 
 export interface NodeSelectedPayload {
   id: string
+}
+
+export interface SceneFocusPayload {
+  id: string
+}
+
+export interface SceneFilterPayload {
+  status?: string
+}
+
+export interface SceneSelectionPayload {
+  ids: string[]
 }
