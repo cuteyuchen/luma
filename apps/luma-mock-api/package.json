@@ -5,13 +5,16 @@
   "private": true,
   "scripts": {
     "build": "nitro build",
-    "dev": "nitro dev --port 5320",
+    "dev": "nitro dev --host 127.0.0.1 --port 5320",
+    "preview": "node .output/server/index.mjs",
     "start": "node .output/server/index.mjs",
-    "test": "vitest run --config ../../vitest.config.ts tests",
+    "test": "vitest run --config vitest.config.ts tests",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@luma/core": "workspace:*"
+    "@luma/core": "workspace:*",
+    "h3": "1.15.11",
+    "nitropack": "^2.13.4"
   },
   "devDependencies": {
     "@types/node": "^24.6.1",

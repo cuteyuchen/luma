@@ -1,9 +1,10 @@
 import { createAuthorityDirective } from '@luma/core/directives'
 import { mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
-import { adminPermissionCodes } from '../src/mock/permission'
+import { adminPermissionCodes } from '../src/api/permissions'
 import { permissionStore } from '../src/services/permission'
+import { login, logout } from '../src/services/session'
 import UserView from '../src/views/system/UserView.vue'
 
 const sampleUser = {
@@ -68,8 +69,13 @@ function mountUserView() {
 }
 
 describe('system user view', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await login('admin')
     permissionStore.clear()
+  })
+
+  afterEach(async () => {
+    await logout()
   })
 
   it('配置用户字段、查询条件和标准 dataSource', async () => {

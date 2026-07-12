@@ -15,6 +15,7 @@ import type {
 import { LumaCrudTable } from '@luma/core/components'
 import { ElAlert, ElButton, ElDialog, ElMessage, ElMessageBox, ElTree } from 'element-plus'
 import { nextTick, onMounted, shallowRef, useTemplateRef } from 'vue'
+import { adminPermissionCodes } from '../../api/permissions'
 import {
   createSystemRole,
   deleteSystemRole,
@@ -24,7 +25,6 @@ import {
   updateSystemRole,
   updateSystemRolePermissions,
 } from '../../api/system'
-import { adminPermissionCodes } from '../../mock/permission'
 
 interface RoleCrudTableExpose {
   openEdit: (row: SchemaTableRow) => void

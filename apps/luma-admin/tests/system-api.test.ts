@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { parseAdminPageResponse } from '../src/api/adapters'
-import { loginAdmin } from '../src/api/auth'
 import { loadAdminMenus } from '../src/api/menu'
+import { adminPermissionCodes } from '../src/api/permissions'
 import {
   createDictionaryItem,
   createDictionaryType,
@@ -36,30 +36,15 @@ import {
   updateSystemUserRoles,
   updateSystemUserStatus,
 } from '../src/api/system'
-import { adminPermissionCodes } from '../src/mock/permission'
-import {
-  resetMockDictionaries,
-  resetMockSystemMenus,
-  resetMockSystemOrganizations,
-  resetMockSystemRoles,
-  resetMockSystemUsers,
-} from '../src/mock/system'
+import { login, logout } from '../src/services/session'
 
 describe('system mock api', () => {
-  beforeEach(() => {
-    resetMockDictionaries()
-    resetMockSystemMenus()
-    resetMockSystemOrganizations()
-    resetMockSystemRoles()
-    resetMockSystemUsers()
+  beforeEach(async () => {
+    await login('admin')
   })
 
-  afterEach(() => {
-    resetMockDictionaries()
-    resetMockSystemMenus()
-    resetMockSystemOrganizations()
-    resetMockSystemRoles()
-    resetMockSystemUsers()
+  afterEach(async () => {
+    await logout()
   })
 
   it('支持用户分页和关键词、角色、状态查询', async () => {
@@ -134,7 +119,7 @@ describe('system mock api', () => {
     ])
   })
 
-  it('支持用户启停、角色分配和密码重置并同步到登录账号', async () => {
+  it('支持用户启停、角色分配和密码重置并同步到当前沙箱', async () => {
     await updateSystemUserRoles('user-2', ['operator', 'guest'])
     const roleUpdated = await fetchSystemUsers({
       page: 1,
@@ -144,18 +129,13 @@ describe('system mock api', () => {
     expect(roleUpdated.items.find(user => user.id === 'user-2')?.roles).toEqual(['operator', 'guest'])
 
     await updateSystemUserStatus('user-2', 'disabled')
-    await expect(loginAdmin({ password: 'luma123', username: 'operator' })).rejects.toThrow('账号已停用')
+    await expect(fetchSystemUsers({ page: 1, pageSize: 10, query: { keyword: 'operator', status: 'disabled' } })).resolves.toMatchObject({ total: 1 })
 
     await updateSystemUserStatus('user-2', 'enabled')
     const resetResult = await resetSystemUserPassword('user-2')
     expect(resetResult.temporaryPassword).toBe('Luma@123456')
-    await expect(loginAdmin({ password: 'luma123', username: 'operator' })).rejects.toThrow('账号或密码不正确')
-    const loginResult = await loginAdmin({ password: resetResult.temporaryPassword, username: 'operator' })
-    expect(loginResult.user.roles).toEqual(['operator', 'guest'])
-    expect(loginResult.user.permissions).toEqual(expect.arrayContaining([
-      adminPermissionCodes.systemDictUpdate,
-      adminPermissionCodes.examplesView,
-    ]))
+    const resetUsers = await fetchSystemUsers({ page: 1, pageSize: 10, query: { keyword: 'operator' } })
+    expect(resetUsers.items.find(user => user.id === 'user-2')).toMatchObject({ roles: ['operator', 'guest'], status: 'enabled' })
   })
 
   it('支持角色 CRUD 和基于菜单、按钮生成的权限树', async () => {
@@ -202,25 +182,16 @@ describe('system mock api', () => {
     })).resolves.toMatchObject({ total: 0 })
   })
 
-  it('角色授权关系会用于账号下一次登录', async () => {
+  it('角色授权关系会保存在当前沙箱', async () => {
     await updateSystemRolePermissions('guest', [
       adminPermissionCodes.dashboardView,
       adminPermissionCodes.projectList,
     ])
 
-    const result = await loginAdmin({
-      password: 'luma123',
-      username: 'guest',
-    })
-
-    expect(result.user.permissions).toEqual([
+    await expect(fetchSystemRolePermissions('guest')).resolves.toEqual([
       adminPermissionCodes.dashboardView,
       adminPermissionCodes.projectList,
     ])
-    expect(result.session).toMatchObject({
-      accessToken: expect.stringContaining('mock-token-guest'),
-      refreshToken: 'mock-refresh-guest',
-    })
   })
 
   it('公司分页和菜单异常字段只通过 adapter 转为标准模型', async () => {

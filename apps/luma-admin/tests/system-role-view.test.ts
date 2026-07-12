@@ -2,13 +2,13 @@ import { createAuthorityDirective } from '@luma/core/directives'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
+import { adminPermissionCodes } from '../src/api/permissions'
 import {
   createSystemRole,
   fetchSystemRolePermissions,
 } from '../src/api/system'
-import { adminPermissionCodes } from '../src/mock/permission'
-import { resetMockSystemRoles } from '../src/mock/system'
 import { permissionStore } from '../src/services/permission'
+import { login, logout } from '../src/services/session'
 import RoleView from '../src/views/system/RoleView.vue'
 
 const sampleRole = {
@@ -84,6 +84,7 @@ const TreeStub = defineComponent({
 
 async function flushPromises(): Promise<void> {
   await Promise.resolve()
+  await new Promise(resolve => setTimeout(resolve, 25))
   await nextTick()
   await Promise.resolve()
   await nextTick()
@@ -107,8 +108,8 @@ function mountRoleView() {
 
 describe('system role view', () => {
   beforeEach(async () => {
+    await login('admin')
     permissionStore.clear()
-    resetMockSystemRoles()
     await createSystemRole({
       code: 'auditor',
       description: '只读审计角色',
@@ -117,9 +118,9 @@ describe('system role view', () => {
     })
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     permissionStore.clear()
-    resetMockSystemRoles()
+    await logout()
   })
 
   it('配置角色字段、查询条件和 CRUD dataSource', () => {

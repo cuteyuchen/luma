@@ -11,6 +11,7 @@ import type { SaveSystemUserInput, SystemUserQuery, SystemUserRecord } from '../
 import { LumaCrudTable, LumaSchemaForm } from '@luma/core/components'
 import { ElAlert, ElButton, ElDialog, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, shallowRef, useTemplateRef } from 'vue'
+import { adminPermissionCodes } from '../../api/permissions'
 import {
   createSystemUser,
   deleteSystemUser,
@@ -21,7 +22,6 @@ import {
   updateSystemUserRoles,
   updateSystemUserStatus,
 } from '../../api/system'
-import { adminPermissionCodes } from '../../mock/permission'
 
 interface UserCrudTableExpose {
   openEdit: (row: SchemaTableRow) => void

@@ -2,9 +2,9 @@ import { createAuthorityDirective } from '@luma/core/directives'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
-import { adminPermissionCodes } from '../src/mock/permission'
-import { resetMockSystemOrganizations } from '../src/mock/system'
+import { adminPermissionCodes } from '../src/api/permissions'
 import { permissionStore } from '../src/services/permission'
+import { login, logout } from '../src/services/session'
 import OrganizationView from '../src/views/system/OrganizationView.vue'
 
 const sampleOrganization = {
@@ -81,18 +81,19 @@ function mountOrganizationView() {
 
 async function flushPromises(): Promise<void> {
   await Promise.resolve()
+  await new Promise(resolve => setTimeout(resolve, 25))
   await nextTick()
 }
 
 describe('system organization view', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await login('admin')
     permissionStore.clear()
-    resetMockSystemOrganizations()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     permissionStore.clear()
-    resetMockSystemOrganizations()
+    await logout()
   })
 
   it('使用树表展示机构及上下级关系字段', async () => {

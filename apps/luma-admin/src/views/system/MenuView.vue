@@ -11,13 +11,13 @@ import type { SaveSystemMenuInput, SystemMenuRecord } from '../../api/system'
 import { LumaPage, LumaSchemaForm, LumaSchemaTable } from '@luma/core/components'
 import { ElAlert, ElButton, ElDialog, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, shallowRef } from 'vue'
+import { adminPermissionCodes } from '../../api/permissions'
 import {
   createSystemMenu,
   deleteSystemMenu,
   fetchSystemMenus,
   updateSystemMenu,
 } from '../../api/system'
-import { adminPermissionCodes } from '../../mock/permission'
 
 /***********************页面状态*********************/
 const menus = shallowRef<SystemMenuRecord[]>([])

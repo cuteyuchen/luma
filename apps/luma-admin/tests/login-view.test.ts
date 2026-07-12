@@ -1,5 +1,5 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { afterEach, describe, expect, it } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory } from 'vue-router'
 import { createAdminRouter } from '../src/router'
 import { currentUser, logout } from '../src/services/session'
@@ -9,6 +9,7 @@ import { elementPlusStubs } from './helpers/element-plus-stubs'
 describe('login view', () => {
   afterEach(async () => {
     await logout()
+    localStorage.removeItem('luma-admin:login-layout')
   })
 
   it('会使用账号预设登录并按 redirect 回跳', async () => {
@@ -25,15 +26,21 @@ describe('login view', () => {
     })
 
     expect(wrapper.text()).toContain('Luma Admin')
+    expect(wrapper.find('img[src*="luma-logo.svg"]').exists()).toBe(true)
+    expect(wrapper.find('[data-action="toggle-theme"]').attributes('aria-label')).toContain('切换')
     expect(wrapper.find('[data-testid="login-username"] input').element).toHaveProperty('value', 'admin')
+
+    await wrapper.find('button[aria-label="表单居左"]').trigger('click')
+    expect(wrapper.classes()).toContain('is-form-left')
+    expect(localStorage.getItem('luma-admin:login-layout')).toBe('left')
 
     await wrapper.find('[data-testid="login-account"]').setValue('operator')
     expect(wrapper.find('[data-testid="login-username"] input').element).toHaveProperty('value', 'operator')
 
     await wrapper.find('[data-testid="login-form"]').trigger('submit')
-    await flushPromises()
-
-    expect(currentUser.value?.username).toBe('operator')
-    expect(router.currentRoute.value.path).toBe('/project')
+    await vi.waitFor(() => {
+      expect(currentUser.value?.username).toBe('operator')
+      expect(router.currentRoute.value.path).toBe('/project')
+    })
   })
 })

@@ -5,6 +5,14 @@ import { defineConfig } from 'vite'
 /***********************应用开发配置*********************/
 export default defineConfig({
   plugins: [vue()],
+  server: {
+    proxy: {
+      '/api': {
+        changeOrigin: true,
+        target: 'http://127.0.0.1:5320',
+      },
+    },
+  },
   build: {
     chunkSizeWarningLimit: 500,
     rolldownOptions: {

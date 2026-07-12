@@ -2,9 +2,9 @@ import { createAuthorityDirective } from '@luma/core/directives'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
-import { adminPermissionCodes } from '../src/mock/permission'
-import { resetMockSystemMenus } from '../src/mock/system'
+import { adminPermissionCodes } from '../src/api/permissions'
 import { permissionStore } from '../src/services/permission'
+import { login, logout } from '../src/services/session'
 import MenuView from '../src/views/system/MenuView.vue'
 
 const sampleMenu = {
@@ -76,6 +76,7 @@ const FormStub = defineComponent({
 
 async function flushPromises(): Promise<void> {
   await Promise.resolve()
+  await new Promise(resolve => setTimeout(resolve, 25))
   await nextTick()
 }
 
@@ -97,14 +98,14 @@ function mountMenuView() {
 }
 
 describe('system menu view', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await login('admin')
     permissionStore.clear()
-    resetMockSystemMenus()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     permissionStore.clear()
-    resetMockSystemMenus()
+    await logout()
   })
 
   it('使用 SchemaTable 树表展示菜单字段', async () => {

@@ -4,6 +4,7 @@ import type { SaveSystemDictionaryItemInput, SystemDictionaryItemRecord, SystemD
 import { LumaPage, LumaSchemaForm, LumaSchemaTable } from '@luma/core/components'
 import { ElButton, ElDialog, ElMessage, ElMessageBox, ElOption, ElSelect } from 'element-plus'
 import { computed, onMounted, shallowRef } from 'vue'
+import { adminPermissionCodes } from '../../api/permissions'
 import {
   createDictionaryItem,
   deleteDictionaryItem,
@@ -11,7 +12,6 @@ import {
   fetchDictionaryTypes,
   updateDictionaryItem,
 } from '../../api/system'
-import { adminPermissionCodes } from '../../mock/permission'
 import { refreshAdminDictionaryCache } from '../../services/dictionary'
 
 const types = shallowRef<SystemDictionaryTypeRecord[]>([])

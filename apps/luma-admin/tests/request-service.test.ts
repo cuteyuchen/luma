@@ -1,13 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { createAdminRequestClient } from '../src/services/request'
 import { adminSession, currentUser, login, logout } from '../src/services/session'
-
-function createJsonResponse(data: unknown): Response {
-  return new Response(JSON.stringify(data), {
-    headers: { 'content-type': 'application/json' },
-    status: 200,
-  })
-}
 
 describe('admin request service', () => {
   afterEach(async () => {
@@ -16,29 +9,15 @@ describe('admin request service', () => {
 
   it('通过 Admin adapter 识别业务会话码，刷新后重放 GET', async () => {
     await login('admin')
-    const initialToken = adminSession.getToken()
-    const fetchMock = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
-      const token = new Headers(init?.headers).get('Authorization')
-
-      if (token === `Bearer ${initialToken}`) {
-        return createJsonResponse({
-          result: null,
-          resultMsg: '访问凭据已过期',
-          statusCode: 'AUTH_EXPIRED',
-        })
-      }
-
-      return createJsonResponse({
-        result: { name: 'Luma Admin' },
-        resultMsg: 'ok',
-        statusCode: '0000',
-      })
+    adminSession.setSession({
+      accessToken: 'expired-access',
+      refreshToken: adminSession.getRefreshToken(),
     })
-    const request = createAdminRequestClient(fetchMock)
+    const request = createAdminRequestClient()
 
-    await expect(request.get('/profile')).resolves.toEqual({ name: 'Luma Admin' })
-    expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(adminSession.getToken()).not.toBe(initialToken)
+    await expect(request.get('/session/me')).resolves.toMatchObject({ username: 'admin' })
+    expect(adminSession.getToken()).not.toBe('expired-access')
+    expect(adminSession.getToken()).toBeTruthy()
     expect(currentUser.value?.username).toBe('admin')
   })
 
@@ -48,11 +27,7 @@ describe('admin request service', () => {
       accessToken: 'expired-access',
       refreshToken: 'invalid-refresh',
     })
-    const request = createAdminRequestClient(vi.fn(async () => createJsonResponse({
-      result: null,
-      resultMsg: '访问凭据已过期',
-      statusCode: 'AUTH_EXPIRED',
-    })))
+    const request = createAdminRequestClient()
 
     await expect(request.get('/profile')).rejects.toMatchObject({ kind: 'session' })
     expect(adminSession.getSession()).toBeNull()

@@ -8,7 +8,7 @@ import {
   permissionStore,
 } from '../src/router'
 import { adminRouteRecords } from '../src/router/routes'
-import { adminSession, login, logout } from '../src/services/session'
+import { login, logout } from '../src/services/session'
 
 describe('luma admin router', () => {
   afterEach(async () => {
@@ -387,7 +387,7 @@ describe('luma admin router', () => {
   })
 
   it('无受限示例权限时访问受限示例会跳转到 403', async () => {
-    adminSession.setToken('test-token')
+    await login('admin')
     permissionStore.setPermissions(['dashboard:view', 'examples:view', 'examples:dictionary'])
     permissionStore.setRoles(['admin'])
 

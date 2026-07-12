@@ -17,8 +17,8 @@ describe('admin session service', () => {
   it('admin 登录后会写入 token、当前用户、角色和权限', async () => {
     const user = await login('admin')
 
-    expect(adminSession.getToken()).toContain('admin')
-    expect(adminSession.getRefreshToken()).toBe('mock-refresh-admin')
+    expect(adminSession.getToken().split('.')).toHaveLength(3)
+    expect(adminSession.getRefreshToken().split('.')).toHaveLength(3)
     expect(isAuthenticated()).toBe(true)
     expect(currentUser.value).toMatchObject({
       name: '超级管理员',

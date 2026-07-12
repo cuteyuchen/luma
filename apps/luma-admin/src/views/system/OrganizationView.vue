@@ -11,13 +11,13 @@ import type { SaveSystemOrganizationInput, SystemOrganizationRecord } from '../.
 import { LumaPage, LumaSchemaForm, LumaSchemaTable } from '@luma/core/components'
 import { ElAlert, ElButton, ElDialog, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, shallowRef } from 'vue'
+import { adminPermissionCodes } from '../../api/permissions'
 import {
   createSystemOrganization,
   deleteSystemOrganization,
   fetchSystemOrganizations,
   updateSystemOrganization,
 } from '../../api/system'
-import { adminPermissionCodes } from '../../mock/permission'
 
 /***********************页面状态*********************/
 const organizations = shallowRef<SystemOrganizationRecord[]>([])

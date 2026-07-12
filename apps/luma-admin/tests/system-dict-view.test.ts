@@ -2,9 +2,9 @@ import { createAuthorityDirective } from '@luma/core/directives'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
-import { adminPermissionCodes } from '../src/mock/permission'
-import { resetMockDictionaries } from '../src/mock/system'
+import { adminPermissionCodes } from '../src/api/permissions'
 import { permissionStore } from '../src/services/permission'
+import { login, logout } from '../src/services/session'
 import DictionaryItemView from '../src/views/system/DictionaryItemView.vue'
 import DictionaryTypeView from '../src/views/system/DictionaryTypeView.vue'
 
@@ -65,23 +65,24 @@ function mountView(component: typeof DictionaryItemView | typeof DictionaryTypeV
 
 async function flushPromises(): Promise<void> {
   await Promise.resolve()
+  await new Promise(resolve => setTimeout(resolve, 25))
   await nextTick()
 }
 
 describe('system dictionary views', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await login('admin')
     permissionStore.setPermissions([
       adminPermissionCodes.systemDictList,
       adminPermissionCodes.systemDictCreate,
       adminPermissionCodes.systemDictUpdate,
       adminPermissionCodes.systemDictDelete,
     ])
-    resetMockDictionaries()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     permissionStore.clear()
-    resetMockDictionaries()
+    await logout()
   })
 
   it('将字典分类与字典项拆分为独立页面', async () => {
