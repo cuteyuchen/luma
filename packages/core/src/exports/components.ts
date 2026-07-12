@@ -16,8 +16,8 @@ export type {
   CrudRemoveConfirm,
   CrudRemoveConfirmOptions,
   CrudStateResolver,
-  CrudTableConfig,
   CrudTableColumn,
+  CrudTableConfig,
   CrudTablePageChangePayload,
   CrudTableProps,
   CrudTableQueryModel,
@@ -87,8 +87,8 @@ export type {
   SchemaTableRecord,
   SchemaTableRow,
   SchemaTableSelectionPayload,
-  SchemaTableStateResolver,
   SchemaTableSortChangePayload,
+  SchemaTableStateResolver,
   SchemaTableTreeProps,
 } from '../components/schema-table'
 export {

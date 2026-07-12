@@ -78,7 +78,8 @@ describe('luma crud table', () => {
       },
     })
 
-    expect(wrapper.find('.luma-page__title').text()).toBe('项目列表')
+    expect(wrapper.find('.luma-page').exists()).toBe(false)
+    expect(wrapper.find('.luma-schema-table__toolbar-title').text()).toBe('项目列表')
     expect(wrapper.find('.luma-crud-table__query').exists()).toBe(true)
     expect(wrapper.findComponent(LumaSchemaForm).exists()).toBe(true)
     expect(wrapper.findComponent(LumaSchemaTable).exists()).toBe(true)
@@ -86,6 +87,137 @@ describe('luma crud table', () => {
     expect(wrapper.find('[data-action="search"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="reset"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="create"]').exists()).toBe(true)
+  })
+
+  it('会把表格标题、默认右侧新增和筛选、刷新、全屏、列设置放在同一工具栏', async () => {
+    const wrapper = mount(LumaCrudTable, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        dataSource: {
+          create: vi.fn().mockResolvedValue({}),
+          fetch: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+        },
+        table: {
+          columns: [{ field: 'name', label: '名称' }],
+          showColumnSettings: true,
+        },
+        title: '项目列表',
+        query: {
+          schemas: [{ field: 'keyword', label: '关键词' }],
+        },
+      },
+    })
+
+    await flushPromises()
+
+    const toolbar = wrapper.find('.luma-schema-table__toolbar')
+    const toolbarTitle = toolbar.find('.luma-schema-table__toolbar-title')
+    const actions = toolbar.find('.luma-crud-table__toolbar')
+    const tools = toolbar.find('.luma-schema-table__toolbar-tools')
+    const createButton = actions.find('[data-action="create"]')
+    const queryToggleButton = tools.find('[data-action="toggle-query-panel"]')
+    const refreshButton = tools.find('[data-action="refresh"]')
+    const fullscreenButton = tools.find('[data-action="fullscreen"]')
+    const columnSettingsButton = tools.find('[aria-label="列设置"]')
+
+    expect(toolbarTitle.text()).toBe('项目列表')
+    expect(actions.classes()).toContain('is-right')
+    expect(createButton.text()).toContain('新增')
+    expect(tools.find('[data-action="create"]').exists()).toBe(false)
+    expect(refreshButton.text()).toBe('')
+    expect(refreshButton.attributes('aria-label')).toBe('刷新')
+    expect(fullscreenButton.text()).toBe('')
+    expect(fullscreenButton.attributes('aria-label')).toBe('全屏')
+    expect(columnSettingsButton.exists()).toBe(true)
+    expect(queryToggleButton.attributes('aria-label')).toBe('隐藏筛选条件')
+
+    await queryToggleButton.trigger('click')
+    expect(wrapper.find('.luma-crud-table__query').isVisible()).toBe(false)
+    expect(queryToggleButton.attributes('aria-label')).toBe('显示筛选条件')
+  })
+
+  it('仅在传入标题时显示工具栏标题，并允许业务操作显式放在左侧', () => {
+    const wrapper = mount(LumaCrudTable, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        columns: [{ field: 'name', label: '名称' }],
+        formSchemas: [{ field: 'name', label: '名称' }],
+        rows: [],
+        title: '数据列表',
+        toolbar: {
+          actionsPosition: 'left',
+        },
+      },
+    })
+
+    expect(wrapper.find('.luma-schema-table__toolbar-title').text()).toBe('数据列表')
+    expect(wrapper.find('.luma-crud-table__toolbar').classes()).toContain('is-left')
+
+    const wrapperWithoutTitle = mount(LumaCrudTable, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        columns: [{ field: 'name', label: '名称' }],
+        rows: [],
+      },
+    })
+    expect(wrapperWithoutTitle.find('.luma-schema-table__toolbar-title').exists()).toBe(false)
+  })
+
+  it('查询列数会按容器宽度自适应，并允许 query.columns 显式覆盖', async () => {
+    let resizeCallback: ResizeObserverCallback | undefined
+    class ResizeObserverMock implements ResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback
+      }
+
+      disconnect(): void {}
+      observe(): void {}
+      unobserve(): void {}
+    }
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+
+    try {
+      const wrapper = mount(LumaCrudTable, {
+        global: { stubs: elementPlusStubs },
+        props: {
+          columns: [{ field: 'name', label: '名称' }],
+          query: {
+            schemas: [{ field: 'keyword', label: '关键词' }],
+          },
+          rows: [],
+        },
+      })
+      const queryForm = wrapper.findComponent(LumaSchemaForm)
+
+      resizeCallback?.([{ contentRect: { width: 600 } } as ResizeObserverEntry], {} as ResizeObserver)
+      await nextTick()
+      expect(queryForm.props('columns')).toBe(1)
+
+      resizeCallback?.([{ contentRect: { width: 800 } } as ResizeObserverEntry], {} as ResizeObserver)
+      await nextTick()
+      expect(queryForm.props('columns')).toBe(2)
+
+      resizeCallback?.([{ contentRect: { width: 1100 } } as ResizeObserverEntry], {} as ResizeObserver)
+      await nextTick()
+      expect(queryForm.props('columns')).toBe(3)
+
+      resizeCallback?.([{ contentRect: { width: 1300 } } as ResizeObserverEntry], {} as ResizeObserver)
+      await nextTick()
+      expect(queryForm.props('columns')).toBe(4)
+
+      await wrapper.setProps({
+        query: {
+          columns: 5,
+          schemas: [{ field: 'keyword', label: '关键词' }],
+        },
+      })
+      resizeCallback?.([{ contentRect: { width: 600 } } as ResizeObserverEntry], {} as ResizeObserver)
+      await nextTick()
+      expect(queryForm.props('columns')).toBe(5)
+    }
+    finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   it('允许应用通过 create-action 插槽替换默认新增按钮', async () => {
@@ -366,6 +498,7 @@ describe('luma crud table', () => {
 
     const dialogForm = wrapper.findAllComponents(LumaSchemaForm).at(-1)
     expect(dialogForm?.props('schemas').map((schema: { field: string }) => schema.field)).toEqual(['status', 'remark'])
+    expect(dialogForm?.props('labelWidth')).toBe(88)
     expect(dialogForm?.findAllComponents({ name: 'ElOption' }).map(item => item.props('label'))).toEqual(['启用', '停用'])
   })
 

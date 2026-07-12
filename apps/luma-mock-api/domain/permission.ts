@@ -113,3 +113,14 @@ export function resetMockRolePermissions(): void {
   })
   Object.assign(mockRolePermissions, cloneRolePermissions(initialRolePermissions))
 }
+
+export function exportMockRolePermissions(): Record<string, string[]> {
+  return cloneRolePermissions(mockRolePermissions)
+}
+
+export function importMockRolePermissions(permissions: Record<string, string[]>): void {
+  Object.keys(mockRolePermissions).forEach((role) => {
+    delete mockRolePermissions[role]
+  })
+  Object.assign(mockRolePermissions, cloneRolePermissions(permissions))
+}

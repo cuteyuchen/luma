@@ -9,14 +9,14 @@ import type {
   CrudTableResetPayload,
   CrudTableSearchPayload,
 } from './types'
+import { LumaIcon } from '@luma/icons'
 import { ElButton, ElMessageBox } from 'element-plus'
-import { computed, onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
-import { LumaPage } from '../page'
+import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { LumaPagination } from '../pagination'
 import { LumaSchemaForm } from '../schema-form'
 import { LumaSchemaTable } from '../schema-table'
-import { deriveCrudFormSchemas } from './schema'
 import LumaCrudEditor from './LumaCrudEditor.vue'
+import { deriveCrudFormSchemas } from './schema'
 import { useCrudData } from './useCrudData'
 import { useCrudDialog } from './useCrudDialog'
 import { useCrudQuery } from './useCrudQuery'
@@ -77,6 +77,7 @@ const pageSize = defineModel<number>('pageSize', { default: 10 })
 
 /***********************模板引用*********************/
 const crudRef = useTemplateRef<HTMLElement>('crudRef')
+const queryRef = useTemplateRef<HTMLElement>('queryRef')
 const queryFormRef = useTemplateRef<SchemaFormExpose>('queryFormRef')
 const dialogFormRef = useTemplateRef<SchemaFormExpose>('dialogFormRef')
 const tableRef = useTemplateRef<SchemaTableExpose>('tableRef')
@@ -89,7 +90,8 @@ const resolvedFormSchemas = computed(() => deriveCrudFormSchemas(resolvedAllColu
 const resolvedRowKey = computed(() => props.table?.rowKey ?? props.rowKey)
 const resolvedSelection = computed(() => props.table?.selection ?? props.selection)
 const resolvedEmptyText = computed(() => props.table?.emptyText ?? props.emptyText)
-const queryColumns = computed(() => Math.max(1, props.query?.columns ?? 3))
+const responsiveQueryColumns = shallowRef(3)
+const queryColumns = computed(() => Math.max(1, props.query?.columns ?? responsiveQueryColumns.value))
 const queryCollapsible = computed(() => props.query?.collapsible ?? false)
 const queryDefaultCollapsed = computed(() => props.query?.defaultCollapsed ?? true)
 const queryCollapsedRows = computed(() => Math.max(1, props.query?.collapsedRows ?? 1))
@@ -107,13 +109,17 @@ const showBatchDelete = computed(() => resolvedSelection.value && props.toolbar?
 const showRefresh = computed(() => Boolean(props.dataSource) && props.toolbar?.refresh !== false)
 const showExport = computed(() => Boolean(props.toolbar?.export))
 const showFullscreen = computed(() => props.toolbar?.fullscreen !== false)
-const hasToolbar = computed(() => showCreate.value || showBatchDelete.value || showRefresh.value || showExport.value || showFullscreen.value)
+const showQueryToggle = computed(() => hasQuery.value && props.toolbar?.queryToggle !== false)
+const hasToolbarActions = computed(() => showCreate.value || showBatchDelete.value || showExport.value)
+const hasToolbarTools = computed(() => showQueryToggle.value || showRefresh.value || showFullscreen.value)
 
 /***********************组合状态*********************/
 const dataSource = computed(() => props.dataSource)
 const operationLoading = shallowRef(false)
 const isFullscreen = shallowRef(false)
+const queryPanelVisible = shallowRef(props.query?.defaultVisible ?? true)
 let querySubmitTimer: ReturnType<typeof setTimeout> | undefined
+let queryResizeObserver: ResizeObserver | undefined
 
 const data = useCrudData({
   dataSource,
@@ -159,17 +165,54 @@ function handleFullscreenChange(): void {
   isFullscreen.value = typeof document !== 'undefined' && document.fullscreenElement === crudRef.value
 }
 
+function updateResponsiveQueryColumns(width: number): void {
+  if (props.query?.columns !== undefined || width <= 0) {
+    return
+  }
+  const columns = width >= 1280 ? 4 : width >= 960 ? 3 : width >= 640 ? 2 : 1
+  if (responsiveQueryColumns.value !== columns) {
+    responsiveQueryColumns.value = columns
+  }
+}
+
+function setupQueryResizeObserver(): void {
+  queryResizeObserver?.disconnect()
+  queryResizeObserver = undefined
+  if (!queryRef.value) {
+    return
+  }
+  updateResponsiveQueryColumns(queryRef.value.clientWidth)
+  if (typeof ResizeObserver === 'undefined') {
+    return
+  }
+  queryResizeObserver = new ResizeObserver(entries => updateResponsiveQueryColumns(entries[0]?.contentRect.width ?? 0))
+  queryResizeObserver.observe(queryRef.value)
+}
+
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.addEventListener('fullscreenchange', handleFullscreenChange)
   }
+  setupQueryResizeObserver()
 })
 onBeforeUnmount(() => {
   if (typeof document !== 'undefined') {
     document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }
+  queryResizeObserver?.disconnect()
   if (querySubmitTimer) {
     clearTimeout(querySubmitTimer)
+  }
+})
+
+watch(() => props.query?.columns, (columns) => {
+  if (columns === undefined) {
+    updateResponsiveQueryColumns(queryRef.value?.clientWidth ?? 0)
+  }
+})
+watch(() => props.query?.defaultVisible, (visible) => {
+  if (visible !== undefined) {
+    queryPanelVisible.value = visible
   }
 })
 
@@ -228,7 +271,7 @@ async function handleExportClick(): Promise<void> {
     !exportData
     || typeof document === 'undefined'
     || typeof URL === 'undefined'
-    || typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom')
+    || (typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom'))
   ) {
     return
   }
@@ -265,6 +308,19 @@ async function toggleFullscreen(): Promise<void> {
 
 function handlePageChange(payload: PaginationChangePayload): void {
   emit('pageChange', payload)
+}
+
+function toggleQueryPanel(): void {
+  queryPanelVisible.value = !queryPanelVisible.value
+  if (queryPanelVisible.value) {
+    void nextTick(() => {
+      setupQueryResizeObserver()
+      tableRef.value?.doLayout()
+    })
+    return
+  }
+  queryResizeObserver?.disconnect()
+  void nextTick(() => tableRef.value?.doLayout())
 }
 
 /***********************行操作与弹窗*********************/
@@ -442,96 +498,66 @@ defineExpose({
   reload: data.load,
   removeRow,
   removeSelectedRows,
+  setFormData: (value: SchemaFormModel) => dialogFormRef.value?.setValues(value),
+  toggleFullscreen,
   toggleQuery: queryState.toggle,
+  toggleQueryPanel,
 })
 </script>
 
 <template>
   <div ref="crudRef" class="luma-crud-table">
-    <LumaPage class="luma-crud-table__page" :title="toolbar?.title ?? title" :description="description" :loading="currentLoading">
-      <template v-if="$slots['table-title']" #title>
-        <slot name="table-title" />
-      </template>
-      <template v-if="hasToolbar || $slots.actions" #actions>
-        <div class="luma-crud-table__toolbar">
-          <slot v-if="showCreate" name="create-action" :open-create="openCreate">
-            <ElButton type="primary" native-type="button" data-action="create" @click="openCreate">
-              {{ toolbar?.createText ?? createText }}
-            </ElButton>
-          </slot>
-          <ElButton
-            v-if="showBatchDelete"
-            native-type="button"
-            data-action="batch-remove"
-            :disabled="selectionState.selectedRows.value.length === 0 || operationLoading"
-            @click="removeSelectedRows"
-          >
-            {{ toolbar?.batchDeleteText ?? batchDeleteText }}
-          </ElButton>
-          <ElButton v-if="showRefresh" native-type="button" data-action="refresh" @click="data.load">
-            {{ toolbar?.refreshText ?? '刷新' }}
-          </ElButton>
-          <ElButton
-            v-if="showExport"
-            native-type="button"
-            data-action="export"
-            @click="handleExportClick"
-          >
-            {{ toolbar?.exportText ?? '导出' }}
-          </ElButton>
-          <ElButton v-if="showFullscreen" native-type="button" data-action="fullscreen" @click="toggleFullscreen">
-            {{ toolbar?.fullscreenText ?? (isFullscreen ? '退出全屏' : '全屏') }}
-          </ElButton>
-          <slot name="toolbar-actions" :reload="data.load" :open-create="openCreate" />
-          <slot name="toolbar-tools" :reload="data.load" :toggle-fullscreen="toggleFullscreen" />
-          <slot name="actions" />
-        </div>
-      </template>
-
-      <div v-if="hasQuery" class="luma-crud-table__query">
-        <LumaSchemaForm
-          ref="queryFormRef"
-          v-model="queryModel"
-          :schemas="queryState.visibleSchemas.value"
-          :columns="queryColumns"
-          :label-width="query?.labelWidth ?? 'auto'"
-          class="luma-crud-table__query-form"
-          @values-change="handleQueryValuesChange"
+    <div
+      v-if="hasQuery"
+      v-show="queryPanelVisible"
+      ref="queryRef"
+      class="luma-crud-table__query"
+      :class="{ 'is-collapsed': queryState.collapsed.value }"
+    >
+      <LumaSchemaForm
+        ref="queryFormRef"
+        v-model="queryModel"
+        :schemas="queryState.visibleSchemas.value"
+        :columns="queryColumns"
+        :label-width="query?.labelWidth ?? 'auto'"
+        class="luma-crud-table__query-form"
+        @values-change="handleQueryValuesChange"
+      >
+        <template
+          v-for="schema in queryState.visibleSchemas.value.filter(item => $slots[`query-${String(item.field)}`])"
+          :key="String(schema.field)"
+          #[`field-${String(schema.field)}`]="scope"
         >
-          <template
-            v-for="schema in queryState.visibleSchemas.value.filter(item => $slots[`query-${String(item.field)}`])"
-            :key="String(schema.field)"
-            #[`field-${String(schema.field)}`]="scope"
-          >
-            <slot :name="`query-${String(schema.field)}`" v-bind="scope" />
-          </template>
-        </LumaSchemaForm>
-        <div class="luma-crud-table__query-actions">
-          <ElButton type="primary" native-type="button" data-action="search" @click="handleSearchClick">
-            {{ query?.searchText ?? searchText }}
-          </ElButton>
-          <ElButton native-type="button" data-action="reset" @click="handleResetClick">
-            {{ query?.resetText ?? resetText }}
-          </ElButton>
-          <ElButton
-            v-if="queryState.canCollapse.value"
-            native-type="button"
-            data-action="toggle-query"
-            :aria-expanded="String(!queryState.collapsed.value)"
-            @click="queryState.toggle"
-          >
-            {{ queryState.collapsed.value ? '展开' : '收起' }}
-          </ElButton>
-        </div>
-      </div>
-
-      <div v-if="data.error.value" class="luma-crud-table__error" role="alert">
-        <span>{{ data.error.value }}</span>
-        <ElButton native-type="button" data-action="retry" @click="data.load">
-          重试
+          <slot :name="`query-${String(schema.field)}`" v-bind="scope" />
+        </template>
+      </LumaSchemaForm>
+      <div class="luma-crud-table__query-actions">
+        <ElButton type="primary" native-type="button" data-action="search" @click="handleSearchClick">
+          {{ query?.searchText ?? searchText }}
+        </ElButton>
+        <ElButton native-type="button" data-action="reset" @click="handleResetClick">
+          {{ query?.resetText ?? resetText }}
+        </ElButton>
+        <ElButton
+          v-if="queryState.canCollapse.value"
+          native-type="button"
+          data-action="toggle-query"
+          :aria-expanded="String(!queryState.collapsed.value)"
+          @click="queryState.toggle"
+        >
+          {{ queryState.collapsed.value ? '展开' : '收起' }}
         </ElButton>
       </div>
+    </div>
 
+    <div v-if="data.error.value" class="luma-crud-table__error" role="alert">
+      <span>{{ data.error.value }}</span>
+      <ElButton native-type="button" data-action="retry" @click="data.load">
+        重试
+      </ElButton>
+    </div>
+
+    <section class="luma-crud-table__table-panel">
       <div class="luma-crud-table__body">
         <LumaSchemaTable
           ref="tableRef"
@@ -545,8 +571,81 @@ defineExpose({
           :column-settings="table?.columnSettings"
           :auto-resize="table?.autoResize ?? true"
           :action-width="table?.actionWidth"
+          :table-props="{ height: '100%' }"
           @selection-change="selectionState.update"
         >
+          <template v-if="$slots['table-title'] || title" #toolbar-title>
+            <slot name="table-title">
+              {{ title }}
+            </slot>
+          </template>
+          <template v-if="hasToolbarActions || $slots.actions || $slots['toolbar-actions']" #toolbar>
+            <div
+              class="luma-crud-table__toolbar"
+              :class="`is-${toolbar?.actionsPosition ?? 'right'}`"
+            >
+              <slot v-if="showCreate" name="create-action" :open-create="openCreate">
+                <ElButton type="primary" native-type="button" data-action="create" @click="openCreate">
+                  <LumaIcon name="luma:plus" />
+                  {{ toolbar?.createText ?? createText }}
+                </ElButton>
+              </slot>
+              <ElButton
+                v-if="showBatchDelete"
+                native-type="button"
+                data-action="batch-remove"
+                :disabled="selectionState.selectedRows.value.length === 0 || operationLoading"
+                @click="removeSelectedRows"
+              >
+                {{ toolbar?.batchDeleteText ?? batchDeleteText }}
+              </ElButton>
+              <ElButton v-if="showExport" native-type="button" data-action="export" @click="handleExportClick">
+                {{ toolbar?.exportText ?? '导出' }}
+              </ElButton>
+              <slot name="toolbar-actions" :reload="data.load" :open-create="openCreate" />
+              <slot name="actions" />
+            </div>
+          </template>
+          <template v-if="hasToolbarTools || $slots['toolbar-tools']" #toolbar-tools>
+            <div class="luma-crud-table__toolbar-tools">
+              <slot name="toolbar-tools" :reload="data.load" :toggle-fullscreen="toggleFullscreen" />
+              <ElButton
+                v-if="showQueryToggle"
+                circle
+                native-type="button"
+                data-action="toggle-query-panel"
+                :class="{ 'is-active': queryPanelVisible }"
+                :aria-expanded="String(queryPanelVisible)"
+                :aria-label="queryPanelVisible ? '隐藏筛选条件' : '显示筛选条件'"
+                :title="queryPanelVisible ? '隐藏筛选条件' : '显示筛选条件'"
+                @click="toggleQueryPanel"
+              >
+                <LumaIcon name="luma:filter" />
+              </ElButton>
+              <ElButton
+                v-if="showRefresh"
+                circle
+                native-type="button"
+                data-action="refresh"
+                :aria-label="toolbar?.refreshText ?? '刷新'"
+                :title="toolbar?.refreshText ?? '刷新'"
+                @click="data.load"
+              >
+                <LumaIcon name="luma:refresh" />
+              </ElButton>
+              <ElButton
+                v-if="showFullscreen"
+                circle
+                native-type="button"
+                data-action="fullscreen"
+                :aria-label="toolbar?.fullscreenText ?? (isFullscreen ? '退出全屏' : '全屏')"
+                :title="toolbar?.fullscreenText ?? (isFullscreen ? '退出全屏' : '全屏')"
+                @click="toggleFullscreen"
+              >
+                <LumaIcon :name="isFullscreen ? 'luma:fullscreen-exit' : 'luma:fullscreen'" />
+              </ElButton>
+            </div>
+          </template>
           <template
             v-for="column in resolvedColumns.filter(item => $slots[`table-${String(item.field)}`])"
             :key="String(column.field)"
@@ -609,7 +708,7 @@ defineExpose({
           @change="handlePageChange"
         />
       </div>
-    </LumaPage>
+    </section>
 
     <LumaCrudEditor
       v-model="dialogState.visible.value"
@@ -629,7 +728,7 @@ defineExpose({
         :mode="dialogState.mode.value"
         :schemas="resolvedFormSchemas"
         :columns="editor?.columns ?? 2"
-        :label-width="editor?.labelWidth"
+        :label-width="editor?.labelWidth ?? 88"
         :loading="editor?.loading"
         :disabled="dialogState.saving.value || editor?.disabled"
         :submit-loading="dialogState.saving.value"
@@ -668,8 +767,15 @@ defineExpose({
 
 <style scoped lang="scss">
 .luma-crud-table {
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
   width: 100%;
+  min-height: 0;
   min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
 }
 
 .luma-crud-table:fullscreen {
@@ -680,26 +786,14 @@ defineExpose({
   background: var(--el-bg-color-page);
 }
 
-.luma-crud-table:fullscreen .luma-crud-table__page {
-  min-height: calc(100dvh - 32px);
-}
-
-.luma-crud-table__page {
-  overflow: hidden;
-}
-
-.luma-crud-table__page :deep(.luma-page__body) {
-  display: grid;
-  gap: 16px;
-}
-
 .luma-crud-table__query {
   display: grid;
+  flex: none;
   gap: var(--luma-space-3, 12px);
   padding: 16px;
   border: 1px solid var(--el-border-color-lighter);
   border-radius: calc(8px * var(--luma-radius-scale, 1));
-  background: var(--el-fill-color-extra-light);
+  background: var(--el-fill-color-light);
 }
 
 .luma-crud-table__query-form :deep(.luma-schema-form__row) {
@@ -712,11 +806,33 @@ defineExpose({
 }
 
 .luma-crud-table__query-actions,
-.luma-crud-table__toolbar {
+.luma-crud-table__toolbar,
+.luma-crud-table__toolbar-tools {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   gap: var(--luma-space-2, 8px);
   align-items: center;
+}
+
+.luma-crud-table__toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.luma-crud-table__toolbar.is-right {
+  justify-content: flex-end;
+}
+
+.luma-crud-table__toolbar-tools {
+  flex: none;
+  justify-content: flex-end;
+}
+
+.luma-crud-table__toolbar-tools :deep([data-action="toggle-query-panel"].is-active) {
+  border-color: var(--el-color-primary-light-5);
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
 }
 
 .luma-crud-table__query-actions {
@@ -736,19 +852,60 @@ defineExpose({
   background: var(--el-color-danger-light-9);
 }
 
+.luma-crud-table__table-panel,
 .luma-crud-table__body,
 .luma-crud-table__extra {
   width: 100%;
   min-width: 0;
 }
 
+.luma-crud-table__table-panel {
+  box-sizing: border-box;
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: calc(8px * var(--luma-radius-scale, 1));
+  background: var(--el-bg-color);
+}
+
 .luma-crud-table__body {
-  padding-top: 4px;
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.luma-crud-table__body :deep(.luma-schema-table) {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.luma-crud-table__body :deep(.luma-schema-table__scroll) {
+  height: 100%;
+  min-height: 0;
 }
 
 .luma-crud-table__pagination {
-  padding-top: var(--luma-space-4, 16px);
+  flex: none;
+  min-width: 0;
+  padding-top: 12px;
   border-top: 1px solid var(--el-border-color-lighter);
+}
+
+@media (min-width: 960px) {
+  .luma-crud-table__query.is-collapsed {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .luma-crud-table__query.is-collapsed .luma-crud-table__query-actions {
+    align-self: end;
+    white-space: nowrap;
+  }
 }
 
 .luma-crud-table__dialog-error {
@@ -787,10 +944,58 @@ defineExpose({
     margin-left: 0;
   }
 
+  .luma-crud-table__query-actions :deep([data-action="toggle-query"]) {
+    grid-column: 1 / -1;
+  }
+
   .luma-crud-table__toolbar :deep(.el-button) {
     min-height: 44px;
+    margin-left: 0;
+  }
+
+  .luma-crud-table__toolbar-tools :deep(.el-button) {
+    margin-left: 0;
+  }
+
+  :global(.luma-crud-table__dialog.el-dialog) {
+    display: flex;
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+    flex-direction: column;
+    margin: 12px auto;
+  }
+
+  :global(.luma-crud-table__dialog .el-dialog__header) {
+    padding: 16px;
+  }
+
+  :global(.luma-crud-table__dialog .el-dialog__body) {
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  :global(.luma-crud-table__dialog .el-dialog__footer) {
+    padding: 12px 16px 16px;
+  }
+
+  .luma-crud-table__dialog-footer :deep(.el-button) {
+    min-height: 44px;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .luma-crud-table__query {
+    padding: 12px;
+  }
+
+  .luma-crud-table__table-panel {
+    padding: 12px;
+  }
+
+  .luma-crud-table__dialog-footer :deep(.el-button) {
+    flex: 1 1 0;
   }
 }
 </style>
-  setFormData: (value: SchemaFormModel) => dialogFormRef.value?.setValues(value),
-  toggleFullscreen,

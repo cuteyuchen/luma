@@ -854,7 +854,7 @@ defineEmits<{
     <ElButton text :aria-label="resolvedThemeMode === 'dark' ? '切换浅色模式' : '切换深色模式'" @click="$emit('toggleTheme')">
       主题
     </ElButton>
-    <ElButton text aria-label="主题与布局设置" @click="$emit('openSettings')">
+    <ElButton text aria-label="偏好设置" @click="$emit('openSettings')">
       设置
     </ElButton>
     <span>{{ userName }}</span>
@@ -893,7 +893,7 @@ const visible = computed({
 </script>
 
 <template>
-  <ElDrawer v-model="visible" title="主题与布局设置" size="420px" append-to-body>
+  <ElDrawer v-model="visible" title="偏好设置" size="384px" append-to-body>
     <LumaThemeSettingsPanel
       :defaults="defaults"
       :preferences="preferences"

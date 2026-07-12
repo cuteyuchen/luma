@@ -364,6 +364,27 @@ describe('luma schema table', () => {
     expect(wrapper.find('.custom-table-cell').exists()).toBe(false)
   })
 
+  it('工具栏插槽与列设置共享同一工具栏层级', () => {
+    const wrapper = mount(LumaSchemaTable, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        columns: [{ field: 'name', label: '名称' }],
+        rows: [],
+        showColumnSettings: true,
+      },
+      slots: {
+        'toolbar': () => h('button', { class: 'custom-toolbar-action', type: 'button' }, '新增'),
+        'toolbar-tools': () => h('button', { class: 'custom-toolbar-tool', type: 'button' }, '刷新'),
+      },
+    })
+
+    const toolbar = wrapper.find('.luma-schema-table__toolbar')
+    expect(toolbar.find('.custom-toolbar-action').exists()).toBe(true)
+    const tools = toolbar.find('.luma-schema-table__toolbar-tools')
+    expect(tools.find('.custom-toolbar-tool').exists()).toBe(true)
+    expect(tools.find('[aria-label="列设置"]').exists()).toBe(true)
+  })
+
   it('列设置支持持久化顺序、隐藏和恢复默认', async () => {
     localStorage.setItem('schema-table-columns', JSON.stringify({
       hidden: ['status'],
@@ -425,5 +446,8 @@ describe('luma schema table', () => {
     await wrapper.find('.luma-schema-table__error button').trigger('click')
     expect(wrapper.find('.luma-schema-table__error').text()).toContain('加载失败')
     expect(wrapper.emitted('retry')).toHaveLength(1)
+
+    await wrapper.setProps({ error: '' })
+    expect(wrapper.find('.luma-schema-table__error').exists()).toBe(false)
   })
 })

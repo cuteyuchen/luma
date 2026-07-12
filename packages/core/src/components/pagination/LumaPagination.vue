@@ -81,6 +81,24 @@ defineExpose({
 <style scoped lang="scss">
 .luma-pagination {
   display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 8px;
   justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .luma-pagination {
+    justify-content: flex-start;
+  }
+
+  .luma-pagination :deep(.el-pagination__jump) {
+    display: none;
+  }
+
+  .luma-pagination :deep(.el-pagination__sizes) {
+    margin-left: 0;
+  }
 }
 </style>

@@ -328,9 +328,12 @@ onMounted(() => {
       v-model="authorizationVisible"
       append-to-body
       class="luma-admin-dialog"
-      :title="`角色授权：${authorizingRole?.name ?? ''}`"
+      :title="`角色授权：${authorizingRole?.name ?? ''}${authorizingRole ? `（${authorizingRole.code}）` : ''}`"
       width="560px"
     >
+      <p class="luma-admin-role-authorization__hint">
+        勾选菜单会联动下级页面和按钮权限，可按需取消具体操作权限。
+      </p>
       <ElAlert
         v-if="authorizationError"
         class="luma-admin-page__operation-error"
@@ -366,3 +369,12 @@ onMounted(() => {
     </ElDialog>
   </main>
 </template>
+
+<style scoped lang="scss">
+.luma-admin-role-authorization__hint {
+  margin: 0 0 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+</style>

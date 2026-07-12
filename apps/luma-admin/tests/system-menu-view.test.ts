@@ -155,22 +155,112 @@ describe('system menu view', () => {
     const form = wrapper.findComponent(FormStub)
     const schemas = form.props('schemas') as { field: string }[]
     expect(schemas.map(schema => schema.field)).toEqual([
-      'parentId',
       'type',
       'title',
-      'order',
+      'parentId',
       'name',
       'path',
       'component',
       'redirect',
       'externalLink',
-      'externalTarget',
       'icon',
       'permissions',
+      'order',
+      'hidden',
+    ])
+
+    expect((schemas.find(schema => schema.field === 'type') as { options?: Array<{ value: string }> }).options?.map(option => option.value)).toEqual([
+      'directory',
+      'menu',
+      'button',
+      'embedded',
+      'external',
+    ])
+  })
+
+  it('根据菜单类型只展示对应字段', async () => {
+    permissionStore.setPermissions(resolveMenuPermissions())
+    const wrapper = mountMenuView()
+
+    await wrapper.find('[data-action="create-menu"]').trigger('click')
+    await nextTick()
+
+    const schemas = wrapper.findComponent(FormStub).props('schemas') as Array<{
+      field: string
+      hidden?: boolean | ((context: { model: Record<string, unknown> }) => boolean)
+    }>
+
+    expect(resolveVisibleFields(schemas, 'directory')).toEqual([
+      'type',
+      'title',
+      'parentId',
+      'name',
+      'path',
+      'redirect',
+      'icon',
+      'permissions',
+      'order',
+      'hidden',
+    ])
+    expect(resolveVisibleFields(schemas, 'menu')).toEqual([
+      'type',
+      'title',
+      'parentId',
+      'name',
+      'path',
+      'component',
+      'icon',
+      'permissions',
+      'order',
+      'hidden',
+    ])
+    expect(resolveVisibleFields(schemas, 'button')).toEqual([
+      'type',
+      'title',
+      'parentId',
+      'permissions',
+      'order',
+    ])
+    expect(resolveVisibleFields(schemas, 'embedded')).toEqual([
+      'type',
+      'title',
+      'parentId',
+      'name',
+      'path',
+      'externalLink',
+      'icon',
+      'permissions',
+      'order',
+      'hidden',
+    ])
+    expect(resolveVisibleFields(schemas, 'external')).toEqual([
+      'type',
+      'title',
+      'parentId',
+      'name',
+      'path',
+      'externalLink',
+      'icon',
+      'permissions',
+      'order',
       'hidden',
     ])
   })
 })
+
+function resolveVisibleFields(
+  schemas: Array<{
+    field: string
+    hidden?: boolean | ((context: { model: Record<string, unknown> }) => boolean)
+  }>,
+  type: string,
+): string[] {
+  return schemas
+    .filter(schema => typeof schema.hidden === 'function'
+      ? !schema.hidden({ model: { type } })
+      : schema.hidden !== true)
+    .map(schema => schema.field)
+}
 
 function resolveMenuPermissions(): string[] {
   return [

@@ -6,13 +6,18 @@ test('设置、标签页和移动布局可以完整操作并持久化', async ({
   await openTopMenu(page, '功能示例')
   await page.getByRole('menuitem', { name: 'Chart Panel', exact: true }).click()
   await expect(page.getByRole('tab', { name: 'Chart Panel' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '刷新当前页面' })).toBeVisible()
+  await page.getByRole('button', { name: '刷新当前页面' }).click()
 
   await page.getByRole('tab', { name: 'Chart Panel' }).click({ button: 'right' })
   await expect(page.getByRole('menuitem', { name: '刷新当前页' })).toBeVisible()
   await page.getByRole('menuitem', { name: '刷新当前页' }).click()
 
-  await page.getByRole('button', { name: '主题与布局设置' }).click()
-  await page.getByRole('tab', { name: '主题', exact: true }).click()
+  await page.getByRole('button', { name: '偏好设置' }).click()
+  const drawer = page.locator('.luma-admin-settings-drawer')
+  expect(await drawer.evaluate(element => element.getBoundingClientRect().width)).toBeLessThanOrEqual(385)
+  await expect(page.getByText('自定义偏好设置 & 实时预览')).toBeVisible()
+  await page.getByRole('tab', { name: '外观', exact: true }).click()
   await expect(page.locator('.luma-theme-settings__mode-card .luma-icon')).toHaveCount(3)
   await expect(page.locator('.luma-theme-settings__mode-card > span').last()).toHaveCSS('white-space', 'nowrap')
   await expect(page.locator('.luma-theme-settings__color-card > span').first()).toHaveCSS('white-space', 'nowrap')
@@ -20,6 +25,12 @@ test('设置、标签页和移动布局可以完整操作并持久化', async ({
   await expect(page.locator('html')).toHaveClass(/dark/)
 
   await page.getByRole('tab', { name: '布局', exact: true }).click()
+  const layoutCards = page.locator('.luma-theme-settings__layout-card')
+  await expect(layoutCards).toHaveCount(3)
+  const layoutCardTops = await layoutCards.evaluateAll(elements =>
+    elements.map(element => Math.round(element.getBoundingClientRect().top)),
+  )
+  expect(new Set(layoutCardTops).size).toBe(1)
   await page.getByRole('button', { name: '顶部导航', exact: true }).click()
   await expect(page.locator('.luma-layout')).toHaveAttribute('data-layout', 'top-nav')
   await expect.poll(async () => page.evaluate(() => {
@@ -40,7 +51,7 @@ test('三种桌面布局在 768、1024、1440px 均无页面级溢出', async ({
 
   for (const width of [768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 })
-    await page.getByRole('button', { name: '主题与布局设置' }).click()
+    await page.getByRole('button', { name: '偏好设置' }).click()
     await page.getByRole('tab', { name: '布局', exact: true }).click()
 
     for (const layout of ['侧边导航', '顶部导航', '混合导航']) {
@@ -54,7 +65,7 @@ test('三种桌面布局在 768、1024、1440px 均无页面级溢出', async ({
 
 test('侧栏折叠后仍显示已注册的菜单图标', async ({ page }) => {
   await loginAsAdmin(page)
-  await page.getByRole('button', { name: '主题与布局设置' }).click()
+  await page.getByRole('button', { name: '偏好设置' }).click()
   await page.getByRole('tab', { name: '布局', exact: true }).click()
   await page.getByRole('button', { name: '侧边导航', exact: true }).click()
   await page.getByRole('button', { name: '关闭此对话框' }).click()
@@ -88,7 +99,7 @@ test('主题设置页和抽屉共享自适应图标卡片布局', async ({ page 
   await expect(panel).toBeVisible()
   expect(await panel.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(340)
 
-  await panel.getByRole('tab', { name: '主题', exact: true }).click()
+  await panel.getByRole('tab', { name: '外观', exact: true }).click()
   await expect(panel.locator('.luma-theme-settings__mode-card .luma-icon')).toHaveCount(3)
   await expect(panel.locator('.luma-theme-settings__color-card > span').first()).toHaveCSS('white-space', 'nowrap')
 })
@@ -96,8 +107,8 @@ test('主题设置页和抽屉共享自适应图标卡片布局', async ({ page 
 test('系统主题和 reduced-motion 偏好会应用到真实页面', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' })
   await loginAsAdmin(page)
-  await page.getByRole('button', { name: '主题与布局设置' }).click()
-  await page.getByRole('tab', { name: '主题', exact: true }).click()
+  await page.getByRole('button', { name: '偏好设置' }).click()
+  await page.getByRole('tab', { name: '外观', exact: true }).click()
   await page.getByRole('button', { name: '跟随系统', exact: true }).click()
   await expect(page.locator('html')).toHaveClass(/dark/)
 

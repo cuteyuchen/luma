@@ -65,6 +65,7 @@ const props = withDefaults(defineProps<{
   disabled: false,
   gutter: 16,
   labelPosition: 'right',
+  labelWidth: 'auto',
   loading: false,
   mode: 'create',
   resetText: '重置',
@@ -387,11 +388,13 @@ function scrollToField(field: string): void {
 
 function getFieldComponent(field: string): HTMLElement | undefined {
   const formElement = formRef.value?.$el as HTMLElement | undefined
-  return formElement?.querySelector<HTMLElement>(`[data-field="${field}"] input, [data-field="${field}"] textarea, [data-field="${field}"] select, [data-field="${field}"] button`)
+  return formElement?.querySelector<HTMLElement>(`[data-field="${field}"] input, [data-field="${field}"] textarea, [data-field="${field}"] select, [data-field="${field}"] button`) ?? undefined
 }
 
 /***********************公开方法*********************/
 defineExpose({
+  clearValidate,
+  getFieldComponent,
   getFormElement: () => formRef.value?.$el as HTMLFormElement | undefined,
   getFormInstance: () => formRef.value,
   getValues: () => normalizedModel.value,
@@ -744,6 +747,25 @@ defineExpose({
   .luma-schema-form__actions :deep(.el-button) {
     min-height: 44px;
     flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .luma-schema-form__item {
+    display: block;
+  }
+
+  .luma-schema-form__item :deep(.el-form-item__label) {
+    width: 100% !important;
+    height: auto;
+    justify-content: flex-start;
+    padding: 0 0 6px;
+    line-height: 20px;
+  }
+
+  .luma-schema-form__item :deep(.el-form-item__content) {
+    width: 100%;
+    margin-left: 0 !important;
   }
 }
 </style>

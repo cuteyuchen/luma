@@ -283,13 +283,28 @@ describe('luma tabs', () => {
     expect(tabButtons).toHaveLength(2)
     expect(tabButtons[0]?.attributes('aria-selected')).toBe('true')
     expect(tabButtons[0]?.attributes('tabindex')).toBe('0')
+    expect(wrapper.find('[data-action="refresh-current-tab"]').exists()).toBe(true)
 
+    await wrapper.find('[data-action="refresh-current-tab"]').trigger('click')
     await tabButtons[1]?.trigger('click')
     await wrapper.find('[aria-label="关闭系统管理"]').trigger('click')
 
     expect(wrapper.emitted('update:activePath')?.[0]).toEqual(['/system'])
+    expect(wrapper.emitted('refresh')?.[0]).toEqual(['/dashboard'])
     expect(wrapper.emitted('change')?.[0]).toEqual(['/system'])
     expect(wrapper.emitted('remove')?.[0]).toEqual(['/system'])
+  })
+
+  it('允许消费方隐藏常驻刷新按钮', () => {
+    const wrapper = mount(LumaTabs, {
+      props: {
+        activePath: '/dashboard',
+        showRefresh: false,
+        tabs,
+      },
+    })
+
+    expect(wrapper.find('[data-action="refresh-current-tab"]').exists()).toBe(false)
   })
 
   it('支持键盘切换和右键菜单批量操作', async () => {

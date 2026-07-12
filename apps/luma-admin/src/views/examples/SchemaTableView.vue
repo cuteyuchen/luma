@@ -10,7 +10,7 @@ const pageSize = shallowRef(10)
 const selectedRows = shallowRef<SchemaTableRow[]>([])
 const selectedRowKeys = shallowRef<Array<string | number>>([])
 const loading = shallowRef(false)
-const error = shallowRef('')
+const error = shallowRef<false | string>(false)
 const empty = shallowRef(false)
 
 const tableStateItems = computed(() => [
@@ -32,15 +32,25 @@ function handlePageChange(payload: SchemaTablePaginationChangePayload): void {
   page.value = payload.page
   pageSize.value = payload.pageSize
 }
+
+function handleRetry(): void {
+  error.value = false
+}
 </script>
 
 <template>
   <main class="luma-admin-example">
     <LumaPage title="Schema Table" description="验证字段插槽、列设置、选择主键、树表、自动布局和字典回显。">
       <template #actions>
-        <button class="luma-admin-example__button" type="button" @click="loading = !loading">切换 Loading</button>
-        <button class="luma-admin-example__button" type="button" @click="empty = !empty">切换空数据</button>
-        <button class="luma-admin-example__button" type="button" @click="error = '表格数据加载失败'">模拟错误</button>
+        <button class="luma-admin-example__button" type="button" @click="loading = !loading">
+          切换 Loading
+        </button>
+        <button class="luma-admin-example__button" type="button" @click="empty = !empty">
+          切换空数据
+        </button>
+        <button class="luma-admin-example__button" type="button" @click="error = '表格数据加载失败'">
+          模拟错误
+        </button>
       </template>
       <div class="luma-admin-example__two-columns">
         <LumaSchemaTable
@@ -59,7 +69,7 @@ function handlePageChange(payload: SchemaTablePaginationChangePayload): void {
           :table-props="{ border: true, stripe: true }"
           @selection-change="handleSelectionChange"
           @page-change="handlePageChange"
-          @retry="error = ''"
+          @retry="handleRetry"
         >
           <template #table-name="{ value }">
             <strong>{{ value }}</strong>

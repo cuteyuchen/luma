@@ -20,7 +20,7 @@ const emit = defineEmits<{
   reset: [preferences: LumaPreferences]
 }>()
 const preferences = defineModel<LumaPreferences>('preferences', { required: true })
-const activeTab = ref<'common' | 'layout' | 'theme'>('common')
+const activeTab = ref<'common' | 'layout' | 'theme'>('theme')
 
 const themeModeOptions: { icon: string, label: string, value: ThemeMode }[] = [
   { icon: 'luma:sun', label: '浅色', value: 'light' },
@@ -48,9 +48,9 @@ const alignOptions: { label: string, value: LumaHeaderMenuAlign }[] = [
 const presetColors = computed(() => props.colorPresets.filter(item => !item.custom))
 const customColorActive = computed(() => !presetColors.value.some(item => item.value === preferences.value.theme.colorPrimary))
 const settingsTabs = computed(() => [
-  { label: '通用', value: 'common' as const },
-  { label: '主题', value: 'theme' as const },
+  { label: '外观', value: 'theme' as const },
   ...(props.showLayout ? [{ label: '布局', value: 'layout' as const }] : []),
+  { label: '通用', value: 'common' as const },
 ])
 const availability = computed(() => resolvePreferenceAvailability(preferences.value))
 
@@ -63,7 +63,7 @@ function update(patch: Parameters<typeof mergePreferences>[1]): void {
 function resetPreferences(): void {
   const next = createDefaultPreferences(props.defaults)
   preferences.value = next
-  activeTab.value = 'common'
+  activeTab.value = 'theme'
   emit('change', next)
   emit('reset', next)
 }
@@ -75,7 +75,12 @@ function setColor(color: string): void {
 
 <template>
   <div class="luma-theme-settings">
-    <div class="luma-theme-settings__tabs" role="tablist" aria-label="设置分类">
+    <div
+      class="luma-theme-settings__tabs"
+      role="tablist"
+      aria-label="偏好设置分类"
+      :style="{ gridTemplateColumns: `repeat(${settingsTabs.length}, minmax(0, 1fr))` }"
+    >
       <button
         v-for="tab in settingsTabs"
         :key="tab.value" type="button" role="tab" class="luma-theme-settings__tab"
@@ -241,45 +246,50 @@ function setColor(color: string): void {
 
 <style scoped lang="scss">
 .luma-theme-settings { container-type: inline-size; display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; color: var(--el-text-color-primary); }
-.luma-theme-settings__tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--el-fill-color-light); border-radius: 10px; }
-.luma-theme-settings__tab { min-height: 40px; border: 0; border-radius: 7px; color: var(--el-text-color-regular); cursor: pointer; background: transparent; transition: color .2s, background-color .2s, box-shadow .2s; }
-.luma-theme-settings__tab.is-active { color: var(--el-color-primary); background: var(--el-bg-color); box-shadow: var(--el-box-shadow-lighter); }
-.luma-theme-settings__scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 2px 24px; }
-.luma-theme-settings__pane { display: grid; gap: 24px; }
-.luma-theme-settings__section { display: grid; gap: 14px; }
-.luma-theme-settings__section + .luma-theme-settings__section { padding-top: 22px; border-top: 1px solid var(--el-border-color-lighter); }
-h4 { margin: 0; font-size: 14px; font-weight: 650; }
-.luma-theme-settings__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 32px; font-size: 13px; }
+.luma-theme-settings__tabs { display: grid; grid-template-columns: repeat(3, 1fr); flex: none; gap: 4px; margin-top: 12px; padding: 4px; border: 1px solid var(--el-border-color-lighter); border-radius: 9px; background: var(--el-fill-color); }
+.luma-theme-settings__tab { min-height: 34px; padding: 0 8px; border: 0; border-radius: 6px; color: var(--el-text-color-secondary); cursor: pointer; background: transparent; font-size: 13px; font-weight: 600; transition: color .2s, background-color .2s, box-shadow .2s; }
+.luma-theme-settings__tab:hover { color: var(--el-text-color-primary); }
+.luma-theme-settings__tab.is-active { color: var(--el-color-primary); background: var(--el-bg-color); box-shadow: 0 1px 3px color-mix(in srgb, var(--el-color-black) 12%, transparent); }
+.luma-theme-settings__scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 4px 22px; scrollbar-width: thin; }
+.luma-theme-settings__pane { display: grid; gap: 26px; }
+.luma-theme-settings__section { display: grid; gap: 12px; }
+.luma-theme-settings__section + .luma-theme-settings__section { padding-top: 0; border-top: 0; }
+h4 { margin: 0; color: var(--el-text-color-primary); font-size: 14px; font-weight: 700; letter-spacing: .01em; }
+.luma-theme-settings__row { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px; font-size: 13px; }
 .luma-theme-settings__row.is-stacked { display: grid; grid-template-columns: 1fr auto; }
 .luma-theme-settings__row.is-stacked :deep(.el-slider) { grid-column: 1; width: 100%; }
 .luma-theme-settings__row.is-stacked :deep(.el-input-number) { grid-column: 2; grid-row: 2; width: 112px; }
 .is-disabled { opacity: .48; }
-.luma-theme-settings__card-grid, .luma-theme-settings__layout-grid, .luma-theme-settings__transition-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
-.luma-theme-settings__card-grid.is-three { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+.luma-theme-settings__card-grid, .luma-theme-settings__layout-grid, .luma-theme-settings__transition-grid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.luma-theme-settings__card-grid.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.luma-theme-settings__layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.luma-theme-settings__transition-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 button { font: inherit; }
-.luma-theme-settings__mode-card, .luma-theme-settings__layout-card, .luma-theme-settings__transition-card { display: flex; min-height: 78px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--el-border-color-light); border-radius: 10px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-bg-color); transition: border-color .2s, color .2s, background-color .2s, transform .2s; }
-.luma-theme-settings__mode-card:hover, .luma-theme-settings__layout-card:hover, .luma-theme-settings__transition-card:hover { border-color: var(--el-color-primary-light-5); }
-.luma-theme-settings__mode-card.is-active, .luma-theme-settings__layout-card.is-active, .luma-theme-settings__transition-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
+.luma-theme-settings__mode-card, .luma-theme-settings__layout-card, .luma-theme-settings__transition-card { display: flex; min-width: 0; min-height: 62px; align-items: center; justify-content: center; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--el-border-color-lighter); border-radius: 8px; color: var(--el-text-color-secondary); cursor: pointer; background: var(--el-bg-color); box-shadow: 0 1px 2px color-mix(in srgb, var(--el-color-black) 4%, transparent); transition: border-color .2s, color .2s, background-color .2s, box-shadow .2s; }
+.luma-theme-settings__mode-card:hover, .luma-theme-settings__layout-card:hover, .luma-theme-settings__transition-card:hover { border-color: var(--el-color-primary-light-5); color: var(--el-text-color-primary); box-shadow: 0 3px 8px color-mix(in srgb, var(--el-color-black) 8%, transparent); }
+.luma-theme-settings__mode-card.is-active, .luma-theme-settings__layout-card.is-active, .luma-theme-settings__transition-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: color-mix(in srgb, var(--el-color-primary) 8%, var(--el-bg-color)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 30%, transparent); }
 .luma-theme-settings__mode-card:focus-visible, .luma-theme-settings__layout-card:focus-visible, .luma-theme-settings__transition-card:focus-visible, .luma-theme-settings__tab:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
 .luma-theme-settings__mode-icon { flex: none; }
 .luma-theme-settings__mode-card > span:last-child { white-space: nowrap; word-break: keep-all; }
-.luma-theme-settings__color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; }
-.luma-theme-settings__color-card { position: relative; display: flex; min-height: 54px; align-items: center; gap: 8px; padding: 8px; overflow: hidden; border: 1px solid var(--el-border-color-light); border-radius: 9px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-bg-color); }
-.luma-theme-settings__color-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); }
-.luma-theme-settings__color-card i { width: 22px; height: 22px; flex: none; border-radius: 6px; }
+.luma-theme-settings__color-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.luma-theme-settings__color-card { position: relative; display: flex; min-width: 0; min-height: 68px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; padding: 8px 6px; overflow: hidden; border: 1px solid var(--el-border-color-lighter); border-radius: 8px; color: var(--el-text-color-secondary); cursor: pointer; background: var(--el-bg-color); transition: border-color .2s, color .2s, background-color .2s, box-shadow .2s; }
+.luma-theme-settings__color-card:hover { border-color: var(--el-color-primary-light-5); color: var(--el-text-color-primary); }
+.luma-theme-settings__color-card.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: color-mix(in srgb, var(--el-color-primary) 6%, var(--el-bg-color)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 25%, transparent); }
+.luma-theme-settings__color-card i { width: 28px; height: 20px; flex: none; border-radius: 6px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--el-color-black) 8%, transparent); }
 .luma-theme-settings__color-card i.is-custom { background: linear-gradient(135deg, #3b82f6, #8b5cf6 50%, #ef4444); }
-.luma-theme-settings__color-card > span { min-width: 0; white-space: nowrap; word-break: keep-all; }
+.luma-theme-settings__color-card > span { min-width: 0; max-width: 100%; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; word-break: keep-all; }
 .luma-theme-settings__color-card input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .luma-theme-settings__radius-grid, .luma-theme-settings__segments { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.luma-theme-settings__radius-grid button, .luma-theme-settings__segments button { min-height: 36px; border: 1px solid var(--el-border-color-light); border-radius: 7px; color: var(--el-text-color-regular); cursor: pointer; background: var(--el-fill-color-light); }
+.luma-theme-settings__radius-grid button, .luma-theme-settings__segments button { min-height: 32px; border: 1px solid var(--el-border-color-lighter); border-radius: 6px; color: var(--el-text-color-secondary); cursor: pointer; background: var(--el-bg-color); }
 .luma-theme-settings__radius-grid button.is-active, .luma-theme-settings__segments button.is-active { border-color: var(--el-color-primary); color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
 .luma-theme-settings__segments { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
-.luma-theme-settings__layout-preview { width: 100%; height: auto; color: var(--el-color-primary); }
+.luma-theme-settings__layout-preview { width: 100%; max-height: 48px; color: var(--el-color-primary); }
 .luma-theme-settings__layout-preview rect { fill: var(--el-fill-color); stroke: color-mix(in srgb, var(--el-border-color) 80%, transparent); stroke-width: 1; }
 .luma-theme-settings__layout-preview rect.is-background { fill: var(--el-fill-color-lighter); }
 .luma-theme-settings__layout-preview rect.is-medium { fill: var(--el-color-primary-light-7); stroke: var(--el-color-primary-light-5); }
 .luma-theme-settings__layout-preview rect.is-strong { fill: var(--el-color-primary-light-5); stroke: var(--el-color-primary-light-3); }
-.luma-theme-settings__transition-preview { position: relative; width: 58px; height: 42px; border-radius: 6px; background: var(--el-fill-color-light); }
+.luma-theme-settings__transition-card { min-height: 64px; padding: 7px 4px; font-size: 12px; }
+.luma-theme-settings__transition-preview { position: relative; width: 42px; height: 30px; border-radius: 6px; background: var(--el-fill-color-light); }
 .luma-theme-settings__transition-preview i { position: absolute; inset: 7px 10px; border-radius: 5px; background: var(--el-color-primary-light-5); opacity: .3; }
 .luma-theme-settings__transition-preview i:last-child { opacity: 1; }
 .luma-theme-settings__transition-card:not(:disabled).is-fade-side i:last-child { animation: luma-settings-side 2.4s infinite; }
@@ -287,12 +297,12 @@ button { font: inherit; }
 .luma-theme-settings__transition-card:not(:disabled).is-fade-bottom i:last-child { animation: luma-settings-bottom 2.4s infinite; }
 .luma-theme-settings__transition-card:not(:disabled).is-zoom-fade i:last-child { animation: luma-settings-zoom 2.4s infinite; }
 .luma-theme-settings__transition-card:disabled { cursor: not-allowed; opacity: .45; }
-.luma-theme-settings__actions { flex: none; padding-top: 16px; border-top: 1px solid var(--el-border-color-lighter); background: var(--el-bg-color); }
-.luma-theme-settings__reset { width: 100%; min-height: 40px; gap: 8px; }
+.luma-theme-settings__actions { flex: none; padding: 12px 4px 0; border-top: 1px solid var(--el-border-color-lighter); background: var(--el-bg-color-page); }
+.luma-theme-settings__reset { width: 100%; min-height: 38px; gap: 8px; border-color: var(--el-border-color); background: var(--el-bg-color); }
 @keyframes luma-settings-side { 0%, 20%, 100% { opacity: 0; transform: translateX(-10px); } 40%, 80% { opacity: 1; transform: translateX(0); } }
 @keyframes luma-settings-fade { 0%, 20%, 100% { opacity: 0; } 40%, 80% { opacity: 1; } }
 @keyframes luma-settings-bottom { 0%, 20%, 100% { opacity: 0; transform: translateY(8px); } 40%, 80% { opacity: 1; transform: translateY(0); } }
 @keyframes luma-settings-zoom { 0%, 20%, 100% { opacity: 0; transform: scale(.82); } 40%, 80% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .luma-theme-settings *, .luma-theme-settings *::before, .luma-theme-settings *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; } }
-@container (max-width: 300px) { .luma-theme-settings__layout-grid, .luma-theme-settings__transition-grid { grid-template-columns: 1fr; } }
+@container (max-width: 320px) { .luma-theme-settings__transition-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

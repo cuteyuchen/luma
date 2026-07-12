@@ -49,7 +49,7 @@ export interface SchemaTableColumnSettings {
 export interface SchemaTableSortChangePayload {
   column?: unknown
   order?: 'ascending' | 'descending' | null
-  prop?: string
+  prop?: string | null
 }
 
 export interface SchemaTableColumn<T extends SchemaTableRecord = SchemaTableRow> {

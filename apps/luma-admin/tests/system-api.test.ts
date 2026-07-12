@@ -291,7 +291,7 @@ describe('system mock api', () => {
     expect(findOrganization(organizations, created.id)).toBeUndefined()
   })
 
-  it('支持目录、菜单、按钮树的创建、编辑和删除', async () => {
+  it('支持目录、菜单、按钮、内嵌和外链节点的创建、编辑和删除', async () => {
     const directory = await createSystemMenu({
       order: 10,
       parentId: '',
@@ -316,6 +316,24 @@ describe('system mock api', () => {
       title: '导出审计日志',
       type: 'button',
     })
+    const embedded = await createSystemMenu({
+      externalLink: 'https://example.com/embedded',
+      name: 'AuditEmbedded',
+      order: 2,
+      parentId: directory.id,
+      path: 'embedded',
+      title: '内嵌审计页',
+      type: 'embedded',
+    })
+    const external = await createSystemMenu({
+      externalLink: 'https://example.com/docs',
+      name: 'AuditDocs',
+      order: 3,
+      parentId: directory.id,
+      path: 'docs',
+      title: '审计文档',
+      type: 'external',
+    })
 
     let menus = await fetchSystemMenus()
     const auditDirectory = findMenu(menus, directory.id)
@@ -323,12 +341,29 @@ describe('system mock api', () => {
       id: button.id,
       type: 'button',
     })
+    expect(findMenu(menus, embedded.id)).toMatchObject({
+      component: 'shared/external-frame',
+      externalTarget: '_self',
+      type: 'embedded',
+    })
+    expect(findMenu(menus, external.id)).toMatchObject({
+      component: '',
+      externalTarget: '_blank',
+      type: 'external',
+    })
 
     let runtimeMenus = await loadAdminMenus()
     expect(findRuntimeMenu(runtimeMenus, '/audit/index')).toMatchObject({
       component: 'audit/index',
       name: 'AuditIndex',
       title: '审计日志',
+    })
+    expect(findRuntimeMenu(runtimeMenus, '/audit/embedded')).toMatchObject({
+      component: 'shared/external-frame',
+      externalLink: 'https://example.com/embedded',
+    })
+    expect(findRuntimeMenu(runtimeMenus, '/audit/docs')).toMatchObject({
+      externalLink: 'https://example.com/docs',
     })
 
     await updateSystemMenu(menu.id, {

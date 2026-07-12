@@ -1,4 +1,3 @@
-import { createAdminResponseTransport, createAdminSessionTransport } from '../api/adapters'
 import { resolveRolePermissions } from './permission'
 
 export type AdminAccountKey = 'admin' | 'guest' | 'operator'
@@ -25,7 +24,7 @@ export interface AdminAccountPreset {
   username: string
 }
 
-interface MockAccount extends AdminAccountPreset {
+export interface MockAccount extends AdminAccountPreset {
   enabled: boolean
   user: AdminUser
 }
@@ -84,7 +83,7 @@ export const adminAccountOptions: AdminAccountPreset[] = Object.values(mockAccou
   return preset
 })
 
-/***********************登录接口模拟*********************/
+/***********************登录校验*********************/
 function cloneUser(user: AdminUser): AdminUser {
   return {
     ...user,
@@ -101,7 +100,7 @@ function resolveAccount(payload: AdminLoginRequest): MockAccount | undefined {
   return Object.values(mockAccounts).find(account => account.username === payload.username)
 }
 
-export async function mockLogin(payload: AdminLoginRequest): Promise<Record<string, unknown>> {
+export function verifyMockAccount(payload: AdminLoginRequest): { key: AdminAccountKey, user: AdminUser } {
   const account = resolveAccount(payload)
   const password = payload.password || 'luma123'
 
@@ -113,32 +112,13 @@ export async function mockLogin(payload: AdminLoginRequest): Promise<Record<stri
     throw new Error('账号已停用')
   }
 
-  return createAuthResponse(account)
-}
-
-function createAuthResponse(account: MockAccount): Record<string, unknown> {
-  return createAdminSessionTransport({
-    accessToken: `mock-token-${account.key}-${Date.now()}`,
-    expiresAt: Date.now() + 30 * 60 * 1000,
-    refreshToken: `mock-refresh-${account.key}`,
-  }, cloneUser({
-    ...account.user,
-    permissions: resolveRolePermissions(account.user.roles),
-  }))
-}
-
-export async function mockRefreshSession(refreshToken: string): Promise<Record<string, unknown>> {
-  const accountKey = refreshToken.replace(/^mock-refresh-/, '') as AdminAccountKey
-  const account = mockAccounts[accountKey]
-
-  if (!account || refreshToken !== `mock-refresh-${accountKey}`) {
-    return createAdminResponseTransport(null, {
-      code: 'AUTH_EXPIRED',
-      message: '刷新凭据已失效',
-    })
+  return {
+    key: account.key,
+    user: cloneUser({
+      ...account.user,
+      permissions: resolveRolePermissions(account.user.roles),
+    }),
   }
-
-  return createAuthResponse(account)
 }
 
 export function updateMockAccountStatus(username: string, enabled: boolean): void {
@@ -156,11 +136,28 @@ export function updateMockAccountRoles(username: string, roles: string[]): void 
   }
 }
 
+export function updateMockAccountName(username: string, name: string): void {
+  const account = Object.values(mockAccounts).find(item => item.username === username)
+  if (account) {
+    account.user.name = name
+  }
+}
+
 export function resetMockAccountPassword(username: string, password: string): void {
   const account = Object.values(mockAccounts).find(item => item.username === username)
   if (account) {
     account.password = password
   }
+}
+
+export function changeMockAccountPassword(username: string, currentPassword: string, newPassword: string): void {
+  const account = Object.values(mockAccounts).find(item => item.username === username)
+
+  if (!account || account.password !== currentPassword) {
+    throw new Error('当前密码不正确')
+  }
+
+  account.password = newPassword
 }
 
 export function resetMockAccounts(): void {
@@ -169,11 +166,36 @@ export function resetMockAccounts(): void {
     guest: ['guest'],
     operator: ['operator'],
   }
+  const names: Record<AdminAccountKey, string> = {
+    admin: '超级管理员',
+    guest: '访客账号',
+    operator: '运营人员',
+  }
 
   Object.values(mockAccounts).forEach((account) => {
     account.enabled = true
     account.password = 'luma123'
+    account.user.name = names[account.key]
     account.user.roles = [...defaults[account.key]]
     account.user.permissions = resolveRolePermissions(account.user.roles)
+  })
+}
+
+export function exportMockAccounts(): Record<AdminAccountKey, MockAccount> {
+  return Object.fromEntries(Object.entries(mockAccounts).map(([key, account]) => [
+    key,
+    {
+      ...account,
+      user: cloneUser(account.user),
+    },
+  ])) as Record<AdminAccountKey, MockAccount>
+}
+
+export function importMockAccounts(accounts: Record<AdminAccountKey, MockAccount>): void {
+  Object.entries(accounts).forEach(([key, account]) => {
+    mockAccounts[key as AdminAccountKey] = {
+      ...account,
+      user: cloneUser(account.user),
+    }
   })
 }

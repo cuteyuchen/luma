@@ -62,6 +62,7 @@ export interface CrudQueryConfig {
   columns?: number
   collapsible?: boolean
   defaultCollapsed?: boolean
+  defaultVisible?: boolean
   collapsedRows?: number
   labelWidth?: number | string
   searchText?: string
@@ -99,7 +100,8 @@ export interface CrudTableColumn extends SchemaTableColumn {
 }
 
 export interface CrudToolbarConfig {
-  title?: string
+  actionsPosition?: 'left' | 'right'
+  queryToggle?: boolean
   create?: boolean
   batchDelete?: boolean
   refresh?: boolean
@@ -161,7 +163,6 @@ export interface CrudPaginationConfig {
 
 export interface CrudTableProps {
   title?: string
-  description?: string
   querySchemas?: SchemaFormItem[]
   formSchemas?: SchemaFormItem[]
   columns?: CrudTableColumn[]

@@ -156,7 +156,8 @@ describe('system role view', () => {
     await wrapper.find('[data-action="authorize-role"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.find('.dialog-stub').attributes('data-title')).toBe('角色授权：审计员')
+    expect(wrapper.find('.dialog-stub').attributes('data-title')).toBe('角色授权：审计员（auditor）')
+    expect(wrapper.text()).toContain('勾选菜单会联动下级页面和按钮权限')
     expect(wrapper.findComponent(TreeStub).props('data')).toEqual(expect.arrayContaining([
       expect.objectContaining({ label: '系统管理' }),
     ]))

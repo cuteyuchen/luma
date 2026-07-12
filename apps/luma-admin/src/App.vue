@@ -74,6 +74,12 @@ function handleOpenSettings(): void {
   openAdminSettings()
 }
 
+function handleOpenProfile(): void {
+  if (route.path !== '/profile') {
+    void router.push('/profile')
+  }
+}
+
 function handlePreferencesChange(nextPreferences: LumaPreferences): void {
   patchAdminPreferences(nextPreferences)
 }
@@ -170,6 +176,7 @@ async function handleTabRefresh(path: string): Promise<void> {
         :resolved-theme-mode="resolvedThemeMode"
         :user-name="userName"
         @logout="handleLogout"
+        @open-profile="handleOpenProfile"
         @open-settings="handleOpenSettings"
         @toggle-theme="handleToggleTheme"
       />

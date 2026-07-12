@@ -9,7 +9,7 @@ import type {
   SchemaFormModel,
   SchemaTableRow,
 } from '@luma/core/components'
-import { LumaCrudTable } from '@luma/core/components'
+import { LumaCrudTable, LumaPage } from '@luma/core/components'
 import { shallowRef } from 'vue'
 import {
   createExampleQueryModel,
@@ -28,7 +28,6 @@ const editorType = shallowRef<'dialog' | 'drawer'>('dialog')
 const queryConfig = {
   collapsible: true,
   collapsedRows: 1,
-  columns: 2,
   defaultCollapsed: true,
   schemas: exampleQuerySchemas,
   submitDebounce: 250,
@@ -125,27 +124,28 @@ function handleExport(payload: { selectedRows: SchemaTableRow[] }): void {
 
 <template>
   <main class="luma-admin-example">
-    <LumaCrudTable
-      v-model:query-model="queryModel"
-      v-model:page="page"
-      v-model:page-size="pageSize"
-      title="CRUD Table"
-      :description="message"
-      :data-source="dataSource"
-      :editor="{ columns: 2, type: editorType, width: editorType === 'drawer' ? 'min(720px, 92vw)' : 'min(920px, calc(100vw - 32px))' }"
-      :query="queryConfig"
-      :table="tableConfig"
-      :toolbar="toolbarConfig"
-      @search="handleSearch"
-      @reset="handleReset"
-      @page-change="handlePageChange"
-      @export="handleExport"
-    >
-      <template #toolbar-tools>
-        <button class="luma-admin-example__button" type="button" @click="editorType = editorType === 'dialog' ? 'drawer' : 'dialog'">
-          编辑器：{{ editorType === 'dialog' ? '弹窗' : '抽屉' }}
-        </button>
-      </template>
-    </LumaCrudTable>
+    <LumaPage title="CRUD Table" :description="message" fill>
+      <LumaCrudTable
+        v-model:query-model="queryModel"
+        v-model:page="page"
+        v-model:page-size="pageSize"
+        title="数据列表"
+        :data-source="dataSource"
+        :editor="{ columns: 2, type: editorType, width: editorType === 'drawer' ? 'min(720px, 92vw)' : 'min(920px, calc(100vw - 32px))' }"
+        :query="queryConfig"
+        :table="tableConfig"
+        :toolbar="toolbarConfig"
+        @search="handleSearch"
+        @reset="handleReset"
+        @page-change="handlePageChange"
+        @export="handleExport"
+      >
+        <template #toolbar-actions>
+          <button class="luma-admin-example__button" type="button" @click="editorType = editorType === 'dialog' ? 'drawer' : 'dialog'">
+            编辑器：{{ editorType === 'dialog' ? '弹窗' : '抽屉' }}
+          </button>
+        </template>
+      </LumaCrudTable>
+    </LumaPage>
   </main>
 </template>

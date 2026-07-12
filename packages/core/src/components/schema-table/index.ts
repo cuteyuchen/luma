@@ -23,7 +23,7 @@ export type {
   SchemaTableRecord,
   SchemaTableRow,
   SchemaTableSelectionPayload,
-  SchemaTableStateResolver,
   SchemaTableSortChangePayload,
+  SchemaTableStateResolver,
   SchemaTableTreeProps,
 } from './types'

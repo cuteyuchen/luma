@@ -108,6 +108,19 @@ export function syncSessionAccess(user: AdminUser | null = currentUserState.valu
   syncAdminAccess(user)
 }
 
+export function updateCurrentUserName(name: string): AdminUser {
+  const user = currentUserState.value
+
+  if (!user) {
+    throw new Error('当前用户未登录')
+  }
+
+  const updatedUser = { ...user, name }
+  currentUserState.value = updatedUser
+  writeStoredUser(updatedUser)
+  return updatedUser
+}
+
 /***********************登录登出*********************/
 function normalizeLoginPayload(payload: AdminAccountKey | AdminLoginRequest): AdminLoginRequest {
   if (typeof payload !== 'string') {

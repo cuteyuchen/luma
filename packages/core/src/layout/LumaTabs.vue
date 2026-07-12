@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<{
   fullscreenTarget?: string
   showIcon?: boolean
   showMaximize?: boolean
+  showRefresh?: boolean
   tabs?: LumaLayoutTabItem[]
   visible?: boolean
 }>(), {
@@ -27,6 +28,7 @@ const props = withDefaults(defineProps<{
   fullscreenTarget: '[data-layout-fullscreen-target]',
   showIcon: true,
   showMaximize: true,
+  showRefresh: true,
   tabs: () => [],
   visible: true,
 })
@@ -95,6 +97,12 @@ function activateTab(path: string): void {
 function closeTab(path: string): void {
   if (canCloseTab(path)) {
     emit('remove', path)
+  }
+}
+
+function refreshActiveTab(): void {
+  if (activePath.value) {
+    emit('refresh', activePath.value)
   }
 }
 
@@ -269,6 +277,7 @@ onBeforeUnmount(() => {
 
 defineExpose({
   getTabsElement: () => tabsViewportRef.value,
+  refreshCurrent: refreshActiveTab,
   scrollTabs,
   toggleFullscreen,
 })
@@ -339,13 +348,25 @@ defineExpose({
     </button>
 
     <button
+      v-if="showRefresh"
+      class="luma-tabs__tool"
+      type="button"
+      aria-label="刷新当前页面"
+      data-action="refresh-current-tab"
+      :disabled="!activePath"
+      @click="refreshActiveTab"
+    >
+      <LumaIcon name="luma:refresh" :size="16" />
+    </button>
+
+    <button
       v-if="showMaximize"
       class="luma-tabs__tool"
       type="button"
       :aria-label="isFullscreen ? '退出内容最大化' : '内容最大化'"
       @click="toggleFullscreen"
     >
-      <span aria-hidden="true">{{ isFullscreen ? '↙' : '⛶' }}</span>
+      <LumaIcon :name="isFullscreen ? 'luma:fullscreen-exit' : 'luma:fullscreen'" :size="16" />
     </button>
 
     <Teleport to="body">
@@ -409,15 +430,15 @@ defineExpose({
   min-width: 100%;
   height: 100%;
   align-items: stretch;
-  gap: 4px;
-  padding: 4px 8px 0;
+  gap: 2px;
+  padding: 3px 6px 0;
   box-sizing: border-box;
 }
 
 .luma-tabs__item {
   position: relative;
   display: flex;
-  min-width: 96px;
+  min-width: 88px;
   max-width: min(240px, 32vw);
   align-items: center;
   border-radius: var(--luma-radius-small) var(--luma-radius-small) 0 0;
@@ -434,6 +455,7 @@ defineExpose({
 .luma-tabs__item.is-active {
   color: var(--el-color-primary);
   background: var(--el-color-primary-light-9);
+  box-shadow: inset 0 -2px var(--el-color-primary);
 }
 
 .luma-tabs__tab {
@@ -442,8 +464,8 @@ defineExpose({
   min-width: 0;
   height: 100%;
   align-items: center;
-  gap: 6px;
-  padding: 0 28px 0 12px;
+  gap: 5px;
+  padding: 0 26px 0 10px;
   border: 0;
   color: inherit;
   background: transparent;

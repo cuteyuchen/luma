@@ -164,7 +164,7 @@ const schemas: SchemaFormItem<ProjectForm>[] = [
 - `dictionary`：从字典上下文加载 options。
 - `options`：数组或 `Ref` options。
 - `rules`：Element Plus 表单校验规则。
-- `span` / `columns` / `labelWidth`：控制布局。
+- `span` / `columns` / `labelWidth`：控制布局；未传 `labelWidth` 时默认使用 `auto`，同一表单共享统一标签区宽度，保证等宽栅格中的输入区对齐。
 - `hidden` / `disabled` / `readonly`：支持布尔值或 `(context) => boolean`。
 - `editDisabled`：仅编辑模式禁用。
 - `authority` / `readonlyAuthority`：结合 `canAccess` 控制隐藏或只读权限。
@@ -327,7 +327,6 @@ const dataSource: CrudDataSource = {
     title="项目列表"
     :data-source="dataSource"
     :query="{
-      columns: 3,
       collapsible: true,
       schemas: querySchemas,
     }"
@@ -376,13 +375,19 @@ Form、Table 和 CRUD 的字典规则保持一致：只需提供 `dictionary`（
 
 编辑器通过 `editor` 配置，`type` 支持 `dialog` 和 `drawer`，默认使用 `dialog`；同时支持宽度、表单列数、标签宽度、Loading、禁用态和关闭确认。工具栏支持标题、新增、批量删除、刷新、字典化 CSV 导出和全屏。
 
+查询区未传 `query.columns` 时会按实际容器宽度自动使用 1～4 列：小于 640px 为 1 列、640px 起为 2 列、960px 起为 3 列、1280px 起为 4 列。显式传入 `query.columns` 时以配置值为准，适合需要固定密度的业务页面。
+
+`LumaCrudTable` 只负责组合查询表单、表格、分页和增删改查，不包含 `LumaPage` 页面壳。需要页面 header、description 或 loading 遮罩时，由消费方自行包裹 `LumaPage`。
+
+传入 `title` 时会在业务操作组左侧显示表格标题，不传则不渲染标题；也可通过 `table-title` 插槽自定义标题。新增、批量删除、导出、`toolbar-actions` 与 `actions` 插槽属于业务操作组，可通过 `toolbar.actionsPosition: 'left' | 'right'` 设置位置，默认在右侧；筛选区显隐、刷新、全屏、`toolbar-tools` 插槽和列设置始终位于右侧工具组。筛选、刷新、全屏与列设置使用图标按钮，并保留 `aria-label` 和 `title` 供键盘及辅助技术识别。查询配置可用 `defaultVisible` 设置筛选区初始显隐，工具栏可用 `queryToggle: false` 关闭显隐按钮。
+
 CRUD 会转发 `query-{field}`、`table-{field}`、`form-{field}`、`table-title`、`toolbar-actions`、`toolbar-tools`、`row-actions` 和 `footer` 插槽。查询配置可启用 `submitOnChange` 与 `submitDebounce`。
 
 推荐使用六个配置对象组织复杂页面：
 
 - `query`：schemas、列数、折叠、label width 和查询文案。
 - `table`：columns、rowKey、selection、列设置、自动 resize 和操作列宽度。
-- `toolbar`：新增、批量删除、刷新、导出及对应文案。
+- `toolbar`：业务操作位置、新增、批量删除、刷新、导出及对应文案。
 - `actions`：查看、编辑、删除的行级显示函数、文案和删除确认策略。
 - `dialog`：标题、宽度、提交文案和脏表单关闭确认。
 - `pagination`：开关和 page sizes。

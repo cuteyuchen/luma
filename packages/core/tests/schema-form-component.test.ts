@@ -42,6 +42,7 @@ describe('luma schema form', () => {
     })
 
     expect(wrapper.findComponent({ name: 'ElForm' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'ElForm' }).props('labelWidth')).toBe('auto')
     expect(wrapper.findComponent({ name: 'ElInput' }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'ElSelect' }).exists()).toBe(true)
     expect(wrapper.find('[data-field="id"]').exists()).toBe(false)

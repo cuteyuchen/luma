@@ -21,7 +21,9 @@ defineExpose({
 
 <style scoped lang="scss">
 .luma-content {
+  display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   padding: 20px;

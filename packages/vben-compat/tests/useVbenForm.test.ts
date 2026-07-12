@@ -48,7 +48,7 @@ describe('useVbenForm', () => {
         field: 'name',
         label: '名称',
         placeholder: '请输入名称',
-        props: {
+        componentProps: {
           disabled: true,
         },
         required: true,
@@ -62,20 +62,20 @@ describe('useVbenForm', () => {
           { label: '停用', value: 'disabled', disabled: true },
         ],
         placeholder: '请选择状态',
-        props: {},
+        componentProps: {},
       },
       {
         component: 'textarea',
         field: 'remark',
         label: '备注',
-        props: {},
+        componentProps: {},
       },
       {
         component: 'input',
         field: 'internal',
         hidden: true,
         label: '内部字段',
-        props: {},
+        componentProps: {},
       },
     ])
   })
@@ -185,6 +185,6 @@ describe('useVbenForm', () => {
       'tree-select',
       'input',
     ])
-    expect(schemas.at(-1)?.props).toMatchObject({ type: 'password' })
+    expect(schemas.at(-1)?.componentProps).toMatchObject({ type: 'password' })
   })
 })

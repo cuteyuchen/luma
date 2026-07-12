@@ -121,7 +121,7 @@ export function adaptVbenFormSchema(schema: VbenFormSchema): SchemaFormItem {
     label: schema.label,
     options: adaptVbenOptions(componentProps),
     placeholder: componentProps.placeholder,
-    props: resolveVbenComponentProps(schema),
+    componentProps: resolveVbenComponentProps(schema),
     required: isVbenSchemaRequired(schema),
   }
 }

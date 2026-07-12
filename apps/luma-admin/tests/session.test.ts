@@ -6,6 +6,7 @@ import {
   isAuthenticated,
   login,
   logout,
+  updateCurrentUserName,
 } from '../src/services/session'
 
 describe('admin session service', () => {
@@ -48,6 +49,18 @@ describe('admin session service', () => {
     expect(currentUser.value).toBeNull()
     expect(permissionStore.permissions).toEqual([])
     expect(permissionStore.roles).toEqual([])
+  })
+
+  it('更新当前用户昵称会同步会话快照', async () => {
+    await login('admin')
+
+    updateCurrentUserName('新管理员')
+
+    expect(currentUser.value?.name).toBe('新管理员')
+    expect(JSON.parse(localStorage.getItem('luma-admin:user') ?? '{}')).toMatchObject({
+      name: '新管理员',
+      username: 'admin',
+    })
   })
 
   it('operator 和 guest 拥有不同访问能力', async () => {

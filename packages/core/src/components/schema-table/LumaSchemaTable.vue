@@ -12,6 +12,7 @@ import type {
   SchemaTableSortChangePayload,
   SchemaTableTreeProps,
 } from './types'
+import { LumaIcon } from '@luma/icons'
 import { ElCheckbox, ElLoading, ElTable, ElTableColumn } from 'element-plus'
 import {
   computed,
@@ -41,7 +42,7 @@ const props = withDefaults(defineProps<{
   columns: SchemaTableColumn<T>[]
   defaultExpandAll?: boolean
   emptyText?: string
-  error?: boolean | Error | string
+  error?: Error | string | boolean
   errorText?: string
   headerCellClassName?: SchemaTableClassName<T>
   indexLabel?: string
@@ -53,6 +54,7 @@ const props = withDefaults(defineProps<{
   rowClassName?: SchemaTableClassName<T>
   rowKey?: string | ((row: T, index: number) => string | number)
   rows?: T[]
+  retryText?: string
   scaleColumnWidth?: boolean
   selection?: boolean
   showColumnSettings?: boolean
@@ -76,6 +78,7 @@ const props = withDefaults(defineProps<{
   pagination: false,
   rowKey: 'id',
   rows: () => [],
+  retryText: '重新加载',
   scaleColumnWidth: true,
   selection: false,
   showColumnSettings: false,
@@ -85,7 +88,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  currentChange: [currentRow: T | undefined, oldCurrentRow: T | undefined]
+  currentChange: [currentRow: T | null, oldCurrentRow: T | null]
   expandChange: [row: T, expanded: boolean | T[]]
   filterChange: [filters: Record<string, unknown>]
   pageChange: [payload: SchemaTablePaginationChangePayload]
@@ -107,6 +110,7 @@ const columnOrder = shallowRef<string[]>([])
 const selectedRows = shallowRef<T[]>([])
 const selectedRowKeys = shallowRef<Array<string | number>>([])
 let resizeObserver: ResizeObserver | undefined
+let resizeLayoutTimer: ReturnType<typeof setTimeout> | undefined
 let draggedColumnField = ''
 
 const normalizedColumns = computed(() => normalizeSchemaTableColumns<T>(props.columns, {
@@ -335,7 +339,7 @@ function handleRowClick(row: T, column: unknown, event: Event): void {
   emit('rowClick', row, column, event)
 }
 
-function handleCurrentChange(currentRow: T | undefined, oldCurrentRow: T | undefined): void {
+function handleCurrentChange(currentRow: T | null, oldCurrentRow: T | null): void {
   emit('currentChange', currentRow, oldCurrentRow)
 }
 
@@ -348,7 +352,13 @@ function setupResizeObserver(): void {
     return
   }
   resizeObserver = new ResizeObserver(() => {
-    void nextTick(() => tableRef.value?.doLayout?.())
+    if (resizeLayoutTimer) {
+      clearTimeout(resizeLayoutTimer)
+    }
+    resizeLayoutTimer = setTimeout(() => {
+      resizeLayoutTimer = undefined
+      tableRef.value?.doLayout?.()
+    })
   })
   resizeObserver.observe(containerRef.value)
 }
@@ -356,6 +366,10 @@ function setupResizeObserver(): void {
 function teardownResizeObserver(): void {
   resizeObserver?.disconnect()
   resizeObserver = undefined
+  if (resizeLayoutTimer) {
+    clearTimeout(resizeLayoutTimer)
+    resizeLayoutTimer = undefined
+  }
 }
 
 watch(() => props.autoResize, () => {
@@ -382,6 +396,7 @@ defineExpose({
     )),
   }),
   getVisibleColumns: () => [...renderableColumns.value],
+  resetColumnSettings,
   getTableElement: () => tableRef.value?.$el as HTMLElement | undefined,
   getTableInstance: () => tableRef.value,
   toggleRowSelection: (row: T, selected?: boolean) => tableRef.value?.toggleRowSelection?.(row, selected),
@@ -390,47 +405,62 @@ defineExpose({
 
 <template>
   <div ref="containerRef" class="luma-schema-table">
-    <div v-if="showColumnSettingsPanel" class="luma-schema-table__toolbar">
-      <div class="luma-schema-table__column-settings">
-        <details>
-          <summary class="luma-schema-table__column-settings-trigger" aria-label="列设置" title="列设置">
-            <svg aria-hidden="true" viewBox="0 0 24 24">
-              <path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" />
-            </svg>
-          </summary>
-          <div class="luma-schema-table__column-options">
-            <div class="luma-schema-table__column-options-header">
-              <strong>列设置</strong>
-              <button type="button" @click="resetColumnSettings">恢复默认</button>
-            </div>
-            <div
-              v-for="(column, index) in configurableColumns"
-              :key="String(column.field)"
-              class="luma-schema-table__column-option"
-              :draggable="columnSettings?.reorderable !== false"
-              @dragstart="handleColumnDragStart(String(column.field))"
-              @dragover.prevent
-              @drop="handleColumnDrop(String(column.field))"
-            >
-              <ElCheckbox
-                :model-value="!hiddenColumnFields.has(String(column.field))"
-                @update:model-value="toggleColumnVisible(String(column.field))"
+    <div v-if="$slots['toolbar-title'] || $slots.toolbar || $slots['toolbar-tools'] || showColumnSettingsPanel" class="luma-schema-table__toolbar">
+      <div v-if="$slots['toolbar-title']" class="luma-schema-table__toolbar-title">
+        <slot name="toolbar-title" />
+      </div>
+      <div v-if="$slots.toolbar" class="luma-schema-table__toolbar-content">
+        <slot name="toolbar" />
+      </div>
+      <div v-if="$slots['toolbar-tools'] || showColumnSettingsPanel" class="luma-schema-table__toolbar-tools">
+        <slot name="toolbar-tools" />
+        <div v-if="showColumnSettingsPanel" class="luma-schema-table__column-settings">
+          <details>
+            <summary class="luma-schema-table__column-settings-trigger" aria-label="列设置" title="列设置">
+              <LumaIcon name="luma:grid" />
+            </summary>
+            <div class="luma-schema-table__column-options">
+              <div class="luma-schema-table__column-options-header">
+                <strong>列设置</strong>
+                <button type="button" @click="resetColumnSettings">
+                  恢复默认
+                </button>
+              </div>
+              <div
+                v-for="(column, index) in configurableColumns"
+                :key="String(column.field)"
+                class="luma-schema-table__column-option"
+                :draggable="columnSettings?.reorderable !== false"
+                @dragstart="handleColumnDragStart(String(column.field))"
+                @dragover.prevent
+                @drop="handleColumnDrop(String(column.field))"
               >
-                {{ column.label }}
-              </ElCheckbox>
-              <span v-if="columnSettings?.reorderable !== false" class="luma-schema-table__column-order-actions">
-                <button type="button" :disabled="index === 0" :aria-label="`上移${column.label}`" @click="moveColumn(String(column.field), -1)">↑</button>
-                <button type="button" :disabled="index === configurableColumns.length - 1" :aria-label="`下移${column.label}`" @click="moveColumn(String(column.field), 1)">↓</button>
-              </span>
+                <ElCheckbox
+                  :model-value="!hiddenColumnFields.has(String(column.field))"
+                  @update:model-value="toggleColumnVisible(String(column.field))"
+                >
+                  {{ column.label }}
+                </ElCheckbox>
+                <span v-if="columnSettings?.reorderable !== false" class="luma-schema-table__column-order-actions">
+                  <button type="button" :disabled="index === 0" :aria-label="`上移${column.label}`" @click="moveColumn(String(column.field), -1)">
+                    ↑
+                  </button>
+                  <button type="button" :disabled="index === configurableColumns.length - 1" :aria-label="`下移${column.label}`" @click="moveColumn(String(column.field), 1)">
+                    ↓
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
-        </details>
+          </details>
+        </div>
       </div>
     </div>
 
     <div v-if="error" class="luma-schema-table__error" role="alert">
       <span>{{ resolvedErrorText }}</span>
-      <button type="button" @click="emit('retry')">{{ retryText }}</button>
+      <button type="button" @click="emit('retry')">
+        {{ retryText }}
+      </button>
     </div>
 
     <div v-else class="luma-schema-table__scroll">
@@ -536,6 +566,50 @@ defineExpose({
   justify-content: flex-end;
 }
 
+.luma-schema-table__toolbar {
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+}
+
+.luma-schema-table__toolbar-content {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: flex-start;
+}
+
+.luma-schema-table__toolbar-title {
+  min-width: 0;
+  flex: none;
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.luma-schema-table__toolbar-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.luma-schema-table__toolbar-tools :deep(.el-button) {
+  margin-left: 0;
+}
+
+.luma-schema-table__toolbar-tools :deep(.el-button.is-circle) {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  flex: 0 0 30px;
+  padding: 0;
+}
+
 .luma-schema-table__column-options {
   position: absolute;
   z-index: var(--luma-z-dropdown);
@@ -614,19 +688,16 @@ defineExpose({
   position: relative;
 }
 
-.luma-schema-table__column-settings-trigger svg {
+.luma-schema-table__column-settings-trigger :deep(.luma-icon) {
   width: 16px;
   height: 16px;
-  fill: none;
-  stroke: currentcolor;
-  stroke-linejoin: round;
-  stroke-width: 1.6;
 }
 
 .luma-schema-table__column-settings-trigger {
+  box-sizing: border-box;
   display: inline-flex;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid var(--el-border-color);
   border-radius: 50%;
@@ -691,9 +762,38 @@ defineExpose({
     gap: 12px;
   }
 
+  .luma-schema-table__toolbar {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .luma-schema-table__toolbar-content {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  .luma-schema-table__toolbar-tools {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .luma-schema-table__toolbar-tools :deep(.el-button.is-circle) {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    flex-basis: 28px;
+  }
+
   .luma-schema-table__column-settings-trigger {
-    min-height: 44px;
-    min-width: 44px;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
   }
 
   .luma-schema-table__pagination {

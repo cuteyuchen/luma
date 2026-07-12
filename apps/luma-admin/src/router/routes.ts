@@ -14,6 +14,17 @@ export const adminRouteRecords: LumaMenuRecord[] = [
     },
   },
   {
+    component: 'profile/index',
+    name: 'Profile',
+    path: '/profile',
+    meta: {
+      hideInMenu: true,
+      icon: 'app:user',
+      order: 2,
+      title: '个人中心',
+    },
+  },
+  {
     children: [
       {
         component: 'system/user',

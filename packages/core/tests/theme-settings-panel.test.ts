@@ -19,7 +19,7 @@ function mountPanel() {
 describe('luma theme settings panel', () => {
   it('切换外观模式会更新 preferences 并抛出 change', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
+    await wrapper.findAll('.luma-theme-settings__tab')[0]?.trigger('click')
     const darkButton = wrapper.findAll('.luma-theme-settings__mode-card')
       .find(button => button.text() === '深色')
 
@@ -32,7 +32,7 @@ describe('luma theme settings panel', () => {
 
   it('选择预设主题色会写入 colorPrimary', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
+    await wrapper.findAll('.luma-theme-settings__tab')[0]?.trigger('click')
     const colorButton = wrapper.find('.luma-theme-settings__color-card')
 
     await colorButton.trigger('click')
@@ -43,7 +43,7 @@ describe('luma theme settings panel', () => {
 
   it('关闭标签页开关会同步禁用缓存开关', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[2]?.trigger('click')
+    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
     const switches = wrapper.findAll('.el-switch')
     // DOM 中通用页的三个动画开关在前，布局页标签栏开关位于第六项。
     await switches[5]?.setValue(false)
@@ -63,7 +63,7 @@ describe('luma theme settings panel', () => {
       },
     })
 
-    await wrapper.findAll('.luma-theme-settings__tab')[2]?.trigger('click')
+    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
     const switches = wrapper.findAll('.el-switch')
 
     expect((switches[3]?.element as HTMLInputElement).disabled).toBe(false)
@@ -85,8 +85,11 @@ describe('luma theme settings panel', () => {
   it('提供三页签和四种可选择的动画预览', async () => {
     const wrapper = mountPanel()
 
-    expect(wrapper.findAll('.luma-theme-settings__tab').map(tab => tab.text())).toEqual(['通用', '主题', '布局'])
+    expect(wrapper.findAll('.luma-theme-settings__tab').map(tab => tab.text())).toEqual(['外观', '布局', '通用'])
     expect(wrapper.findAll('.luma-theme-settings__transition-card')).toHaveLength(4)
+
+    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
+    expect(wrapper.findAll('.luma-theme-settings__layout-card')).toHaveLength(3)
 
     await wrapper.find('.luma-theme-settings__transition-card.is-zoom-fade').trigger('click')
     const updates = wrapper.emitted('update:preferences') as [ReturnType<typeof createDefaultPreferences>][]

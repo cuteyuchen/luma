@@ -1,9 +1,10 @@
 import type { DictionaryOption } from '@luma/core/dictionary'
 import type { LumaMenuRecord } from '@luma/core/router'
-import { adminRouteRecords } from '../router/routes'
+import { adminRouteRecords } from '../../luma-admin/src/router/routes'
 import {
   resetMockAccountPassword,
   resetMockAccounts,
+  updateMockAccountName,
   updateMockAccountRoles,
   updateMockAccountStatus,
 } from './auth'
@@ -127,7 +128,7 @@ export interface SystemPermissionTreeNode {
   permission?: string
 }
 
-export type SystemMenuType = 'button' | 'directory' | 'menu'
+export type SystemMenuType = 'button' | 'directory' | 'embedded' | 'external' | 'menu'
 
 export interface SystemMenuRecord {
   children?: SystemMenuRecord[]
@@ -539,7 +540,9 @@ function createSystemMenusFromRoutes(
       permissions,
       redirect: typeof route.redirect === 'string' ? route.redirect : '',
       title: typeof route.meta?.title === 'string' ? route.meta.title : route.name ?? route.path,
-      type: route.children?.length && !route.component && !externalLink ? 'directory' : 'menu',
+      type: externalLink
+        ? route.meta?.externalTarget === '_self' ? 'embedded' : 'external'
+        : route.children?.length && !route.component ? 'directory' : 'menu',
     }
   })
 }
@@ -899,7 +902,7 @@ function sortOrganizations(organizations: SystemOrganizationRecord[]): SystemOrg
 }
 
 function normalizeMenuType(value: unknown): SystemMenuType {
-  if (value === 'button' || value === 'directory' || value === 'menu') {
+  if (value === 'button' || value === 'directory' || value === 'embedded' || value === 'external' || value === 'menu') {
     return value
   }
 
@@ -912,7 +915,7 @@ function resolveMenuInput(input: SaveSystemMenuInput): Omit<SystemMenuRecord, 'c
   const parentId = normalizeText(input.parentId)
   const path = type === 'button' ? '' : normalizeText(input.path)
   const component = type === 'menu' ? normalizeText(input.component) : ''
-  const externalLink = type === 'menu' ? normalizeText(input.externalLink) : ''
+  const externalLink = type === 'embedded' || type === 'external' ? normalizeText(input.externalLink) : ''
   const permissionValues = Array.isArray(input.permissions)
     ? input.permissions
     : normalizeText(input.permissions ?? input.permission).split(',')
@@ -923,17 +926,21 @@ function resolveMenuInput(input: SaveSystemMenuInput): Omit<SystemMenuRecord, 'c
   }
 
   if (type !== 'button' && !path) {
-    throw new Error('目录和菜单必须填写路径')
+    throw new Error('当前菜单类型必须填写路径')
   }
 
-  if (type === 'menu' && !component && !externalLink) {
-    throw new Error('菜单必须填写组件或外链地址')
+  if (type === 'menu' && !component) {
+    throw new Error('菜单必须填写组件')
+  }
+
+  if ((type === 'embedded' || type === 'external') && !externalLink) {
+    throw new Error(type === 'embedded' ? '内嵌菜单必须填写内嵌地址' : '外链菜单必须填写外链地址')
   }
 
   return {
-    component,
+    component: type === 'embedded' ? 'shared/external-frame' : component,
     externalLink,
-    externalTarget: input.externalTarget === '_self' ? '_self' : '_blank',
+    externalTarget: type === 'embedded' ? '_self' : type === 'external' ? '_blank' : undefined,
     hidden: type === 'button' ? true : input.hidden === true,
     icon: type === 'button' ? '' : normalizeText(input.icon),
     name: type === 'button' ? '' : normalizeText(input.name),
@@ -1147,6 +1154,7 @@ export async function mockUpdateSystemUser(id: string, input: SaveSystemUserInpu
     ...normalized,
   }
   systemUsers = systemUsers.map(user => user.id === id ? updatedUser : user)
+  updateMockAccountName(updatedUser.username, updatedUser.nickname)
   updateMockAccountRoles(updatedUser.username, updatedUser.roles)
   updateMockAccountStatus(updatedUser.username, updatedUser.status === 'enabled')
 
@@ -1373,8 +1381,8 @@ export async function mockCreateSystemMenu(input: SaveSystemMenuInput): Promise<
     throw new Error('父级菜单不存在')
   }
 
-  if (parent?.type === 'button') {
-    throw new Error('按钮节点不能添加子项')
+  if (parent && parent.type !== 'directory' && parent.type !== 'menu') {
+    throw new Error('当前节点类型不能添加子项')
   }
 
   const menu: SystemMenuRecord = {
@@ -1398,6 +1406,9 @@ export async function mockUpdateSystemMenu(id: string, input: SaveSystemMenuInpu
     ...input,
     parentId: currentMenu.parentId,
   })
+  if (currentMenu.children?.length && normalized.type !== 'directory' && normalized.type !== 'menu') {
+    throw new Error('存在子项的节点只能设置为目录或菜单')
+  }
   const updatedMenu: SystemMenuRecord = {
     ...currentMenu,
     ...normalized,
@@ -1559,4 +1570,51 @@ export function resetMockDictionaries(): void {
   nextDictionaryTypeId = initialDictionaryTypes.length + 1
   dictionaryItems = cloneDictionaryItems(initialDictionaryItems)
   nextDictionaryItemId = initialDictionaryItems.length + 1
+}
+
+export interface MockSystemState {
+  dictionaryItems: SystemDictionaryItemRecord[]
+  dictionaryTypes: SystemDictionaryTypeRecord[]
+  nextDictionaryItemId: number
+  nextDictionaryTypeId: number
+  nextSystemMenuId: number
+  nextSystemOrganizationId: number
+  nextSystemRoleId: number
+  nextSystemUserId: number
+  systemMenus: SystemMenuRecord[]
+  systemOrganizations: SystemOrganizationRecord[]
+  systemRoles: SystemRoleRecord[]
+  systemUsers: SystemUserRecord[]
+}
+
+export function exportMockSystemState(): MockSystemState {
+  return {
+    dictionaryItems: cloneDictionaryItems(dictionaryItems),
+    dictionaryTypes: cloneDictionaryTypes(dictionaryTypes),
+    nextDictionaryItemId,
+    nextDictionaryTypeId,
+    nextSystemMenuId,
+    nextSystemOrganizationId,
+    nextSystemRoleId,
+    nextSystemUserId,
+    systemMenus: cloneMenus(systemMenus),
+    systemOrganizations: cloneOrganizations(systemOrganizations),
+    systemRoles: cloneRoles(systemRoles),
+    systemUsers: cloneUsers(systemUsers),
+  }
+}
+
+export function importMockSystemState(state: MockSystemState): void {
+  dictionaryItems = cloneDictionaryItems(state.dictionaryItems)
+  dictionaryTypes = cloneDictionaryTypes(state.dictionaryTypes)
+  nextDictionaryItemId = state.nextDictionaryItemId
+  nextDictionaryTypeId = state.nextDictionaryTypeId
+  nextSystemMenuId = state.nextSystemMenuId
+  nextSystemOrganizationId = state.nextSystemOrganizationId
+  nextSystemRoleId = state.nextSystemRoleId
+  nextSystemUserId = state.nextSystemUserId
+  systemMenus = cloneMenus(state.systemMenus)
+  systemOrganizations = cloneOrganizations(state.systemOrganizations)
+  systemRoles = cloneRoles(state.systemRoles)
+  systemUsers = cloneUsers(state.systemUsers)
 }

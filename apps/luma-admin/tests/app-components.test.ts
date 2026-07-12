@@ -18,10 +18,11 @@ const DrawerStub = defineComponent({
   name: 'ElDrawer',
   props: {
     modelValue: Boolean,
+    size: String,
     title: String,
   },
   emits: ['update:modelValue'],
-  template: '<section v-if="modelValue" class="el-drawer" :data-title="title"><slot /></section>',
+  template: '<section v-if="modelValue" class="el-drawer" :data-size="size" :data-title="title"><slot name="header" /><slot /></section>',
 })
 
 const ThemeSettingsPanelStub = defineComponent({
@@ -58,15 +59,19 @@ describe('app header actions', () => {
 
     expect(wrapper.find('[data-action="toggle-theme"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="open-settings"]').exists()).toBe(true)
+    expect(wrapper.find('[data-action="open-settings"]').attributes('aria-label')).toBe('偏好设置')
+    expect(wrapper.find('[data-action="open-profile"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="logout"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('管理员')
 
     await wrapper.find('[data-action="toggle-theme"]').trigger('click')
     await wrapper.find('[data-action="open-settings"]').trigger('click')
+    await wrapper.find('[data-action="open-profile"]').trigger('click')
     await wrapper.find('[data-action="logout"]').trigger('click')
 
     expect(wrapper.emitted('toggleTheme')).toHaveLength(1)
     expect(wrapper.emitted('openSettings')).toHaveLength(1)
+    expect(wrapper.emitted('openProfile')).toHaveLength(1)
     expect(wrapper.emitted('logout')).toHaveLength(1)
   })
 })
@@ -87,7 +92,9 @@ describe('app settings drawer', () => {
       },
     })
 
-    expect(wrapper.find('.el-drawer').attributes('data-title')).toBe('主题与布局设置')
+    expect(wrapper.find('.el-drawer').attributes('data-title')).toBe('偏好设置')
+    expect(wrapper.find('.el-drawer').attributes('data-size')).toBe('384px')
+    expect(wrapper.text()).toContain('自定义偏好设置 & 实时预览')
 
     await wrapper.find('.theme-panel-stub').trigger('click')
 

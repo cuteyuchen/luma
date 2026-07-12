@@ -45,15 +45,20 @@ function handleReset(nextPreferences: LumaPreferences): void {
   <ElDrawer
     v-model="visibleModel"
     class="luma-admin-settings-drawer"
-    title="主题与布局设置"
-    size="420px"
+    title="偏好设置"
+    size="384px"
     append-to-body
     destroy-on-close
   >
     <template #header>
       <div class="luma-admin-settings-drawer__title">
-        <LumaIcon name="luma:settings" :size="20" />
-        <span>主题与布局设置</span>
+        <span class="luma-admin-settings-drawer__title-icon">
+          <LumaIcon name="luma:settings" :size="18" />
+        </span>
+        <span class="luma-admin-settings-drawer__title-copy">
+          <strong>偏好设置</strong>
+          <small>自定义偏好设置 &amp; 实时预览</small>
+        </span>
       </div>
     </template>
     <LumaThemeSettingsPanel
@@ -69,22 +74,24 @@ function handleReset(nextPreferences: LumaPreferences): void {
 <style lang="scss">
 .luma-admin-settings-drawer {
   max-width: 100%;
+  background: var(--el-bg-color-page);
 }
 
 .luma-admin-settings-drawer .el-drawer__header {
   min-height: 64px;
   margin: 0;
-  padding: 0 24px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--el-border-color-lighter);
   color: var(--el-text-color-primary);
-  font-weight: 700;
+  background: var(--el-bg-color);
 }
 
 .luma-admin-settings-drawer .el-drawer__body {
   height: calc(100% - 64px);
   min-height: 0;
-  padding: 20px 24px 24px;
+  padding: 0 12px 12px;
   overflow: hidden;
+  background: var(--el-bg-color-page);
 }
 
 .luma-admin-settings-drawer__title {
@@ -92,13 +99,41 @@ function handleReset(nextPreferences: LumaPreferences): void {
   align-items: center;
   gap: 10px;
   color: var(--el-text-color-primary);
+}
+
+.luma-admin-settings-drawer__title-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 8px;
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+
+.luma-admin-settings-drawer__title-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.luma-admin-settings-drawer__title-copy strong {
   font-size: 16px;
   font-weight: 700;
+  line-height: 1.25;
+}
+
+.luma-admin-settings-drawer__title-copy small {
+  color: var(--el-text-color-secondary);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.25;
 }
 
 @media (max-width: 640px) {
   .luma-admin-settings-drawer {
-    width: min(420px, 100vw) !important;
+    width: min(384px, 100vw) !important;
   }
 
   .luma-admin-settings-drawer .el-drawer__header,

@@ -37,6 +37,8 @@ const menuTypeOptions: SchemaFormOption[] = [
   { label: '目录', value: 'directory' },
   { label: '菜单', value: 'menu' },
   { label: '按钮', value: 'button' },
+  { label: '内嵌', value: 'embedded' },
+  { label: '外链', value: 'external' },
 ]
 
 const columns: SchemaTableColumn[] = [
@@ -44,7 +46,7 @@ const columns: SchemaTableColumn[] = [
   { field: 'type', label: '类型', options: menuTypeOptions, width: 90 },
   { field: 'path', label: '路径', width: 150 },
   { field: 'component', label: '组件', width: 160 },
-  { field: 'externalLink', label: '外链', width: 180 },
+  { field: 'externalLink', label: '页面地址', width: 180 },
   { field: 'icon', label: '图标', width: 130 },
   {
     field: 'permissions',
@@ -66,9 +68,9 @@ const columns: SchemaTableColumn[] = [
 
 function flattenParentOptions(items: SystemMenuRecord[], depth = 0): SchemaFormOption[] {
   return items.flatMap((menu) => {
-    const current = menu.type === 'button'
-      ? []
-      : [{ label: `${'　'.repeat(depth)}${menu.title}`, value: menu.id }]
+    const current = menu.type === 'directory' || menu.type === 'menu'
+      ? [{ label: `${'　'.repeat(depth)}${menu.title}`, value: menu.id }]
+      : []
     const children = menu.children ? flattenParentOptions(menu.children, depth + 1) : []
 
     return [...current, ...children]
@@ -82,32 +84,26 @@ const parentOptions = computed<SchemaFormOption[]>(() => [
 
 const formSchemas = computed<SchemaFormItem[]>(() => [
   {
-    component: 'select',
-    disabled: ({ mode }) => mode === 'edit',
-    field: 'parentId',
-    label: '父级节点',
-    options: parentOptions.value,
-    span: 12,
-  },
-  {
-    component: 'select',
+    component: 'radio',
     field: 'type',
     label: '节点类型',
     options: menuTypeOptions,
     required: true,
-    span: 12,
+    span: 24,
   },
   {
     component: 'input',
     field: 'title',
-    label: '标题',
+    label: '菜单名称',
     required: true,
     span: 12,
   },
   {
-    component: 'number',
-    field: 'order',
-    label: '排序',
+    component: 'select',
+    disabled: ({ mode }) => mode === 'edit',
+    field: 'parentId',
+    label: '上级菜单',
+    options: parentOptions.value,
     span: 12,
   },
   {
@@ -124,6 +120,7 @@ const formSchemas = computed<SchemaFormItem[]>(() => [
     hidden: ({ model }) => model.type === 'button',
     label: '路径',
     placeholder: '根节点使用 /path，子节点使用 path',
+    required: true,
     span: 12,
   },
   {
@@ -132,6 +129,7 @@ const formSchemas = computed<SchemaFormItem[]>(() => [
     hidden: ({ model }) => model.type !== 'menu',
     label: '组件',
     placeholder: '例如 system/user',
+    required: true,
     span: 12,
   },
   {
@@ -145,21 +143,10 @@ const formSchemas = computed<SchemaFormItem[]>(() => [
   {
     component: 'input',
     field: 'externalLink',
-    hidden: ({ model }) => model.type !== 'menu',
-    label: '外链地址',
-    placeholder: '填写后可不配置组件',
-    span: 12,
-  },
-  {
-    component: 'select',
-    defaultValue: '_blank',
-    field: 'externalTarget',
-    hidden: ({ model }) => model.type !== 'menu' || !model.externalLink,
-    label: '打开方式',
-    options: [
-      { label: '新窗口', value: '_blank' },
-      { label: '站内 iframe', value: '_self' },
-    ],
+    hidden: ({ model }) => model.type !== 'embedded' && model.type !== 'external',
+    label: '页面地址',
+    placeholder: '请输入完整的 http(s) 地址',
+    required: true,
     span: 12,
   },
   {
@@ -175,6 +162,12 @@ const formSchemas = computed<SchemaFormItem[]>(() => [
     field: 'permissions',
     label: '权限码',
     placeholder: '多个权限码使用英文逗号分隔',
+    span: 12,
+  },
+  {
+    component: 'number',
+    field: 'order',
+    label: '排序',
     span: 12,
   },
   {
@@ -213,7 +206,7 @@ function toMenuInput(model: SchemaFormModel): SaveSystemMenuInput {
   return {
     component: model.component,
     externalLink: model.externalLink,
-    externalTarget: model.externalTarget,
+    externalTarget: model.type === 'embedded' ? '_self' : model.type === 'external' ? '_blank' : undefined,
     hidden: model.hidden,
     icon: model.icon,
     name: model.name,
@@ -232,7 +225,6 @@ function openCreate(parentId = ''): void {
   formMode.value = 'create'
   editingMenu.value = undefined
   formModel.value = {
-    externalTarget: '_blank',
     hidden: false,
     order: 0,
     parentId,
@@ -315,7 +307,7 @@ onMounted(() => {
   <main class="luma-admin-page">
     <LumaPage
       title="菜单管理"
-      description="维护目录、菜单、外链和按钮权限节点；保存结果会在下一次登录时直接驱动动态路由。"
+      description="维护目录、菜单、按钮、内嵌和外链节点；保存结果会在下一次登录时直接驱动动态路由。"
       :loading="loading"
     >
       <template #actions>
@@ -335,7 +327,7 @@ onMounted(() => {
         :rows="tableRows"
         :table-props="tableProps"
         row-key="id"
-        action-width="270"
+        action-width="300"
       >
         <template #actions="{ row }">
           <ElButton

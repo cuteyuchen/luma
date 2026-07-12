@@ -13,6 +13,7 @@ import SchemaTableView from '../views/examples/SchemaTableView.vue'
 import ServicesView from '../views/examples/ServicesView.vue'
 import ThemeSettingsView from '../views/examples/ThemeSettingsView.vue'
 import UtilsView from '../views/examples/UtilsView.vue'
+import ProfileView from '../views/profile/ProfileView.vue'
 import ProjectView from '../views/project/ProjectView.vue'
 import ExternalFrameView from '../views/shared/ExternalFrameView.vue'
 import ConfigView from '../views/system/ConfigView.vue'
@@ -39,6 +40,7 @@ const routeComponents: Record<string, RouteRecordRaw['component']> = {
   'examples/services': ServicesView,
   'examples/theme-settings': ThemeSettingsView,
   'examples/utils': UtilsView,
+  'profile/index': ProfileView,
   'project/index': ProjectView,
   'shared/external-frame': ExternalFrameView,
   'system/config': ConfigView,

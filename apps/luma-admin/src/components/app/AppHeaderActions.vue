@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   logout: []
+  openProfile: []
   openSettings: []
   toggleTheme: []
 }>()
@@ -29,6 +30,10 @@ function handleToggleTheme(): void {
 
 function handleOpenSettings(): void {
   emit('openSettings')
+}
+
+function handleOpenProfile(): void {
+  emit('openProfile')
 }
 
 function handleLogout(): void {
@@ -52,8 +57,8 @@ function handleLogout(): void {
     <ElButton
       circle
       text
-      title="主题与布局设置"
-      aria-label="主题与布局设置"
+      title="偏好设置"
+      aria-label="偏好设置"
       data-action="open-settings"
       @click="handleOpenSettings"
     >
@@ -62,10 +67,17 @@ function handleLogout(): void {
 
     <span class="luma-admin-header-actions__divider" aria-hidden="true" />
 
-    <span class="luma-admin-header-actions__user">
+    <button
+      class="luma-admin-header-actions__user"
+      type="button"
+      title="个人中心"
+      aria-label="进入个人中心"
+      data-action="open-profile"
+      @click="handleOpenProfile"
+    >
       <span class="luma-admin-header-actions__avatar" aria-hidden="true">{{ userInitial }}</span>
       <span class="luma-admin-header-actions__name">{{ userName }}</span>
-    </span>
+    </button>
 
     <ElButton
       circle
@@ -97,12 +109,26 @@ function handleLogout(): void {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 8px;
+  border: 0;
+  border-radius: var(--luma-radius-small);
   color: var(--el-text-color-regular);
+  cursor: pointer;
+  background: transparent;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.luma-admin-header-actions__user:hover {
+  color: var(--el-text-color-primary);
+  background: var(--el-fill-color-light);
+}
+
+.luma-admin-header-actions__user:focus-visible {
+  outline: 2px solid var(--el-color-primary);
+  outline-offset: 2px;
 }
 
 .luma-admin-header-actions__avatar {

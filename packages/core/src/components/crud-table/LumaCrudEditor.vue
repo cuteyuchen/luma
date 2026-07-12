@@ -30,7 +30,9 @@ const visible = defineModel<boolean>({ default: false })
     class="luma-crud-table__drawer"
   >
     <slot />
-    <template #footer><slot name="footer" /></template>
+    <template #footer>
+      <slot name="footer" />
+    </template>
   </ElDrawer>
   <ElDialog
     v-else
@@ -43,6 +45,8 @@ const visible = defineModel<boolean>({ default: false })
     class="luma-crud-table__dialog"
   >
     <slot />
-    <template #footer><slot name="footer" /></template>
+    <template #footer>
+      <slot name="footer" />
+    </template>
   </ElDialog>
 </template>

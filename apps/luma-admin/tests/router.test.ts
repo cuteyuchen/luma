@@ -17,6 +17,7 @@ describe('luma admin router', () => {
 
   it('示例路由配置使用标准 meta.authority 字段', () => {
     const examplesRoute = adminRouteRecords.find(route => route.path === '/examples')
+    const profileRoute = adminRouteRecords.find(route => route.path === '/profile')
     const projectRoute = adminRouteRecords.find(route => route.path === '/project')
     const systemRoute = adminRouteRecords.find(route => route.path === '/system')
 
@@ -84,6 +85,14 @@ describe('luma admin router', () => {
       meta: {
         authority: ['project:list'],
         title: '项目管理',
+      },
+    })
+    expect(profileRoute).toMatchObject({
+      component: 'profile/index',
+      path: '/profile',
+      meta: {
+        hideInMenu: true,
+        title: '个人中心',
       },
     })
     expect(JSON.stringify(adminRouteRecords)).not.toContain('"permissions"')
@@ -309,6 +318,17 @@ describe('luma admin router', () => {
 
     expect(router.currentRoute.value.fullPath).toBe('/system/organization?source=refresh')
     expect(router.currentRoute.value.name).toBe('SystemOrganization')
+  })
+
+  it('个人中心可直接访问但不会出现在侧边栏', async () => {
+    await login('guest')
+    const router = createAdminRouter(createMemoryHistory())
+
+    await router.push('/profile')
+    await router.isReady()
+
+    expect(router.currentRoute.value.name).toBe('Profile')
+    expect(createAdminSidebarMenus(router).some(menu => menu.path === '/profile')).toBe(false)
   })
 
   it('未知地址会进入独立 404 页面', async () => {

@@ -304,7 +304,6 @@ onMounted(() => {
       v-model:page="page"
       v-model:page-size="pageSize"
       title="用户管理"
-      description="维护后台账号、角色与启用状态；当前示例使用应用级可变 Mock API。"
       :actions="actionsConfig"
       :data-source="dataSource"
       :form-schemas="formSchemas"
