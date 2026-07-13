@@ -2,8 +2,11 @@
 import type { CockpitConfig, CockpitDesignerSavePayload } from '@luma/cockpit'
 import { LumaCockpitDesigner } from '@luma/cockpit/designer'
 import { LumaCockpit } from '@luma/cockpit/runtime'
+import { LumaIcon } from '@luma/icons'
+import { ElButton, ElTooltip } from 'element-plus'
 import { computed, ref, shallowRef, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import StubCenter from './centers/stub-center/Center.vue'
 import { permissionStore } from '../services/permission'
 import { adminCockpitRepository } from './api/cockpit'
 import { adminCockpitRegistry } from './registry'
@@ -25,8 +28,7 @@ const designerVisible = ref(false)
 const saving = ref(false)
 const saveError = ref<string>('')
 
-const activeCategoryId = ref<string | undefined>()
-const activePageId = ref<string | undefined>()
+const activeLayoutId = ref<string | undefined>()
 
 async function load(): Promise<void> {
   loading.value = true
@@ -91,52 +93,53 @@ async function toggleFullscreen(): Promise<void> {
 
     <div v-else-if="loadError" class="admin-cockpit-view__state" role="alert">
       <p>{{ loadError }}</p>
-      <button type="button" @click="load">
+      <ElButton @click="load">
+        <LumaIcon name="luma:refresh" :size="15" />
         重试
-      </button>
+      </ElButton>
     </div>
 
     <template v-else-if="config">
       <LumaCockpit
         ref="cockpitRef"
-        v-model:active-category-id="activeCategoryId"
-        v-model:active-page-id="activePageId"
+        v-model:active-layout-id="activeLayoutId"
         :config="config"
         :registry="adminCockpitRegistry"
         @configure="openDesigner"
       >
+        <template #header-title="{ title }">
+          <div class="admin-cockpit-view__heading">
+            <h1>{{ title }}</h1>
+            <nav class="admin-cockpit-view__layouts" aria-label="布局选择">
+              <ElButton
+                v-for="layout in config.layouts"
+                :key="layout.id"
+                :class="{ 'is-active': (activeLayoutId ?? config.activeLayoutId) === layout.id }"
+                @click="activeLayoutId = layout.id"
+              >
+                {{ layout.title }}
+              </ElButton>
+            </nav>
+          </div>
+        </template>
         <!-- 应用提供的顶部操作：返回、全屏、配置入口 -->
         <template #header-actions>
           <div class="admin-cockpit-view__actions">
-            <button
-              type="button"
-              title="返回 Admin"
-              aria-label="返回 Admin"
-              data-action="cockpit-back"
-              @click="backToAdmin"
-            >
-              返回
-            </button>
-            <button
-              type="button"
-              title="进入全屏"
-              aria-label="进入全屏"
-              data-action="cockpit-fullscreen"
-              @click="toggleFullscreen"
-            >
-              全屏
-            </button>
-            <button
-              v-if="canEdit"
-              type="button"
-              title="进入配置模式"
-              aria-label="进入配置模式"
-              data-action="cockpit-configure"
-              @click="openDesigner"
-            >
-              配置
-            </button>
+            <ElButton data-action="cockpit-back" aria-label="返回 Admin" @click="backToAdmin">返回</ElButton>
+            <ElTooltip content="进入全屏">
+              <ElButton circle data-action="cockpit-fullscreen" aria-label="进入全屏" @click="toggleFullscreen">
+                <LumaIcon name="luma:fullscreen" :size="18" />
+              </ElButton>
+            </ElTooltip>
+            <ElTooltip v-if="canEdit" content="进入配置模式">
+              <ElButton circle data-action="cockpit-configure" aria-label="进入配置模式" @click="openDesigner">
+                <LumaIcon name="luma:settings" :size="18" />
+              </ElButton>
+            </ElTooltip>
           </div>
+        </template>
+        <template #center="{ context }">
+          <StubCenter :context="context" />
         </template>
       </LumaCockpit>
 
@@ -182,7 +185,41 @@ async function toggleFullscreen(): Promise<void> {
   gap: 8px;
 }
 
-.admin-cockpit-view__actions button {
+.admin-cockpit-view__heading,
+.admin-cockpit-view__layouts {
+  display: flex;
+  align-items: center;
+}
+
+.admin-cockpit-view__heading {
+  gap: 24px;
+}
+
+.admin-cockpit-view__heading h1 {
+  margin: 0;
+  font: inherit;
+}
+
+.admin-cockpit-view__layouts {
+  gap: 8px;
+}
+
+.admin-cockpit-view__layouts :deep(.el-button) {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--luma-cockpit-border);
+  border-radius: 6px;
+  background: var(--luma-cockpit-floating-bg);
+  color: inherit;
+  cursor: pointer;
+}
+
+.admin-cockpit-view__layouts :deep(.el-button.is-active) {
+  border-color: var(--luma-cockpit-accent);
+  box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+}
+
+.admin-cockpit-view__actions :deep(.el-button) {
   min-height: 44px;
   min-width: 44px;
   padding: 4px 12px;

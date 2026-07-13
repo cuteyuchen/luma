@@ -26,20 +26,20 @@ defineExpose({
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  padding: 20px;
+  padding: 14px;
   overflow: auto;
   background: var(--el-bg-color-page);
 }
 
 @media (max-width: 1024px) {
   .luma-content {
-    padding: 16px;
+    padding: 10px;
   }
 }
 
 @media (max-width: 768px) {
   .luma-content {
-    padding: 12px;
+    padding: 6px;
   }
 }
 </style>

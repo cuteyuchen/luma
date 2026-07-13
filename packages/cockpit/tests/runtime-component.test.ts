@@ -6,215 +6,74 @@ import { useCockpitContext } from '../src/composables/useCockpitContext'
 import { createCockpitRegistry } from '../src/registry/createCockpitRegistry'
 import LumaCockpit from '../src/runtime/LumaCockpit.vue'
 
-/***********************测试用 Stub 组件*********************/
 const StubWidget = defineComponent({
   name: 'StubWidget',
   setup() {
-    const ctx = useCockpitContext()
-    return () => h('div', { 'class': 'stub-widget', 'data-instance': ctx.instanceId }, ctx.instanceId)
+    const context = useCockpitContext()
+    return () => h('div', { class: 'stub-widget', 'data-layout': context.layoutId, 'data-instance': context.instanceId }, context.instanceId)
   },
 })
 
-const StubCenter = defineComponent({
-  name: 'StubCenter',
-  setup() {
-    const ctx = useCockpitContext()
-    return () => h('div', { class: 'stub-center' }, ctx.instanceId)
-  },
-})
-
-function createRegistry() {
-  const registry = createCockpitRegistry()
-  registry.registerWidget({ type: 'stub', label: 'Stub', component: StubWidget })
-  registry.registerCenter({ type: 'stub-center', label: 'Center', component: StubCenter })
-  return registry
+function registry() {
+  const value = createCockpitRegistry()
+  value.registerWidget({ type: 'stub', label: 'Stub', component: StubWidget })
+  return value
 }
 
-function baseConfig(overrides: Partial<CockpitConfig> = {}): CockpitConfig {
+function config(): CockpitConfig {
   return {
-    schemaVersion: 1,
-    id: 'ck',
+    schemaVersion: 3,
+    id: 'cockpit',
     title: '测试驾驶舱',
-    categories: [{
-      id: 'cat-1',
-      label: '分类一',
-      visible: true,
-      activePageId: 'page-1',
-      pages: [{
-        id: 'page-1',
-        title: '页面一',
-        center: { id: 'center-1', type: 'stub-center' },
-        left: { columns: [] },
-        right: { columns: [] },
-      }],
-    }],
-    ...overrides,
+    activeLayoutId: 'layout-a',
+    layouts: [
+      {
+        id: 'layout-a', title: '布局 A',
+        left: { columns: [{ id: 'left-col', width: 320 }], rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell', widget: { id: 'left-widget', type: 'stub' } }] }] },
+        right: { columns: [{ id: 'right-col', width: 320 }], rows: [{ id: 'right-row', height: 100, mode: 'tabs', cells: [], activeWidgetId: 'right-a', widgets: [{ id: 'right-a', type: 'stub', title: '甲' }, { id: 'right-b', type: 'stub', title: '乙' }] }] },
+      },
+      {
+        id: 'layout-b', title: '布局 B',
+        left: { columns: [{ id: 'left-b-col', width: 320 }], rows: [{ id: 'left-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-b-cell', widget: { id: 'left-b-widget', type: 'stub' } }] }] },
+        right: { columns: [{ id: 'right-b-col', width: 320 }], rows: [{ id: 'right-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-b-cell' }] }] },
+      },
+    ],
   }
 }
 
-describe('lumaCockpit 运行时', () => {
-  it('渲染标题与分类导航', () => {
+describe('LumaCockpit v3 运行时', () => {
+  it('渲染当前布局、模块和消费应用提供的中心插槽', () => {
     const wrapper = mount(LumaCockpit, {
-      props: { config: baseConfig(), registry: createRegistry() },
+      props: { config: config(), registry: registry() },
+      slots: { center: ({ context }: { context: { layoutId: string } }) => h('div', { class: 'stub-center' }, context.layoutId) },
     })
     expect(wrapper.text()).toContain('测试驾驶舱')
-    expect(wrapper.find('[aria-label="分类导航"]').exists()).toBe(true)
-    expect(wrapper.find('.stub-center').exists()).toBe(true)
+    expect(wrapper.find('.stub-center').text()).toBe('layout-a')
+    expect(wrapper.find('.stub-widget').attributes('data-layout')).toBe('layout-a')
+    expect(wrapper.find('[aria-label="页面选择"]').exists()).toBe(false)
+    expect(wrapper.find('[aria-label="分类导航"]').exists()).toBe(false)
   })
 
-  it('single 模式渲染单个可见模块', () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'single',
-        widgets: [{ id: 'w1', type: 'stub', visible: true }],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
-    expect(wrapper.findAll('.stub-widget')).toHaveLength(1)
+  it('由 activeLayoutId 控制当前布局', async () => {
+    const wrapper = mount(LumaCockpit, { props: { config: config(), registry: registry(), activeLayoutId: 'layout-b' } })
+    expect(wrapper.find('.stub-widget').attributes('data-instance')).toBe('left-b-widget')
+    await wrapper.setProps({ activeLayoutId: 'layout-a' })
+    expect(wrapper.find('.stub-widget').attributes('data-instance')).toBe('left-widget')
   })
 
-  it('combined 模式同时渲染多个模块', () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'combined',
-        direction: 'horizontal',
-        widgets: [
-          { id: 'w1', type: 'stub', visible: true },
-          { id: 'w2', type: 'stub', visible: true },
-        ],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
-    expect(wrapper.findAll('.stub-widget')).toHaveLength(2)
-  })
-
-  it('同 type 多实例使用不同 instanceId', () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'combined',
-        widgets: [
-          { id: 'inst-a', type: 'stub', visible: true },
-          { id: 'inst-b', type: 'stub', visible: true },
-        ],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
-    const instances = wrapper.findAll('.stub-widget').map(w => w.attributes('data-instance'))
-    expect(instances).toEqual(['inst-a', 'inst-b'])
-  })
-
-  it('tabs 模式仅展示激活面板并可切换', async () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'tabs',
-        activeWidgetId: 'w1',
-        widgets: [
-          { id: 'w1', type: 'stub', title: 'Tab1', visible: true },
-          { id: 'w2', type: 'stub', title: 'Tab2', visible: true },
-        ],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
+  it('Tab 行只显示激活模块且可切换', async () => {
+    const wrapper = mount(LumaCockpit, { props: { config: config(), registry: registry() } })
     const tabs = wrapper.findAll('[role="tab"]')
     expect(tabs).toHaveLength(2)
-    expect(tabs[0].attributes('aria-selected')).toBe('true')
+    // Tab 面板使用 v-show 保留非激活模块状态，左侧模块加两个 Tab 模块共三实例。
+    expect(wrapper.findAll('.stub-widget')).toHaveLength(3)
     await tabs[1].trigger('click')
-    expect(wrapper.findAll('[role="tab"]')[1].attributes('aria-selected')).toBe('true')
+    expect(tabs[1].attributes('aria-selected')).toBe('true')
   })
 
-  it('缺失模块 type 渲染降级占位', () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'single',
-        widgets: [{ id: 'w1', type: 'unknown-type', visible: true }],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
-    expect(wrapper.text()).toContain('未注册模块')
-  })
-
-  it('切换分类回退到该分类首个页面', async () => {
-    const config = baseConfig({
-      categories: [
-        {
-          id: 'cat-1',
-          label: '分类一',
-          visible: true,
-          activePageId: 'p1',
-          pages: [{ id: 'p1', title: '页面A', left: { columns: [] }, right: { columns: [] } }],
-        },
-        {
-          id: 'cat-2',
-          label: '分类二',
-          visible: true,
-          activePageId: 'p2',
-          pages: [{ id: 'p2', title: '页面B', left: { columns: [] }, right: { columns: [] } }],
-        },
-      ],
-    })
-    const wrapper = mount(LumaCockpit, { props: { config, registry: createRegistry() } })
-    const categoryButtons = wrapper.findAll('[aria-label="分类导航"] button')
-    await categoryButtons[1].trigger('click')
-    expect(wrapper.text()).toContain('页面B')
-  })
-
-  it('配置为空展示空驾驶舱状态', () => {
-    const wrapper = mount(LumaCockpit, {
-      props: { config: baseConfig({ categories: [] }), registry: createRegistry() },
-    })
-    expect(wrapper.text()).toContain('空驾驶舱')
-  })
-
-  it('输出已解析主题属性', () => {
-    const wrapper = mount(LumaCockpit, {
-      props: { config: baseConfig(), registry: createRegistry(), themeMode: 'light' },
-    })
-    expect(wrapper.attributes('data-cockpit-theme')).toBe('light')
-  })
-
-  it('design 模式点击节点时发出稳定 node-select 事件', async () => {
-    const config = baseConfig()
-    config.categories[0].pages[0].left.columns = [{
-      id: 'col',
-      width: 1,
-      containers: [{
-        id: 'ct',
-        height: 1,
-        mode: 'single',
-        widgets: [{ id: 'w1', type: 'stub', visible: true }],
-      }],
-    }]
-    const wrapper = mount(LumaCockpit, {
-      props: { config, registry: createRegistry(), renderMode: 'design' },
-    })
-
+  it('design 模式点击模块发出 v3 节点事件', async () => {
+    const wrapper = mount(LumaCockpit, { props: { config: config(), registry: registry(), renderMode: 'design' } })
     await wrapper.find('.stub-widget').trigger('click')
-
-    expect(wrapper.emitted('nodeSelect')?.[0]).toEqual([{ kind: 'widget', id: 'w1', side: 'left' }])
+    expect(wrapper.emitted('nodeSelect')?.[0]).toEqual([{ kind: 'widget', id: 'left-widget', side: 'left' }])
   })
 })

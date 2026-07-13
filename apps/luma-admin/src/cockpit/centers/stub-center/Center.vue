@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BusinessItemSelectedPayload } from '../../messages/topics'
-import { useCockpitContext } from '@luma/cockpit'
+import type { CockpitCenterContext } from '@luma/cockpit'
 import { onBeforeUnmount, ref } from 'vue'
 import {
 
@@ -10,7 +10,8 @@ import {
 /***********************中性中央组件示例*********************/
 // 演示中央组件与业务模块的双向联动，不依赖任何地图或三维运行时。
 
-const context = useCockpitContext()
+const props = defineProps<{ context: CockpitCenterContext }>()
+const context = props.context
 const lastSelected = ref<string>('')
 
 // 订阅业务模块的选择事件

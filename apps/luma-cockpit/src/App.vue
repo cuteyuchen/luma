@@ -4,7 +4,9 @@ import type { CockpitConfig, CockpitDesignerSavePayload } from '@luma/cockpit'
 import { LumaCockpitDesigner } from '@luma/cockpit/designer'
 import { LumaCockpit } from '@luma/cockpit/runtime'
 import { LumaIcon } from '@luma/icons'
+import { ElButton, ElTooltip } from 'element-plus'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import EchartsGeoCenter from './centers/echarts-geo-center/Center.vue'
 import { standaloneCockpitRegistry } from './registry'
 import { loadStandaloneConfig, saveStandaloneConfig } from './services/config'
 import {
@@ -20,8 +22,7 @@ const designerVisible = ref(false)
 const saving = ref(false)
 const saveError = ref<string>('')
 
-const activeCategoryId = ref<string | undefined>()
-const activePageId = ref<string | undefined>()
+const activeLayoutId = ref<string | undefined>()
 const fullscreenActive = ref(false)
 const cockpitRef = ref<InstanceType<typeof LumaCockpit> | null>(null)
 
@@ -102,43 +103,49 @@ onBeforeUnmount(() => {
   <div class="standalone-app">
     <LumaCockpit
       ref="cockpitRef"
-      v-model:active-category-id="activeCategoryId"
-      v-model:active-page-id="activePageId"
+      v-model:active-layout-id="activeLayoutId"
       :config="config"
       :registry="standaloneCockpitRegistry"
       :theme-mode="standaloneResolvedThemeMode"
       @configure="openDesigner"
     >
+      <template #header-title="{ title }">
+        <div class="standalone-app__heading">
+          <h1>{{ title }}</h1>
+          <nav class="standalone-app__layouts" aria-label="布局选择">
+            <ElButton
+              v-for="layout in config.layouts"
+              :key="layout.id"
+              :class="{ 'is-active': (activeLayoutId ?? config.activeLayoutId) === layout.id }"
+              :aria-current="(activeLayoutId ?? config.activeLayoutId) === layout.id ? 'page' : undefined"
+              @click="activeLayoutId = layout.id"
+            >
+              {{ layout.title }}
+            </ElButton>
+          </nav>
+        </div>
+      </template>
       <template #header-actions>
         <div class="standalone-app__actions">
-          <button
-            type="button"
-            data-action="cockpit-theme"
-            :aria-label="`切换主题，当前：${themeModeLabel}`"
-            :title="`切换主题，当前：${themeModeLabel}`"
-            @click="cycleThemeMode"
-          >
-            <LumaIcon :name="themeModeIcon" :size="18" />
-          </button>
-          <button
-            type="button"
-            data-action="cockpit-fullscreen"
-            :aria-label="fullscreenActive ? '退出全屏' : '进入全屏'"
-            :title="fullscreenActive ? '退出全屏' : '进入全屏'"
-            @click="toggleFullscreen"
-          >
-            <LumaIcon :name="fullscreenActive ? 'luma:fullscreen-exit' : 'luma:fullscreen'" :size="18" />
-          </button>
-          <button
-            type="button"
-            data-action="cockpit-configure"
-            aria-label="打开配置器"
-            title="打开配置器"
-            @click="openDesigner"
-          >
-            <LumaIcon name="luma:settings" :size="18" />
-          </button>
+          <ElTooltip :content="`切换主题，当前：${themeModeLabel}`">
+            <ElButton circle data-action="cockpit-theme" :aria-label="`切换主题，当前：${themeModeLabel}`" @click="cycleThemeMode">
+              <LumaIcon :name="themeModeIcon" :size="18" />
+            </ElButton>
+          </ElTooltip>
+          <ElTooltip :content="fullscreenActive ? '退出全屏' : '进入全屏'">
+            <ElButton circle data-action="cockpit-fullscreen" :aria-label="fullscreenActive ? '退出全屏' : '进入全屏'" @click="toggleFullscreen">
+              <LumaIcon :name="fullscreenActive ? 'luma:fullscreen-exit' : 'luma:fullscreen'" :size="18" />
+            </ElButton>
+          </ElTooltip>
+          <ElTooltip content="打开配置器">
+            <ElButton circle data-action="cockpit-configure" aria-label="打开配置器" @click="openDesigner">
+              <LumaIcon name="luma:settings" :size="18" />
+            </ElButton>
+          </ElTooltip>
         </div>
+      </template>
+      <template #center="{ context }">
+        <EchartsGeoCenter :context="context" />
       </template>
     </LumaCockpit>
 
@@ -179,7 +186,38 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
-.standalone-app__actions button {
+.standalone-app__heading {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.standalone-app__heading h1 {
+  margin: 0;
+  font: inherit;
+}
+
+.standalone-app__layouts {
+  display: flex;
+  gap: 8px;
+}
+
+.standalone-app__layouts :deep(.el-button) {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--luma-cockpit-border);
+  border-radius: 6px;
+  background: var(--luma-cockpit-floating-bg);
+  color: inherit;
+  cursor: pointer;
+}
+
+.standalone-app__layouts :deep(.el-button.is-active) {
+  border-color: var(--luma-cockpit-accent);
+  box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+}
+
+.standalone-app__actions :deep(.el-button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

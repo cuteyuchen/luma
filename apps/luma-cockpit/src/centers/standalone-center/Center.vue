@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SceneFocusPayload, SceneSelectionPayload } from '../../messages/topics'
-import { useCockpitContext } from '@luma/cockpit'
+import type { CockpitCenterContext } from '@luma/cockpit'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { demoScene } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
@@ -8,7 +8,8 @@ import { cockpitTopics } from '../../messages/topics'
 /***********************独立应用中性中央组件*********************/
 // ECharts 地图组件落地前的场景预览，业务 topic 和数据模型保持一致。
 
-const context = useCockpitContext()
+const props = defineProps<{ context: CockpitCenterContext }>()
+const context = props.context
 const selectedIds = ref<string[]>([])
 const focusedId = ref<string>('')
 

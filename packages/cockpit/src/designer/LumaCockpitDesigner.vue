@@ -1,31 +1,20 @@
 <script setup lang="ts">
-import type { CockpitRegistry } from '../registry/types'
-import type {
-  CockpitConfig,
-  CockpitConfigIssue,
-  CockpitDesignerSavePayload,
-  CockpitNodeSelectPayload,
-  CockpitThemeMode,
-} from '../types'
+import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types'
+import type { CockpitConfig, CockpitConfigIssue, CockpitDesignerSavePayload, CockpitThemeMode } from '../types'
+import { LumaIcon } from '@luma/icons'
+import { ElAlert, ElButton, ElInput, ElMessageBox, ElOption, ElSelect, ElTooltip } from 'element-plus'
 import { computed, ref } from 'vue'
-import { LumaCockpit } from '../runtime'
 import CockpitComponentLibrary from './CockpitComponentLibrary.vue'
 import CockpitLayoutEditor from './CockpitLayoutEditor.vue'
-import CockpitPropertiesPanel from './CockpitPropertiesPanel.vue'
 import { useCockpitDraft } from './useCockpitDraft'
 
-/***********************驾驶舱配置设计器*********************/
-// 不绑定承载方式：宿主可放入全屏覆盖层、独立路由或大尺寸抽屉。
-// 显式保存、立即生效；保存前标准化 + 校验；保存失败保持打开。
+/***********************驾驶舱装配 Designer*********************/
 
 const props = defineProps<{
   config: CockpitConfig
   registry: CockpitRegistry
-  /** 宿主保存进行中，用于禁用重复提交 */
   saving?: boolean
-  /** 宿主保存失败信息 */
   saveError?: string
-  /** 已解析主题；system 由宿主应用解析为 light/dark */
   themeMode?: CockpitThemeMode
 }>()
 
@@ -35,119 +24,108 @@ const emit = defineEmits<{
 }>()
 
 const draft = useCockpitDraft(props.config)
-const selectedNode = ref<CockpitNodeSelectPayload | null>(null)
-
 const issues = ref<CockpitConfigIssue[]>([])
-const errorIssues = computed(() => issues.value.filter(i => i.level === 'error'))
+const selectedWidget = ref<CockpitWidgetDefinition>()
+const activeLayout = computed(() => draft.activeLayout.value)
+const errors = computed(() => issues.value.filter(issue => issue.level === 'error'))
 
-const previewCategoryId = computed(() => draft.activeCategory.value?.id)
-const previewPageId = computed(() => draft.activePage.value?.id)
-
-function handleSave(): void {
-  const { config, validation } = draft.buildSaveConfig()
-  issues.value = validation.issues
-  if (!validation.valid)
+function save(): void {
+  const result = draft.buildSaveConfig()
+  issues.value = result.validation.issues
+  if (!result.validation.valid)
     return
-  emit('save', { config })
+  const layoutId = activeLayout.value?.id ?? result.config.activeLayoutId
+  const layout = result.config.layouts.find(item => item.id === layoutId)
+  if (layout)
+    emit('save', { config: result.config, layout })
 }
 
-function handleCancel(): void {
-  emit('cancel')
+async function removeLayout(): Promise<void> {
+  const layout = activeLayout.value
+  if (!layout)
+    return
+  if (draft.layouts.value.length <= 1) {
+    await ElMessageBox.alert('至少保留一个布局。', '无法删除', { confirmButtonText: '知道了', type: 'warning' })
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定删除布局“${layout.title}”吗？`, '删除布局', {
+      cancelButtonText: '取消',
+      confirmButtonText: '删除',
+      type: 'warning',
+    })
+    draft.removeLayout(layout.id)
+  }
+  catch {
+    // 用户取消时保留草稿，不需要额外提示。
+  }
 }
 
-function handleReset(): void {
-  draft.reset()
-  issues.value = []
-  selectedNode.value = null
-}
-
-function handleNodeSelect(payload: CockpitNodeSelectPayload): void {
-  selectedNode.value = payload
+async function reset(): Promise<void> {
+  try {
+    await ElMessageBox.confirm('将放弃本次尚未保存的所有布局调整，是否继续？', '重置草稿', {
+      cancelButtonText: '取消',
+      confirmButtonText: '重置',
+      type: 'warning',
+    })
+    draft.reset()
+    issues.value = []
+  }
+  catch {
+    // 用户取消时保留当前草稿。
+  }
 }
 </script>
 
 <template>
-  <div
-    class="luma-cockpit-designer"
-    :data-cockpit-theme="themeMode ?? 'dark'"
-    :data-selected-node="selectedNode?.id"
-  >
+  <div class="luma-cockpit-designer" :data-cockpit-theme="themeMode ?? 'dark'">
     <header class="luma-cockpit-designer__toolbar">
       <h2 class="luma-cockpit-designer__heading">
-        驾驶舱配置
+        <LumaIcon name="luma:settings" :size="18" />
+        驾驶舱布局
       </h2>
+      <div class="luma-cockpit-designer__layout-controls">
+        <label class="luma-cockpit-designer__field">
+          <span>布局</span>
+          <ElSelect :model-value="activeLayout?.id" aria-label="选择布局" @update:model-value="draft.selectLayout">
+            <ElOption v-for="layout in draft.layouts.value" :key="layout.id" :label="layout.title" :value="layout.id" />
+          </ElSelect>
+        </label>
+        <ElInput
+          v-if="activeLayout"
+          :model-value="activeLayout.title"
+          aria-label="当前布局名称"
+          @change="draft.renameLayout(activeLayout.id, $event)"
+        />
+        <ElButton type="primary" @click="draft.addLayout()">
+          <LumaIcon name="luma:plus" :size="15" />
+          添加布局
+        </ElButton>
+        <ElButton v-if="activeLayout" @click="draft.duplicateLayout(activeLayout.id)">复制布局</ElButton>
+        <ElButton v-if="activeLayout" type="danger" plain @click="removeLayout">删除布局</ElButton>
+      </div>
       <div class="luma-cockpit-designer__toolbar-actions">
-        <button type="button" @click="handleReset">
-          重置
-        </button>
-        <button type="button" @click="handleCancel">
-          取消
-        </button>
-        <button
-          type="button"
-          class="luma-cockpit-designer__save"
-          :disabled="saving"
-          :aria-busy="saving"
-          @click="handleSave"
-        >
+        <ElTooltip content="重置未保存的草稿" placement="bottom">
+          <ElButton circle aria-label="重置未保存的草稿" @click="reset">
+            <LumaIcon name="luma:reset" :size="16" />
+          </ElButton>
+        </ElTooltip>
+        <ElButton @click="emit('cancel')">取消</ElButton>
+        <ElButton type="primary" class="luma-cockpit-designer__save" :loading="saving" :aria-busy="saving" @click="save">
           {{ saving ? '保存中…' : '保存' }}
-        </button>
+        </ElButton>
       </div>
     </header>
 
-    <!-- 校验错误与保存失败提示 -->
-    <div v-if="errorIssues.length || saveError" class="luma-cockpit-designer__issues" role="alert">
-      <p v-if="saveError" class="luma-cockpit-designer__issue">
-        保存失败：{{ saveError }}
-      </p>
-      <p
-        v-for="(issue, index) in errorIssues"
-        :key="index"
-        class="luma-cockpit-designer__issue"
-      >
-        <template v-if="issue.path">
-          [{{ issue.path.join(' / ') }}]
-        </template>{{ issue.message }}
-      </p>
+    <div v-if="errors.length || saveError" class="luma-cockpit-designer__issues" role="alert">
+      <ElAlert v-if="saveError" type="error" :closable="false" :title="`保存失败：${saveError}`" show-icon />
+      <ElAlert v-for="(issue, index) in errors" :key="index" type="error" :closable="false" :title="issue.message" show-icon />
     </div>
 
-    <div class="luma-cockpit-designer__body">
-      <!-- 左：分类与页面管理 -->
-      <aside class="luma-cockpit-designer__pane luma-cockpit-designer__pane--props">
-        <CockpitPropertiesPanel :draft="draft" />
-      </aside>
-
-      <!-- 中：布局编辑 + 实时预览 -->
-      <div class="luma-cockpit-designer__pane luma-cockpit-designer__pane--editor">
-        <div class="luma-cockpit-designer__editors">
-          <CockpitLayoutEditor :draft="draft" :registry="registry" side="left" />
-          <CockpitLayoutEditor :draft="draft" :registry="registry" side="right" />
-        </div>
-        <div class="luma-cockpit-designer__preview">
-          <span class="luma-cockpit-designer__preview-label">实时预览</span>
-          <div class="luma-cockpit-designer__preview-stage">
-            <LumaCockpit
-              v-if="draft.draft.value"
-              :config="draft.draft.value"
-              :registry="registry"
-              render-mode="design"
-              :active-category-id="previewCategoryId"
-              :active-page-id="previewPageId"
-              :theme-mode="themeMode ?? 'dark'"
-              @node-select="handleNodeSelect"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 右：组件库 -->
-      <aside class="luma-cockpit-designer__pane luma-cockpit-designer__pane--library">
-        <CockpitComponentLibrary
-          :registry="registry"
-          :current-center-type="draft.activePage.value?.center?.type"
-          @select-center="draft.setPageCenter($event)"
-        />
-      </aside>
-    </div>
+    <main class="luma-cockpit-designer__workspace">
+      <CockpitLayoutEditor :draft="draft" :selected-widget="selectedWidget" side="left" />
+      <CockpitLayoutEditor :draft="draft" :selected-widget="selectedWidget" side="right" />
+      <CockpitComponentLibrary :registry="registry" :selected-type="selectedWidget?.type" @select-widget="selectedWidget = $event" />
+    </main>
   </div>
 </template>

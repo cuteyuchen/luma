@@ -1,216 +1,145 @@
 import type {
-  CockpitCategoryConfig,
-  CockpitColumnConfig,
   CockpitConfig,
-  CockpitContainerConfig,
-  CockpitContainerMode,
-  CockpitPageConfig,
+  CockpitGridCellConfig,
+  CockpitGridColumnConfig,
+  CockpitGridRowConfig,
+  CockpitGridRowMode,
+  CockpitLayoutConfig,
   CockpitRegionConfig,
   CockpitWidgetInstance,
 } from '../types'
 import {
   COCKPIT_SCHEMA_VERSION,
   createCockpitId,
-  DEFAULT_REGION_WIDTH,
-  DEFAULT_WEIGHT,
-  MAX_REGION_WIDTH,
-  MIN_CENTER_WIDTH,
-  MIN_REGION_WIDTH,
+  createGridCell,
+  createGridColumn,
+  createGridRow,
+  createLayout,
+  DEFAULT_COLUMN_WIDTH,
 } from './defaults'
 
-/***********************工具*********************/
+/***********************配置标准化*********************/
 
-const CONTAINER_MODES: CockpitContainerMode[] = ['single', 'combined', 'tabs']
-const BASE_CANVAS_WIDTH = 1920
-const BODY_COLUMN_GAPS = 24
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function toSafeWeight(value: unknown, fallback = DEFAULT_WEIGHT): number {
-  const num = typeof value === 'number' ? value : Number(value)
-  if (!Number.isFinite(num) || num <= 0)
-    return fallback
-  return num
-}
-
-function toSafeRegionWidth(value: unknown, columnCount: number): number {
-  if (columnCount <= 0)
-    return 0
-  const num = typeof value === 'number' ? value : Number(value)
-  const fallback = DEFAULT_REGION_WIDTH
-  const width = Number.isFinite(num) && num > 0 ? num : fallback
-  return Math.min(MAX_REGION_WIDTH, Math.max(MIN_REGION_WIDTH, width))
-}
-
-function toArray(value: unknown): unknown[] {
+function arrayOf(value: unknown): unknown[] {
   return Array.isArray(value) ? value : []
 }
 
-function toStringOr(value: unknown, fallback: string): string {
-  return typeof value === 'string' && value.length > 0 ? value : fallback
+function text(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim() ? value : fallback
 }
 
-/***********************节点标准化*********************/
+function positive(value: unknown, fallback: number): number {
+  const numberValue = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : fallback
+}
 
-function normalizeWidget(raw: unknown): CockpitWidgetInstance | null {
-  if (!isPlainObject(raw))
-    return null
-  const type = raw.type
-  if (typeof type !== 'string' || type.trim() === '')
-    return null
+function normalizeWidget(raw: unknown): CockpitWidgetInstance | undefined {
+  if (!isRecord(raw) || typeof raw.type !== 'string' || !raw.type.trim())
+    return undefined
   return {
-    id: toStringOr(raw.id, createCockpitId('widget')),
-    type,
-    title: typeof raw.title === 'string' ? raw.title : undefined,
-    visible: raw.visible !== false,
+    id: text(raw.id, createCockpitId('widget')),
+    type: raw.type,
+    title: typeof raw.title === 'string' && raw.title.trim() ? raw.title : undefined,
   }
 }
 
-function normalizeContainer(raw: unknown): CockpitContainerConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const mode: CockpitContainerMode = CONTAINER_MODES.includes(source.mode as CockpitContainerMode)
-    ? source.mode as CockpitContainerMode
-    : 'single'
+function normalizeCell(raw: unknown): CockpitGridCellConfig {
+  const source = isRecord(raw) ? raw : {}
+  return {
+    id: text(source.id, createCockpitId('cell')),
+    widget: normalizeWidget(source.widget),
+  }
+}
 
-  const widgets = toArray(source.widgets)
-    .map(normalizeWidget)
-    .filter((widget): widget is CockpitWidgetInstance => widget !== null)
+function normalizeColumns(raw: unknown): CockpitGridColumnConfig[] {
+  const columns = arrayOf(raw).map((item) => {
+    const source = isRecord(item) ? item : {}
+    return {
+      id: text(source.id, createCockpitId('column')),
+      width: Math.round(positive(source.width, DEFAULT_COLUMN_WIDTH)),
+    }
+  })
+  return columns.length ? columns : [createGridColumn()]
+}
 
-  const container: CockpitContainerConfig = {
-    id: toStringOr(source.id, createCockpitId('container')),
-    height: toSafeWeight(source.height),
+function normalizeRow(raw: unknown, columnCount: number): CockpitGridRowConfig {
+  const source = isRecord(raw) ? raw : {}
+  const mode: CockpitGridRowMode = source.mode === 'tabs' ? 'tabs' : 'grid'
+  const row: CockpitGridRowConfig = {
+    id: text(source.id, createCockpitId('row')),
+    height: positive(source.height, 100),
     mode,
-    widgets,
-  }
-
-  // single 模式仅保留第一个可见模块可见，其余强制不可见
-  if (mode === 'single') {
-    let seenVisible = false
-    container.widgets = widgets.map((widget) => {
-      const isVisible = widget.visible !== false
-      if (isVisible && !seenVisible) {
-        seenVisible = true
-        return { ...widget, visible: true }
-      }
-      return { ...widget, visible: false }
-    })
-  }
-
-  if (mode === 'combined') {
-    container.direction = source.direction === 'vertical' ? 'vertical' : 'horizontal'
+    cells: [],
+    widgets: [],
   }
 
   if (mode === 'tabs') {
-    const visibleWidgets = widgets.filter(widget => widget.visible !== false)
-    const requested = typeof source.activeWidgetId === 'string' ? source.activeWidgetId : undefined
-    const exists = requested !== undefined && visibleWidgets.some(widget => widget.id === requested)
-    container.activeWidgetId = exists ? requested : visibleWidgets[0]?.id
+    row.widgets = arrayOf(source.widgets)
+      .map(normalizeWidget)
+      .filter((widget): widget is CockpitWidgetInstance => Boolean(widget))
+    const active = typeof source.activeWidgetId === 'string' ? source.activeWidgetId : undefined
+    row.activeWidgetId = row.widgets.some(widget => widget.id === active) ? active : row.widgets[0]?.id
+  }
+  else {
+    const cells = arrayOf(source.cells).map(normalizeCell).slice(0, columnCount)
+    while (cells.length < columnCount)
+      cells.push(createGridCell())
+    row.cells = cells
   }
 
-  return container
+  return row
 }
 
-function normalizeColumn(raw: unknown): CockpitColumnConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const column: CockpitColumnConfig = {
-    id: toStringOr(source.id, createCockpitId('column')),
-    width: toSafeWeight(source.width),
-    containers: toArray(source.containers).map(normalizeContainer),
+function normalizeRowHeights(rows: CockpitGridRowConfig[]): void {
+  const total = rows.reduce((sum, row) => sum + row.height, 0)
+  if (total <= 0) {
+    const height = 100 / rows.length
+    rows.forEach(row => { row.height = height })
+    return
   }
-  if (source.height !== undefined)
-    column.height = toSafeWeight(source.height)
-  return column
+  rows.forEach((row) => {
+    row.height = Number(((row.height / total) * 100).toFixed(3))
+  })
+  const remainder = Number((100 - rows.reduce((sum, row) => sum + row.height, 0)).toFixed(3))
+  if (rows[rows.length - 1])
+    rows[rows.length - 1].height = Number((rows[rows.length - 1].height + remainder).toFixed(3))
 }
 
 function normalizeRegion(raw: unknown): CockpitRegionConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const columns = toArray(source.columns).map(normalizeColumn)
-  return {
-    width: toSafeRegionWidth(source.width, columns.length),
-    columns,
-  }
+  const source = isRecord(raw) ? raw : {}
+  const columns = normalizeColumns(source.columns)
+  const rows = arrayOf(source.rows).map(item => normalizeRow(item, columns.length))
+  if (!rows.length)
+    rows.push(createGridRow(columns.length))
+  normalizeRowHeights(rows)
+  return { columns, rows }
 }
 
-function normalizePageRegionWidths(page: CockpitPageConfig): void {
-  const maxSideTotal = BASE_CANVAS_WIDTH - MIN_CENTER_WIDTH - BODY_COLUMN_GAPS
-  const leftWidth = page.left.width ?? 0
-  const rightWidth = page.right.width ?? 0
-  const total = leftWidth + rightWidth
-  if (total <= maxSideTotal || total <= 0)
-    return
-
-  const ratio = maxSideTotal / total
-  page.left.width = leftWidth > 0
-    ? Math.max(MIN_REGION_WIDTH, Math.floor(leftWidth * ratio))
-    : 0
-  page.right.width = rightWidth > 0
-    ? Math.max(MIN_REGION_WIDTH, Math.floor(rightWidth * ratio))
-    : 0
+function normalizeLayout(raw: unknown): CockpitLayoutConfig {
+  const source = isRecord(raw) ? raw : {}
+  const layout = createLayout(text(source.title, '未命名布局'))
+  layout.id = text(source.id, layout.id)
+  layout.left = normalizeRegion(source.left)
+  layout.right = normalizeRegion(source.right)
+  return layout
 }
 
-function normalizePage(raw: unknown): CockpitPageConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const page: CockpitPageConfig = {
-    id: toStringOr(source.id, createCockpitId('page')),
-    title: toStringOr(source.title, '未命名页面'),
-    left: normalizeRegion(source.left),
-    right: normalizeRegion(source.right),
-  }
-  normalizePageRegionWidths(page)
-  if (typeof source.order === 'number' && Number.isFinite(source.order))
-    page.order = source.order
-  if (isPlainObject(source.center) && typeof source.center.type === 'string' && source.center.type.trim() !== '') {
-    page.center = {
-      id: toStringOr(source.center.id, createCockpitId('center')),
-      type: source.center.type,
-    }
-  }
-  return page
-}
-
-function normalizeCategory(raw: unknown): CockpitCategoryConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const pages = toArray(source.pages).map(normalizePage)
-  const category: CockpitCategoryConfig = {
-    id: toStringOr(source.id, createCockpitId('category')),
-    label: toStringOr(source.label, '未命名分类'),
-    visible: source.visible !== false,
-    pages,
-  }
-  if (typeof source.icon === 'string')
-    category.icon = source.icon
-  if (typeof source.order === 'number' && Number.isFinite(source.order))
-    category.order = source.order
-
-  const requestedPage = typeof source.activePageId === 'string' ? source.activePageId : undefined
-  const pageExists = requestedPage !== undefined && pages.some(page => page.id === requestedPage)
-  category.activePageId = pageExists ? requestedPage : pages[0]?.id
-  return category
-}
-
-/***********************配置标准化入口*********************/
-
-/**
- * 将任意来源的配置对象标准化为安全、可渲染、JSON 可序列化的 CockpitConfig。
- * 缺失字段补齐安全默认值，非法权重归一，activeId 失效时回退到第一个可用项。
- */
 export function normalizeCockpitConfig(raw: unknown): CockpitConfig {
-  const source = isPlainObject(raw) ? raw : {}
-  const categories = toArray(source.categories).map(normalizeCategory)
-
+  const source = isRecord(raw) ? raw : {}
+  const layouts = arrayOf(source.layouts).map(normalizeLayout)
   const config: CockpitConfig = {
     schemaVersion: COCKPIT_SCHEMA_VERSION,
-    id: toStringOr(source.id, createCockpitId('cockpit')),
-    title: toStringOr(source.title, '驾驶舱'),
-    categories,
+    id: text(source.id, createCockpitId('cockpit')),
+    title: text(source.title, '驾驶舱'),
+    layouts: layouts.length ? layouts : [createLayout('布局 1')],
   }
-
-  const visibleCategories = categories.filter(category => category.visible !== false)
-  const requested = typeof source.activeCategoryId === 'string' ? source.activeCategoryId : undefined
-  const exists = requested !== undefined && visibleCategories.some(category => category.id === requested)
-  config.activeCategoryId = exists ? requested : (visibleCategories[0]?.id ?? categories[0]?.id)
-
+  const requested = typeof source.activeLayoutId === 'string' ? source.activeLayoutId : undefined
+  config.activeLayoutId = config.layouts.some(layout => layout.id === requested)
+    ? requested
+    : config.layouts[0].id
   return config
 }

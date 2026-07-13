@@ -15,8 +15,7 @@ describe('独立驾驶舱应用', () => {
     localStorage.clear()
   })
 
-  it('注册了自己的中央组件与业务模块', () => {
-    expect(standaloneCockpitRegistry.resolveCenter('standalone-center')).toBeTruthy()
+  it('注册了自己的业务模块', () => {
     expect(standaloneCockpitRegistry.resolveWidget('metric-summary')).toBeTruthy()
     expect(standaloneCockpitRegistry.resolveWidget('trend-panel')).toBeTruthy()
     expect(standaloneCockpitRegistry.resolveWidget('event-list')).toBeTruthy()
@@ -26,11 +25,11 @@ describe('独立驾驶舱应用', () => {
 
   it('加载默认标准配置', () => {
     const config = loadStandaloneConfig()
-    expect(config.schemaVersion).toBe(2)
-    expect(config.categories.length).toBeGreaterThan(0)
-    expect(config.categories[0].pages).toHaveLength(2)
-    expect(config.categories[0].pages[0].left.width).toBe(420)
-    expect(config.categories[0].pages[0].right.width).toBe(420)
+    expect(config.schemaVersion).toBe(3)
+    expect(config.layouts).toHaveLength(2)
+    expect(config.layouts[0].left.columns[0].width).toBe(420)
+    expect(config.layouts[0].right.columns[0].width).toBe(420)
+    expect(config.layouts[0].left.rows.reduce((sum, row) => sum + row.height, 0)).toBe(100)
     expect(() => JSON.stringify(config)).not.toThrow()
   })
 
@@ -43,9 +42,9 @@ describe('独立驾驶舱应用', () => {
 
   it('保存会标准化非法配置', () => {
     const config = loadStandaloneConfig()
-    const saved = saveStandaloneConfig({ ...config, categories: [] })
-    expect(saved.categories).toEqual([])
-    expect(saved.schemaVersion).toBe(2)
+    const saved = saveStandaloneConfig({ ...config, layouts: [] })
+    expect(saved.layouts).toHaveLength(1)
+    expect(saved.schemaVersion).toBe(3)
   })
 
   it('主题偏好独立持久化并输出解析模式', () => {

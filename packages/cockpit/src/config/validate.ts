@@ -1,167 +1,79 @@
 import type {
   CockpitConfig,
   CockpitConfigIssue,
+  CockpitGridRowConfig,
   CockpitRegionConfig,
 } from '../types'
-import {
-  DEFAULT_REGION_WIDTH,
-  MAX_REGION_WIDTH,
-  MIN_CENTER_WIDTH,
-  MIN_REGION_WIDTH,
-} from './defaults'
+import { COCKPIT_SCHEMA_VERSION } from './defaults'
 
 /***********************配置校验*********************/
-
-const BASE_CANVAS_WIDTH = 1920
-const BODY_COLUMN_GAPS = 24
 
 export interface CockpitValidationResult {
   valid: boolean
   issues: CockpitConfigIssue[]
 }
 
-interface IdTracker {
-  seen: Set<string>
-  addIssueOnDuplicate: (id: string, path: string[], scope: string) => void
+function addDuplicateIssue(seen: Set<string>, issues: CockpitConfigIssue[], id: string, scope: string, path: string[]): void {
+  if (seen.has(id))
+    issues.push({ level: 'error', message: `${scope} 存在重复 id：${id}`, path })
+  seen.add(id)
 }
 
-function createScopedTracker(issues: CockpitConfigIssue[]): IdTracker {
-  const seen = new Set<string>()
-  return {
-    seen,
-    addIssueOnDuplicate(id, path, scope) {
-      const key = `${scope}:${id}`
-      if (seen.has(key)) {
-        issues.push({
-          level: 'error',
-          message: `${scope} 存在重复 id：${id}`,
-          path,
-        })
-      }
-      seen.add(key)
-    },
-  }
+function validateRow(row: CockpitGridRowConfig, region: CockpitRegionConfig, path: string[], widgetIds: Set<string>, issues: CockpitConfigIssue[]): void {
+  if (!(row.height > 0))
+    issues.push({ level: 'error', message: '行高必须大于 0%。', path })
+  if (row.mode === 'grid' && row.cells.length !== region.columns.length)
+    issues.push({ level: 'error', message: '普通行的单元格数量必须与列数一致。', path })
+  if (row.mode === 'tabs' && row.cells.length)
+    issues.push({ level: 'error', message: 'Tab 行不能保留普通单元格。', path })
+
+  const widgets = row.mode === 'tabs'
+    ? row.widgets
+    : row.cells.flatMap(cell => cell.widget ? [cell.widget] : [])
+  widgets.forEach((widget) => {
+    addDuplicateIssue(widgetIds, issues, widget.id, '模块实例', [...path, widget.id])
+    if (!widget.type.trim())
+      issues.push({ level: 'error', message: '模块类型不能为空。', path: [...path, widget.id] })
+  })
+  if (row.mode === 'tabs' && row.activeWidgetId && !row.widgets.some(widget => widget.id === row.activeWidgetId))
+    issues.push({ level: 'error', message: '当前 Tab 不存在。', path })
 }
 
-function regionColumnCount(region: CockpitRegionConfig | undefined): number {
-  return region?.columns?.length ?? 0
+function validateRegion(region: CockpitRegionConfig, path: string[], widgetIds: Set<string>, issues: CockpitConfigIssue[]): void {
+  if (!region.columns.length)
+    issues.push({ level: 'error', message: '区域至少需要一列。', path })
+  if (!region.rows.length)
+    issues.push({ level: 'error', message: '区域至少需要一行。', path })
+  const columnIds = new Set<string>()
+  region.columns.forEach((column) => {
+    addDuplicateIssue(columnIds, issues, column.id, '列', [...path, column.id])
+    if (!(column.width > 0))
+      issues.push({ level: 'error', message: '列宽必须大于 0 像素。', path: [...path, column.id] })
+  })
+  const rowIds = new Set<string>()
+  region.rows.forEach((row) => {
+    addDuplicateIssue(rowIds, issues, row.id, '行', [...path, row.id])
+    validateRow(row, region, [...path, row.id], widgetIds, issues)
+  })
+  const totalHeight = region.rows.reduce((sum, row) => sum + row.height, 0)
+  if (Math.abs(totalHeight - 100) > 0.01)
+    issues.push({ level: 'error', message: '区域行高总和必须为 100%。', path })
 }
 
-function resolveRegionWidthForValidation(region: CockpitRegionConfig | undefined): number {
-  const count = regionColumnCount(region)
-  if (count <= 0)
-    return 0
-  const width = region?.width
-  return typeof width === 'number' && Number.isFinite(width) && width > 0
-    ? width
-    : DEFAULT_REGION_WIDTH
-}
-
-function validateRegionWidth(
-  issues: CockpitConfigIssue[],
-  region: CockpitRegionConfig | undefined,
-  path: string[],
-): void {
-  const columnCount = regionColumnCount(region)
-  const width = region?.width
-  if (columnCount <= 0) {
-    if (width !== undefined && width !== 0)
-      issues.push({ level: 'warning', message: '空区域宽度将归一化为 0。', path })
-    return
-  }
-  if (width !== undefined && (!(width > 0) || width < MIN_REGION_WIDTH || width > MAX_REGION_WIDTH)) {
-    issues.push({
-      level: 'warning',
-      message: `区域宽度超出 ${MIN_REGION_WIDTH}-${MAX_REGION_WIDTH} 范围，将归一化为安全值。`,
-      path,
-    })
-  }
-}
-
-/**
- * 校验标准化后的配置。返回是否可保存以及问题清单。
- * error 级别问题会阻止保存；warning 级别仅提示。
- */
 export function validateCockpitConfig(config: CockpitConfig): CockpitValidationResult {
   const issues: CockpitConfigIssue[] = []
-  const tracker = createScopedTracker(issues)
-  // 模块实例 id 建议整个驾驶舱内唯一
-  const widgetTracker = createScopedTracker(issues)
-
-  if (!Array.isArray(config.categories) || config.categories.length === 0) {
-    issues.push({ level: 'error', message: '驾驶舱至少需要一个分类。' })
-  }
-
-  config.categories?.forEach((category) => {
-    const categoryPath = [category.id]
-    tracker.addIssueOnDuplicate(category.id, categoryPath, '分类')
-
-    if (!Array.isArray(category.pages) || category.pages.length === 0) {
-      issues.push({ level: 'error', message: `分类「${category.label}」至少需要一个页面。`, path: categoryPath })
-    }
-
-    const pageTracker = createScopedTracker(issues)
-    category.pages?.forEach((page) => {
-      const pagePath = [...categoryPath, page.id]
-      pageTracker.addIssueOnDuplicate(page.id, pagePath, '页面')
-
-      validateRegionWidth(issues, page.left, [...pagePath, 'left'])
-      validateRegionWidth(issues, page.right, [...pagePath, 'right'])
-      const sideWidthTotal = resolveRegionWidthForValidation(page.left) + resolveRegionWidthForValidation(page.right)
-      const maxSideTotal = BASE_CANVAS_WIDTH - MIN_CENTER_WIDTH - BODY_COLUMN_GAPS
-      if (sideWidthTotal > maxSideTotal) {
-        issues.push({
-          level: 'warning',
-          message: '左右区域总宽度过大，将压缩以保留中央区域最小宽度。',
-          path: pagePath,
-        })
-      }
-
-      ;([['left', page.left], ['right', page.right]] as const).forEach(([side, region]) => {
-        const columnTracker = createScopedTracker(issues)
-        region?.columns?.forEach((column) => {
-          const columnPath = [...pagePath, `${side}:${column.id}`]
-          columnTracker.addIssueOnDuplicate(column.id, columnPath, '列')
-          if (!(column.width > 0))
-            issues.push({ level: 'warning', message: '列宽权重非法，将回退为安全默认值。', path: columnPath })
-
-          const containerTracker = createScopedTracker(issues)
-          column.containers?.forEach((container) => {
-            const containerPath = [...columnPath, container.id]
-            containerTracker.addIssueOnDuplicate(container.id, containerPath, '容器')
-            if (!(container.height > 0))
-              issues.push({ level: 'warning', message: '容器高度权重非法，将回退为安全默认值。', path: containerPath })
-
-            const visibleWidgets = container.widgets?.filter(widget => widget.visible !== false) ?? []
-            if (container.mode === 'single' && visibleWidgets.length > 1) {
-              issues.push({
-                level: 'error',
-                message: 'single 模式只允许一个可见模块。',
-                path: containerPath,
-              })
-            }
-            if (container.mode === 'tabs' && container.activeWidgetId) {
-              const activeExists = visibleWidgets.some(widget => widget.id === container.activeWidgetId)
-              if (!activeExists) {
-                issues.push({
-                  level: 'warning',
-                  message: 'tabs 默认激活模块不存在，将回退到第一个可见模块。',
-                  path: containerPath,
-                })
-              }
-            }
-
-            container.widgets?.forEach((widget) => {
-              widgetTracker.addIssueOnDuplicate(widget.id, [...containerPath, widget.id], '模块实例')
-            })
-          })
-        })
-      })
-    })
+  if (config.schemaVersion !== COCKPIT_SCHEMA_VERSION)
+    issues.push({ level: 'error', message: `配置版本必须为 v${COCKPIT_SCHEMA_VERSION}。` })
+  if (!config.layouts.length)
+    issues.push({ level: 'error', message: '驾驶舱至少需要一个布局。' })
+  const layoutIds = new Set<string>()
+  const widgetIds = new Set<string>()
+  config.layouts.forEach((layout) => {
+    addDuplicateIssue(layoutIds, issues, layout.id, '布局', [layout.id])
+    if (!layout.title.trim())
+      issues.push({ level: 'error', message: '布局名称不能为空。', path: [layout.id] })
+    validateRegion(layout.left, [layout.id, 'left'], widgetIds, issues)
+    validateRegion(layout.right, [layout.id, 'right'], widgetIds, issues)
   })
-
-  return {
-    valid: !issues.some(issue => issue.level === 'error'),
-    issues,
-  }
+  return { valid: !issues.some(issue => issue.level === 'error'), issues }
 }

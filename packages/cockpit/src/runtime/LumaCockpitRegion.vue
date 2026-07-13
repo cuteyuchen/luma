@@ -1,60 +1,39 @@
 <script setup lang="ts">
-import type { CockpitRegionConfig } from '../types'
+import type { CockpitRegionConfig, CockpitSide } from '../types'
 import { computed } from 'vue'
-import LumaCockpitColumn from './LumaCockpitColumn.vue'
+import LumaCockpitContainer from './LumaCockpitContainer.vue'
 
-/***********************左右区域*********************/
-// 按列宽权重在区域内归一化分配横向空间。
+/***********************左右网格区域*********************/
 
 const props = defineProps<{
-  categoryId: string
-  pageId: string
+  layoutId: string
   region: CockpitRegionConfig
-  side: 'left' | 'right'
+  side: CockpitSide
 }>()
 
-const totalWidth = computed(() =>
-  props.region.columns.reduce((sum, column) => sum + (column.width > 0 ? column.width : 0), 0),
-)
-
-const regionStyle = computed(() => ({
-  width: `${props.region.width ?? 0}px`,
-  flex: `0 0 ${props.region.width ?? 0}px`,
-}))
-
-function columnFlex(width: number): string {
-  const safe = width > 0 ? width : 0
-  const total = totalWidth.value
-  if (total <= 0)
-    return '1 1 0%'
-  return `${(safe / total) * 100} 1 0%`
-}
+const regionWidth = computed(() => {
+  const widths = props.region.columns.reduce((sum, column) => sum + column.width, 0)
+  return widths + Math.max(0, props.region.columns.length - 1) * 12
+})
+const regionStyle = computed(() => ({ width: `${regionWidth.value}px`, flex: `0 0 ${regionWidth.value}px` }))
 </script>
 
 <template>
-  <div
+  <section
     class="luma-cockpit-region"
     :data-side="side"
     data-cockpit-node="region"
-    :data-cockpit-node-id="`${categoryId}:${pageId}:${side}`"
+    :data-cockpit-node-id="`${layoutId}:${side}`"
     :data-cockpit-side="side"
     :style="regionStyle"
   >
-    <div
-      v-for="column in region.columns"
-      :key="column.id"
-      class="luma-cockpit-region__column"
-      data-cockpit-node="column"
-      :data-cockpit-node-id="column.id"
-      :data-cockpit-side="side"
-      :style="{ flex: columnFlex(column.width) }"
-    >
-      <LumaCockpitColumn
-        :category-id="categoryId"
-        :page-id="pageId"
-        :side="side"
-        :column="column"
-      />
-    </div>
-  </div>
+    <LumaCockpitContainer
+      v-for="row in region.rows"
+      :key="row.id"
+      :layout-id="layoutId"
+      :side="side"
+      :columns="region.columns"
+      :row="row"
+    />
+  </section>
 </template>

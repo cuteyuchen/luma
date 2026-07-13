@@ -1,3 +1,5 @@
+@import '@luma/icons/style.css';
+
 /***********************@luma/cockpit 基础样式*********************/
 // 仅提供布局骨架与可覆盖 token，不含任何行业皮肤、背景图或 Logo。
 // 应用通过重设下列 CSS 变量完成品牌定制。
@@ -337,31 +339,106 @@
 
 /***********************Designer*********************/
 .luma-cockpit-designer {
+  --luma-cockpit-designer-control-height: 36px;
+  --luma-cockpit-designer-control-radius: 6px;
+  --luma-cockpit-designer-pane-padding: 16px;
+
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-width: 1120px;
   color: var(--luma-cockpit-text, #e5eaf3);
   background: var(--luma-cockpit-bg, #10131a);
+
+  &__toolbar-actions button,
+  &__region :is(button, input:not([type='radio']):not([type='checkbox']), select),
+  &__properties :is(button, input),
+  &__library :is(button, select) {
+    box-sizing: border-box;
+    font: inherit;
+  }
+
+  &__toolbar-actions button,
+  &__region button,
+  &__properties button,
+  &__library button {
+    min-height: var(--luma-cockpit-designer-control-height);
+    padding: 0 10px;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    background: var(--luma-cockpit-floating-bg, rgb(255 255 255 / 5%));
+    color: var(--luma-cockpit-text, #e5eaf3);
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+
+    &:hover:not(:disabled) {
+      border-color: color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 38%);
+      background: color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 90%);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--luma-cockpit-focus-ring, #409eff);
+      outline-offset: 2px;
+    }
+  }
+
+  &__region :is(input:not([type='radio']):not([type='checkbox']), select),
+  &__properties input,
+  &__library select {
+    min-height: var(--luma-cockpit-designer-control-height);
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    outline: 0;
+    background: var(--luma-cockpit-bg, #10131a);
+    color: var(--luma-cockpit-text, #e5eaf3);
+
+    &:focus {
+      border-color: var(--luma-cockpit-accent, #409eff);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 82%);
+    }
+  }
 
   &__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--luma-cockpit-gap, 12px);
-    padding: 12px 16px;
+    min-height: 64px;
+    padding: 0 20px;
     border-bottom: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    background: var(--luma-cockpit-panel-bg, rgb(18 31 45 / 78%));
+    box-shadow: 0 1px 0 rgb(255 255 255 / 3%);
     flex: none;
   }
 
   &__heading {
     margin: 0;
+    color: var(--luma-cockpit-title-text, #f1f6ff);
     font-size: 18px;
+    font-weight: 650;
   }
 
   &__toolbar-actions {
     display: flex;
     gap: 8px;
+
+    .luma-cockpit-designer__save {
+      border-color: var(--luma-cockpit-accent, #409eff);
+      background: var(--luma-cockpit-accent, #409eff);
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        border-color: var(--luma-cockpit-accent, #409eff);
+        background: color-mix(in srgb, var(--luma-cockpit-accent, #409eff), #000 12%);
+      }
+    }
   }
 
   &__issues {
@@ -377,56 +454,59 @@
   }
 
   &__body {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(244px, 268px) minmax(0, 1fr) minmax(244px, 268px);
     flex: 1 1 auto;
     min-height: 0;
   }
 
   &__pane {
-    padding: 12px;
+    min-width: 0;
+    padding: var(--luma-cockpit-designer-pane-padding);
     overflow: auto;
 
     &--props {
-      flex: 0 0 240px;
       border-right: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+      background: color-mix(in srgb, var(--luma-cockpit-panel-bg, #182738), transparent 10%);
     }
 
     &--editor {
-      flex: 1 1 auto;
-      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      background: color-mix(in srgb, var(--luma-cockpit-bg, #10131a), #000 8%);
     }
 
     &--library {
-      flex: 0 0 240px;
       border-left: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+      background: color-mix(in srgb, var(--luma-cockpit-panel-bg, #182738), transparent 10%);
     }
   }
 
   &__editors {
-    display: flex;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
     flex: 0 0 auto;
-
-    > * {
-      flex: 1 1 0;
-      min-width: 0;
-    }
   }
 
   &__preview {
     flex: 1 1 auto;
-    min-height: 280px;
+    min-height: 420px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
 
   &__preview-label {
-    font-size: 13px;
-    opacity: 0.72;
+    align-self: flex-start;
+    padding: 4px 8px;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: 4px;
+    background: var(--luma-cockpit-floating-bg, rgb(255 255 255 / 5%));
+    color: var(--luma-cockpit-text-secondary, #a8b7c8);
+    font-size: 12px;
+    line-height: 1.2;
   }
 
   &__preview-stage {
@@ -435,54 +515,285 @@
     min-height: 0;
     border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
     border-radius: var(--luma-cockpit-radius, 8px);
+    background: color-mix(in srgb, var(--luma-cockpit-bg, #10131a), #000 10%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
     overflow: hidden;
+  }
+
+  &__region {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-radius, 8px);
+    background: var(--luma-cockpit-panel-bg, rgb(18 31 45 / 78%));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+  }
+
+  &__region-head,
+  &__column-head,
+  &__container-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__region-head {
+    min-height: 52px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg, #192738), transparent 18%);
+
+    > span {
+      color: var(--luma-cockpit-title-text, #f1f6ff);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    > button {
+      margin-left: auto;
+    }
+  }
+
+  &__region-empty {
+    display: grid;
+    min-height: 112px;
+    padding: 16px;
+    place-items: center;
+    color: var(--luma-cockpit-text-muted, #7d8b9c);
   }
 
   // 通用操作按钮组：排序 / 删除 / 复制均提供按钮，满足键盘可达
   &__ops {
     display: inline-flex;
     gap: 4px;
+    margin-left: auto;
+    flex-wrap: wrap;
 
     button {
-      min-width: 44px;
-      min-height: 44px;
-      padding: 4px 8px;
-      border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
-      border-radius: 6px;
-      background: var(--luma-cockpit-surface, rgb(255 255 255 / 4%));
-      color: inherit;
-      cursor: pointer;
-
-      &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-
-      &:focus-visible {
-        outline: 2px solid var(--luma-cockpit-focus-ring, #409eff);
-        outline-offset: 2px;
-      }
+      min-width: var(--luma-cockpit-designer-control-height);
+      padding: 0 8px;
     }
   }
 
-  &__column,
+  &__column {
+    margin: 12px;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg, #192738), transparent 28%);
+    overflow: hidden;
+  }
+
+  &__column-head {
+    min-height: 48px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+
+    > span {
+      color: var(--luma-cockpit-title-text, #f1f6ff);
+      font-weight: 600;
+    }
+  }
+
+  &__column-head label,
+  &__container-head label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--luma-cockpit-text-secondary, #a8b7c8);
+    font-size: 12px;
+
+    input,
+    select {
+      width: 76px;
+      padding: 0 8px;
+    }
+
+    select {
+      width: auto;
+      min-width: 74px;
+    }
+  }
+
   &__container {
-    margin: 8px 0;
-    padding: 8px;
+    margin: 10px;
     border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
     border-radius: var(--luma-cockpit-radius, 8px);
+    background: color-mix(in srgb, var(--luma-cockpit-bg, #10131a), transparent 14%);
+    overflow: hidden;
+  }
+
+  &__container-head {
+    min-height: 48px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
   }
 
   &__props-item,
   &__widget {
+    min-width: 0;
+  }
+
+  &__widgets {
+    display: grid;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  &__widget {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 6px 8px;
+    border: 1px solid color-mix(in srgb, var(--luma-cockpit-border, #3d5268), transparent 26%);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg, #192738), transparent 36%);
+
+    input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--luma-cockpit-accent, #409eff);
+    }
+
+    .luma-cockpit-designer__ops {
+      justify-self: end;
+    }
+  }
+
+  &__widget-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__widget-empty {
+    padding: 18px 8px;
+    color: var(--luma-cockpit-text-muted, #7d8b9c);
+    text-align: center;
+  }
+
+  &__add-widget {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 0;
+    gap: 8px;
+    padding: 0 10px 10px;
+    color: var(--luma-cockpit-text-secondary, #a8b7c8);
+    font-size: 12px;
+
+    select {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0 8px;
+    }
+  }
+
+  &__properties,
+  &__library {
+    display: grid;
+    gap: 20px;
+  }
+
+  &__props-section,
+  &__library-section {
+    display: grid;
+    gap: 10px;
+  }
+
+  &__props-title,
+  &__library-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 32px;
+    color: var(--luma-cockpit-title-text, #f1f6ff);
+    font-size: 14px;
+    font-weight: 600;
+
+    select {
+      min-width: 0;
+      max-width: 132px;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+  }
+
+  &__props-list,
+  &__library-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  &__props-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg, #192738), transparent 24%);
 
     &.is-active {
-      box-shadow: inset 2px 0 0 0 var(--luma-cockpit-accent, #409eff);
+      border-color: color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 30%);
+      box-shadow: inset 2px 0 0 var(--luma-cockpit-accent, #409eff);
     }
+  }
+
+  &__props-select {
+    min-width: 0;
+    justify-content: flex-start;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rename {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 0 8px;
+  }
+
+  &__props-item > &__ops {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  &__library-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    overflow: hidden;
+    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg, #192738), transparent 26%);
+    color: var(--luma-cockpit-text, #e5eaf3);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+
+    &.is-active {
+      border-color: var(--luma-cockpit-accent, #409eff);
+      background: color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 88%);
+      box-shadow: inset 2px 0 0 var(--luma-cockpit-accent, #409eff);
+    }
+
+    &.is-static {
+      color: var(--luma-cockpit-text-secondary, #a8b7c8);
+    }
+  }
+
+  &__library-empty {
+    padding: 12px 0;
+    color: var(--luma-cockpit-text-muted, #7d8b9c);
+    font-size: 13px;
   }
 
   &__props-list,
@@ -494,9 +805,700 @@
   }
 }
 
+@media (max-width: 1280px) {
+  .luma-cockpit-designer {
+    &__body {
+      grid-template-columns: minmax(220px, 244px) minmax(0, 1fr) minmax(220px, 244px);
+    }
+
+    &__editors {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .luma-cockpit-designer {
+    height: auto;
+    min-height: 100%;
+
+    &__body {
+      grid-template-columns: minmax(0, 1fr);
+      overflow: visible;
+    }
+
+    &__pane {
+      overflow: visible;
+
+      &--props,
+      &--library {
+        border: 0;
+        border-top: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
+      }
+
+      &--editor {
+        order: -1;
+      }
+    }
+
+    &__properties,
+    &__library {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .luma-cockpit-designer {
+    &__toolbar {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 12px;
+    }
+
+    &__toolbar-actions {
+      width: 100%;
+
+      button {
+        flex: 1 1 0;
+      }
+    }
+
+    &__pane {
+      padding: 12px;
+    }
+
+    &__preview {
+      min-height: 300px;
+    }
+
+    &__properties,
+    &__library {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__column-head,
+    &__container-head {
+      align-items: stretch;
+
+      > .luma-cockpit-designer__ops {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+
+    &__widget {
+      grid-template-columns: auto minmax(0, 1fr);
+
+      .luma-cockpit-designer__ops {
+        grid-column: 1 / -1;
+        justify-self: stretch;
+        margin-left: 0;
+      }
+    }
+  }
+}
+
 /***********************减少动画*********************/
 @media (prefers-reduced-motion: reduce) {
   .luma-cockpit-canvas__stage {
     will-change: auto;
   }
+}
+
+/***********************v3 网格运行时*********************/
+.luma-cockpit-region {
+  flex-direction: column;
+  gap: var(--luma-cockpit-gap);
+  height: 100%;
+
+  &__column {
+    display: none;
+  }
+}
+
+.luma-cockpit-container {
+  position: relative;
+  min-height: 0;
+  flex: 0 0 auto;
+
+  &__grid {
+    display: grid;
+    gap: var(--luma-cockpit-gap);
+    width: 100%;
+    height: 100%;
+  }
+
+  &__cell {
+    min-width: 0;
+    min-height: 0;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: var(--luma-cockpit-radius);
+    background: var(--luma-cockpit-surface);
+    overflow: hidden;
+  }
+
+  &__tabs {
+    height: 100%;
+  }
+}
+
+.luma-cockpit-canvas__center {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+
+  > * {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+/***********************v3 布局 Designer*********************/
+.luma-cockpit-designer {
+  &__toolbar {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__layout-controls {
+    display: flex;
+    flex: 1 1 520px;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__layout-controls label,
+  &__layout-controls input,
+  &__layout-controls select {
+    min-height: var(--luma-cockpit-designer-control-height);
+    box-sizing: border-box;
+    font: inherit;
+  }
+
+  &__layout-controls label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--luma-cockpit-text-secondary);
+    font-size: 12px;
+  }
+
+  &__layout-controls input,
+  &__layout-controls select {
+    min-width: 120px;
+    padding: 0 8px;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: var(--luma-cockpit-designer-control-radius);
+    outline: 0;
+    background: var(--luma-cockpit-bg);
+    color: var(--luma-cockpit-text);
+  }
+
+  &__layout-controls input:focus,
+  &__layout-controls select:focus {
+    border-color: var(--luma-cockpit-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--luma-cockpit-accent), transparent 82%);
+  }
+
+  &__layout-controls .is-danger {
+    border-color: color-mix(in srgb, var(--luma-cockpit-danger), transparent 46%);
+    color: var(--luma-cockpit-danger);
+  }
+
+  &__workspace {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr) minmax(268px, 320px);
+    gap: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px;
+    overflow: auto;
+    background: color-mix(in srgb, var(--luma-cockpit-bg), #000 8%);
+  }
+
+  &__workspace > &__region,
+  &__workspace > &__library {
+    min-width: 0;
+    min-height: 0;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: var(--luma-cockpit-radius);
+    background: var(--luma-cockpit-panel-bg);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+  }
+
+  &__workspace > &__region {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
+  }
+
+  &__region-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 64px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--luma-cockpit-border);
+    background: var(--luma-cockpit-floating-bg);
+  }
+
+  &__region-head > div {
+    display: grid;
+    gap: 2px;
+    margin-right: auto;
+  }
+
+  &__region-head strong {
+    color: var(--luma-cockpit-title-text);
+    font-size: 15px;
+  }
+
+  &__region-head span {
+    color: var(--luma-cockpit-text-muted);
+    font-size: 12px;
+  }
+
+  &__region-head label,
+  &__region-controls label,
+  &__grid-row-head label {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    color: var(--luma-cockpit-text-secondary);
+    font-size: 12px;
+  }
+
+  &__region-head input,
+  &__region-controls input,
+  &__grid-row-head input {
+    width: 64px;
+    min-height: 32px;
+    padding: 0 7px;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: 5px;
+    background: var(--luma-cockpit-bg);
+    color: var(--luma-cockpit-text);
+    font: inherit;
+  }
+
+  &__region-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--luma-cockpit-border);
+  }
+
+  &__grid-rows {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  &__grid-row {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 22%);
+  }
+
+  &__grid-row-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  &__grid-row-head strong {
+    margin-right: auto;
+    color: var(--luma-cockpit-title-text);
+    font-size: 13px;
+  }
+
+  &__tabs-switch {
+    cursor: pointer;
+  }
+
+  &__tabs-switch input {
+    width: 16px;
+    min-height: 16px;
+    margin: 0;
+    accent-color: var(--luma-cockpit-accent);
+  }
+
+  &__grid-cells {
+    display: grid;
+    gap: 8px;
+    min-height: 126px;
+  }
+
+  &__drop-zone {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  &__grid-cells > &__drop-zone {
+    min-height: 126px;
+  }
+
+  &__tab-row &__drop-zone {
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 92px;
+  }
+
+  &__empty-cell {
+    display: grid;
+    width: 100%;
+    min-height: 100%;
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--luma-cockpit-accent), transparent 46%);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--luma-cockpit-accent), transparent 94%);
+    color: var(--luma-cockpit-text-secondary);
+    place-items: center;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  &__empty-cell:disabled {
+    border-color: var(--luma-cockpit-border);
+    background: transparent;
+    color: var(--luma-cockpit-text-muted);
+    cursor: default;
+  }
+
+  &__placed-widget {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 72px;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--luma-cockpit-accent), transparent 54%);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--luma-cockpit-accent), transparent 90%);
+    color: var(--luma-cockpit-title-text);
+    cursor: grab;
+    box-sizing: border-box;
+  }
+
+  &__placed-widget:active {
+    cursor: grabbing;
+  }
+
+  &__placed-widget.is-active {
+    border-color: var(--luma-cockpit-accent);
+    box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+  }
+
+  &__placed-widget button {
+    min-height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: 5px;
+    background: var(--luma-cockpit-floating-bg);
+    color: inherit;
+    cursor: pointer;
+  }
+
+  &__tab-row &__placed-widget {
+    width: auto;
+    min-width: 136px;
+    min-height: 52px;
+  }
+
+  &__library {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: auto;
+    padding: 12px;
+    overflow: auto;
+  }
+
+  &__library-title strong,
+  &__library-title span {
+    display: block;
+  }
+
+  &__library-title strong {
+    color: var(--luma-cockpit-title-text);
+  }
+
+  &__library-title span {
+    margin-top: 2px;
+    color: var(--luma-cockpit-text-muted);
+    font-size: 12px;
+  }
+
+  &__library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  &__library-card {
+    display: grid;
+    gap: 8px;
+    min-height: 112px;
+    padding: 10px;
+    border: 1px solid var(--luma-cockpit-border);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 22%);
+    color: var(--luma-cockpit-text);
+    cursor: grab;
+    text-align: left;
+  }
+
+  &__library-card:hover {
+    border-color: var(--luma-cockpit-accent);
+  }
+
+  &__library-card:focus-visible,
+  &__empty-cell:focus-visible,
+  &__placed-widget button:focus-visible {
+    outline: 2px solid var(--luma-cockpit-focus-ring);
+    outline-offset: 2px;
+  }
+
+  &__library-thumbnail,
+  &__library-icon {
+    display: grid;
+    width: 100%;
+    height: 54px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--luma-cockpit-accent), transparent 88%);
+    object-fit: cover;
+    place-items: center;
+    color: var(--luma-cockpit-text-secondary);
+    font-size: 12px;
+  }
+
+  &__library-label {
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__library-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 20px 0;
+    color: var(--luma-cockpit-text-muted);
+    text-align: center;
+  }
+}
+
+@media (max-width: 1320px) {
+  .luma-cockpit-designer__workspace {
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+  }
+
+  .luma-cockpit-designer__workspace > .luma-cockpit-designer__library {
+    grid-column: 1 / -1;
+  }
+
+  .luma-cockpit-designer__library-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .luma-cockpit-designer__workspace {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .luma-cockpit-designer__workspace > .luma-cockpit-designer__library {
+    grid-column: auto;
+  }
+
+  .luma-cockpit-designer__library-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .luma-cockpit-designer__region-head,
+  .luma-cockpit-designer__grid-row-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* Element Plus 控件由 Designer 直接使用；仅覆盖语义变量和布局，不重绘其交互状态。 */
+.luma-cockpit-designer {
+  --el-color-primary: var(--luma-cockpit-accent);
+  --el-bg-color: var(--luma-cockpit-panel-bg);
+  --el-bg-color-overlay: var(--luma-cockpit-floating-bg);
+  --el-fill-color-blank: var(--luma-cockpit-panel-bg);
+  --el-fill-color-light: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 18%);
+  --el-fill-color-lighter: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 32%);
+  --el-text-color-primary: var(--luma-cockpit-text);
+  --el-text-color-regular: var(--luma-cockpit-text-secondary);
+  --el-text-color-secondary: var(--luma-cockpit-text-muted);
+  --el-border-color: var(--luma-cockpit-border);
+  --el-border-color-light: var(--luma-cockpit-border);
+  --el-border-radius-base: var(--luma-cockpit-designer-control-radius);
+
+  &__heading {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__layout-controls {
+    .el-select {
+      width: 168px;
+    }
+
+    > .el-input {
+      width: 180px;
+    }
+  }
+
+  &__field {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--luma-cockpit-text-secondary);
+    font-size: 12px;
+
+    > .el-input-number {
+      width: 92px;
+    }
+
+    em {
+      color: var(--luma-cockpit-text-muted);
+      font-size: 12px;
+      font-style: normal;
+    }
+  }
+
+  &__issues {
+    display: grid;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--luma-cockpit-panel-bg);
+  }
+
+  &__region-head .el-input-number {
+    width: 80px;
+  }
+
+  &__region-controls .el-input-number,
+  &__grid-row-head .el-input-number {
+    width: 78px;
+  }
+
+  &__tabs-switch {
+    margin-left: auto;
+  }
+
+  &__empty-cell.el-button {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin: 0;
+    white-space: normal;
+
+    .luma-icon {
+      flex: none;
+    }
+  }
+
+  &__placed-widget {
+    .el-button {
+      flex: none;
+    }
+  }
+
+  &__tab-widget-title.el-button {
+    min-height: 0;
+    margin-right: auto;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+  }
+
+  &__library-card.el-button {
+    display: grid;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    align-content: start;
+    align-items: start;
+    justify-items: start;
+    text-align: left;
+    white-space: normal;
+
+    &.is-selected {
+      border-color: var(--luma-cockpit-accent);
+      box-shadow: inset 0 0 0 1px var(--luma-cockpit-accent);
+    }
+  }
+
+  &__library-empty {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .el-button + .el-button {
+    margin-left: 0;
+  }
+}
+
+.luma-cockpit-container__tab.el-button {
+  --el-button-bg-color: var(--luma-cockpit-surface);
+  --el-button-border-color: var(--luma-cockpit-border);
+  --el-button-text-color: var(--luma-cockpit-text);
+  --el-button-hover-bg-color: var(--luma-cockpit-selected);
+  --el-button-hover-border-color: var(--luma-cockpit-accent);
+  --el-button-hover-text-color: var(--luma-cockpit-text);
+  --el-button-active-bg-color: var(--luma-cockpit-selected);
+  --el-button-active-border-color: var(--luma-cockpit-accent);
+  --el-button-active-text-color: var(--luma-cockpit-text);
+  min-height: 36px;
+  padding: 6px 12px;
+
+  &.is-active {
+    border-color: var(--luma-cockpit-accent);
+    box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+  }
+}
+
+.luma-cockpit-error-boundary__retry.el-button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* 不能用 --el-text-color-* 反向推导 Cockpit token，否则 Designer 再映射 Element Plus token 时会形成循环。 */
+.luma-cockpit-designer[data-cockpit-theme='light'] {
+  --luma-cockpit-title-text: #1f2d3d;
+  --luma-cockpit-text: #243447;
+  --luma-cockpit-text-secondary: #526172;
+  --luma-cockpit-text-muted: #7a8794;
+  --el-text-color-primary: #243447;
+  --el-text-color-regular: #526172;
+  --el-text-color-secondary: #7a8794;
+}
+
+.luma-cockpit-designer[data-cockpit-theme='dark'] {
+  --luma-cockpit-title-text: #f1f6ff;
+  --luma-cockpit-text: #e5edf7;
+  --luma-cockpit-text-secondary: #a8b7c8;
+  --luma-cockpit-text-muted: #7d8b9c;
+  --el-text-color-primary: #e5edf7;
+  --el-text-color-regular: #a8b7c8;
+  --el-text-color-secondary: #7d8b9c;
 }

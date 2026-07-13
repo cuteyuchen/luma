@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { CockpitBaseContext, CockpitWidgetInstance } from '../types'
+import { LumaIcon } from '@luma/icons'
+import { ElButton } from 'element-plus'
 import { computed, onBeforeUnmount } from 'vue'
 import { provideCockpitContext } from '../composables/useCockpitContext'
 import CockpitErrorBoundary from './CockpitErrorBoundary.vue'
@@ -10,8 +12,7 @@ import { resolveCockpitComponent } from './resolveComponent'
 // 渲染单个模块实例：per-instance 上下文、缺失降级、卸载清理订阅。
 
 const props = defineProps<{
-  categoryId: string
-  pageId: string
+  layoutId: string
   side: 'left' | 'right'
   widget: CockpitWidgetInstance
 }>()
@@ -26,8 +27,7 @@ const resolved = computed(() => {
 
 const context = computed<CockpitBaseContext>(() => ({
   cockpitId: env.cockpitId,
-  categoryId: props.categoryId,
-  pageId: props.pageId,
+  layoutId: props.layoutId,
   instanceId: props.widget.id,
   mode: env.mode,
   messages: env.messages,
@@ -89,9 +89,10 @@ const title = computed(() => props.widget.title)
           />
           <div v-else class="luma-cockpit-widget__error" role="alert">
             <span>模块加载失败</span>
-            <button type="button" @click="retry">
+            <ElButton text type="primary" @click="retry">
+              <LumaIcon name="luma:refresh" :size="14" />
               重试
-            </button>
+            </ElButton>
           </div>
         </template>
       </CockpitErrorBoundary>

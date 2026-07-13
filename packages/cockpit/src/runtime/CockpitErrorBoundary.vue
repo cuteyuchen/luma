@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { LumaIcon } from '@luma/icons'
+import { ElButton } from 'element-plus'
 import { nextTick, onErrorCaptured, ref } from 'vue'
 
 /***********************渲染错误边界*********************/
@@ -37,13 +39,13 @@ async function retry(): Promise<void> {
           <p class="luma-cockpit-error-boundary__message">
             组件渲染失败
           </p>
-          <button
-            type="button"
+          <ElButton
             class="luma-cockpit-error-boundary__retry"
             @click="retry"
           >
+            <LumaIcon name="luma:refresh" :size="15" />
             重试
-          </button>
+          </ElButton>
         </div>
       </slot>
     </template>

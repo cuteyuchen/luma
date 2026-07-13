@@ -1,496 +1,408 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { CockpitValidationResult } from '../config/validate'
 import type {
-  CockpitCategoryConfig,
-  CockpitColumnConfig,
   CockpitConfig,
-  CockpitContainerConfig,
-  CockpitContainerMode,
-  CockpitPageConfig,
+  CockpitGridCellConfig,
+  CockpitGridRowConfig,
+  CockpitLayoutConfig,
+  CockpitRegionConfig,
+  CockpitSide,
   CockpitWidgetInstance,
 } from '../types'
 import { computed, ref } from 'vue'
 import {
-  createCategory,
-  createCockpitId,
-  createColumn,
-  createContainer,
-  createPage,
+  createGridCell,
+  createGridColumn,
+  createGridRow,
+  createLayout,
   createWidgetInstance,
-} from '../config/defaults'
-import { normalizeCockpitConfig } from '../config/normalize'
-import { validateCockpitConfig } from '../config/validate'
+  normalizeCockpitConfig,
+  validateCockpitConfig,
+} from '../config'
+import type { CockpitValidationResult } from '../config'
 
-/***********************Designer 草稿管理*********************/
-
-/** 配置保证 JSON 可序列化，深拷贝用 JSON 往返即可 */
-function cloneConfig(config: CockpitConfig): CockpitConfig {
-  return JSON.parse(JSON.stringify(config)) as CockpitConfig
-}
-
-type Side = 'left' | 'right'
+/***********************布局草稿状态机*********************/
 
 export interface DraftSelection {
-  categoryId?: string
-  pageId?: string
+  layoutId?: string
+}
+
+export type DraftWidgetLocation =
+  | { kind: 'cell', side: CockpitSide, rowId: string, cellId: string }
+  | { kind: 'tabs', side: CockpitSide, rowId: string, widgetId?: string }
+
+export interface MoveWidgetResult {
+  moved: boolean
+  requiresReplace: boolean
 }
 
 export interface UseCockpitDraftReturn {
   draft: Ref<CockpitConfig>
   selection: Ref<DraftSelection>
-  activeCategory: ComputedRef<CockpitCategoryConfig | undefined>
-  activePage: ComputedRef<CockpitPageConfig | undefined>
-  // 分类
-  addCategory: () => void
-  removeCategory: (id: string) => void
-  duplicateCategory: (id: string) => void
-  renameCategory: (id: string, label: string) => void
-  moveCategory: (id: string, delta: number) => void
-  selectCategory: (id: string) => void
-  // 页面
-  addPage: () => void
-  removePage: (id: string) => void
-  duplicatePage: (id: string) => void
-  renamePage: (id: string, title: string) => void
-  movePage: (id: string, delta: number) => void
-  selectPage: (id: string) => void
-  setPageCenter: (type: string | undefined) => void
-  // 列
-  addColumn: (side: Side) => void
-  removeColumn: (side: Side, columnId: string) => void
-  moveColumn: (side: Side, columnId: string, delta: number) => void
-  setColumnWidth: (side: Side, columnId: string, width: number) => void
-  setColumnHeight: (side: Side, columnId: string, height: number | undefined) => void
-  // 容器
-  addContainer: (side: Side, columnId: string) => void
-  removeContainer: (side: Side, columnId: string, containerId: string) => void
-  duplicateContainer: (side: Side, columnId: string, containerId: string) => void
-  moveContainer: (side: Side, columnId: string, containerId: string, delta: number) => void
-  setContainerHeight: (side: Side, columnId: string, containerId: string, height: number) => void
-  setContainerMode: (side: Side, columnId: string, containerId: string, mode: CockpitContainerMode) => void
-  setContainerDirection: (side: Side, columnId: string, containerId: string, direction: 'horizontal' | 'vertical') => void
-  setContainerActiveWidget: (side: Side, columnId: string, containerId: string, widgetId: string) => void
-  // 模块
-  addWidget: (side: Side, columnId: string, containerId: string, type: string, title?: string) => void
-  removeWidget: (side: Side, columnId: string, containerId: string, widgetId: string) => void
-  duplicateWidget: (side: Side, columnId: string, containerId: string, widgetId: string) => void
-  moveWidget: (side: Side, columnId: string, containerId: string, widgetId: string, delta: number) => void
-  // 生命周期
+  layouts: ComputedRef<CockpitLayoutConfig[]>
+  activeLayout: ComputedRef<CockpitLayoutConfig | undefined>
+  addLayout: () => void
+  duplicateLayout: (id: string) => void
+  removeLayout: (id: string) => boolean
+  renameLayout: (id: string, title: string) => void
+  selectLayout: (id: string) => void
+  resizeRegion: (side: CockpitSide, rows: number, columns: number, discardOccupied?: boolean) => boolean
+  setColumnWidth: (side: CockpitSide, columnId: string, width: number) => void
+  setRowHeight: (side: CockpitSide, rowId: string, height: number) => void
+  setRowTabs: (side: CockpitSide, rowId: string, enabled: boolean) => boolean
+  hasWidgetAt: (location: DraftWidgetLocation) => boolean
+  addWidget: (location: DraftWidgetLocation, type: string, title?: string, replace?: boolean) => boolean
+  moveWidget: (source: DraftWidgetLocation, target: DraftWidgetLocation, replace?: boolean) => MoveWidgetResult
+  removeWidget: (location: DraftWidgetLocation) => void
+  reorderTabWidgets: (side: CockpitSide, rowId: string, oldIndex: number, newIndex: number) => void
+  setActiveTab: (side: CockpitSide, rowId: string, widgetId: string) => void
   reset: () => void
   buildSaveConfig: () => { config: CockpitConfig, validation: CockpitValidationResult }
 }
 
-/**
- * 管理 Designer 草稿：
- * - 打开时深拷贝原始配置为独立草稿。
- * - 所有编辑仅修改草稿。
- * - reset 恢复本次打开时的原始配置。
- * - buildSaveConfig 先标准化再校验，供保存前拦截。
- */
+function cloneConfig(config: CockpitConfig): CockpitConfig {
+  return JSON.parse(JSON.stringify(config)) as CockpitConfig
+}
+
+function widgetsInRow(row: CockpitGridRowConfig): CockpitWidgetInstance[] {
+  return row.mode === 'tabs'
+    ? row.widgets
+    : row.cells.flatMap(cell => cell.widget ? [cell.widget] : [])
+}
+
+function hasOccupiedContent(row: CockpitGridRowConfig): boolean {
+  return widgetsInRow(row).length > 0
+}
+
+function normalizeRowHeights(rows: CockpitGridRowConfig[]): void {
+  if (!rows.length)
+    return
+  const total = rows.reduce((sum, row) => sum + Math.max(0, row.height), 0)
+  if (total <= 0) {
+    const height = 100 / rows.length
+    rows.forEach(row => { row.height = height })
+    return
+  }
+  rows.forEach((row) => {
+    row.height = Number(((Math.max(0, row.height) / total) * 100).toFixed(3))
+  })
+  const remainder = Number((100 - rows.reduce((sum, row) => sum + row.height, 0)).toFixed(3))
+  rows[rows.length - 1].height = Number((rows[rows.length - 1].height + remainder).toFixed(3))
+}
+
+function regionOf(layout: CockpitLayoutConfig, side: CockpitSide): CockpitRegionConfig {
+  return side === 'left' ? layout.left : layout.right
+}
+
+function cloneLayoutWithIds(source: CockpitLayoutConfig): CockpitLayoutConfig {
+  const clone = JSON.parse(JSON.stringify(source)) as CockpitLayoutConfig
+  clone.id = createLayout().id
+  for (const side of ['left', 'right'] as const) {
+    const region = regionOf(clone, side)
+    region.columns.forEach((column) => { column.id = createGridColumn().id })
+    region.rows.forEach((row) => {
+      row.id = createGridRow(1).id
+      row.cells.forEach((cell) => {
+        cell.id = createGridCell().id
+        if (cell.widget)
+          cell.widget.id = createWidgetInstance(cell.widget.type).id
+      })
+      row.widgets.forEach((widget) => { widget.id = createWidgetInstance(widget.type).id })
+      row.activeWidgetId = row.widgets[0]?.id
+    })
+  }
+  return clone
+}
+
 export function useCockpitDraft(source: CockpitConfig): UseCockpitDraftReturn {
-  // 保存本次打开时的原始快照，供 reset 使用
   const original = cloneConfig(source)
   const draft = ref<CockpitConfig>(cloneConfig(source))
-  const selection = ref<DraftSelection>({
-    categoryId: source.activeCategoryId ?? source.categories[0]?.id,
-    pageId: undefined,
+  const selection = ref<DraftSelection>({ layoutId: source.activeLayoutId ?? source.layouts[0]?.id })
+
+  const layouts = computed(() => draft.value.layouts)
+  const activeLayout = computed(() => {
+    const requested = selection.value.layoutId
+    return layouts.value.find(layout => layout.id === requested) ?? layouts.value[0]
   })
 
-  const activeCategory = computed<CockpitCategoryConfig | undefined>(() => {
-    const list = draft.value!.categories
-    return list.find(c => c.id === selection.value!.categoryId) ?? list[0]
-  })
-
-  const activePage = computed<CockpitPageConfig | undefined>(() => {
-    const category = activeCategory.value
-    if (!category)
-      return undefined
-    return category.pages.find(p => p.id === selection.value!.pageId) ?? category.pages[0]
-  })
-
-  function findCategory(id: string): CockpitCategoryConfig | undefined {
-    return draft.value!.categories.find(c => c.id === id)
+  function findRow(side: CockpitSide, rowId: string): CockpitGridRowConfig | undefined {
+    const layout = activeLayout.value
+    return layout ? regionOf(layout, side).rows.find(row => row.id === rowId) : undefined
   }
 
-  function region(page: CockpitPageConfig, side: Side) {
-    return side === 'left' ? page.left : page.right
+  function findCell(location: Extract<DraftWidgetLocation, { kind: 'cell' }>): CockpitGridCellConfig | undefined {
+    return findRow(location.side, location.rowId)?.cells.find(cell => cell.id === location.cellId)
   }
 
-  function findColumn(side: Side, columnId: string): CockpitColumnConfig | undefined {
-    const page = activePage.value
-    if (!page)
-      return undefined
-    return region(page, side).columns.find(col => col.id === columnId)
+  function widgetAt(location: DraftWidgetLocation): CockpitWidgetInstance | undefined {
+    if (location.kind === 'cell')
+      return findCell(location)?.widget
+    const widgets = findRow(location.side, location.rowId)?.widgets ?? []
+    return location.widgetId ? widgets.find(widget => widget.id === location.widgetId) : widgets[0]
   }
 
-  function findContainer(side: Side, columnId: string, containerId: string): CockpitContainerConfig | undefined {
-    return findColumn(side, columnId)?.containers.find(ct => ct.id === containerId)
+  function addLayout(): void {
+    const layout = createLayout(`布局 ${layouts.value.length + 1}`)
+    draft.value.layouts.push(layout)
+    draft.value.activeLayoutId = layout.id
+    selection.value = { layoutId: layout.id }
   }
 
-  function moveInArray<T>(arr: T[], index: number, delta: number): void {
-    const next = index + delta
-    if (index < 0 || next < 0 || next >= arr.length)
-      return
-    const [item] = arr.splice(index, 1)
-    arr.splice(next, 0, item)
-  }
-
-  /***********************分类*********************/
-  function addCategory(): void {
-    const category = createCategory(`分类 ${draft.value!.categories.length + 1}`)
-    draft.value!.categories.push(category)
-    selection.value = { categoryId: category.id, pageId: category.pages[0]?.id }
-  }
-
-  function removeCategory(id: string): void {
-    const list = draft.value!.categories
-    const index = list.findIndex(c => c.id === id)
+  function duplicateLayout(id: string): void {
+    const index = layouts.value.findIndex(layout => layout.id === id)
     if (index < 0)
       return
-    list.splice(index, 1)
-    // 删除当前分类后选择相邻可用项
-    if (selection.value!.categoryId === id) {
-      const next = list[index] ?? list[index - 1]
-      selection.value = { categoryId: next?.id, pageId: next?.pages[0]?.id }
-    }
-  }
-
-  function duplicateCategory(id: string): void {
-    const list = draft.value!.categories
-    const index = list.findIndex(c => c.id === id)
-    if (index < 0)
-      return
-    const clone = cloneConfig({ ...draft.value!, categories: [list[index]] }).categories[0]
-    reassignCategoryIds(clone)
-    clone.label = `${clone.label} 副本`
-    list.splice(index + 1, 0, clone)
-  }
-
-  function renameCategory(id: string, label: string): void {
-    const category = findCategory(id)
-    if (category)
-      category.label = label
-  }
-
-  function moveCategory(id: string, delta: number): void {
-    const list = draft.value!.categories
-    moveInArray(list, list.findIndex(c => c.id === id), delta)
-  }
-
-  function selectCategory(id: string): void {
-    const category = findCategory(id)
-    selection.value = { categoryId: id, pageId: category?.pages[0]?.id }
-  }
-
-  /***********************页面*********************/
-  function addPage(): void {
-    const category = activeCategory.value
-    if (!category)
-      return
-    const page = createPage(`页面 ${category.pages.length + 1}`)
-    category.pages.push(page)
-    selection.value = { categoryId: category.id, pageId: page.id }
-  }
-
-  function removePage(id: string): void {
-    const category = activeCategory.value
-    if (!category)
-      return
-    const index = category.pages.findIndex(p => p.id === id)
-    if (index < 0)
-      return
-    category.pages.splice(index, 1)
-    if (selection.value!.pageId === id) {
-      const next = category.pages[index] ?? category.pages[index - 1]
-      selection.value = { categoryId: category.id, pageId: next?.id }
-    }
-  }
-
-  function duplicatePage(id: string): void {
-    const category = activeCategory.value
-    if (!category)
-      return
-    const index = category.pages.findIndex(p => p.id === id)
-    if (index < 0)
-      return
-    const clone = clonePageWithNewIds(category.pages[index])
+    const clone = cloneLayoutWithIds(layouts.value[index])
     clone.title = `${clone.title} 副本`
-    category.pages.splice(index + 1, 0, clone)
+    layouts.value.splice(index + 1, 0, clone)
+    selection.value = { layoutId: clone.id }
   }
 
-  function renamePage(id: string, title: string): void {
-    const page = activeCategory.value?.pages.find(p => p.id === id)
-    if (page)
-      page.title = title
-  }
-
-  function movePage(id: string, delta: number): void {
-    const pages = activeCategory.value?.pages
-    if (!pages)
-      return
-    moveInArray(pages, pages.findIndex(p => p.id === id), delta)
-  }
-
-  function selectPage(id: string): void {
-    selection.value = { categoryId: selection.value!.categoryId, pageId: id }
-  }
-
-  function setPageCenter(type: string | undefined): void {
-    const page = activePage.value
-    if (!page)
-      return
-    if (!type)
-      page.center = undefined
-    else
-      page.center = { id: page.center?.id ?? createCockpitId('center'), type }
-  }
-
-  /***********************列*********************/
-  function addColumn(side: Side): void {
-    const page = activePage.value
-    if (page)
-      region(page, side).columns.push(createColumn())
-  }
-
-  function removeColumn(side: Side, columnId: string): void {
-    const page = activePage.value
-    if (!page)
-      return
-    const columns = region(page, side).columns
-    const index = columns.findIndex(col => col.id === columnId)
-    if (index >= 0)
-      columns.splice(index, 1)
-  }
-
-  function moveColumn(side: Side, columnId: string, delta: number): void {
-    const page = activePage.value
-    if (!page)
-      return
-    const columns = region(page, side).columns
-    moveInArray(columns, columns.findIndex(col => col.id === columnId), delta)
-  }
-
-  function setColumnWidth(side: Side, columnId: string, width: number): void {
-    const column = findColumn(side, columnId)
-    if (column && width > 0)
-      column.width = width
-  }
-
-  function setColumnHeight(side: Side, columnId: string, height: number | undefined): void {
-    const column = findColumn(side, columnId)
-    if (column)
-      column.height = height !== undefined && height > 0 ? height : undefined
-  }
-
-  /***********************容器*********************/
-  function addContainer(side: Side, columnId: string): void {
-    findColumn(side, columnId)?.containers.push(createContainer())
-  }
-
-  function removeContainer(side: Side, columnId: string, containerId: string): void {
-    const column = findColumn(side, columnId)
-    if (!column)
-      return
-    const index = column.containers.findIndex(ct => ct.id === containerId)
-    if (index >= 0)
-      column.containers.splice(index, 1)
-  }
-
-  function duplicateContainer(side: Side, columnId: string, containerId: string): void {
-    const column = findColumn(side, columnId)
-    if (!column)
-      return
-    const index = column.containers.findIndex(ct => ct.id === containerId)
+  function removeLayout(id: string): boolean {
+    if (layouts.value.length <= 1)
+      return false
+    const index = layouts.value.findIndex(layout => layout.id === id)
     if (index < 0)
-      return
-    const clone = cloneContainerWithNewIds(column.containers[index])
-    column.containers.splice(index + 1, 0, clone)
-  }
-
-  function moveContainer(side: Side, columnId: string, containerId: string, delta: number): void {
-    const column = findColumn(side, columnId)
-    if (!column)
-      return
-    moveInArray(column.containers, column.containers.findIndex(ct => ct.id === containerId), delta)
-  }
-
-  function setContainerHeight(side: Side, columnId: string, containerId: string, height: number): void {
-    const container = findContainer(side, columnId, containerId)
-    if (container && height > 0)
-      container.height = height
-  }
-
-  function setContainerMode(side: Side, columnId: string, containerId: string, mode: CockpitContainerMode): void {
-    const container = findContainer(side, columnId, containerId)
-    if (!container)
-      return
-    container.mode = mode
-    if (mode === 'combined' && !container.direction)
-      container.direction = 'horizontal'
-    if (mode === 'single') {
-      // single 只保留第一个模块可见
-      container.widgets.forEach((widget, index) => {
-        widget.visible = index === 0
-      })
+      return false
+    layouts.value.splice(index, 1)
+    if (selection.value.layoutId === id) {
+      const next = layouts.value[index] ?? layouts.value[index - 1]
+      selection.value = { layoutId: next?.id }
+      draft.value.activeLayoutId = next?.id
     }
-    if (mode === 'tabs') {
-      const firstVisible = container.widgets.find(w => w.visible !== false)
-      container.activeWidgetId = firstVisible?.id
-    }
+    return true
   }
 
-  function setContainerDirection(side: Side, columnId: string, containerId: string, direction: 'horizontal' | 'vertical'): void {
-    const container = findContainer(side, columnId, containerId)
-    if (container)
-      container.direction = direction
+  function renameLayout(id: string, title: string): void {
+    const layout = layouts.value.find(item => item.id === id)
+    if (layout && title.trim())
+      layout.title = title.trim()
   }
 
-  function setContainerActiveWidget(side: Side, columnId: string, containerId: string, widgetId: string): void {
-    const container = findContainer(side, columnId, containerId)
-    if (container)
-      container.activeWidgetId = widgetId
-  }
-
-  /***********************模块*********************/
-  function addWidget(side: Side, columnId: string, containerId: string, type: string, title?: string): void {
-    const container = findContainer(side, columnId, containerId)
-    if (!container)
+  function selectLayout(id: string): void {
+    if (!layouts.value.some(layout => layout.id === id))
       return
+    selection.value = { layoutId: id }
+    draft.value.activeLayoutId = id
+  }
+
+  function resizeRegion(side: CockpitSide, rowCount: number, columnCount: number, discardOccupied = false): boolean {
+    const layout = activeLayout.value
+    if (!layout)
+      return false
+    const region = regionOf(layout, side)
+    const rows = Math.max(1, Math.floor(rowCount))
+    const columns = Math.max(1, Math.floor(columnCount))
+    const removedRows = region.rows.slice(rows)
+    const removedCells = region.rows
+      .filter(row => row.mode === 'grid')
+      .flatMap(row => row.cells.slice(columns))
+    if (!discardOccupied && (removedRows.some(hasOccupiedContent) || removedCells.some(cell => cell.widget)))
+      return false
+
+    while (region.columns.length < columns)
+      region.columns.push(createGridColumn())
+    if (region.columns.length > columns)
+      region.columns.splice(columns)
+
+    region.rows.forEach((row) => {
+      if (row.mode !== 'grid')
+        return
+      while (row.cells.length < columns)
+        row.cells.push(createGridCell())
+      if (row.cells.length > columns)
+        row.cells.splice(columns)
+    })
+    if (region.rows.length > rows)
+      region.rows.splice(rows)
+    while (region.rows.length < rows)
+      region.rows.push(createGridRow(columns, 'grid', 100 / rows))
+    normalizeRowHeights(region.rows)
+    return true
+  }
+
+  function setColumnWidth(side: CockpitSide, columnId: string, width: number): void {
+    const layout = activeLayout.value
+    const column = layout ? regionOf(layout, side).columns.find(item => item.id === columnId) : undefined
+    if (column && Number.isFinite(width) && width > 0)
+      column.width = Math.round(width)
+  }
+
+  function setRowHeight(side: CockpitSide, rowId: string, height: number): void {
+    const layout = activeLayout.value
+    if (!layout || !Number.isFinite(height))
+      return
+    const rows = regionOf(layout, side).rows
+    const row = rows.find(item => item.id === rowId)
+    if (!row)
+      return
+    if (rows.length === 1) {
+      row.height = 100
+      return
+    }
+    const others = rows.filter(item => item.id !== rowId)
+    const next = Math.min(Math.max(1, height), 100 - others.length)
+    const remaining = 100 - next
+    const otherTotal = others.reduce((sum, item) => sum + item.height, 0)
+    row.height = next
+    others.forEach((item) => {
+      item.height = otherTotal > 0 ? (item.height / otherTotal) * remaining : remaining / others.length
+    })
+    normalizeRowHeights(rows)
+  }
+
+  function setRowTabs(side: CockpitSide, rowId: string, enabled: boolean): boolean {
+    const layout = activeLayout.value
+    if (!layout)
+      return false
+    const region = regionOf(layout, side)
+    const row = region.rows.find(item => item.id === rowId)
+    if (!row || (enabled && row.mode === 'tabs') || (!enabled && row.mode === 'grid'))
+      return Boolean(row)
+    if (enabled) {
+      row.widgets = row.cells.flatMap(cell => cell.widget ? [cell.widget] : [])
+      row.cells = []
+      row.mode = 'tabs'
+      row.activeWidgetId = row.widgets[0]?.id
+      return true
+    }
+    if (row.widgets.length > region.columns.length)
+      return false
+    row.cells = Array.from({ length: region.columns.length }, createGridCell)
+    row.widgets.forEach((widget, index) => { row.cells[index].widget = widget })
+    row.widgets = []
+    row.activeWidgetId = undefined
+    row.mode = 'grid'
+    return true
+  }
+
+  function hasWidgetAt(location: DraftWidgetLocation): boolean {
+    return Boolean(widgetAt(location))
+  }
+
+  function addWidget(location: DraftWidgetLocation, type: string, title?: string, replace = false): boolean {
     const widget = createWidgetInstance(type, title)
-    // single 模式已有可见模块时，新模块默认不可见
-    if (container.mode === 'single' && container.widgets.some(w => w.visible !== false))
-      widget.visible = false
-    container.widgets.push(widget)
-    if (container.mode === 'tabs' && !container.activeWidgetId)
-      container.activeWidgetId = widget.id
-  }
-
-  function removeWidget(side: Side, columnId: string, containerId: string, widgetId: string): void {
-    const container = findContainer(side, columnId, containerId)
-    if (!container)
-      return
-    const index = container.widgets.findIndex(w => w.id === widgetId)
-    if (index < 0)
-      return
-    container.widgets.splice(index, 1)
-    if (container.activeWidgetId === widgetId)
-      container.activeWidgetId = container.widgets.find(w => w.visible !== false)?.id
-  }
-
-  function duplicateWidget(side: Side, columnId: string, containerId: string, widgetId: string): void {
-    const container = findContainer(side, columnId, containerId)
-    if (!container)
-      return
-    const index = container.widgets.findIndex(w => w.id === widgetId)
-    if (index < 0)
-      return
-    const source = container.widgets[index]
-    const clone: CockpitWidgetInstance = {
-      ...source,
-      id: createCockpitId('widget'),
-      // single 模式副本默认不可见，避免出现两个可见模块
-      visible: container.mode === 'single' ? false : source.visible,
+    if (location.kind === 'tabs') {
+      const row = findRow(location.side, location.rowId)
+      if (!row || row.mode !== 'tabs')
+        return false
+      row.widgets.push(widget)
+      row.activeWidgetId ??= widget.id
+      return true
     }
-    container.widgets.splice(index + 1, 0, clone)
+    const cell = findCell(location)
+    if (!cell || (cell.widget && !replace))
+      return false
+    cell.widget = widget
+    return true
   }
 
-  function moveWidget(side: Side, columnId: string, containerId: string, widgetId: string, delta: number): void {
-    const container = findContainer(side, columnId, containerId)
-    if (!container)
+  function removeWidget(location: DraftWidgetLocation): void {
+    if (location.kind === 'cell') {
+      const cell = findCell(location)
+      if (cell)
+        cell.widget = undefined
       return
-    moveInArray(container.widgets, container.widgets.findIndex(w => w.id === widgetId), delta)
+    }
+    const row = findRow(location.side, location.rowId)
+    if (!row || row.mode !== 'tabs')
+      return
+    const index = location.widgetId ? row.widgets.findIndex(widget => widget.id === location.widgetId) : 0
+    if (index >= 0)
+      row.widgets.splice(index, 1)
+    row.activeWidgetId = row.widgets[0]?.id
   }
 
-  /***********************生命周期*********************/
+  function removeLocatedWidget(location: DraftWidgetLocation, widgetId?: string): CockpitWidgetInstance | undefined {
+    if (location.kind === 'cell') {
+      const cell = findCell(location)
+      const widget = cell?.widget
+      if (cell)
+        cell.widget = undefined
+      return widget
+    }
+    const row = findRow(location.side, location.rowId)
+    if (!row || row.mode !== 'tabs')
+      return undefined
+    const index = widgetId ? row.widgets.findIndex(widget => widget.id === widgetId) : 0
+    if (index < 0)
+      return undefined
+    const [widget] = row.widgets.splice(index, 1)
+    row.activeWidgetId = row.widgets.some(item => item.id === row.activeWidgetId) ? row.activeWidgetId : row.widgets[0]?.id
+    return widget
+  }
+
+  function moveWidget(source: DraftWidgetLocation, target: DraftWidgetLocation, replace = false): MoveWidgetResult {
+    const sourceWidget = widgetAt(source)
+    if (!sourceWidget)
+      return { moved: false, requiresReplace: false }
+    if (target.kind === 'cell') {
+      const targetCell = findCell(target)
+      if (!targetCell)
+        return { moved: false, requiresReplace: false }
+      if (targetCell.widget && targetCell.widget.id !== sourceWidget.id && !replace)
+        return { moved: false, requiresReplace: true }
+      const moved = removeLocatedWidget(source, sourceWidget.id)
+      if (!moved)
+        return { moved: false, requiresReplace: false }
+      targetCell.widget = moved
+      return { moved: true, requiresReplace: false }
+    }
+    const row = findRow(target.side, target.rowId)
+    if (!row || row.mode !== 'tabs')
+      return { moved: false, requiresReplace: false }
+    const moved = removeLocatedWidget(source, sourceWidget.id)
+    if (!moved)
+      return { moved: false, requiresReplace: false }
+    row.widgets.push(moved)
+    row.activeWidgetId ??= moved.id
+    return { moved: true, requiresReplace: false }
+  }
+
+  function reorderTabWidgets(side: CockpitSide, rowId: string, oldIndex: number, newIndex: number): void {
+    const row = findRow(side, rowId)
+    if (!row || row.mode !== 'tabs' || oldIndex === newIndex || oldIndex < 0 || newIndex < 0 || oldIndex >= row.widgets.length || newIndex >= row.widgets.length)
+      return
+    const [widget] = row.widgets.splice(oldIndex, 1)
+    row.widgets.splice(newIndex, 0, widget)
+  }
+
+  function setActiveTab(side: CockpitSide, rowId: string, widgetId: string): void {
+    const row = findRow(side, rowId)
+    if (row?.mode === 'tabs' && row.widgets.some(widget => widget.id === widgetId))
+      row.activeWidgetId = widgetId
+  }
+
   function reset(): void {
     draft.value = cloneConfig(original)
-    selection.value = {
-      categoryId: original.activeCategoryId ?? original.categories[0]?.id,
-      pageId: undefined,
-    }
+    selection.value = { layoutId: original.activeLayoutId ?? original.layouts[0]?.id }
   }
 
   function buildSaveConfig(): { config: CockpitConfig, validation: CockpitValidationResult } {
-    // 先校验原始草稿以捕获重复 id 等硬错误，再标准化输出
-    const validation = validateCockpitConfig(draft.value!)
-    const normalized = normalizeCockpitConfig(draft.value!)
-    return { config: normalized, validation }
+    const validation = validateCockpitConfig(draft.value)
+    return { config: normalizeCockpitConfig(draft.value), validation }
   }
 
   return {
     draft,
     selection,
-    activeCategory,
-    activePage,
-    addCategory,
-    removeCategory,
-    duplicateCategory,
-    renameCategory,
-    moveCategory,
-    selectCategory,
-    addPage,
-    removePage,
-    duplicatePage,
-    renamePage,
-    movePage,
-    selectPage,
-    setPageCenter,
-    addColumn,
-    removeColumn,
-    moveColumn,
+    layouts,
+    activeLayout,
+    addLayout,
+    duplicateLayout,
+    removeLayout,
+    renameLayout,
+    selectLayout,
+    resizeRegion,
     setColumnWidth,
-    setColumnHeight,
-    addContainer,
-    removeContainer,
-    duplicateContainer,
-    moveContainer,
-    setContainerHeight,
-    setContainerMode,
-    setContainerDirection,
-    setContainerActiveWidget,
+    setRowHeight,
+    setRowTabs,
+    hasWidgetAt,
     addWidget,
-    removeWidget,
-    duplicateWidget,
     moveWidget,
+    removeWidget,
+    reorderTabWidgets,
+    setActiveTab,
     reset,
     buildSaveConfig,
   }
-}
-
-/***********************ID 重分配（复制时保持唯一）*********************/
-
-function reassignCategoryIds(category: CockpitCategoryConfig): void {
-  category.id = createCockpitId('category')
-  category.pages = category.pages.map(clonePageWithNewIds)
-  category.activePageId = category.pages[0]?.id
-}
-
-function clonePageWithNewIds(page: CockpitPageConfig): CockpitPageConfig {
-  const clone = JSON.parse(JSON.stringify(page)) as CockpitPageConfig
-  clone.id = createCockpitId('page')
-  if (clone.center)
-    clone.center.id = createCockpitId('center')
-  clone.left.columns = clone.left.columns.map(cloneColumnWithNewIds)
-  clone.right.columns = clone.right.columns.map(cloneColumnWithNewIds)
-  return clone
-}
-
-function cloneColumnWithNewIds(column: CockpitColumnConfig): CockpitColumnConfig {
-  column.id = createCockpitId('column')
-  column.containers = column.containers.map(cloneContainerWithNewIds)
-  return column
-}
-
-function cloneContainerWithNewIds(container: CockpitContainerConfig): CockpitContainerConfig {
-  const clone = JSON.parse(JSON.stringify(container)) as CockpitContainerConfig
-  clone.id = createCockpitId('container')
-  const idMap = new Map<string, string>()
-  clone.widgets = clone.widgets.map((widget) => {
-    const newId = createCockpitId('widget')
-    idMap.set(widget.id, newId)
-    return { ...widget, id: newId }
-  })
-  if (clone.activeWidgetId)
-    clone.activeWidgetId = idMap.get(clone.activeWidgetId) ?? clone.widgets.find(w => w.visible !== false)?.id
-  return clone
 }

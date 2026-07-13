@@ -1,181 +1,203 @@
 <script setup lang="ts">
-import type { CockpitRegistry } from '../registry/types'
-import type { CockpitContainerMode } from '../types'
-import type { UseCockpitDraftReturn } from './useCockpitDraft'
+import type { CockpitWidgetDefinition } from '../registry/types'
+import type { CockpitGridRowConfig, CockpitSide } from '../types'
+import type { DraftWidgetLocation, UseCockpitDraftReturn } from './useCockpitDraft'
+import { LumaIcon } from '@luma/icons'
+import { ElButton, ElInputNumber, ElMessage, ElSwitch, ElTooltip } from 'element-plus'
 import { computed } from 'vue'
+import CockpitWidgetDropZone from './CockpitWidgetDropZone.vue'
 
-/***********************左右区域布局编辑器*********************/
-// 编辑单个区域的列 / 容器 / 模块结构。
-// 排序全部提供按钮替代，满足无拖拽的键盘可达要求。
+/***********************左右区域网格编辑器*********************/
 
 const props = defineProps<{
   draft: UseCockpitDraftReturn
-  registry: CockpitRegistry
-  side: 'left' | 'right'
+  selectedWidget?: CockpitWidgetDefinition
+  side: CockpitSide
 }>()
 
-const page = computed(() => props.draft.activePage.value)
-const columns = computed(() => {
-  const p = page.value
-  if (!p)
-    return []
-  return props.side === 'left' ? p.left.columns : p.right.columns
+const region = computed(() => {
+  const layout = props.draft.activeLayout.value
+  if (!layout)
+    return undefined
+  return props.side === 'left' ? layout.left : layout.right
 })
 
-const widgetOptions = computed(() => props.registry.listWidgets())
-
-const modes: { value: CockpitContainerMode, label: string }[] = [
-  { value: 'single', label: '单一' },
-  { value: 'combined', label: '组合' },
-  { value: 'tabs', label: '标签' },
-]
-
-function addWidgetFromSelect(columnId: string, containerId: string, event: Event): void {
-  const select = event.target as HTMLSelectElement
-  const type = select.value
-  if (!type)
-    return
-  const def = widgetOptions.value.find(w => w.type === type)
-  props.draft.addWidget(props.side, columnId, containerId, type, def?.label)
-  select.value = ''
+function locationForCell(row: CockpitGridRowConfig, cellId: string): DraftWidgetLocation {
+  return { kind: 'cell', side: props.side, rowId: row.id, cellId }
 }
+
+function locationForTabs(row: CockpitGridRowConfig, widgetId?: string): DraftWidgetLocation {
+  return { kind: 'tabs', side: props.side, rowId: row.id, widgetId }
+}
+
+function resize(rows: number, columns: number): void {
+  if (!props.draft.resizeRegion(props.side, rows, columns))
+    ElMessage.warning('缩减区域会移除已放置模块，请先拖动模块到保留槽位后再操作。')
+}
+
+function setTabs(row: CockpitGridRowConfig, enabled: boolean): void {
+  if (!props.draft.setRowTabs(props.side, row.id, enabled))
+    ElMessage.warning('Tab 行中的模块数超过当前列数，无法解除合并。')
+}
+
+function addSelected(location: DraftWidgetLocation): void {
+  if (props.selectedWidget)
+    props.draft.addWidget(location, props.selectedWidget.type, props.selectedWidget.label)
+}
+
+function handleDrop(target: DraftWidgetLocation, payload: { source?: DraftWidgetLocation, library?: { type: string, title?: string }, replace?: boolean, reorder?: { oldIndex: number, newIndex: number } }): void {
+  if (payload.reorder && target.kind === 'tabs') {
+    props.draft.reorderTabWidgets(props.side, target.rowId, payload.reorder.oldIndex, payload.reorder.newIndex)
+    return
+  }
+  if (payload.library) {
+    if (!props.draft.addWidget(target, payload.library.type, payload.library.title, payload.replace))
+      ElMessage.warning('目标槽位已有模块，请确认替换后再操作。')
+    return
+  }
+  if (!payload.source)
+    return
+  const result = props.draft.moveWidget(payload.source, target, payload.replace)
+  if (!result.moved && !result.requiresReplace)
+    ElMessage.error('模块移动失败。')
+}
+
 </script>
 
 <template>
-  <div class="luma-cockpit-designer__region" :data-side="side">
+  <section class="luma-cockpit-designer__region" :data-side="side">
     <header class="luma-cockpit-designer__region-head">
-      <span>{{ side === 'left' ? '左侧区域' : '右侧区域' }}</span>
-      <button type="button" @click="draft.addColumn(side)">
-        新增列
-      </button>
+      <div>
+        <strong>{{ side === 'left' ? '左侧区域' : '右侧区域' }}</strong>
+        <span>列宽像素，行高百分比</span>
+      </div>
+      <label class="luma-cockpit-designer__field">
+        <span>行</span>
+        <ElInputNumber
+          :model-value="region?.rows.length ?? 1"
+          :min="1"
+          controls-position="right"
+          :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域行数`"
+          @change="resize($event ?? 1, region?.columns.length ?? 1)"
+        />
+      </label>
+      <label class="luma-cockpit-designer__field">
+        <span>列</span>
+        <ElInputNumber
+          :model-value="region?.columns.length ?? 1"
+          :min="1"
+          controls-position="right"
+          :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域列数`"
+          @change="resize(region?.rows.length ?? 1, $event ?? 1)"
+        />
+      </label>
     </header>
 
-    <div v-if="!columns.length" class="luma-cockpit-designer__region-empty">
-      暂无列
+    <div v-if="region" class="luma-cockpit-designer__region-controls">
+      <label v-for="(column, index) in region.columns" :key="column.id" class="luma-cockpit-designer__field">
+        <span>列 {{ index + 1 }}</span>
+        <ElInputNumber
+          :model-value="column.width"
+          :min="1"
+          controls-position="right"
+          :aria-label="`列 ${index + 1} 宽度像素`"
+          @change="draft.setColumnWidth(side, column.id, $event ?? column.width)"
+        />
+        <em>px</em>
+      </label>
     </div>
 
-    <div
-      v-for="(column, ci) in columns"
-      :key="column.id"
-      class="luma-cockpit-designer__column"
-    >
-      <header class="luma-cockpit-designer__column-head">
-        <span>列 {{ ci + 1 }}</span>
-        <label>
-          宽
-          <input
-            type="number"
-            min="1"
-            :value="column.width"
-            :aria-label="`列 ${ci + 1} 宽度权重`"
-            @change="draft.setColumnWidth(side, column.id, Number(($event.target as HTMLInputElement).value))"
-          >
-        </label>
-        <label>
-          高
-          <input
-            type="number"
-            min="0"
-            :value="column.height ?? ''"
-            :aria-label="`列 ${ci + 1} 高度权重`"
-            @change="draft.setColumnHeight(side, column.id, Number(($event.target as HTMLInputElement).value) || undefined)"
-          >
-        </label>
-        <span class="luma-cockpit-designer__ops">
-          <button type="button" :disabled="ci === 0" :aria-label="`左移列 ${ci + 1}`" @click="draft.moveColumn(side, column.id, -1)">←</button>
-          <button type="button" :disabled="ci === columns.length - 1" :aria-label="`右移列 ${ci + 1}`" @click="draft.moveColumn(side, column.id, 1)">→</button>
-          <button type="button" :aria-label="`删除列 ${ci + 1}`" @click="draft.removeColumn(side, column.id)">删除</button>
-          <button type="button" @click="draft.addContainer(side, column.id)">加容器</button>
-        </span>
-      </header>
-
-      <div
-        v-for="(container, ti) in column.containers"
-        :key="container.id"
-        class="luma-cockpit-designer__container"
-      >
-        <header class="luma-cockpit-designer__container-head">
-          <label>
-            模式
-            <select
-              :value="container.mode"
-              :aria-label="`容器 ${ti + 1} 模式`"
-              @change="draft.setContainerMode(side, column.id, container.id, ($event.target as HTMLSelectElement).value as CockpitContainerMode)"
-            >
-              <option v-for="m in modes" :key="m.value" :value="m.value">{{ m.label }}</option>
-            </select>
+    <div v-if="region" class="luma-cockpit-designer__grid-rows">
+      <section v-for="(row, rowIndex) in region.rows" :key="row.id" class="luma-cockpit-designer__grid-row">
+        <header class="luma-cockpit-designer__grid-row-head">
+          <strong>第 {{ rowIndex + 1 }} 行</strong>
+          <label class="luma-cockpit-designer__field">
+            <span>高</span>
+            <ElInputNumber
+              :model-value="row.height"
+              :min="1"
+              :max="100"
+              :precision="3"
+              controls-position="right"
+              :aria-label="`第 ${rowIndex + 1} 行高度百分比`"
+              @change="draft.setRowHeight(side, row.id, $event ?? row.height)"
+            />
+            <em>%</em>
           </label>
-          <label v-if="container.mode === 'combined'">
-            方向
-            <select
-              :value="container.direction ?? 'horizontal'"
-              :aria-label="`容器 ${ti + 1} 排列方向`"
-              @change="draft.setContainerDirection(side, column.id, container.id, ($event.target as HTMLSelectElement).value as 'horizontal' | 'vertical')"
-            >
-              <option value="horizontal">横向</option>
-              <option value="vertical">纵向</option>
-            </select>
+          <label class="luma-cockpit-designer__tabs-switch">
+            <span>合并为 Tab 行</span>
+            <ElSwitch :model-value="row.mode === 'tabs'" @change="setTabs(row, Boolean($event))" />
           </label>
-          <label>
-            高
-            <input
-              type="number"
-              min="1"
-              :value="container.height"
-              :aria-label="`容器 ${ti + 1} 高度权重`"
-              @change="draft.setContainerHeight(side, column.id, container.id, Number(($event.target as HTMLInputElement).value))"
-            >
-          </label>
-          <span class="luma-cockpit-designer__ops">
-            <button type="button" :disabled="ti === 0" :aria-label="`上移容器 ${ti + 1}`" @click="draft.moveContainer(side, column.id, container.id, -1)">↑</button>
-            <button type="button" :disabled="ti === column.containers.length - 1" :aria-label="`下移容器 ${ti + 1}`" @click="draft.moveContainer(side, column.id, container.id, 1)">↓</button>
-            <button type="button" @click="draft.duplicateContainer(side, column.id, container.id)">复制</button>
-            <button type="button" :aria-label="`删除容器 ${ti + 1}`" @click="draft.removeContainer(side, column.id, container.id)">删除</button>
-          </span>
         </header>
 
-        <ul class="luma-cockpit-designer__widgets">
-          <li
-            v-for="(widget, wi) in container.widgets"
-            :key="widget.id"
-            class="luma-cockpit-designer__widget"
+        <div v-if="row.mode === 'grid'" class="luma-cockpit-designer__grid-cells" :style="{ gridTemplateColumns: `repeat(${region.columns.length}, minmax(0, 1fr))` }">
+          <CockpitWidgetDropZone
+            v-for="cell in row.cells"
+            :key="cell.id"
+            :target="locationForCell(row, cell.id)"
+            :widget="cell.widget"
+            @drop="handleDrop(locationForCell(row, cell.id), $event)"
           >
-            <input
-              v-if="container.mode === 'tabs'"
-              type="radio"
-              :name="`active-${container.id}`"
-              :checked="container.activeWidgetId === widget.id"
-              :aria-label="`设为默认标签：${widget.title ?? widget.type}`"
-              @change="draft.setContainerActiveWidget(side, column.id, container.id, widget.id)"
+            <article
+              v-if="cell.widget"
+              class="luma-cockpit-designer__placed-widget luma-cockpit-designer__drag-item"
+              :data-cockpit-drag-source="JSON.stringify(locationForCell(row, cell.id))"
             >
-            <input
-              v-else-if="container.mode === 'combined'"
-              type="checkbox"
-              disabled
-              checked
-              aria-hidden="true"
+              <span>{{ cell.widget.title ?? cell.widget.type }}</span>
+              <ElTooltip content="移除模块" placement="top">
+                <ElButton text type="danger" :aria-label="`移除模块 ${cell.widget.title ?? cell.widget.type}`" @click="draft.removeWidget(locationForCell(row, cell.id))">
+                  移除
+                </ElButton>
+              </ElTooltip>
+            </article>
+            <ElButton
+              v-else
+              class="luma-cockpit-designer__empty-cell"
+              plain
+              :disabled="!selectedWidget"
+              @click="addSelected(locationForCell(row, cell.id))"
             >
-            <span class="luma-cockpit-designer__widget-label">{{ widget.title ?? widget.type }}</span>
-            <span class="luma-cockpit-designer__ops">
-              <button type="button" :disabled="wi === 0" aria-label="上移模块" @click="draft.moveWidget(side, column.id, container.id, widget.id, -1)">↑</button>
-              <button type="button" :disabled="wi === container.widgets.length - 1" aria-label="下移模块" @click="draft.moveWidget(side, column.id, container.id, widget.id, 1)">↓</button>
-              <button type="button" @click="draft.duplicateWidget(side, column.id, container.id, widget.id)">复制</button>
-              <button type="button" aria-label="删除模块" @click="draft.removeWidget(side, column.id, container.id, widget.id)">删除</button>
-            </span>
-          </li>
-          <li v-if="!container.widgets.length" class="luma-cockpit-designer__widget-empty">
-            空容器
-          </li>
-        </ul>
+              <LumaIcon name="luma:plus" :size="14" />
+              {{ selectedWidget ? `放入 ${selectedWidget.label}` : '拖放模块到这里' }}
+            </ElButton>
+          </CockpitWidgetDropZone>
+        </div>
 
-        <label class="luma-cockpit-designer__add-widget">
-          添加模块
-          <select :aria-label="`向容器 ${ti + 1} 添加模块`" @change="addWidgetFromSelect(column.id, container.id, $event)">
-            <option value="">选择模块类型…</option>
-            <option v-for="w in widgetOptions" :key="w.type" :value="w.type">{{ w.label }}</option>
-          </select>
-        </label>
-      </div>
+        <CockpitWidgetDropZone
+          v-else
+          class="luma-cockpit-designer__tab-row"
+          allow-multiple
+          :target="locationForTabs(row)"
+          @drop="handleDrop(locationForTabs(row), $event)"
+        >
+          <article
+            v-for="widget in row.widgets"
+            :key="widget.id"
+            class="luma-cockpit-designer__placed-widget luma-cockpit-designer__drag-item"
+            :class="{ 'is-active': row.activeWidgetId === widget.id }"
+            :data-cockpit-drag-source="JSON.stringify(locationForTabs(row, widget.id))"
+          >
+            <ElButton text class="luma-cockpit-designer__tab-widget-title" :aria-pressed="row.activeWidgetId === widget.id" @click="draft.setActiveTab(side, row.id, widget.id)">
+              {{ widget.title ?? widget.type }}
+            </ElButton>
+            <ElTooltip content="移除模块" placement="top">
+              <ElButton text type="danger" :aria-label="`移除 Tab 模块 ${widget.title ?? widget.type}`" @mousedown.stop @click.stop="draft.removeWidget(locationForTabs(row, widget.id))">
+                移除
+              </ElButton>
+            </ElTooltip>
+          </article>
+          <ElButton
+            v-if="!row.widgets.length"
+            class="luma-cockpit-designer__empty-cell"
+            plain
+            :disabled="!selectedWidget"
+            @click="addSelected(locationForTabs(row))"
+          >
+            <LumaIcon name="luma:plus" :size="14" />
+            {{ selectedWidget ? `放入 ${selectedWidget.label}` : '拖放模块到这里' }}
+          </ElButton>
+        </CockpitWidgetDropZone>
+      </section>
     </div>
-  </div>
+  </section>
 </template>

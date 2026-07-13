@@ -4,15 +4,16 @@ import { normalizeCockpitConfig } from './normalize'
 
 export {
   COCKPIT_SCHEMA_VERSION,
-  createCategory,
   createCockpitId,
-  createColumn,
-  createContainer,
   createDefaultCockpitConfig,
-  createEmptyRegion,
-  createPage,
+  createGridCell,
+  createGridColumn,
+  createGridRow,
+  createLayout,
+  createRegion,
   createWidgetInstance,
-  DEFAULT_WEIGHT,
+  DEFAULT_COLUMN_WIDTH,
+  DEFAULT_ROW_HEIGHT,
 } from './defaults'
 export {
   migrateCockpitConfig,

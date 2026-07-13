@@ -2,73 +2,58 @@ import type { CockpitMessageBus } from '../messaging/types'
 
 /***********************公开配置模型*********************/
 
-export interface CockpitCenterInstance {
-  id: string
-  type: string
-}
+export type CockpitSide = 'left' | 'right'
 
 export interface CockpitWidgetInstance {
   id: string
   type: string
   title?: string
-  visible?: boolean
 }
 
-export type CockpitContainerMode = 'single' | 'combined' | 'tabs'
-export type CockpitCombinedDirection = 'horizontal' | 'vertical'
-
-export interface CockpitContainerConfig {
+export interface CockpitGridColumnConfig {
   id: string
-  /** 正数高度权重，运行时按同级归一化，不存储像素 */
-  height: number
-  mode: CockpitContainerMode
-  /** 仅 combined 模式使用 */
-  direction?: CockpitCombinedDirection
-  /** 仅 tabs 模式使用；不存在时回退到第一个可见模块 */
-  activeWidgetId?: string
-  widgets: CockpitWidgetInstance[]
-}
-
-export interface CockpitColumnConfig {
-  id: string
-  /** 正数宽度权重，运行时按同级归一化 */
+  /** 1920 基准画布中的列宽像素。 */
   width: number
-  /** 可选高度权重 */
-  height?: number
-  containers: CockpitContainerConfig[]
+}
+
+export interface CockpitGridCellConfig {
+  id: string
+  /** 未设置时渲染为空槽。 */
+  widget?: CockpitWidgetInstance
+}
+
+export type CockpitGridRowMode = 'grid' | 'tabs'
+
+export interface CockpitGridRowConfig {
+  id: string
+  /** 区域内的行高百分比，所有行标准化后恒为 100。 */
+  height: number
+  mode: CockpitGridRowMode
+  /** grid 行按列顺序保存一个单元格。tabs 行为空数组。 */
+  cells: CockpitGridCellConfig[]
+  /** tabs 行保存同一整行可切换的模块。grid 行为空数组。 */
+  widgets: CockpitWidgetInstance[]
+  activeWidgetId?: string
 }
 
 export interface CockpitRegionConfig {
-  /** 1920 基准画布像素；空区域为 0，非空区域默认 420 */
-  width?: number
-  columns: CockpitColumnConfig[]
+  columns: CockpitGridColumnConfig[]
+  rows: CockpitGridRowConfig[]
 }
 
-export interface CockpitPageConfig {
+export interface CockpitLayoutConfig {
   id: string
   title: string
-  order?: number
-  center?: CockpitCenterInstance
   left: CockpitRegionConfig
   right: CockpitRegionConfig
-}
-
-export interface CockpitCategoryConfig {
-  id: string
-  label: string
-  icon?: string
-  order?: number
-  visible?: boolean
-  activePageId?: string
-  pages: CockpitPageConfig[]
 }
 
 export interface CockpitConfig {
   schemaVersion: number
   id: string
   title: string
-  activeCategoryId?: string
-  categories: CockpitCategoryConfig[]
+  activeLayoutId?: string
+  layouts: CockpitLayoutConfig[]
 }
 
 /***********************组件运行时协议*********************/
@@ -76,18 +61,17 @@ export interface CockpitConfig {
 export type CockpitThemeMode = 'light' | 'dark'
 export type CockpitRenderMode = 'runtime' | 'design'
 
-export type CockpitNodeKind = 'region' | 'column' | 'container' | 'widget' | 'center'
+export type CockpitNodeKind = 'layout' | 'region' | 'column' | 'row' | 'cell' | 'widget'
 
 export interface CockpitNodeSelectPayload {
   kind: CockpitNodeKind
   id: string
-  side?: 'left' | 'right'
+  side?: CockpitSide
 }
 
 export interface CockpitBaseContext {
   cockpitId: string
-  categoryId: string
-  pageId: string
+  layoutId: string
   instanceId: string
   mode: CockpitRenderMode
   messages: CockpitMessageBus
@@ -100,6 +84,8 @@ export type CockpitWidgetContext = CockpitBaseContext
 
 export interface CockpitDesignerSavePayload {
   config: CockpitConfig
+  /** 本次保存时正在编辑的布局，便于消费方做局部持久化或即时反馈。 */
+  layout: CockpitLayoutConfig
 }
 
 /***********************配置校验问题*********************/
@@ -109,6 +95,6 @@ export type CockpitConfigIssueLevel = 'error' | 'warning'
 export interface CockpitConfigIssue {
   level: CockpitConfigIssueLevel
   message: string
-  /** 关联到具体结构节点的 id 路径，用于在 Designer 中定位 */
+  /** 关联到具体结构节点的 id 路径，用于在 Designer 中定位。 */
   path?: string[]
 }

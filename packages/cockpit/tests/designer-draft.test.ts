@@ -1,86 +1,75 @@
 import type { CockpitConfig } from '../src/types'
 import { describe, expect, it } from 'vitest'
-import { COCKPIT_SCHEMA_VERSION } from '../src/config/defaults'
 import { useCockpitDraft } from '../src/designer/useCockpitDraft'
 
 function sourceConfig(): CockpitConfig {
   return {
-    schemaVersion: 1,
-    id: 'ck',
+    schemaVersion: 3,
+    id: 'cockpit',
     title: '原始',
-    activeCategoryId: 'cat-1',
-    categories: [{
-      id: 'cat-1',
-      label: '分类一',
-      visible: true,
-      activePageId: 'p1',
-      pages: [{
-        id: 'p1',
-        title: '页面一',
-        left: { columns: [{ id: 'col', width: 1, containers: [{ id: 'ct', height: 1, mode: 'single', widgets: [] }] }] },
-        right: { columns: [] },
-      }],
+    activeLayoutId: 'layout',
+    layouts: [{
+      id: 'layout', title: '布局',
+      left: {
+        columns: [{ id: 'left-a', width: 320 }, { id: 'left-b', width: 320 }],
+        rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell-a' }, { id: 'left-cell-b' }] }],
+      },
+      right: {
+        columns: [{ id: 'right-a', width: 320 }],
+        rows: [{ id: 'right-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-cell' }] }],
+      },
     }],
   }
 }
 
-describe('useCockpitDraft', () => {
-  it('编辑草稿不污染原始配置', () => {
+describe('v3 useCockpitDraft', () => {
+  it('编辑布局不污染原始配置，并支持新增布局', () => {
     const source = sourceConfig()
     const draft = useCockpitDraft(source)
-    draft.renameCategory('cat-1', '改名了')
-    expect(draft.draft.value.categories[0].label).toBe('改名了')
-    // 原始对象不受影响
-    expect(source.categories[0].label).toBe('分类一')
+    draft.renameLayout('layout', '改名')
+    draft.addLayout()
+    expect(source.layouts).toHaveLength(1)
+    expect(source.layouts[0].title).toBe('布局')
+    expect(draft.layouts.value).toHaveLength(2)
   })
 
-  it('reset 恢复本次打开时的原始配置', () => {
+  it('行高自动重分配到 100%', () => {
     const draft = useCockpitDraft(sourceConfig())
-    draft.addCategory()
-    expect(draft.draft.value.categories).toHaveLength(2)
-    draft.reset()
-    expect(draft.draft.value.categories).toHaveLength(1)
+    draft.resizeRegion('left', 2, 2)
+    const rows = draft.activeLayout.value!.left.rows
+    draft.setRowHeight('left', rows[0].id, 70)
+    expect(rows.reduce((sum, row) => sum + row.height, 0)).toBeCloseTo(100, 3)
+    expect(rows[0].height).toBeCloseTo(70, 3)
   })
 
-  it('新增页面与列容器模块', () => {
+  it('缩减含模块的列被阻止，显式丢弃才会执行', () => {
     const draft = useCockpitDraft(sourceConfig())
-    draft.addColumn('left')
-    draft.addPage()
-    expect(draft.activeCategory.value?.pages).toHaveLength(2)
+    draft.addWidget({ kind: 'cell', side: 'left', rowId: 'left-row', cellId: 'left-cell-b' }, 'stub')
+    expect(draft.resizeRegion('left', 1, 1)).toBe(false)
+    expect(draft.resizeRegion('left', 1, 1, true)).toBe(true)
+    expect(draft.activeLayout.value!.left.columns).toHaveLength(1)
   })
 
-  it('同 type 可添加多个实例且 id 唯一', () => {
+  it('普通行可转换为 Tab 行并安全还原', () => {
     const draft = useCockpitDraft(sourceConfig())
-    draft.addWidget('left', 'col', 'ct', 'stub', '模块')
-    draft.setContainerMode('left', 'col', 'ct', 'combined')
-    draft.addWidget('left', 'col', 'ct', 'stub', '模块')
-    const widgets = draft.draft.value.categories[0].pages[0].left.columns[0].containers[0].widgets
-    expect(widgets).toHaveLength(2)
-    expect(widgets[0].id).not.toBe(widgets[1].id)
+    draft.addWidget({ kind: 'cell', side: 'left', rowId: 'left-row', cellId: 'left-cell-a' }, 'a')
+    draft.addWidget({ kind: 'cell', side: 'left', rowId: 'left-row', cellId: 'left-cell-b' }, 'b')
+    expect(draft.setRowTabs('left', 'left-row', true)).toBe(true)
+    const row = draft.activeLayout.value!.left.rows[0]
+    expect(row.mode).toBe('tabs')
+    expect(row.widgets).toHaveLength(2)
+    expect(draft.setRowTabs('left', 'left-row', false)).toBe(true)
+    expect(row.cells.filter(cell => cell.widget)).toHaveLength(2)
   })
 
-  it('buildSaveConfig 对重复 id 校验失败', () => {
+  it('移动到占用槽需要替换确认', () => {
     const draft = useCockpitDraft(sourceConfig())
-    // 制造重复分类 id
-    draft.draft.value.categories.push({ ...draft.draft.value.categories[0] })
-    const { validation } = draft.buildSaveConfig()
-    expect(validation.valid).toBe(false)
-  })
-
-  it('buildSaveConfig 输出标准化的合法配置', () => {
-    const draft = useCockpitDraft(sourceConfig())
-    const { config, validation } = draft.buildSaveConfig()
-    expect(validation.valid).toBe(true)
-    expect(config.schemaVersion).toBe(COCKPIT_SCHEMA_VERSION)
-    expect(() => JSON.stringify(config)).not.toThrow()
-  })
-
-  it('删除分类后选择相邻可用项', () => {
-    const draft = useCockpitDraft(sourceConfig())
-    draft.addCategory()
-    const secondId = draft.draft.value.categories[1].id
-    draft.selectCategory(secondId)
-    draft.removeCategory(secondId)
-    expect(draft.activeCategory.value?.id).toBe('cat-1')
+    const source = { kind: 'cell' as const, side: 'left' as const, rowId: 'left-row', cellId: 'left-cell-a' }
+    const target = { kind: 'cell' as const, side: 'right' as const, rowId: 'right-row', cellId: 'right-cell' }
+    draft.addWidget(source, 'source')
+    draft.addWidget(target, 'target')
+    expect(draft.moveWidget(source, target)).toEqual({ moved: false, requiresReplace: true })
+    expect(draft.moveWidget(source, target, true).moved).toBe(true)
+    expect(draft.activeLayout.value!.right.rows[0].cells[0].widget?.type).toBe('source')
   })
 })
