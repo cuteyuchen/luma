@@ -234,7 +234,6 @@ async function toggleFullscreen(): Promise<void> {
 }
 
 .admin-cockpit-view__designer {
-  --luma-cockpit-designer-scale: calc(100vw / 2048px);
   position: fixed;
   inset: 0;
   z-index: 2050;

@@ -2,7 +2,7 @@
 import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types'
 import type { CockpitConfig, CockpitConfigIssue, CockpitDesignerSavePayload, CockpitThemeMode } from '../types'
 import { LumaIcon } from '@luma/icons'
-import { ElAlert, ElButton, ElInput, ElMessageBox, ElOption, ElSelect, ElTooltip } from 'element-plus'
+import { ElAlert, ElButton, ElCheckbox, ElInput, ElMessageBox, ElOption, ElRadio, ElRadioGroup, ElSelect, ElTooltip } from 'element-plus'
 import { computed, ref } from 'vue'
 import CockpitComponentLibrary from './CockpitComponentLibrary.vue'
 import CockpitLayoutEditor from './CockpitLayoutEditor.vue'
@@ -29,6 +29,26 @@ const issues = ref<CockpitConfigIssue[]>([])
 const selectedWidget = ref<CockpitWidgetDefinition>()
 const activeLayout = computed(() => draft.activeLayout.value)
 const errors = computed(() => issues.value.filter(issue => issue.level === 'error'))
+const columnCount = computed({
+  get: () => activeLayout.value?.left.columns.length ?? 1,
+  set: (value: number) => {
+    const layout = activeLayout.value
+    if (!layout)
+      return
+    draft.resizeRegion('left', layout.left.rows.length, value)
+    draft.resizeRegion('right', layout.right.rows.length, value)
+  },
+})
+const mergeRows = computed({
+  get: () => Boolean(activeLayout.value?.left.rows.length && activeLayout.value.left.rows.every(row => row.mode === 'tabs')),
+  set: (value: boolean) => {
+    const layout = activeLayout.value
+    if (!layout)
+      return
+    layout.left.rows.forEach(row => draft.setRowTabs('left', row.id, value))
+    layout.right.rows.forEach(row => draft.setRowTabs('right', row.id, value))
+  },
+})
 
 function save(): void {
   const result = draft.buildSaveConfig()
@@ -119,6 +139,14 @@ defineExpose({ toggleTheme })
           <ElButton v-if="activeLayout" @click="draft.duplicateLayout(activeLayout.id)">复制</ElButton>
           <ElButton v-if="activeLayout" type="danger" plain @click="removeLayout">删除</ElButton>
         </div>
+        <div class="luma-cockpit-designer__global-controls" aria-label="布局列设置">
+          <ElRadioGroup v-model="columnCount">
+            <ElRadio :value="1">一列</ElRadio>
+            <ElRadio :value="2">二列</ElRadio>
+            <ElRadio :value="3">三列</ElRadio>
+          </ElRadioGroup>
+          <ElCheckbox v-model="mergeRows">合并列</ElCheckbox>
+        </div>
       </div>
     </section>
 
@@ -135,7 +163,11 @@ defineExpose({ toggleTheme })
       <section class="luma-cockpit-designer__assembly" aria-label="驾驶舱布局装配区">
         <div class="luma-cockpit-designer__assembly-stage">
           <CockpitLayoutEditor :cockpit-id="config.id" :draft="draft" :registry="registry" :selected-widget="selectedWidget" side="left" />
-          <div class="luma-cockpit-designer__center-guide" aria-hidden="true" />
+          <div class="luma-cockpit-designer__center-preview">
+            <slot name="center-preview" :layout="activeLayout">
+              <div class="luma-cockpit-designer__center-guide" aria-hidden="true" />
+            </slot>
+          </div>
           <CockpitLayoutEditor :cockpit-id="config.id" :draft="draft" :registry="registry" :selected-widget="selectedWidget" side="right" />
         </div>
       </section>
@@ -149,7 +181,7 @@ defineExpose({ toggleTheme })
     </main>
 
     <footer class="luma-cockpit-designer__footer">
-      <p>提示：将需要的业务模块拖入空槽，已占用槽位会在确认后替换。</p>
+      <p>PS：将需要的业务板块拖入上方白框内，已占用槽位会在确认后替换。</p>
       <div class="luma-cockpit-designer__footer-actions">
         <ElButton @click="reset">
           <LumaIcon name="luma:reset" :size="16" />

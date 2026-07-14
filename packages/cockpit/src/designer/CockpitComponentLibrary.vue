@@ -39,12 +39,6 @@ onBeforeUnmount(() => {
 
 <template>
   <aside class="luma-cockpit-designer__library" aria-label="模块库">
-    <header class="luma-cockpit-designer__library-title">
-      <div>
-        <strong>模块</strong>
-        <span>{{ widgets.length }} 个可用模块</span>
-      </div>
-    </header>
     <div ref="libraryRef" class="luma-cockpit-designer__library-grid">
       <article
         v-for="widget in widgets"

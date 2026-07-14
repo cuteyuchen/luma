@@ -6,6 +6,8 @@ import { LumaCockpit } from '@luma/cockpit/runtime'
 import { LumaIcon } from '@luma/icons'
 import { ElButton, ElTooltip } from 'element-plus'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import designerTitleImage from './assets/fuyang-cockpit/dialog-header-bg.png'
+import fuyangMap from './assets/fuyang-cockpit/map.png'
 import EchartsGeoCenter from './centers/echarts-geo-center/Center.vue'
 import { standaloneCockpitRegistry } from './registry'
 import { loadStandaloneConfig, saveStandaloneConfig } from './services/config'
@@ -161,6 +163,7 @@ onBeforeUnmount(() => {
       class="standalone-app__designer"
       role="dialog"
       aria-label="驾驶舱配置"
+      :style="{ '--luma-cockpit-designer-title-image': `url(${designerTitleImage})` }"
     >
       <LumaCockpitDesigner
         :config="config"
@@ -170,7 +173,11 @@ onBeforeUnmount(() => {
         :theme-mode="standaloneResolvedThemeMode"
         @save="handleSave"
         @cancel="closeDesigner"
-      />
+      >
+        <template #center-preview>
+          <img class="standalone-app__designer-map" :src="fuyangMap" alt="富阳驾驶舱地图预览">
+        </template>
+      </LumaCockpitDesigner>
     </div>
   </div>
 </template>
@@ -185,6 +192,13 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 2050;
+}
+
+.standalone-app__designer-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .standalone-app__actions {
