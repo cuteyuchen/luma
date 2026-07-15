@@ -118,9 +118,9 @@ describe('驾驶舱中央地图', () => {
     expect(beijing?.center[0]).toBeCloseTo(116.389, 3)
     expect(beijing?.center[1]).toBeCloseTo(39.9488, 3)
 
-    const activeLineMetric = metricSummaries.find(item => item.label === '活跃链路')
-    expect(activeLineMetric?.value).toBe(String(demoScene.lines.filter(line => line.status === 'active').length))
-    expect(activeLineMetric?.trend).toBe(`共 ${demoScene.lines.length} 条`)
+    const lineMetric = metricSummaries.find(item => item.label === '运行链路')
+    expect(lineMetric?.value).toBe(demoScene.lines.length)
+    expect(lineMetric?.trend).toBe(`高负载 ${demoScene.lines.filter(line => line.status === 'active').length} 条`)
   })
 
   it('响应侧栏消息并在三种引擎间保留和反向发布状态', async () => {

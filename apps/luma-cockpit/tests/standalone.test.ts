@@ -1,4 +1,5 @@
 import type { Component, PropType } from 'vue'
+import { LumaBorderBox } from '@luma/datav'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { defineComponent, h } from 'vue'
@@ -62,7 +63,9 @@ describe('独立驾驶舱应用', () => {
     })
 
     expect(wrapper.get('.standalone-cockpit-card').exists()).toBe(true)
-    expect(wrapper.get('.standalone-cockpit-card .luma-cockpit-card__title').text()).toBe('应用模块')
+    expect(wrapper.getComponent(LumaBorderBox).props('variant')).toBe(8)
+    expect(wrapper.get('.standalone-cockpit-card .luma-cockpit-card__title').text()).toContain('应用模块')
+    expect(wrapper.get('.standalone-cockpit-card .standalone-cockpit-card__title-content small').text()).toBe('DATA SYS')
     expect(wrapper.get('.standalone-cockpit-card .app-card-content').text()).toBe('模块内容')
     wrapper.unmount()
   })
@@ -70,7 +73,9 @@ describe('独立驾驶舱应用', () => {
   it('加载默认标准配置', () => {
     const config = loadStandaloneConfig()
     expect(config.schemaVersion).toBe(3)
+    expect(config.title).toBe('全国智慧运行态势')
     expect(config.layouts).toHaveLength(2)
+    expect(config.layouts.map(layout => layout.title)).toEqual(['综合态势', '运行分析'])
     expect(config.layouts[0].left.columns[0].width).toBe(420)
     expect(config.layouts[0].right.columns[0].width).toBe(420)
     expect(config.layouts[0].left.rows.reduce((sum, row) => sum + row.height, 0)).toBe(100)

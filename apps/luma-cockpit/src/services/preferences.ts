@@ -86,8 +86,8 @@ export const standalonePreferenceDefaults: LumaPreferencesDefaults = {
     wheelable: true,
   },
   theme: {
-    colorPrimary: '#1677ff',
-    mode: 'system',
+    colorPrimary: '#00d7ff',
+    mode: 'dark',
     radiusScale: 0.75,
   },
   transition: {

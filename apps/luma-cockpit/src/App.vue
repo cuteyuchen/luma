@@ -116,7 +116,10 @@ onBeforeUnmount(() => {
     >
       <template #header-title="{ title }">
         <div class="standalone-app__heading">
-          <h1>{{ title }}</h1>
+          <div class="standalone-app__brand">
+            <h1>{{ title }}</h1>
+            <span>NATIONAL SMART OPERATIONS</span>
+          </div>
           <nav class="standalone-app__layouts" aria-label="布局选择">
             <ElButton
               v-for="layout in config.layouts"
@@ -132,6 +135,7 @@ onBeforeUnmount(() => {
       </template>
       <template #header-actions>
         <div class="standalone-app__actions">
+          <span class="standalone-app__live"><i />实时在线</span>
           <ElTooltip :content="`切换主题，当前：${themeModeLabel}`">
             <ElButton circle data-action="cockpit-theme" :aria-label="`切换主题，当前：${themeModeLabel}`" @click="cycleThemeMode">
               <LumaIcon :name="themeModeIcon" :size="18" />
@@ -144,7 +148,7 @@ onBeforeUnmount(() => {
           </ElTooltip>
           <ElTooltip :content="viewportMode === 'scale' ? '当前：等比缩放' : '当前：VW/VH 适配'">
             <ElButton circle aria-label="切换大屏适配模式" @click="viewportMode = viewportMode === 'scale' ? 'vwvh' : 'scale'">
-              <LumaIcon name="luma:screen" :size="18" />
+              <LumaIcon name="luma:monitor" :size="18" />
             </ElButton>
           </ElTooltip>
           <ElTooltip content="打开配置器">
@@ -174,7 +178,11 @@ onBeforeUnmount(() => {
         :theme-mode="standaloneResolvedThemeMode"
         @save="handleSave"
         @cancel="closeDesigner"
-      />
+      >
+        <template #center-preview="{ context }">
+          <SceneCenter :key="context.instanceId" :context="context" />
+        </template>
+      </LumaCockpitDesigner>
     </div>
   </div>
 </template>
@@ -199,13 +207,30 @@ onBeforeUnmount(() => {
 
 .standalone-app__heading {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   align-items: center;
 }
 
-.standalone-app__heading h1 {
+.standalone-app__brand {
+  display: grid;
+  gap: 2px;
+}
+
+.standalone-app__brand h1 {
   margin: 0;
   font: inherit;
+}
+
+.standalone-app__brand span {
+  color: var(--luma-cockpit-text-secondary);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+}
+
+:global(:root[data-luma-theme='dark']) .standalone-app__brand span {
+  color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 36%);
 }
 
 .standalone-app__layouts {
@@ -215,17 +240,41 @@ onBeforeUnmount(() => {
 
 .standalone-app__layouts :deep(.el-button) {
   min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--luma-cockpit-border);
-  border-radius: 6px;
-  background: var(--luma-cockpit-floating-bg);
-  color: inherit;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
+  color: var(--luma-cockpit-text-secondary);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   cursor: pointer;
 }
 
 .standalone-app__layouts :deep(.el-button.is-active) {
   border-color: var(--luma-cockpit-accent);
-  box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--luma-cockpit-accent), transparent 80%), transparent);
+  color: var(--luma-cockpit-title-text);
+  box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent), 0 0 12px color-mix(in srgb, var(--luma-cockpit-accent), transparent 78%);
+}
+
+.standalone-app__live {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--luma-cockpit-success), transparent 60%);
+  background: color-mix(in srgb, var(--luma-cockpit-success), transparent 92%);
+  color: var(--luma-cockpit-success);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.standalone-app__live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--luma-cockpit-success);
+  box-shadow: 0 0 8px var(--luma-cockpit-success);
 }
 
 .standalone-app__actions :deep(.el-button) {
@@ -234,11 +283,17 @@ onBeforeUnmount(() => {
   justify-content: center;
   min-height: 44px;
   min-width: 44px;
-  border: 1px solid var(--luma-cockpit-border);
-  border-radius: var(--luma-cockpit-radius);
-  background: var(--luma-cockpit-floating-bg);
+  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
   color: inherit;
   cursor: pointer;
+}
+
+.standalone-app__actions :deep(.el-button:hover) {
+  border-color: var(--luma-cockpit-accent);
+  background: color-mix(in srgb, var(--luma-cockpit-accent), transparent 88%);
+  color: var(--luma-cockpit-title-text);
 }
 
 .standalone-app__actions button:focus-visible {

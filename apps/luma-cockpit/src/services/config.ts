@@ -8,12 +8,12 @@ const STORAGE_KEY = 'luma-cockpit:config'
 const defaultConfig: CockpitConfig = {
   schemaVersion: 3,
   id: 'standalone-cockpit',
-  title: 'Luma Cockpit',
+  title: '全国智慧运行态势',
   activeLayoutId: 'layout-overview',
   layouts: [
     {
       id: 'layout-overview',
-      title: '实时概览',
+      title: '综合态势',
       left: {
         columns: [{ id: 'left-overview-column', width: 420 }],
         rows: [
@@ -22,7 +22,7 @@ const defaultConfig: CockpitConfig = {
             height: 42,
             mode: 'grid',
             widgets: [],
-            cells: [{ id: 'left-overview-summary-cell', widget: { id: 'w-metric-summary-a', type: 'metric-summary', title: '指标总览' } }],
+            cells: [{ id: 'left-overview-summary-cell', widget: { id: 'w-metric-summary-a', type: 'metric-summary', title: '核心运行指标' } }],
           },
           {
             id: 'left-overview-tabs',
@@ -31,8 +31,8 @@ const defaultConfig: CockpitConfig = {
             cells: [],
             activeWidgetId: 'w-trend-main',
             widgets: [
-              { id: 'w-trend-main', type: 'trend-panel', title: '趋势' },
-              { id: 'w-status-tabs', type: 'status-distribution', title: '状态' },
+              { id: 'w-trend-main', type: 'trend-panel', title: '近七日运行趋势' },
+              { id: 'w-status-tabs', type: 'status-distribution', title: '区域状态分布' },
             ],
           },
         ],
@@ -45,7 +45,7 @@ const defaultConfig: CockpitConfig = {
             height: 50,
             mode: 'grid',
             widgets: [],
-            cells: [{ id: 'right-overview-events-cell', widget: { id: 'w-event-list', type: 'event-list', title: '事件列表' } }],
+            cells: [{ id: 'right-overview-events-cell', widget: { id: 'w-event-list', type: 'event-list', title: '实时告警动态' } }],
           },
           {
             id: 'right-overview-tabs',
@@ -54,8 +54,8 @@ const defaultConfig: CockpitConfig = {
             cells: [],
             activeWidgetId: 'w-region-ranking',
             widgets: [
-              { id: 'w-region-ranking', type: 'region-ranking', title: '区域排名' },
-              { id: 'w-metric-summary-b', type: 'metric-summary', title: '实例对照' },
+              { id: 'w-region-ranking', type: 'region-ranking', title: '区域运行指数' },
+              { id: 'w-metric-summary-b', type: 'metric-summary', title: '重点节点概览' },
             ],
           },
         ],
@@ -63,7 +63,7 @@ const defaultConfig: CockpitConfig = {
     },
     {
       id: 'layout-analysis',
-      title: '分析视图',
+      title: '运行分析',
       left: {
         columns: [{ id: 'left-analysis-column', width: 420 }],
         rows: [
@@ -74,8 +74,8 @@ const defaultConfig: CockpitConfig = {
             cells: [],
             activeWidgetId: 'w-trend-analysis',
             widgets: [
-              { id: 'w-trend-analysis', type: 'trend-panel', title: '趋势对比' },
-              { id: 'w-status-analysis', type: 'status-distribution', title: '状态分布' },
+              { id: 'w-trend-analysis', type: 'trend-panel', title: '运行趋势对比' },
+              { id: 'w-status-analysis', type: 'status-distribution', title: '区域状态分布' },
             ],
           },
         ],
@@ -90,8 +90,8 @@ const defaultConfig: CockpitConfig = {
             cells: [],
             activeWidgetId: 'w-region-ranking-analysis',
             widgets: [
-              { id: 'w-region-ranking-analysis', type: 'region-ranking', title: '区域排名' },
-              { id: 'w-event-list-analysis', type: 'event-list', title: '事件列表' },
+              { id: 'w-region-ranking-analysis', type: 'region-ranking', title: '区域运行指数' },
+              { id: 'w-event-list-analysis', type: 'event-list', title: '实时告警动态' },
             ],
           },
         ],

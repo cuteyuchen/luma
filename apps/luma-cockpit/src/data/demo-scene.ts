@@ -224,10 +224,10 @@ export function getSceneEntity(id?: string): SceneEntity | undefined {
 }
 
 export const metricSummaries = [
-  { label: '覆盖区域', value: String(regions.length), trend: '省级节点' },
-  { label: '在线节点', value: String(points.filter(point => point.status !== 'watch').length), trend: `共 ${points.length} 个` },
-  { label: '活跃链路', value: String(lines.filter(line => line.status === 'active').length), trend: `共 ${lines.length} 条` },
-  { label: '平均指数', value: String(Math.round(regions.reduce((sum, region) => sum + region.value, 0) / regions.length)), trend: '全国态势' },
+  { label: '接入区域', value: regions.length, unit: '个', trend: '全国省级节点', tone: 'cyan', visual: 'digital' as const },
+  { label: '在线率', value: Math.round((points.filter(point => point.status !== 'watch').length / points.length) * 100), unit: '', trend: `在线 ${points.filter(point => point.status !== 'watch').length} / ${points.length}`, tone: 'green', visual: 'percent' as const },
+  { label: '运行链路', value: lines.length, unit: '条', trend: `高负载 ${lines.filter(line => line.status === 'active').length} 条`, tone: 'blue', visual: 'digital' as const },
+  { label: '综合指数', value: Math.round(regions.reduce((sum, region) => sum + region.value, 0) / regions.length), unit: '', trend: '较昨日 +2.8%', tone: 'amber', visual: 'percent' as const },
 ]
 
 const trendPatterns: Record<SceneStatus, number[]> = {
@@ -237,22 +237,28 @@ const trendPatterns: Record<SceneStatus, number[]> = {
 }
 
 export const trendSeries = [
-  { label: '稳定', values: trendPatterns.stable, status: 'stable' as const },
-  { label: '活跃', values: trendPatterns.active, status: 'active' as const },
-  { label: '观察', values: trendPatterns.watch, status: 'watch' as const },
+  { label: '运行平稳', values: trendPatterns.stable, status: 'stable' as const },
+  { label: '高负载', values: trendPatterns.active, status: 'active' as const },
+  { label: '待关注', values: trendPatterns.watch, status: 'watch' as const },
 ]
 
 export const demoEvents = [
-  { id: 'e-1', title: '北京枢纽负载提升', targetId: 'p-beijing', level: 'info', time: '09:20' },
-  { id: 'e-2', title: '新疆区域进入观察', targetId: regionByName.get('新疆')?.id ?? '', level: 'warning', time: '10:05' },
-  { id: 'e-3', title: '武汉中心完成同步', targetId: 'p-wuhan', level: 'success', time: '10:42' },
-  { id: 'e-4', title: '海南链路等待复核', targetId: 'p-haikou', level: 'warning', time: '11:10' },
+  { id: 'e-1', title: '北京枢纽负载升至 92%', targetId: 'p-beijing', level: 'warning', time: '09:20' },
+  { id: 'e-2', title: '上海枢纽新增跨域连接', targetId: 'p-shanghai', level: 'info', time: '09:36' },
+  { id: 'e-3', title: '广州枢纽完成链路切换', targetId: 'p-guangzhou', level: 'success', time: '09:52' },
+  { id: 'e-4', title: '新疆区域链路波动超阈值', targetId: regionByName.get('新疆')?.id ?? '', level: 'danger', time: '10:05' },
+  { id: 'e-5', title: '武汉中心完成全量同步', targetId: 'p-wuhan', level: 'success', time: '10:42' },
+  { id: 'e-6', title: '成都节点恢复正常服务', targetId: 'p-chengdu', level: 'success', time: '10:58' },
+  { id: 'e-7', title: '海南节点连续性等待复核', targetId: 'p-haikou', level: 'warning', time: '11:10' },
+  { id: 'e-8', title: '杭州节点进入高负载状态', targetId: 'p-hangzhou', level: 'warning', time: '11:26' },
+  { id: 'e-9', title: '西安节点完成策略下发', targetId: 'p-xian', level: 'info', time: '11:43' },
+  { id: 'e-10', title: '深圳节点时延回落至 18ms', targetId: 'p-shenzhen', level: 'success', time: '12:02' },
 ]
 
 const statusLabels: Record<SceneStatus, string> = {
-  stable: '稳定',
-  active: '活跃',
-  watch: '观察',
+  stable: '运行平稳',
+  active: '高负载',
+  watch: '待关注',
 }
 
 export const statusDistribution = (['stable', 'active', 'watch'] as const).map((status) => {

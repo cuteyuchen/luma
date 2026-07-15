@@ -45,7 +45,7 @@ export default defineConfig(({ command }) => ({
             return 'vendor-element-plus'
           if (id.includes('node_modules/echarts') || id.includes('node_modules/vue-echarts'))
             return 'vendor-echarts'
-          if (id.includes('/packages/core/') || id.includes('/packages/icons/') || id.includes('/packages/charts/'))
+          if (id.includes('/packages/core/') || id.includes('/packages/icons/') || id.includes('/packages/charts/') || id.includes('/packages/datav/'))
             return 'vendor-luma'
         },
       },
@@ -59,7 +59,7 @@ export default defineConfig(({ command }) => ({
       },
       ...(command === 'serve'
         ? createLumaAliases({
-            packages: ['charts', 'cockpit', 'core', 'icons'],
+            packages: ['charts', 'cockpit', 'core', 'datav', 'icons'],
             workspaceRoot,
           })
         : []),

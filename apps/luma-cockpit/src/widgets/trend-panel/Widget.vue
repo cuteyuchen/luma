@@ -1,32 +1,116 @@
 <script setup lang="ts">
+import type { EChartsOption, SetOptionOpts } from 'echarts'
+import type { ComponentPublicInstance } from 'vue'
 import type { SceneFilterPayload, SceneSelectionPayload } from '../../messages/topics'
+import { useChartResize } from '@luma/charts'
 import { useCockpitContext } from '@luma/cockpit'
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { LineChart } from 'echarts/charts'
+import { AriaComponent, GridComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import VChart from 'vue-echarts'
 import { getSceneEntity, trendSeries } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
+import { standaloneResolvedThemeMode } from '../../services/preferences'
 
-/***********************趋势模块*********************/
+/***********************运行趋势 ECharts 模块*********************/
+
+use([
+  CanvasRenderer,
+  AriaComponent,
+  GridComponent,
+  TooltipComponent,
+  LineChart,
+])
 
 const context = useCockpitContext()
 const loading = false
 const error = ''
 const filterStatus = ref<SceneFilterPayload['status']>()
 const selectedId = ref('')
-const series = computed(() => trendSeries)
-const selectedStatus = computed(() => getSceneEntity(selectedId.value)?.status)
+const chartRef = useTemplateRef<ComponentPublicInstance & { resize: () => void }>('chartRef')
+const updateOptions: SetOptionOpts = { notMerge: false }
+const timeLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '今日']
 
-function toPoints(values: number[]): string {
-  const max = Math.max(...values)
-  const min = Math.min(...values)
-  const span = Math.max(max - min, 1)
-  return values
-    .map((value, index) => {
-      const x = (index / Math.max(values.length - 1, 1)) * 100
-      const y = 70 - ((value - min) / span) * 52
-      return `${x},${y}`
-    })
-    .join(' ')
-}
+const series = computed(() => trendSeries)
+const selectedEntity = computed(() => getSceneEntity(selectedId.value))
+const selectedStatus = computed(() => selectedEntity.value?.status)
+const selectedName = computed(() => selectedEntity.value?.name ?? '全国')
+const latestIndex = computed(() => selectedEntity.value?.value ?? Math.round(
+  series.value.reduce((sum, item) => sum + (item.values.at(-1) ?? 0), 0) / Math.max(series.value.length, 1),
+))
+
+const chartOption = computed<EChartsOption>(() => {
+  const dark = standaloneResolvedThemeMode.value === 'dark'
+  const text = dark ? '#d7eeff' : '#173c4d'
+  const muted = dark ? 'rgba(169, 210, 223, 0.72)' : 'rgba(45, 88, 105, 0.72)'
+  const grid = dark ? 'rgba(116, 239, 255, 0.12)' : 'rgba(8, 127, 175, 0.14)'
+  const colors = {
+    stable: dark ? '#20d8ff' : '#087faf',
+    active: dark ? '#23df7b' : '#00966d',
+    watch: dark ? '#ffc857' : '#b77900',
+  }
+
+  return {
+    animationDuration: 420,
+    animationDurationUpdate: 220,
+    aria: {
+      enabled: true,
+      label: { description: '近七日全国运行态势趋势，包含运行平稳、高负载和待关注三类指数。' },
+    },
+    color: series.value.map(item => colors[item.status]),
+    grid: { top: 14, right: 10, bottom: 24, left: 34, containLabel: false },
+    tooltip: {
+      trigger: 'axis',
+      confine: true,
+      backgroundColor: dark ? 'rgba(3, 24, 37, 0.96)' : 'rgba(247, 252, 255, 0.98)',
+      borderColor: dark ? 'rgba(116, 239, 255, 0.48)' : 'rgba(8, 127, 175, 0.34)',
+      textStyle: { color: text },
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: timeLabels,
+      axisLine: { lineStyle: { color: grid } },
+      axisTick: { show: false },
+      axisLabel: { color: muted, fontSize: 10 },
+    },
+    yAxis: {
+      type: 'value',
+      min: 20,
+      max: 100,
+      splitNumber: 4,
+      axisLabel: { color: muted, fontSize: 10 },
+      splitLine: { lineStyle: { color: grid, type: 'dashed' } },
+    },
+    series: series.value.map((item) => {
+      const emphasized = filterStatus.value === item.status || (!filterStatus.value && selectedStatus.value === item.status)
+      const faded = filterStatus.value && filterStatus.value !== item.status
+      return {
+        name: item.label,
+        type: 'line',
+        smooth: 0.36,
+        showSymbol: false,
+        symbol: 'circle',
+        symbolSize: 7,
+        data: item.values,
+        lineStyle: {
+          color: colors[item.status],
+          opacity: faded ? 0.18 : 1,
+          shadowBlur: emphasized ? 9 : 4,
+          shadowColor: colors[item.status],
+          width: emphasized ? 3 : 2,
+        },
+        areaStyle: {
+          color: colors[item.status],
+          opacity: faded ? 0.01 : emphasized ? 0.18 : 0.07,
+        },
+        emphasis: { focus: 'series', lineStyle: { width: 3 } },
+      }
+    }),
+  }
+})
 
 function filterByStatus(status: string): void {
   const nextStatus = filterStatus.value === status ? undefined : status
@@ -35,6 +119,13 @@ function filterByStatus(status: string): void {
     sourceId: context.instanceId,
     payload: { status: nextStatus },
   })
+}
+
+function handleChartClick(params: unknown): void {
+  const event = params as { seriesName?: string }
+  const item = series.value.find(seriesItem => seriesItem.label === event.seriesName)
+  if (item)
+    filterByStatus(item.status)
 }
 
 const unsubscribeFilter = context.messages.subscribe<SceneFilterPayload>(
@@ -49,6 +140,8 @@ const unsubscribeSelection = context.messages.subscribe<SceneSelectionPayload>(
     selectedId.value = message.payload?.ids[0] ?? ''
   },
 )
+
+useChartResize(chartRef)
 
 onBeforeUnmount(() => {
   unsubscribeFilter()
@@ -68,15 +161,22 @@ onBeforeUnmount(() => {
       暂无数据
     </div>
     <div v-else class="trend-panel__content">
-      <svg class="trend-panel__chart" viewBox="0 0 100 76" role="img" aria-label="趋势对比">
-        <polyline
-          v-for="item in series"
-          :key="item.status"
-          :points="toPoints(item.values)"
-          :data-status="item.status"
-        />
-      </svg>
-      <div class="trend-panel__legend" role="list">
+      <div class="trend-panel__summary">
+        <span>{{ selectedName }}运行指数</span>
+        <strong>{{ latestIndex }}</strong>
+        <em>近 7 日 +2.8%</em>
+      </div>
+      <VChart
+        ref="chartRef"
+        class="trend-panel__chart"
+        :option="chartOption"
+        :update-options="updateOptions"
+        autoresize
+        role="img"
+        aria-label="近七日运行态势趋势图"
+        @click="handleChartClick"
+      />
+      <div class="trend-panel__legend" role="group" aria-label="运行状态筛选">
         <button
           v-for="item in series"
           :key="item.status"
@@ -99,63 +199,81 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.trend-panel {
+.trend-panel,
+.trend-panel__content {
   height: 100%;
+  min-height: 0;
 }
 
 .trend-panel__content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.trend-panel__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 2px 10px;
+  padding: 2px 4px 0;
+}
+
+.trend-panel__summary span {
+  color: var(--luma-cockpit-text-secondary);
+  font-size: 12px;
+}
+
+.trend-panel__summary strong {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  color: var(--luma-cockpit-title-text);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--luma-cockpit-accent), transparent 52%);
+}
+
+.trend-panel__summary em {
+  color: var(--luma-cockpit-success);
+  font-size: 11px;
+  font-style: normal;
 }
 
 .trend-panel__chart {
-  flex: 1 1 auto;
   width: 100%;
-  min-height: 110px;
-}
-
-.trend-panel__chart polyline {
-  fill: none;
-  stroke: var(--luma-cockpit-accent);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
-}
-
-.trend-panel__chart polyline[data-status='active'] {
-  stroke: var(--luma-cockpit-success);
-}
-
-.trend-panel__chart polyline[data-status='watch'] {
-  stroke: var(--luma-cockpit-warning);
+  height: 100%;
+  min-height: 116px;
 }
 
 .trend-panel__legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
 
 .trend-panel__legend button {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--luma-cockpit-border);
-  border-radius: var(--luma-cockpit-radius);
-  background: var(--luma-cockpit-floating-bg);
-  color: inherit;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 24%);
+  color: var(--luma-cockpit-text-secondary);
   cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
 }
 
 .trend-panel__legend span {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   background: var(--luma-cockpit-accent);
+  box-shadow: 0 0 8px currentcolor;
 }
 
 .trend-panel__legend button[data-status='active'] span {
@@ -166,15 +284,17 @@ onBeforeUnmount(() => {
   background: var(--luma-cockpit-warning);
 }
 
-.trend-panel__legend button.is-contextual {
-  border-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 28%);
+.trend-panel__legend button.is-contextual,
+.trend-panel__legend button.is-filtered {
+  border-color: var(--luma-cockpit-accent);
+  background: color-mix(in srgb, var(--luma-cockpit-selected), transparent 12%);
+  color: var(--luma-cockpit-title-text);
   box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
 }
 
-.trend-panel__legend button.is-filtered {
-  border-color: var(--luma-cockpit-accent);
-  background: var(--luma-cockpit-selected);
-  box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
+.trend-panel__legend button:focus-visible {
+  outline: 2px solid var(--luma-cockpit-focus-ring);
+  outline-offset: 2px;
 }
 
 .trend-panel__state {
