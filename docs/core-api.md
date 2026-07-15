@@ -462,6 +462,8 @@ createLumaAdmin({
 - `LumaTabs`
 - `LumaContent`
 - `LumaRouterView`
+- `LumaBreadcrumb`
+- `LumaGlobalSearch`
 
 layout 只负责后台壳层结构和交互，不请求业务数据。`LumaLayout` 接收完整 `menus` 与 `preferences`，并根据 `preferences.app.layout` 自动决定菜单显示位置：
 
@@ -488,6 +490,7 @@ layout 只负责后台壳层结构和交互，不请求业务数据。`LumaLayou
 - `normalizeMenuNodes`
 - `createRouteRecords`
 - `createRouteRegistry`
+- `createMenuRouteRuntime`
 - `createSidebarMenus`
 - `findFirstAccessibleMenu`
 
@@ -519,6 +522,25 @@ registry.register(createRouteRecords(normalizeMenuNodes(menuNodes)))
 registry.reset()
 ```
 
+静态菜单和后端菜单并存时，使用 `createMenuRouteRuntime` 统一完成校验、排序、组件解析和路由注册：
+
+```ts
+const menuRuntime = createMenuRouteRuntime({
+  router,
+  staticMenus,
+  loadRemoteMenus: () => request.get('/menus'),
+  componentResolver: component => views[component],
+  hasPermission: permissions => permissionStore.hasPermission(permissions, 'every'),
+  hasRole: roles => permissionStore.hasRole(roles, 'every'),
+})
+
+await menuRuntime.loadRemote()
+menuRuntime.resetRemote() // 登出时仅移除远程路由
+menuRuntime.dispose() // 应用释放时移除该运行时注册的全部路由
+```
+
+静态菜单可传组件、懒加载器或字符串；远程菜单只接受由 resolver 白名单解析的组件字符串。重复的完整路径或路由名称、空路径、叶子缺组件都会在注册前报错，不会留下部分路由。`reload()` 使用单飞请求并在失败时保留上一份可用远程菜单。运行时传入的 Router 必须提供 `getRoutes()`，用于在注册前检查与应用既有路由的 path 冲突；旧 `createRouteRegistry` 仍兼容不含该方法的最小 Router 适配器。
+
 ## Permission
 
 从 `@luma/core/permission` 导入：
@@ -528,8 +550,11 @@ registry.reset()
 - `hasRole`
 - `createPermissionDirective`
 - `setupPermissionGuard`
+- `LumaAccessControl`
+- `providePermissionStore`
+- `usePermissionStore`
 
-权限能力只处理通用权限判断，不绑定具体业务接口。
+权限能力只处理通用权限判断，不绑定具体业务接口。`LumaAccessControl` 同时声明权限和角色时使用 AND，权限与角色各自通过 `mode` / `role-mode` 选择 `some` 或 `every`；拒绝时可渲染 `fallback` slot。`setupPermissionGuard` 对嵌套路由的每级匹配记录分别执行上述模式，并在父子级之间使用 AND，父级约束不能被子级覆盖。向 `createLumaAdmin` 传入 `permissionStore` 后会自动注入，组合式 API 和组件可直接消费。
 
 ## Auth
 
@@ -605,13 +630,19 @@ const preferences = createPreferencesStore({
   },
 })
 
-preferences.patch({ theme: { mode: 'dark' } })
+preferences.patch({
+  app: { dynamicTitle: true },
+  breadcrumb: { enable: true, showHome: true },
+  header: { globalSearch: true },
+  shortcutKeys: { globalSearch: true },
+  theme: { fontSize: 16, mode: 'dark' },
+})
 preferences.reset()
 preferences.exportCurrent()
 preferences.dispose()
 ```
 
-Store 会清理损坏缓存、补齐新增默认字段，并只在主题模式为 `system` 时监听系统主题变化。
+Store 会清理损坏缓存、补齐新增默认字段，并只在主题模式为 `system` 时监听系统主题变化。全局字号限制为 12-20px，会同步 Luma 和 Element Plus 的字号变量。
 
 ## 可选生态包
 

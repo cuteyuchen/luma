@@ -201,7 +201,7 @@ apps/luma-cockpit
 包可以提供：
 
 - 画布缩放和区域布局样式。
-- 列、容器、Tab、空状态和设计器的基础样式。
+- 列、容器、Card、Tab、空状态和设计器的基础样式。
 - 可覆盖的 CSS 变量和语义 token。
 - 键盘焦点、选中、拖放目标和禁用状态样式。
 
@@ -494,6 +494,7 @@ export interface CockpitMessageBus {
   v-model:active-page-id="activePageId"
   :config="config"
   :registry="registry"
+  :card-component="AppCockpitCard"
   :base-width="1920"
   :base-height="1080"
   :cache-pages="true"
@@ -512,10 +513,39 @@ export interface CockpitMessageBus {
 - missing-center：中央组件 type 未注册。
 - empty-container：空模块容器。
 - missing-widget：模块 type 未注册。
-- widget-title：自定义模块标题。
+- widget-title：自定义模块标题；普通标题与合并 Tab 标题共用该插槽。
 - error：运行时整体错误状态。
 
 包不得在默认 header-actions 中加入 Admin 返回、业务筛选或地图操作按钮。
+
+### 10.1 公共 Card 契约
+
+`LumaCockpitCard`、`CockpitCardTab`、`CockpitCardProps` 和 `CockpitCardComponent` 必须同时从 `@luma/cockpit` 与 `@luma/cockpit/runtime` 导出。`cardComponent` 未传时，`LumaCockpit` 使用 `LumaCockpitCard`。
+
+~~~ts
+interface CockpitCardTab {
+  id: string
+  title: string
+  widget: CockpitWidgetInstance
+}
+
+interface CockpitCardProps {
+  title?: string
+  widget?: CockpitWidgetInstance
+  tabs?: CockpitCardTab[]
+  activeTabId?: string
+}
+~~~
+
+替换组件必须：
+
+- 接收上述 props，并通过 `update:activeTabId` 发出新的 Tab id。
+- 渲染默认插槽，其作用域为 `{ activeTabId: string | undefined }`。
+- 支持 `title` 插槽 `{ title, widget }` 与 `tab` 插槽 `{ tab, active }`。
+- 多个 Tab 时在同一个 Card 标题栏切换；单个 Tab 时退化为普通标题。
+- 保持 TabList、Tab、TabPanel 的 ARIA 关联及方向键、Home、End 键盘行为。
+
+标题由运行时按 `widget.title → registry.label → widget.type` 回退。默认 Card 的稳定样式入口为 `.luma-cockpit-card`、`__header`、`__title`、`__tablist`、`__tab`、`__body`；容器只负责布局，Card 负责外框、标题、Tab 与统一 body 间距。
 
 ## 11. Designer 行为规格
 
@@ -710,6 +740,7 @@ Widget.vue 负责：
 
 - 使用应用现有 request client 请求业务数据。
 - 处理自己的 loading、empty 和 error 状态。
+- 让 Card 提供标题、外框和统一外层间距，不在 Widget 根节点重复这些样式。
 - 根据容器尺寸调整展示密度。
 - 通过 useCockpitContext 参与联动。
 - 在多实例场景下使用 instanceId 隔离本地状态。
@@ -925,7 +956,7 @@ Cesium、OpenLayers、ECharts 等具体分包名称和资源策略由 App 配置
 
 - Header 图标按钮必须包含 title 和 aria-label。
 - 分类导航使用可识别的导航语义。
-- tabs 模式符合 Tab、TabList、TabPanel 键盘交互。
+- tabs 模式符合 Tab、TabList、TabPanel 键盘交互，支持方向键、Home 和 End，Tab 交互目标不小于 44 × 44 CSS 像素。
 - 设计器拖拽操作必须提供上移、下移、左移、右移等按钮替代。
 - 所有操作按钮拥有可见焦点状态。
 - 删除、重置等危险操作需要确认。

@@ -1,6 +1,6 @@
 import type { DictionaryOption } from '@luma/core/dictionary'
 import type { LumaMenuRecord } from '@luma/core/router'
-import { adminRouteRecords } from '../../luma-admin/src/router/routes'
+import { adminRouteRecords, staticAdminRouteRecords } from '../../luma-admin/src/router/routes'
 import {
   resetMockAccountPassword,
   resetMockAccounts,
@@ -131,11 +131,16 @@ export interface SystemPermissionTreeNode {
 export type SystemMenuType = 'button' | 'directory' | 'embedded' | 'external' | 'menu'
 
 export interface SystemMenuRecord {
+  activeMenu?: string
+  badge?: string | number
+  badgeTone?: string
+  badgeType?: 'dot' | 'text'
   children?: SystemMenuRecord[]
   component: string
   externalLink?: string
   externalTarget?: '_blank' | '_self'
   hidden: boolean
+  hideInBreadcrumb?: boolean
   icon: string
   id: string
   order: number
@@ -150,10 +155,15 @@ export interface SystemMenuRecord {
 }
 
 export interface SaveSystemMenuInput {
+  activeMenu?: unknown
+  badge?: unknown
+  badgeTone?: unknown
+  badgeType?: unknown
   component?: unknown
   externalLink?: unknown
   externalTarget?: unknown
   hidden?: unknown
+  hideInBreadcrumb?: unknown
   icon?: unknown
   order?: unknown
   name?: unknown
@@ -525,11 +535,16 @@ function createSystemMenusFromRoutes(
     const children = [...routeChildren, ...buttonChildren]
 
     return {
+      activeMenu: typeof route.meta?.activeMenu === 'string' ? route.meta.activeMenu : undefined,
+      badge: typeof route.meta?.badge === 'string' || typeof route.meta?.badge === 'number' ? route.meta.badge : undefined,
+      badgeTone: typeof route.meta?.badgeTone === 'string' ? route.meta.badgeTone : undefined,
+      badgeType: route.meta?.badgeType === 'dot' ? 'dot' : route.meta?.badgeType === 'text' ? 'text' : undefined,
       ...(children.length > 0 ? { children } : {}),
       component: route.component ?? '',
       externalLink,
       externalTarget: externalLink ? (route.meta?.externalTarget === '_self' ? '_self' : '_blank') : undefined,
       hidden: route.meta?.hideInMenu === true,
+      hideInBreadcrumb: route.meta?.hideInBreadcrumb === true,
       icon: typeof route.meta?.icon === 'string' ? route.meta.icon : '',
       id,
       name: route.name,
@@ -551,6 +566,7 @@ const initialSystemMenus = createSystemMenusFromRoutes(
   adminRouteRecords,
   collectButtonSeeds(initialPermissionMenuSeed),
 )
+const staticPermissionMenus = createSystemMenusFromRoutes(staticAdminRouteRecords, new Map())
 
 const initialSystemOrganizations: SystemOrganizationRecord[] = [
   {
@@ -938,10 +954,15 @@ function resolveMenuInput(input: SaveSystemMenuInput): Omit<SystemMenuRecord, 'c
   }
 
   return {
+    activeMenu: type === 'button' ? '' : normalizeText(input.activeMenu),
+    badge: type === 'button' ? '' : typeof input.badge === 'number' ? input.badge : normalizeText(input.badge),
+    badgeTone: type === 'button' ? '' : normalizeText(input.badgeTone),
+    badgeType: input.badgeType === 'dot' ? 'dot' : input.badgeType === 'text' ? 'text' : undefined,
     component: type === 'embedded' ? 'shared/external-frame' : component,
     externalLink,
     externalTarget: type === 'embedded' ? '_self' : type === 'external' ? '_blank' : undefined,
     hidden: type === 'button' ? true : input.hidden === true,
+    hideInBreadcrumb: type === 'button' ? true : input.hideInBreadcrumb === true,
     icon: type === 'button' ? '' : normalizeText(input.icon),
     name: type === 'button' ? '' : normalizeText(input.name),
     order: Number.isFinite(Number(input.order)) ? Number(input.order) : 0,
@@ -1300,7 +1321,7 @@ export async function mockDeleteSystemRole(id: string): Promise<void> {
 }
 
 export async function mockFetchSystemPermissionTree(): Promise<SystemPermissionTreeNode[]> {
-  return createPermissionTreeFromMenus(systemMenus)
+  return createPermissionTreeFromMenus([...staticPermissionMenus, ...systemMenus])
 }
 
 export async function mockFetchSystemRolePermissions(roleCode: string): Promise<string[]> {

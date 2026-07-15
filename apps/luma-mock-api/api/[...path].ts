@@ -123,7 +123,12 @@ function toMenuTransport(record: SystemMenuRecord): Record<string, unknown> {
     menuName: record.title,
     menuType: record.type,
     meta: {
+      activeMenu: record.activeMenu,
+      badge: record.badge,
+      badgeTone: record.badgeTone,
+      badgeType: record.badgeType,
       externalTarget: record.externalTarget,
+      hideInBreadcrumb: record.hideInBreadcrumb,
       hideInMenu: record.hidden,
     },
     nodes: record.children?.filter(child => child.type !== 'button').map(toMenuTransport),

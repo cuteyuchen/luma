@@ -53,40 +53,43 @@ const initialConfig: AdminSystemConfig = {
  * 名称保持中性，不含任何行业术语。
  */
 const initialCockpitConfig: CockpitConfigRecord = {
-  schemaVersion: 1,
+  schemaVersion: 3,
   id: 'admin-demo-cockpit',
   title: '应用驾驶舱',
-  activeCategoryId: 'category-a',
-  categories: [
+  activeLayoutId: 'layout-a',
+  layouts: [
     {
-      id: 'category-a',
-      label: '分类 A',
-      visible: true,
-      activePageId: 'page-a',
-      pages: [
-        {
-          id: 'page-a',
-          title: '页面 A',
-          center: { id: 'center-a', type: 'stub-center' },
-          left: {
-            columns: [
+      id: 'layout-a',
+      title: '布局 A',
+      left: {
+        columns: [{ id: 'left-column-a', width: 320 }],
+        rows: [
+          {
+            id: 'left-row-a',
+            height: 100,
+            mode: 'grid',
+            cells: [
               {
-                id: 'col-a',
-                width: 1,
-                containers: [
-                  {
-                    id: 'ct-a',
-                    height: 1,
-                    mode: 'single',
-                    widgets: [{ id: 'w-a', type: 'stub-widget', title: '示例模块', visible: true }],
-                  },
-                ],
+                id: 'left-cell-a',
+                widget: { id: 'w-a', type: 'stub-widget', title: '示例模块' },
               },
             ],
+            widgets: [],
           },
-          right: { columns: [] },
-        },
-      ],
+        ],
+      },
+      right: {
+        columns: [{ id: 'right-column-a', width: 320 }],
+        rows: [
+          {
+            id: 'right-row-a',
+            height: 100,
+            mode: 'grid',
+            cells: [{ id: 'right-cell-a' }],
+            widgets: [],
+          },
+        ],
+      },
     },
   ],
 }
