@@ -123,7 +123,7 @@ function handleExport(payload: { selectedRows: SchemaTableRow[] }): void {
 </script>
 
 <template>
-  <main class="luma-admin-example">
+  <main class="luma-admin-example is-fill">
     <LumaPage title="CRUD Table" :description="message" fill>
       <LumaCrudTable
         v-model:query-model="queryModel"

@@ -41,8 +41,34 @@ test.describe('驾驶舱', () => {
     await page.locator('[data-action="cockpit-configure"]').click()
     await expect(page.getByRole('dialog', { name: '驾驶舱配置' })).toBeVisible()
 
-    // 切换为二列以验证布局编辑
-    await page.getByRole('dialog', { name: '驾驶舱配置' }).getByText('二列', { exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: '驾驶舱配置' })
+    const leftRegion = dialog.locator('[data-side="left"]')
+    const rightRegion = dialog.locator('[data-side="right"]')
+
+    // 左右区域独立配置：只把左侧调整为两列。
+    await leftRegion.locator('[data-role="region-tools-trigger"]').click()
+    const leftColumnInput = leftRegion.getByRole('spinbutton', { name: '左侧区域列数' })
+    await leftColumnInput.fill('2')
+    await leftColumnInput.press('Enter')
+    await expect(leftRegion.locator('.luma-cockpit-designer__grid-cells > .luma-cockpit-designer__drop-zone')).toHaveCount(2)
+    await expect(rightRegion.locator('.luma-cockpit-designer__grid-cells > .luma-cockpit-designer__drop-zone')).toHaveCount(1)
+
+    // 键盘替代操作：库模块放入右侧，再把左侧模块移动并确认替换。
+    await dialog.locator('.luma-cockpit-designer__library-select').first().click()
+    await rightRegion.locator('.luma-cockpit-designer__empty-cell').click()
+    await leftRegion.locator('[data-role="select-move-source"]').first().click()
+    await rightRegion.locator('[data-role="keyboard-target"]').click()
+    await expect(page.getByText('目标槽位已有模块，是否替换？')).toBeVisible()
+    await page.getByRole('button', { name: '替换', exact: true }).click()
+
+    // 单行合并为 Tab 后新增第二个实例并切换 Tab。
+    await rightRegion.locator('[data-role="row-tools-trigger"]').click()
+    await rightRegion.locator('.el-switch').click()
+    await dialog.locator('.luma-cockpit-designer__library-select').first().click()
+    await rightRegion.locator('.luma-cockpit-designer__tab-target').click()
+    await expect(rightRegion.getByRole('tab')).toHaveCount(2)
+    await rightRegion.getByRole('tab').first().click()
+    await expect(rightRegion.getByRole('tab').first()).toHaveAttribute('aria-selected', 'true')
 
     // 保存
     await page.getByRole('button', { name: '保存', exact: true }).click()
@@ -51,6 +77,23 @@ test.describe('驾驶舱', () => {
     // 刷新后配置仍生效（保存到 mock 会话）
     await page.reload()
     await expect(page.locator('[aria-label="布局选择"]')).toBeVisible()
+  })
+
+  test('已放置模块可跨区域移动，模块库可复制到空槽', async ({ page }) => {
+    await loginAsAdmin(page)
+    await page.locator('[data-action="open-cockpit"]').click()
+    await page.locator('[data-action="cockpit-configure"]').click()
+
+    const dialog = page.getByRole('dialog', { name: '驾驶舱配置' })
+    const leftRegion = dialog.locator('[data-side="left"]')
+    const rightRegion = dialog.locator('[data-side="right"]')
+    await leftRegion.locator('[data-role="placed-widget"]').dragTo(rightRegion.locator('.luma-cockpit-designer__empty-cell'))
+    await expect(leftRegion.locator('.luma-cockpit-designer__empty-cell')).toBeVisible()
+    await expect(rightRegion.locator('[data-role="placed-widget"]')).toBeVisible()
+
+    const libraryCard = dialog.locator('.luma-cockpit-designer__library-card').first()
+    await libraryCard.dragTo(leftRegion.locator('.luma-cockpit-designer__empty-cell'))
+    await expect(leftRegion.locator('[data-role="placed-widget"]')).toBeVisible()
   })
 
   test('返回 Admin', async ({ page }) => {

@@ -19,6 +19,7 @@ import {
   fetchDictionaryOptions,
   fetchDictionaryTypes,
   fetchSystemMenus,
+  fetchSystemOrganizationOptions,
   fetchSystemOrganizations,
   fetchSystemPermissionTree,
   fetchSystemRoleOptions,
@@ -34,6 +35,8 @@ import {
   updateSystemRolePermissions,
   updateSystemUser,
   updateSystemUserRoles,
+  updateSystemUsersRoles,
+  updateSystemUsersStatus,
   updateSystemUserStatus,
 } from '../src/api/system'
 import { login, logout } from '../src/services/session'
@@ -71,6 +74,7 @@ describe('system mock api', () => {
   it('支持新增、编辑和删除用户并立即反映到后续查询', async () => {
     const created = await createSystemUser({
       nickname: '测试用户',
+      organizationId: 'organization-5',
       phone: '13900139000',
       roles: ['guest'],
       status: 'enabled',
@@ -86,6 +90,7 @@ describe('system mock api', () => {
 
     const updated = await updateSystemUser(created.id, {
       nickname: '测试用户（已更新）',
+      organizationId: 'organization-2',
       roles: ['operator', 'guest'],
       status: 'disabled',
     })
@@ -108,6 +113,7 @@ describe('system mock api', () => {
   it('拒绝重复用户名并提供角色选项', async () => {
     await expect(createSystemUser({
       nickname: '重复管理员',
+      organizationId: 'organization-1',
       roles: ['admin'],
       username: 'admin',
     })).rejects.toThrow('用户名已存在')
@@ -136,6 +142,39 @@ describe('system mock api', () => {
     expect(resetResult.temporaryPassword).toBe('Luma@123456')
     const resetUsers = await fetchSystemUsers({ page: 1, pageSize: 10, query: { keyword: 'operator' } })
     expect(resetUsers.items.find(user => user.id === 'user-2')).toMatchObject({ roles: ['operator', 'guest'], status: 'enabled' })
+  })
+
+  it('支持机构子树筛选、精简机构选项和原子批量用户操作', async () => {
+    const options = await fetchSystemOrganizationOptions()
+    expect(options).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        disabled: false,
+        label: 'Luma 总部（luma-headquarters）',
+        value: 'organization-1',
+      }),
+    ]))
+
+    const platformUsers = await fetchSystemUsers({
+      page: 1,
+      pageSize: 10,
+      query: { organizationId: 'organization-2' },
+    })
+    expect(platformUsers.items.length).toBeGreaterThan(0)
+    expect(platformUsers.items.every(user => ['organization-2', 'organization-3', 'organization-4'].includes(user.organizationId))).toBe(true)
+
+    const statusResult = await updateSystemUsersStatus(['user-2', 'user-2', 'user-3'], 'disabled')
+    expect(statusResult).toMatchObject({ updated: 2 })
+    expect(statusResult.items.map(user => user.id)).toEqual(['user-2', 'user-3'])
+    expect(statusResult.items.every(user => user.status === 'disabled')).toBe(true)
+
+    const appendResult = await updateSystemUsersRoles(['user-2', 'user-3'], ['guest'], 'append')
+    expect(appendResult.items.every(user => user.roles.includes('guest'))).toBe(true)
+    const replaceResult = await updateSystemUsersRoles(['user-2', 'user-3'], ['operator'], 'replace')
+    expect(replaceResult.items.every(user => user.roles.length === 1 && user.roles[0] === 'operator')).toBe(true)
+
+    await expect(updateSystemUsersRoles(['user-2', 'missing-user'], ['guest'], 'append')).rejects.toThrow('用户不存在')
+    const unchanged = await fetchSystemUsers({ page: 1, pageSize: 10, query: { keyword: 'operator' } })
+    expect(unchanged.items.find(user => user.id === 'user-2')?.roles).toEqual(['operator'])
   })
 
   it('支持角色 CRUD 和基于菜单、按钮生成的权限树', async () => {

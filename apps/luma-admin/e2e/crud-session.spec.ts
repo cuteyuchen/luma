@@ -13,10 +13,13 @@ test('用户管理支持查询和新增流程', async ({ page }) => {
 
   await page.getByRole('button', { name: '新增用户', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: '新增' })
+  await dialog.locator('.el-form-item').filter({ hasText: '所属机构' }).locator('.el-select').click()
+  await page.locator('.el-select-dropdown:visible').getByRole('treeitem', { name: '产品运营中心（product-operation）' }).click()
   await dialog.getByLabel('用户名').fill(username)
   await dialog.getByLabel('昵称').fill('E2E 用户')
   await dialog.locator('.el-form-item').filter({ hasText: '角色' }).locator('.el-select').click()
   await page.getByRole('option', { name: '运营人员', exact: true }).click()
+  await page.keyboard.press('Escape')
   await dialog.getByRole('button', { name: '保存', exact: true }).click()
   await expect(page.getByText('用户新增成功')).toBeVisible()
   await page.getByLabel('关键词').fill(username)

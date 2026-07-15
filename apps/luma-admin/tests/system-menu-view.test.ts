@@ -55,10 +55,17 @@ const DialogStub = defineComponent({
   props: {
     modelValue: Boolean,
     title: String,
+    top: String,
+    width: String,
   },
   setup(props, { slots }) {
     return () => props.modelValue
-      ? h('section', { 'class': 'dialog-stub', 'data-title': props.title }, slots.default?.())
+      ? h('section', {
+          'class': 'dialog-stub',
+          'data-title': props.title,
+          'data-top': props.top,
+          'data-width': props.width,
+        }, slots.default?.())
       : null
   },
 })
@@ -66,6 +73,9 @@ const DialogStub = defineComponent({
 const FormStub = defineComponent({
   name: 'LumaSchemaForm',
   props: {
+    columns: Number,
+    gutter: Number,
+    labelWidth: [Number, String],
     mode: String,
     schemas: Array,
   },
@@ -153,8 +163,18 @@ describe('system menu view', () => {
     await wrapper.find('[data-action="create-menu"]').trigger('click')
     await nextTick()
 
-    expect(wrapper.find('.dialog-stub').attributes('data-title')).toBe('新增菜单')
+    const dialog = wrapper.find('.dialog-stub')
+    expect(dialog.attributes('data-title')).toBe('新增菜单')
+    expect(dialog.attributes('data-top')).toBe('6vh')
+    expect(dialog.attributes('data-width')).toBe('960px')
+    expect(dialog.classes()).toContain('luma-menu-dialog')
+
     const form = wrapper.findComponent(FormStub)
+    expect(form.props()).toMatchObject({
+      columns: 2,
+      gutter: 24,
+      labelWidth: '96px',
+    })
     const schemas = form.props('schemas') as { field: string }[]
     expect(schemas.map(schema => schema.field)).toEqual([
       'type',

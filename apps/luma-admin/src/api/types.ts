@@ -30,6 +30,7 @@ export interface RawSystemUserRecord {
   createdAt: string
   id: string
   nickname: string
+  organizationId: string
   phone: string
   role?: string
   roles: string[]
@@ -44,6 +45,7 @@ export interface SystemRoleListParams { page: number, pageSize: number, query?: 
 export interface SystemRoleListResult { items: SystemRoleRecord[], total: number }
 export interface SaveSystemRoleInput { code?: unknown, description?: unknown, name?: unknown, status?: unknown }
 export interface SystemOrganizationRecord { children?: SystemOrganizationRecord[], code: string, email: string, id: string, leader: string, name: string, order: number, parentId: string, phone: string, status: SystemUserStatus }
+export interface SystemOrganizationOption { children?: SystemOrganizationOption[], disabled: boolean, label: string, value: string }
 export interface SaveSystemOrganizationInput { code?: unknown, email?: unknown, leader?: unknown, name?: unknown, order?: unknown, parentId?: unknown, phone?: unknown, status?: unknown }
 export interface RawSystemPermissionTreeNode { children?: RawSystemPermissionTreeNode[], id: string, label: string, permission?: string }
 export interface RawSystemMenuRecord { activeMenu?: string, badge?: string | number, badgeTone?: string, badgeType?: 'dot' | 'text', children?: RawSystemMenuRecord[], component: string, externalLink?: string, externalTarget?: '_blank' | '_self', hidden: boolean, hideInBreadcrumb?: boolean, icon: string, id: string, name?: string, order: number, parentId: string, path: string, permission?: string, permissions?: string[], redirect?: string, title: string, type: SystemMenuType }

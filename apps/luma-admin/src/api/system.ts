@@ -10,6 +10,7 @@ import type {
   SaveSystemRoleInput,
   SystemDictionaryItemRecord,
   SystemDictionaryTypeRecord,
+  SystemOrganizationOption,
   SystemOrganizationRecord,
   SystemRoleListParams,
   SystemRoleListResult,
@@ -27,6 +28,7 @@ export type {
   SystemDictionaryItemRecord,
   SystemDictionaryTypeRecord,
   SystemMenuType,
+  SystemOrganizationOption,
   SystemOrganizationRecord,
   SystemRoleListParams,
   SystemRoleListResult,
@@ -38,10 +40,12 @@ export type {
 } from './types'
 
 export interface SystemUserRecord extends Omit<RawSystemUserRecord, 'role'> {}
-export interface SystemUserQuery { keyword?: string, role?: string, roles?: string, status?: SystemUserStatus | '' }
+export interface SystemUserQuery { keyword?: string, organizationId?: string, role?: string, roles?: string, status?: SystemUserStatus | '' }
 export interface SystemUserListParams { page: number, pageSize: number, query?: SystemUserQuery }
 export interface SystemUserListResult { items: SystemUserRecord[], total: number }
-export interface SaveSystemUserInput { nickname?: unknown, phone?: unknown, roles?: unknown, status?: unknown, username?: unknown }
+export interface SaveSystemUserInput { nickname?: unknown, organizationId?: unknown, phone?: unknown, roles?: unknown, status?: unknown, username?: unknown }
+export interface SystemUserBatchResult { items: SystemUserRecord[], updated: number }
+export type SystemUserRoleAssignmentMode = 'append' | 'replace'
 export interface SystemPermissionTreeNode { children?: SystemPermissionTreeNode[], id: string, label: string, permissions: string[] }
 export interface SystemMenuRecord extends Omit<RawSystemMenuRecord, 'children' | 'permission' | 'permissions'> { children?: SystemMenuRecord[], permissions: string[] }
 export interface SaveSystemMenuInput { activeMenu?: unknown, badge?: unknown, badgeTone?: unknown, badgeType?: unknown, component?: unknown, externalLink?: unknown, externalTarget?: unknown, hidden?: unknown, hideInBreadcrumb?: unknown, icon?: unknown, name?: unknown, order?: unknown, parentId?: unknown, path?: unknown, permissions?: unknown, redirect?: unknown, title?: unknown, type?: unknown }
@@ -66,7 +70,7 @@ function toPermissionNode(node: RawSystemPermissionTreeNode): SystemPermissionTr
 
 export async function fetchSystemUsers(params: SystemUserListParams): Promise<SystemUserListResult> {
   const result = await adminRequest.get<AdminPageTransport<RawSystemUserRecord>>('/system/users', {
-    query: { page: params.page, pageSize: params.pageSize, keyword: params.query?.keyword, roles: params.query?.roles ?? params.query?.role, status: params.query?.status },
+    query: { page: params.page, pageSize: params.pageSize, keyword: params.query?.keyword, organizationId: params.query?.organizationId, roles: params.query?.roles ?? params.query?.role, status: params.query?.status },
   })
   return { items: result.records.map(toSystemUserRecord), total: result.totalNum }
 }
@@ -85,6 +89,26 @@ export async function updateSystemUserStatus(id: string, status: SystemUserStatu
 
 export async function updateSystemUserRoles(id: string, roles: string[]): Promise<SystemUserRecord> {
   return toSystemUserRecord(await adminRequest.put(`/system/users/${id}/roles`, { body: { roles }, retryOnAuthRefresh: true }))
+}
+
+export async function updateSystemUsersStatus(ids: string[], status: SystemUserStatus): Promise<SystemUserBatchResult> {
+  const result = await adminRequest.patch<{ items: RawSystemUserRecord[], updated: number }>('/system/users/batch/status', {
+    body: { ids, status },
+    retryOnAuthRefresh: true,
+  })
+  return { items: result.items.map(toSystemUserRecord), updated: result.updated }
+}
+
+export async function updateSystemUsersRoles(
+  ids: string[],
+  roles: string[],
+  mode: SystemUserRoleAssignmentMode,
+): Promise<SystemUserBatchResult> {
+  const result = await adminRequest.put<{ items: RawSystemUserRecord[], updated: number }>('/system/users/batch/roles', {
+    body: { ids, mode, roles },
+    retryOnAuthRefresh: true,
+  })
+  return { items: result.items.map(toSystemUserRecord), updated: result.updated }
 }
 
 export function resetSystemUserPassword(id: string): Promise<SystemUserPasswordResetResult> {
@@ -128,6 +152,10 @@ export function updateSystemRolePermissions(roleCode: string, permissions: strin
 
 export function fetchSystemOrganizations(): Promise<SystemOrganizationRecord[]> {
   return adminRequest.get('/system/organizations')
+}
+
+export function fetchSystemOrganizationOptions(): Promise<SystemOrganizationOption[]> {
+  return adminRequest.get('/system/organizations/options')
 }
 
 export function createSystemOrganization(input: SaveSystemOrganizationInput): Promise<SystemOrganizationRecord> {

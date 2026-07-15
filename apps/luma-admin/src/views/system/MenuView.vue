@@ -421,7 +421,14 @@ onMounted(() => {
       </LumaSchemaTable>
     </LumaPage>
 
-    <ElDialog v-model="dialogVisible" append-to-body class="luma-admin-dialog" :title="dialogTitle" width="720px">
+    <ElDialog
+      v-model="dialogVisible"
+      append-to-body
+      class="luma-admin-dialog luma-menu-dialog"
+      :title="dialogTitle"
+      top="6vh"
+      width="960px"
+    >
       <ElAlert
         v-if="operationError"
         class="luma-admin-page__operation-error"
@@ -432,6 +439,9 @@ onMounted(() => {
       />
       <LumaSchemaForm
         v-model="formModel"
+        :columns="2"
+        :gutter="24"
+        label-width="96px"
         :mode="formMode"
         :schemas="formSchemas"
         :submit-loading="saving"
@@ -442,3 +452,21 @@ onMounted(() => {
     </ElDialog>
   </main>
 </template>
+
+<style scoped lang="scss">
+:global(.luma-menu-dialog) {
+  max-width: calc(100vw - 24px);
+}
+
+:global(.luma-menu-dialog .el-dialog__body) {
+  max-height: calc(88vh - 72px);
+  max-height: calc(88dvh - 72px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+:global(.luma-menu-dialog .luma-schema-form__item .el-form-item__label) {
+  white-space: nowrap;
+}
+</style>
