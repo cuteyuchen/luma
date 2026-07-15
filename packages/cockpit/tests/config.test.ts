@@ -45,11 +45,12 @@ describe('v3 配置标准化', () => {
     expect(() => JSON.stringify(result)).not.toThrow()
   })
 
-  it('Tab 行清除普通槽并回退不存在的激活项', () => {
+  it('tab 行清除普通槽并回退不存在的激活项', () => {
     const result = normalizeCockpitConfig({
       schemaVersion: 3,
       layouts: [{
-        id: 'layout', title: '布局',
+        id: 'layout',
+        title: '布局',
         left: { columns: [{ id: 'col', width: 320 }], rows: [{ id: 'row', height: 100, mode: 'tabs', cells: [{ id: 'unused' }], widgets: [{ id: 'w1', type: 'stub' }], activeWidgetId: 'missing' }] },
         right: { columns: [{ id: 'right', width: 320 }], rows: [{ id: 'right-row', height: 100, mode: 'grid', cells: [{ id: 'right-cell' }], widgets: [] }] },
       }],

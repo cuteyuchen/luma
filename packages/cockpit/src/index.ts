@@ -63,10 +63,16 @@ export type {
 /***********************运行时*********************/
 export {
   LumaCockpit,
+  LumaCockpitCard,
   useCockpitRuntimeEnv,
 } from './runtime'
 
-export type { CockpitRuntimeEnv } from './runtime'
+export type {
+  CockpitCardComponent,
+  CockpitCardProps,
+  CockpitCardTab,
+  CockpitRuntimeEnv,
+} from './runtime'
 /***********************类型*********************/
 export type {
   CockpitBaseContext,

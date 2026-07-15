@@ -98,7 +98,9 @@ function normalizeRowHeights(rows: CockpitGridRowConfig[]): void {
   const total = rows.reduce((sum, row) => sum + row.height, 0)
   if (total <= 0) {
     const height = 100 / rows.length
-    rows.forEach(row => { row.height = height })
+    rows.forEach((row) => {
+      row.height = height
+    })
     return
   }
   rows.forEach((row) => {

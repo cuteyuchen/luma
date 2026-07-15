@@ -2,8 +2,8 @@
 import type { SortableEvent } from 'sortablejs'
 import type { CockpitWidgetInstance } from '../types'
 import type { DraftWidgetLocation } from './useCockpitDraft'
-import Sortable from 'sortablejs'
 import { ElMessageBox } from 'element-plus'
+import Sortable from 'sortablejs'
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 /***********************Designer 模块投放区*********************/

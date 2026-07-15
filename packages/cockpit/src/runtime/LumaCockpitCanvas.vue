@@ -22,16 +22,16 @@ const { result } = useCanvasScale(containerRef, {
 })
 const stageStyle = computed(() => props.viewportMode === 'vwvh'
   ? {
-      width: '100vw',
-      height: '100vh',
+      'width': '100vw',
+      'height': '100vh',
       '--luma-cockpit-x-unit': `${100 / props.baseWidth}vw`,
       '--luma-cockpit-y-unit': `${100 / props.baseHeight}vh`,
     }
   : {
-      width: `${props.baseWidth}px`,
-      height: `${props.baseHeight}px`,
-      transform: `translate(${result.value.offsetX}px, ${result.value.offsetY}px) scale(${result.value.scale})`,
-      transformOrigin: 'top left',
+      'width': `${props.baseWidth}px`,
+      'height': `${props.baseHeight}px`,
+      'transform': `translate(${result.value.offsetX}px, ${result.value.offsetY}px) scale(${result.value.scale})`,
+      'transformOrigin': 'top left',
       '--luma-cockpit-x-unit': '1px',
       '--luma-cockpit-y-unit': '1px',
     })

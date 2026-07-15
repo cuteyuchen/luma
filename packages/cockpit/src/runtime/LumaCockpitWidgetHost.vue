@@ -15,6 +15,7 @@ const props = defineProps<{
   layoutId: string
   side: 'left' | 'right'
   widget: CockpitWidgetInstance
+  embedded?: boolean
 }>()
 
 const env = useCockpitRuntimeEnv()
@@ -41,7 +42,11 @@ onBeforeUnmount(() => {
   env.messages.clearInstance(props.widget.id)
 })
 
-const title = computed(() => props.widget.title)
+const title = computed(() => props.widget.title ?? definition.value?.label ?? props.widget.type)
+const cardComponent = computed(() => props.embedded ? 'div' : env.cardComponent)
+const cardProps = computed(() => props.embedded
+  ? { class: 'luma-cockpit-widget__embedded' }
+  : { title: title.value, widget: props.widget })
 </script>
 
 <template>
@@ -53,49 +58,45 @@ const title = computed(() => props.widget.title)
     :data-cockpit-node-id="widget.id"
     :data-cockpit-side="side"
   >
-    <header v-if="title || env.slots['widget-title']" class="luma-cockpit-widget__title">
-      <component
-        :is="env.slots['widget-title']"
-        v-if="env.slots['widget-title']"
-        :widget="widget"
-        :title="title"
-      />
-      <span v-else>{{ title }}</span>
-    </header>
-
-    <div class="luma-cockpit-widget__body">
-      <!-- 未注册 type：缺失占位，不使整个驾驶舱崩溃 -->
-      <template v-if="!definition">
-        <component
-          :is="env.slots['missing-widget']"
-          v-if="env.slots['missing-widget']"
-          :type="widget.type"
-          :instance-id="widget.id"
-        />
-        <div v-else class="luma-cockpit-widget__missing" role="status">
-          未注册模块：{{ widget.type }}
-        </div>
+    <component :is="cardComponent" v-bind="cardProps">
+      <template v-if="!embedded && env.slots['widget-title']" #title>
+        <component :is="env.slots['widget-title']" :widget="widget" :title="title" />
       </template>
 
-      <!-- 已注册：错误边界隔离渲染，异步加载失败可重试 -->
-      <CockpitErrorBoundary v-else>
-        <component :is="resolved" :context="context" />
-        <template #error="{ retry }">
+      <div class="luma-cockpit-widget__body">
+        <!-- 未注册 type：缺失占位，不使整个驾驶舱崩溃 -->
+        <template v-if="!definition">
           <component
-            :is="env.slots.error"
-            v-if="env.slots.error"
-            :retry="retry"
+            :is="env.slots['missing-widget']"
+            v-if="env.slots['missing-widget']"
+            :type="widget.type"
             :instance-id="widget.id"
           />
-          <div v-else class="luma-cockpit-widget__error" role="alert">
-            <span>模块加载失败</span>
-            <ElButton text type="primary" @click="retry">
-              <LumaIcon name="luma:refresh" :size="14" />
-              重试
-            </ElButton>
+          <div v-else class="luma-cockpit-widget__missing" role="status">
+            未注册模块：{{ widget.type }}
           </div>
         </template>
-      </CockpitErrorBoundary>
-    </div>
+
+        <!-- 已注册：错误边界隔离渲染，异步加载失败可重试 -->
+        <CockpitErrorBoundary v-else>
+          <component :is="resolved" :context="context" />
+          <template #error="{ retry }">
+            <component
+              :is="env.slots.error"
+              v-if="env.slots.error"
+              :retry="retry"
+              :instance-id="widget.id"
+            />
+            <div v-else class="luma-cockpit-widget__error" role="alert">
+              <span>模块加载失败</span>
+              <ElButton text type="primary" @click="retry">
+                <LumaIcon name="luma:refresh" :size="14" />
+                重试
+              </ElButton>
+            </div>
+          </template>
+        </CockpitErrorBoundary>
+      </div>
+    </component>
   </section>
 </template>

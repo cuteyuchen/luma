@@ -9,7 +9,8 @@ function sourceConfig(): CockpitConfig {
     title: '原始',
     activeLayoutId: 'layout',
     layouts: [{
-      id: 'layout', title: '布局',
+      id: 'layout',
+      title: '布局',
       left: {
         columns: [{ id: 'left-a', width: 320 }, { id: 'left-b', width: 320 }],
         rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell-a' }, { id: 'left-cell-b' }] }],

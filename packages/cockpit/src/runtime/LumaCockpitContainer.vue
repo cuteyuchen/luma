@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { CockpitGridColumnConfig, CockpitGridRowConfig, CockpitSide } from '../types'
-import { ElButton } from 'element-plus'
+import type { CockpitCardTab } from './card'
 import { computed, ref, watch } from 'vue'
+import { useCockpitRuntimeEnv } from './context'
 import LumaCockpitWidgetHost from './LumaCockpitWidgetHost.vue'
 
 /***********************网格行运行时*********************/
@@ -16,33 +17,26 @@ const props = defineProps<{
 const rowStyle = computed(() => ({ height: `${props.row.height}%` }))
 const gridStyle = computed(() => ({ gridTemplateColumns: props.columns.map(column => `calc(${column.width} * var(--luma-cockpit-x-unit, 1px))`).join(' ') }))
 const activeTabId = ref<string | undefined>()
+const env = useCockpitRuntimeEnv()
+const tabs = computed<CockpitCardTab[]>(() => props.row.widgets.map(widget => ({
+  id: widget.id,
+  title: widget.title ?? env.registry.resolveWidget(widget.type)?.label ?? widget.type,
+  widget,
+})))
 
-function resolveActiveTab(): string | undefined {
-  const requested = activeTabId.value ?? props.row.activeWidgetId
+function resolveConfiguredActiveTab(): string | undefined {
+  const requested = props.row.activeWidgetId
   return props.row.widgets.some(widget => widget.id === requested) ? requested : props.row.widgets[0]?.id
 }
 
-watch(() => [props.row.id, props.row.widgets.map(widget => widget.id).join(',')], () => {
-  activeTabId.value = resolveActiveTab()
+watch(() => [props.row.id, props.row.activeWidgetId], () => {
+  activeTabId.value = resolveConfiguredActiveTab()
 }, { immediate: true })
 
-function onTabKeydown(event: KeyboardEvent, index: number): void {
-  const widgets = props.row.widgets
-  if (!widgets.length)
-    return
-  const byKey: Record<string, number> = {
-    ArrowRight: (index + 1) % widgets.length,
-    ArrowDown: (index + 1) % widgets.length,
-    ArrowLeft: (index - 1 + widgets.length) % widgets.length,
-    ArrowUp: (index - 1 + widgets.length) % widgets.length,
-    Home: 0,
-    End: widgets.length - 1,
-  }
-  if (event.key in byKey) {
-    event.preventDefault()
-    activeTabId.value = widgets[byKey[event.key]].id
-  }
-}
+watch(() => props.row.widgets.map(widget => widget.id).join(','), () => {
+  if (!props.row.widgets.some(widget => widget.id === activeTabId.value))
+    activeTabId.value = resolveConfiguredActiveTab()
+})
 </script>
 
 <template>
@@ -65,6 +59,7 @@ function onTabKeydown(event: KeyboardEvent, index: number): void {
       >
         <LumaCockpitWidgetHost
           v-if="cell.widget"
+          :key="cell.widget.id"
           :layout-id="layoutId"
           :side="side"
           :widget="cell.widget"
@@ -76,27 +71,22 @@ function onTabKeydown(event: KeyboardEvent, index: number): void {
     </div>
 
     <template v-else>
-      <div v-if="row.widgets.length" class="luma-cockpit-container__tabs">
-        <div class="luma-cockpit-container__tablist" role="tablist">
-          <ElButton
-            v-for="(widget, index) in row.widgets"
-            :id="`tab-${widget.id}`"
-            :key="widget.id"
-            role="tab"
-            class="luma-cockpit-container__tab"
-            :class="{ 'is-active': widget.id === activeTabId }"
-            :aria-selected="widget.id === activeTabId"
-            :tabindex="widget.id === activeTabId ? 0 : -1"
-            @click="activeTabId = widget.id"
-            @keydown="onTabKeydown($event, index)"
-          >
-            {{ widget.title ?? widget.type }}
-          </ElButton>
+      <component
+        :is="env.cardComponent"
+        v-if="row.widgets.length"
+        v-model:active-tab-id="activeTabId"
+        :tabs="tabs"
+      >
+        <template v-if="env.slots['widget-title']" #title="{ title, widget }">
+          <component :is="env.slots['widget-title']" :widget="widget" :title="title" />
+        </template>
+        <template v-if="env.slots['widget-title']" #tab="{ tab }">
+          <component :is="env.slots['widget-title']" :widget="tab.widget" :title="tab.title" />
+        </template>
+        <div v-for="widget in row.widgets" v-show="widget.id === activeTabId" :key="widget.id" class="luma-cockpit-container__tabpanel">
+          <LumaCockpitWidgetHost embedded :layout-id="layoutId" :side="side" :widget="widget" />
         </div>
-        <div v-for="widget in row.widgets" v-show="widget.id === activeTabId" :key="widget.id" class="luma-cockpit-container__tabpanel" role="tabpanel">
-          <LumaCockpitWidgetHost :layout-id="layoutId" :side="side" :widget="widget" />
-        </div>
-      </div>
+      </component>
       <div v-else class="luma-cockpit-container__empty" role="status">
         空 Tab 行
       </div>

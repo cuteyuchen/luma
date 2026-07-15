@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Slots } from 'vue'
+import type { CockpitRegistry } from '../registry/types'
 import type {
   CockpitCenterContext,
   CockpitConfig,
@@ -9,13 +10,14 @@ import type {
   CockpitThemeMode,
   CockpitViewportMode,
 } from '../types'
-import type { CockpitRegistry } from '../registry/types'
+import type { CockpitCardComponent } from './card'
 import { computed, provide, ref, useSlots, watch } from 'vue'
 import { useCockpit } from '../composables/useCockpit'
 import { normalizeCockpitConfig } from '../config/normalize'
 import { createCockpitMessageBus } from '../messaging/createCockpitMessageBus'
 import { cockpitRuntimeEnvKey } from './context'
 import LumaCockpitCanvas from './LumaCockpitCanvas.vue'
+import LumaCockpitCard from './LumaCockpitCard.vue'
 
 /***********************驾驶舱运行时主组件*********************/
 // 布局导航由消费应用负责。框架只装配当前布局与注册模块。
@@ -29,6 +31,7 @@ const props = withDefaults(defineProps<{
   renderMode?: CockpitRenderMode
   viewportMode?: CockpitViewportMode
   messageBus?: ReturnType<typeof createCockpitMessageBus>
+  cardComponent?: CockpitCardComponent
 }>(), {
   baseWidth: 1920,
   baseHeight: 1080,
@@ -70,6 +73,9 @@ provide(cockpitRuntimeEnvKey, {
   messages,
   cachePages: props.cachePages,
   slots: slots as Slots,
+  get cardComponent() {
+    return props.cardComponent ?? LumaCockpitCard
+  },
 })
 
 const orchestration = useCockpit({

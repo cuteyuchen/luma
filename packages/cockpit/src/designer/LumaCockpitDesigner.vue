@@ -136,16 +136,28 @@ defineExpose({ toggleTheme })
               <LumaIcon name="luma:plus" :size="15" />
             </ElButton>
           </ElTooltip>
-          <ElButton v-if="activeLayout" @click="draft.duplicateLayout(activeLayout.id)">复制</ElButton>
-          <ElButton v-if="activeLayout" type="danger" plain @click="removeLayout">删除</ElButton>
+          <ElButton v-if="activeLayout" @click="draft.duplicateLayout(activeLayout.id)">
+            复制
+          </ElButton>
+          <ElButton v-if="activeLayout" type="danger" plain @click="removeLayout">
+            删除
+          </ElButton>
         </div>
         <div class="luma-cockpit-designer__global-controls" aria-label="布局列设置">
           <ElRadioGroup v-model="columnCount">
-            <ElRadio :value="1">一列</ElRadio>
-            <ElRadio :value="2">二列</ElRadio>
-            <ElRadio :value="3">三列</ElRadio>
+            <ElRadio :value="1">
+              一列
+            </ElRadio>
+            <ElRadio :value="2">
+              二列
+            </ElRadio>
+            <ElRadio :value="3">
+              三列
+            </ElRadio>
           </ElRadioGroup>
-          <ElCheckbox v-model="mergeRows">合并列</ElCheckbox>
+          <ElCheckbox v-model="mergeRows">
+            合并列
+          </ElCheckbox>
         </div>
       </div>
     </section>

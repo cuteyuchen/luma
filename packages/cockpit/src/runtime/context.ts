@@ -2,6 +2,7 @@ import type { InjectionKey, Slots } from 'vue'
 import type { CockpitMessageBus } from '../messaging/types'
 import type { CockpitRegistry } from '../registry/types'
 import type { CockpitRenderMode } from '../types'
+import type { CockpitCardComponent } from './card'
 import { inject } from 'vue'
 
 /***********************运行时内部环境上下文*********************/
@@ -19,6 +20,8 @@ export interface CockpitRuntimeEnv {
   cachePages: boolean
   /** 宿主传入的插槽，供深层 Host 渲染降级/自定义内容 */
   slots: Slots
+  /** 普通模块与合并模块共用的 Card 实现 */
+  cardComponent: CockpitCardComponent
 }
 
 export const cockpitRuntimeEnvKey: InjectionKey<CockpitRuntimeEnv> = Symbol('luma-cockpit-runtime-env')

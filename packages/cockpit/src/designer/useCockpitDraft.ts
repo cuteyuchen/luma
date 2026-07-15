@@ -1,4 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
+import type { CockpitValidationResult } from '../config'
 import type {
   CockpitConfig,
   CockpitGridCellConfig,
@@ -18,7 +19,6 @@ import {
   normalizeCockpitConfig,
   validateCockpitConfig,
 } from '../config'
-import type { CockpitValidationResult } from '../config'
 
 /***********************布局草稿状态机*********************/
 
@@ -26,9 +26,9 @@ export interface DraftSelection {
   layoutId?: string
 }
 
-export type DraftWidgetLocation =
-  | { kind: 'cell', side: CockpitSide, rowId: string, cellId: string }
-  | { kind: 'tabs', side: CockpitSide, rowId: string, widgetId?: string }
+export type DraftWidgetLocation
+  = | { kind: 'cell', side: CockpitSide, rowId: string, cellId: string }
+    | { kind: 'tabs', side: CockpitSide, rowId: string, widgetId?: string }
 
 export interface MoveWidgetResult {
   moved: boolean
@@ -79,7 +79,9 @@ function normalizeRowHeights(rows: CockpitGridRowConfig[]): void {
   const total = rows.reduce((sum, row) => sum + Math.max(0, row.height), 0)
   if (total <= 0) {
     const height = 100 / rows.length
-    rows.forEach(row => { row.height = height })
+    rows.forEach((row) => {
+      row.height = height
+    })
     return
   }
   rows.forEach((row) => {
@@ -98,7 +100,9 @@ function cloneLayoutWithIds(source: CockpitLayoutConfig): CockpitLayoutConfig {
   clone.id = createLayout().id
   for (const side of ['left', 'right'] as const) {
     const region = regionOf(clone, side)
-    region.columns.forEach((column) => { column.id = createGridColumn().id })
+    region.columns.forEach((column) => {
+      column.id = createGridColumn().id
+    })
     region.rows.forEach((row) => {
       row.id = createGridRow(1).id
       row.cells.forEach((cell) => {
@@ -106,7 +110,9 @@ function cloneLayoutWithIds(source: CockpitLayoutConfig): CockpitLayoutConfig {
         if (cell.widget)
           cell.widget.id = createWidgetInstance(cell.widget.type).id
       })
-      row.widgets.forEach((widget) => { widget.id = createWidgetInstance(widget.type).id })
+      row.widgets.forEach((widget) => {
+        widget.id = createWidgetInstance(widget.type).id
+      })
       row.activeWidgetId = row.widgets[0]?.id
     })
   }
@@ -268,7 +274,9 @@ export function useCockpitDraft(source: CockpitConfig): UseCockpitDraftReturn {
     if (row.widgets.length > region.columns.length)
       return false
     row.cells = Array.from({ length: region.columns.length }, createGridCell)
-    row.widgets.forEach((widget, index) => { row.cells[index].widget = widget })
+    row.widgets.forEach((widget, index) => {
+      row.cells[index].widget = widget
+    })
     row.widgets = []
     row.activeWidgetId = undefined
     row.mode = 'grid'

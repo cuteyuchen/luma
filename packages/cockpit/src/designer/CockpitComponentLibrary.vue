@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types'
-import Sortable from 'sortablejs'
 import { ElButton, ElEmpty } from 'element-plus'
+import Sortable from 'sortablejs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import CockpitWidgetPreview from './CockpitWidgetPreview.vue'
 
