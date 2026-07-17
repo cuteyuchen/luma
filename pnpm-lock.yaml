@@ -71,6 +71,9 @@ importers:
       '@luma/icons':
         specifier: workspace:*
         version: link:../../packages/icons
+      '@luma/icons-vue':
+        specifier: workspace:*
+        version: link:../../packages/icons-vue
       echarts:
         specifier: ^5.5.0
         version: 5.6.0
@@ -114,9 +117,9 @@ importers:
       '@luma/datav':
         specifier: workspace:*
         version: link:../../packages/datav
-      '@luma/icons':
+      '@luma/icons-vue':
         specifier: workspace:*
-        version: link:../../packages/icons
+        version: link:../../packages/icons-vue
       cesium:
         specifier: 1.143.0
         version: 1.143.0
@@ -169,6 +172,9 @@ importers:
       '@luma/icons':
         specifier: workspace:*
         version: link:../../packages/icons
+      '@luma/icons-vue':
+        specifier: workspace:*
+        version: link:../../packages/icons-vue
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
@@ -225,6 +231,9 @@ importers:
       '@luma/icons':
         specifier: workspace:*
         version: link:../../packages/icons
+      '@luma/icons-vue':
+        specifier: workspace:*
+        version: link:../../packages/icons-vue
       '@luma/vben-compat':
         specifier: workspace:*
         version: link:../../packages/vben-compat
@@ -266,9 +275,9 @@ importers:
       '@luma/core':
         specifier: workspace:*
         version: link:../core
-      '@luma/icons':
+      '@luma/icons-vue':
         specifier: workspace:*
-        version: link:../icons
+        version: link:../icons-vue
       element-plus:
         specifier: ^2.11.0
         version: 2.14.2(vue@3.5.39(typescript@6.0.3))
@@ -288,6 +297,9 @@ importers:
       '@luma/icons':
         specifier: workspace:*
         version: link:../icons
+      '@luma/icons-vue':
+        specifier: workspace:*
+        version: link:../icons-vue
       element-plus:
         specifier: ^2.11.0
         version: 2.14.2(vue@3.5.39(typescript@6.0.3))
@@ -320,11 +332,16 @@ importers:
         specifier: ^5.5.0
         version: 5.6.0
 
-  packages/icons:
+  packages/icons: {}
+
+  packages/icons-vue:
     dependencies:
       '@iconify/vue':
         specifier: ^5.0.0
         version: 5.0.1(vue@3.5.39(typescript@6.0.3))
+      '@luma/icons':
+        specifier: workspace:*
+        version: link:../icons
       vue:
         specifier: ^3.5.0
         version: 3.5.39(typescript@6.0.3)

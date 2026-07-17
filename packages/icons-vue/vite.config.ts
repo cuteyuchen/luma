@@ -11,18 +11,13 @@ export default defineConfig({
     emptyOutDir: true,
     lib: {
       entry: {
-        // runtime 与 designer 保持独立入口，只读驾驶舱可避免同步加载 Designer
         index: resolve(packageRoot, 'src/index.ts'),
-        runtime: resolve(packageRoot, 'src/runtime/index.ts'),
-        designer: resolve(packageRoot, 'src/designer/index.ts'),
-        registry: resolve(packageRoot, 'src/registry/index.ts'),
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'cjs' ? 'cjs' : 'js'}`,
     },
     rollupOptions: {
-      // vue / element-plus / @luma/core / @luma/icons-vue 作为外部依赖，不打进产物
-      external: id => id === 'vue' || id === 'element-plus' || id === '@luma/icons-vue' || id === '@luma/core' || id.startsWith('@luma/core/'),
+      external: ['vue', '@iconify/vue', '@luma/icons'],
     },
   },
 })

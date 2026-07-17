@@ -20,6 +20,11 @@ describe('@luma/vite', () => {
       name: 'LumaChartPanel',
       sideEffects: '@luma/charts/style.css',
     })
+    expect(resolver.resolve('LumaIcon')).toEqual({
+      from: '@luma/icons-vue',
+      name: 'LumaIcon',
+      sideEffects: '@luma/icons-vue/style.css',
+    })
     expect(resolver.resolve('ElButton')).toBeUndefined()
   })
 
@@ -57,6 +62,8 @@ describe('@luma/vite', () => {
       .toBe(resolve('E:/workspace/luma', 'packages/datav/src/index.ts'))
     expect(sourceAliases.find(alias => alias.find === '@luma/datav/style.css')?.replacement)
       .toBe(resolve('E:/workspace/luma', 'packages/datav/src/source-style.css'))
+    expect(sourceAliases.find(alias => alias.find === '@luma/icons-vue')?.replacement)
+      .toBe(resolve('E:/workspace/luma', 'packages/icons-vue/src/index.ts'))
     expect(sourceAliases.every(alias => !alias.replacement.replaceAll('\\', '/').includes('/dist/')))
       .toBe(true)
     expect(distAliases.find(alias => alias.find === '@luma/icons/vite')?.replacement)

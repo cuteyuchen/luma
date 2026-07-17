@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CockpitBaseContext, CockpitWidgetInstance } from '../types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElButton } from 'element-plus'
 import { computed, onBeforeUnmount } from 'vue'
 import { provideCockpitContext } from '../composables/useCockpitContext'

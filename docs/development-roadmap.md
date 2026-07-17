@@ -84,7 +84,7 @@ Luma 最终应成为一套“轻量但完整”的 Vue Admin 基础设施：
 
 - Vue 3、TypeScript、Vite、Element Plus 和 fetch。
 - Luma 标准字段：`field`、`dictionary`、`rows`、`{ items, total }`。
-- `@luma/core`、`@luma/icons`、`@luma/charts`、`@luma/vben-compat`、`@luma/vite` 的包边界。
+- `@luma/core`、`@luma/icons`、`@luma/icons-vue`、`@luma/charts`、`@luma/vben-compat`、`@luma/vite` 的包边界。
 - Pinia、权限、字典和主题作为可选能力，不成为 Core 强制依赖。
 - 现有字典布尔值、children、color 和响应适配设计。
 

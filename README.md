@@ -27,7 +27,7 @@ pnpm create luma-admin my-admin
 import { createLumaAdmin } from '@luma/core'
 import '@luma/core/theme-chalk/index.scss'
 import '@luma/core/style.css'
-import '@luma/icons/style.css'
+import '@luma/icons-vue/style.css'
 import App from './App.vue'
 
 createLumaAdmin({
@@ -39,7 +39,8 @@ createLumaAdmin({
 
 | 目录 | 职责 |
 | --- | --- |
-| `packages/icons` | 独立图标注册、渲染、选择和构建能力 |
+| `packages/icons` | 框架无关的图标注册、SVG 处理和构建能力 |
+| `packages/icons-vue` | Vue 图标组件、选择器和响应式注册表适配 |
 | `packages/core` | 安装器、布局、路由、权限、请求、主题、字典和核心组件 |
 | `packages/charts` | 可选 ECharts 面板与自适应能力 |
 | `packages/datav` | 面向驾驶舱的 Vue 3 DataV 可视化组件包（38 个组件重构） |
@@ -56,9 +57,9 @@ createLumaAdmin({
 依赖方向固定为：
 
 ```text
-@luma/icons
-     ↑
-@luma/core  ←  apps/luma-admin
+@luma/icons  →  @luma/icons-vue
+     ↑                  ↑
+     └──────── @luma/core  ←  apps/luma-admin
      ↑
 @luma/cockpit  ←  apps/luma-admin, apps/luma-cockpit
      ↑
@@ -82,7 +83,7 @@ create-luma-admin  →  生成消费公开包入口的应用
 - `LumaSchemaForm`、`LumaSchemaTable`、`LumaCrudTable`、页面与分页组件。
 - fetch 请求客户端、统一错误、接口适配、Token 刷新单飞和安全重放。
 - 用户、角色、菜单、字典和系统配置 Mock CRUD 页面。
-- 响应式图标系统、图表工作流、迁移兼容层、Vite 助手和后台脚手架。
+- 框架无关图标内核、Vue 图标适配层、图表工作流、迁移兼容层、Vite 助手和后台脚手架。
 - DataV 可视化组件包：15 个组件覆盖边框、装饰、数字翻牌、胶囊图、水位图、飞线图、滚动表和原生 ECharts 封装，支持 DataV `config` 与现代 props 双套 API。
 - Playwright 关键流程验收、跨平台 CI、Changesets、CodeQL、明确 vendor 分包和发布产物体积门禁。
 

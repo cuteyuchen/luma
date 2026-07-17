@@ -10,6 +10,7 @@ describe('getPublishPackageNames', () => {
   it('会返回需要发布到 npm 的包名', () => {
     expect(getPublishPackageNames()).toEqual([
       '@luma/icons',
+      '@luma/icons-vue',
       '@luma/core',
       '@luma/charts',
       '@luma/datav',

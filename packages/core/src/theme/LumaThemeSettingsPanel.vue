@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LumaHeaderMenuAlign, LumaLayoutMode, LumaPreferences, LumaPreferencesDefaults, LumaTabStyle, LumaTransitionName, ThemeMode } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElButton, ElInputNumber, ElSlider, ElSwitch } from 'element-plus'
 import { computed, ref } from 'vue'
 import { createDefaultPreferences, mergePreferences, resolvePreferenceAvailability } from './preferences'

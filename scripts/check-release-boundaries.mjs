@@ -8,6 +8,7 @@ const licensePath = join(rootDir, 'LICENSE')
 const packageDirs = {
   createLumaAdmin: join(rootDir, 'packages/create-luma-admin'),
   icons: join(rootDir, 'packages/icons'),
+  iconsVue: join(rootDir, 'packages/icons-vue'),
   core: join(rootDir, 'packages/core'),
   charts: join(rootDir, 'packages/charts'),
   datav: join(rootDir, 'packages/datav'),
@@ -113,6 +114,7 @@ if (existsSync(licensePath)) {
 }
 
 const iconsPackage = checkPublishPackage('@luma/icons', packageDirs.icons)
+const iconsVuePackage = checkPublishPackage('@luma/icons-vue', packageDirs.iconsVue)
 const corePackage = checkPublishPackage('@luma/core', packageDirs.core)
 const chartsPackage = checkPublishPackage('@luma/charts', packageDirs.charts)
 const datavPackage = checkPublishPackage('@luma/datav', packageDirs.datav)
@@ -122,6 +124,7 @@ const vitePackage = checkPublishPackage('@luma/vite', packageDirs.vite)
 const createPackage = checkPublishPackage('create-luma-admin', packageDirs.createLumaAdmin)
 
 assert(corePackage.files?.includes('theme-chalk'), '@luma/core files 未包含 theme-chalk')
+assert(iconsVuePackage.exports?.['./style.css'] === './dist/icons-vue.css', '@luma/icons-vue 未导出 style.css')
 assert(corePackage.exports?.['./style.css'] === './dist/core.css', '@luma/core 未导出 style.css')
 assert(corePackage.exports?.['./theme-chalk/index.scss'], '@luma/core 未导出 theme-chalk/index.scss')
 assert(createPackage.bin?.['create-luma-admin'] === './dist/cli.js', 'create-luma-admin 缺少 bin.create-luma-admin')
@@ -158,6 +161,11 @@ const iconsAllDependencies = getDependencyNames(iconsPackage, [
   'peerDependencies',
   'optionalDependencies',
 ])
+const iconsVueAllDependencies = getDependencyNames(iconsVuePackage, [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+])
 const coreAllDependencies = getDependencyNames(corePackage, [
   'dependencies',
   'peerDependencies',
@@ -184,10 +192,15 @@ const viteAllDependencies = getDependencyNames(vitePackage, [
   'optionalDependencies',
 ])
 
-assert(!iconsAllDependencies.has('@luma/core'), '@luma/icons 不能依赖 @luma/core')
-assert(!iconsAllDependencies.has('@luma/vben-compat'), '@luma/icons 不能依赖 @luma/vben-compat')
+assert(iconsAllDependencies.size === 0, '@luma/icons 必须保持零运行时依赖')
+
+assert(hasDependency(iconsVuePackage, 'dependencies', '@luma/icons'), '@luma/icons-vue 应通过 dependencies 依赖 @luma/icons')
+assert(hasDependency(iconsVuePackage, 'peerDependencies', 'vue'), '@luma/icons-vue 应把 vue 放在 peerDependencies')
+assert(hasDependency(iconsVuePackage, 'peerDependencies', '@iconify/vue'), '@luma/icons-vue 应把 @iconify/vue 放在 peerDependencies')
+assert(!iconsVueAllDependencies.has('@luma/core'), '@luma/icons-vue 不能依赖 @luma/core')
 
 assert(hasDependency(corePackage, 'dependencies', '@luma/icons'), '@luma/core 应通过 dependencies 依赖 @luma/icons')
+assert(hasDependency(corePackage, 'dependencies', '@luma/icons-vue'), '@luma/core 应通过 dependencies 依赖 @luma/icons-vue')
 assert(hasDependency(corePackage, 'peerDependencies', 'element-plus'), '@luma/core 应把 element-plus 放在 peerDependencies')
 assert(!hasDependency(corePackage, 'dependencies', 'element-plus'), '@luma/core 不能把 element-plus 放在 dependencies')
 assert(!coreAllDependencies.has('@luma/vben-compat'), '@luma/core 不能依赖 @luma/vben-compat')
@@ -218,6 +231,7 @@ const cockpitAllDependencies = getDependencyNames(cockpitPackage, [
 ])
 
 assert(hasDependency(cockpitPackage, 'dependencies', '@luma/core'), '@luma/cockpit 应通过 dependencies 依赖 @luma/core')
+assert(hasDependency(cockpitPackage, 'dependencies', '@luma/icons-vue'), '@luma/cockpit 应通过 dependencies 依赖 @luma/icons-vue')
 assert(hasDependency(cockpitPackage, 'peerDependencies', 'vue'), '@luma/cockpit 应把 vue 放在 peerDependencies')
 assert(!cockpitAllDependencies.has('@luma/charts'), '@luma/cockpit 不能依赖 @luma/charts')
 assert(!coreAllDependencies.has('@luma/cockpit'), '@luma/core 不能反向依赖 @luma/cockpit')
@@ -234,6 +248,15 @@ for (const forbiddenName of ['echarts', 'vue-echarts', 'vue-i18n', 'vxe-table', 
 }
 
 /***********************源码边界*********************/
+const iconsFrameworkMatches = findTextMatches(
+  join(packageDirs.icons, 'src'),
+  /from ['"]vue['"]|@iconify\/vue|\.vue['"]?/,
+)
+
+for (const match of iconsFrameworkMatches) {
+  errors.push(`@luma/icons 源码出现框架依赖：${match}`)
+}
+
 const coreForbiddenMatches = findTextMatches(
   join(packageDirs.core, 'src'),
   /@luma\/vben-compat|@luma\/charts|@luma\/cockpit|vue-i18n|@intlify\/|vxe-table|vxe-pc-ui|xe-utils|vue-echarts|from 'echarts'/,
@@ -266,7 +289,7 @@ for (const match of datavForbiddenMatches) {
 
 const appSourceAliasMatches = findTextMatches(
   join(rootDir, 'apps'),
-  /\.\.\/\.\.\/packages|packages\/(?:icons|core|datav|cockpit|vben-compat|vite)\/src|packages\\(?:icons|core|datav|cockpit|vben-compat|vite)\\src/,
+  /\.\.\/\.\.\/packages|packages\/(?:icons|icons-vue|core|datav|cockpit|vben-compat|vite)\/src|packages\\(?:icons|icons-vue|core|datav|cockpit|vben-compat|vite)\\src/,
   new Set(),
   ['../../packages/vite/src/aliases'],
 )

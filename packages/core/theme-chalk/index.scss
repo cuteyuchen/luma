@@ -44,6 +44,27 @@
 @use "element-plus/theme-chalk/src/tree-select.scss";
 @use "element-plus/theme-chalk/src/upload.scss";
 
+html {
+  box-sizing: border-box;
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--el-bg-color-page);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--el-bg-color-page);
+}
+
 .luma-app {
   min-height: 100vh;
 }

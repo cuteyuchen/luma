@@ -10,6 +10,7 @@ const rootDir = join(scriptsDir, '..')
 const defaultRegistry = 'https://registry.npmjs.org'
 const publishPackageJsonPaths = [
   'packages/icons/package.json',
+  'packages/icons-vue/package.json',
   'packages/core/package.json',
   'packages/charts/package.json',
   'packages/datav/package.json',

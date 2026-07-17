@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { LumaIcon, LumaIconPicker, LumaIconPickerDialog } from '@luma/icons'
+import { LumaIcon, LumaIconPicker, LumaIconPickerDialog } from '@luma/icons-vue'
 import { LumaCrudTable } from '../components/crud-table'
 import { LumaInfoTable } from '../components/info-table'
 import { LumaPage } from '../components/page'

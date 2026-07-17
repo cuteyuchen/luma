@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LumaLayoutMenuItem } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { computed, inject } from 'vue'
 import { routeLocationKey } from 'vue-router'
 import { findMenuTrailByPath, resolveNavigationTarget } from './state/menu-layout'

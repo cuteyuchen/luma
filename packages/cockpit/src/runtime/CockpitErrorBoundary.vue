@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElButton } from 'element-plus'
 import { nextTick, onErrorCaptured, ref } from 'vue'
 

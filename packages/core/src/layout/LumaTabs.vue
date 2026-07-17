@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import type { LumaLayoutTabItem, LumaTabStyle } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import Sortable from 'sortablejs'
 import {
   computed,

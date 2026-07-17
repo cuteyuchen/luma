@@ -12,7 +12,8 @@ rg -n "guiren|gr-framework|GrFramework|GSchemaForm|GSchemaTable|GCrudTable|GPage
 
 ## 依赖方向
 
-- `@luma/icons` 不依赖 `@luma/core`。
+- `@luma/icons` 保持零运行时依赖和零 Vue 引用。
+- `@luma/icons-vue` 只依赖 `@luma/icons`，并把 Vue 与 Iconify Vue 保持为 peer dependency。
 - `@luma/core` 不依赖 `@luma/vben-compat`。
 - Element Plus 保持为 `@luma/core` 的 peer dependency，Luma 不从零重写基础 UI 控件。
 - `@luma/core` 不默认依赖 VXE。
@@ -41,7 +42,7 @@ pnpm release:boundaries
 pnpm release:names
 ```
 
-这个命令验证 `@luma/icons`、`@luma/core`、`@luma/charts`、`@luma/cockpit`、`@luma/vben-compat`、`@luma/vite`、`create-luma-admin` 是否能在 registry 查询到；它不能证明发布账号拥有或可创建 `@luma` scope。
+这个命令验证 `@luma/icons`、`@luma/icons-vue`、`@luma/core`、`@luma/charts`、`@luma/datav`、`@luma/cockpit`、`@luma/vben-compat`、`@luma/vite`、`create-luma-admin` 是否能在 registry 查询到；它不能证明发布账号拥有或可创建 `@luma` scope。
 
 拆开执行时也必须保持串行：
 
@@ -68,8 +69,10 @@ pnpm pack:dry-run
 
 ```bash
 pnpm --filter @luma/icons pack --dry-run
+pnpm --filter @luma/icons-vue pack --dry-run
 pnpm --filter @luma/core pack --dry-run
 pnpm --filter @luma/charts pack --dry-run
+pnpm --filter @luma/datav pack --dry-run
 pnpm --filter @luma/cockpit pack --dry-run
 pnpm --filter @luma/vben-compat pack --dry-run
 pnpm --filter @luma/vite pack --dry-run
@@ -81,6 +84,7 @@ pnpm --filter create-luma-admin pack --dry-run
 - 包含 `dist`。
 - 包含包内 `README.md`。
 - `@luma/core` 包含 `theme-chalk/index.scss` 和 `dist/core.css`。
+- `@luma/icons-vue` 包含 `dist/icons-vue.css`。
 - `@luma/cockpit` 包含 `dist/cockpit.css` 及 `dist/runtime.js`、`dist/designer.js` 独立入口。
 - `create-luma-admin` 包含 `dist/cli.js` 和 `dist/index.js`。
 - 不包含 `apps/*`。

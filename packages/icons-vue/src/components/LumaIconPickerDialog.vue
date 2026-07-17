@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from 'vue'
 import LumaIconPicker from './LumaIconPicker.vue'
 
+/***********************属性与事件*********************/
 withDefaults(defineProps<{
   cancelText?: string
   confirmText?: string

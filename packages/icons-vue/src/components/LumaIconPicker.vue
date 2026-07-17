@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { IconDefinition } from '../types'
+import type { IconDefinition } from '@luma/icons'
 import { computed, ref, watch } from 'vue'
-import { getRegisteredIconGroups } from '../registry/groups'
-import { getRegisteredIconDefinitions } from '../registry/icons'
+import { useIconRegistry } from '../composables/useIconRegistry'
 import LumaIcon from './LumaIcon.vue'
 
 const props = withDefaults(defineProps<{
@@ -28,10 +27,11 @@ const keyword = ref('')
 const activeGroup = ref(props.group)
 const page = ref(1)
 const effectivePageSize = computed(() => Math.max(1, props.pageSize))
+const registry = useIconRegistry()
 
-const icons = computed<IconDefinition[]>(() => getRegisteredIconDefinitions())
+const icons = registry.icons
 const groups = computed(() => {
-  const registered = getRegisteredIconGroups()
+  const registered = registry.groups.value
   const known = new Set(registered.map(group => group.key))
   const inferred = icons.value
     .map(icon => icon.group)

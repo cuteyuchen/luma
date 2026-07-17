@@ -1,11 +1,14 @@
-import type { Component } from 'vue'
 import type { IconDefinition, IconKey } from '../types'
-import { iconDefinitions } from './state'
+import { iconDefinitions, notifyIconRegistryChange } from './state'
 
 /***********************图标注册*********************/
 export function registerIcons(icons: IconDefinition[]): void {
   for (const icon of icons) {
     iconDefinitions.set(icon.key, icon)
+  }
+
+  if (icons.length) {
+    notifyIconRegistryChange()
   }
 }
 
@@ -18,10 +21,10 @@ export function getRegisteredIconDefinitions(): IconDefinition[] {
   return [...iconDefinitions.values()]
 }
 
-export function createComponentIconDefinitions(
+export function createComponentIconDefinitions<TComponent>(
   group: string,
-  icons: Record<string, Component>,
-): IconDefinition[] {
+  icons: Record<string, TComponent>,
+): IconDefinition<TComponent>[] {
   return Object.entries(icons).map(([key, component]) => ({
     component,
     group,

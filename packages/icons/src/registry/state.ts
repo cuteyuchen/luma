@@ -1,7 +1,24 @@
 import type { IconDefinition, IconGroupDefinition, IconKey } from '../types'
-import { shallowReactive } from 'vue'
 
 /***********************注册表状态*********************/
-export const iconDefinitions = shallowReactive(new Map<IconKey, IconDefinition>())
+export const iconDefinitions = new Map<IconKey, IconDefinition>()
 
-export const iconGroups = shallowReactive(new Map<string, IconGroupDefinition>())
+export const iconGroups = new Map<string, IconGroupDefinition>()
+
+export type IconRegistryListener = () => void
+
+const registryListeners = new Set<IconRegistryListener>()
+
+export function notifyIconRegistryChange(): void {
+  for (const listener of registryListeners) {
+    listener()
+  }
+}
+
+export function subscribeIconRegistry(listener: IconRegistryListener): () => void {
+  registryListeners.add(listener)
+
+  return () => {
+    registryListeners.delete(listener)
+  }
+}

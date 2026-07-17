@@ -52,6 +52,7 @@ function createPackageJson(projectName: string): string {
     dependencies: {
       '@luma/core': '^0.0.0',
       '@luma/icons': '^0.0.0',
+      '@luma/icons-vue': '^0.0.0',
       'element-plus': '^2.11.0',
       'vue': '^3.5.0',
       'vue-router': '^4.5.0',
@@ -167,7 +168,7 @@ import { router } from './router'
 import { permissionStore } from './services/access'
 import '@luma/core/theme-chalk/index.scss'
 import '@luma/core/style.css'
-import '@luma/icons/style.css'
+import '@luma/icons-vue/style.css'
 import 'element-plus/dist/index.css'
 import './styles.scss'
 

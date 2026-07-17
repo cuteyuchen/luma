@@ -4,7 +4,7 @@ import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types
 import type { CockpitGridRowConfig, CockpitSide, CockpitWidgetInstance } from '../types'
 import type { DesignerPlacementSelection } from './types'
 import type { DraftWidgetLocation, UseCockpitDraftReturn } from './useCockpitDraft'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElButton, ElInputNumber, ElMessage, ElSwitch, ElTooltip } from 'element-plus'
 import { computed, nextTick } from 'vue'
 import CockpitWidgetDropZone from './CockpitWidgetDropZone.vue'

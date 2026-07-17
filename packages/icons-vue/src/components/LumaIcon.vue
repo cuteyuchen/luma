@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
-import type { IconDefinition, IconGradientOptions } from '../types'
+import type { IconDefinition, IconGradientOptions } from '@luma/icons'
+import { applySvgGradient, recolorSvgString } from '@luma/icons'
+import { Icon as IconifyIcon } from '@iconify/vue'
 import { computed, useId } from 'vue'
-import { resolveIconDefinition } from '../registry/icons'
-import { applySvgGradient, recolorSvgString } from '../runtime/svg'
+import { useIconRegistry } from '../composables/useIconRegistry'
 
 /***********************属性定义*********************/
 const props = defineProps<{
   name?: string
-  icon?: Component | IconDefinition | string
+  icon?: Component | IconDefinition<Component> | string
   size?: number | string
   color?: string
   gradient?: IconGradientOptions
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const gradientId = `luma-icon-gradient-${useId()}`
+const registry = useIconRegistry()
 
 /***********************图标解析*********************/
 const resolvedDefinition = computed(() => {
@@ -23,7 +25,7 @@ const resolvedDefinition = computed(() => {
     return undefined
   }
 
-  return resolveIconDefinition(props.name)
+  return registry.resolve(props.name)
 })
 
 const resolvedSvgText = computed(() => {
@@ -47,17 +49,33 @@ const resolvedSvgText = computed(() => {
 })
 
 const resolvedComponent = computed<Component | undefined>(() => {
-  if (resolvedDefinition.value?.component) {
-    return resolvedDefinition.value.component
+  const registeredComponent = resolvedDefinition.value?.component
+  if (typeof registeredComponent === 'function' || (typeof registeredComponent === 'object' && registeredComponent)) {
+    return registeredComponent as Component
   }
 
   if (typeof props.icon === 'object' && props.icon && 'component' in props.icon) {
-    return props.icon.component
+    const component = props.icon.component
+    return typeof component === 'function' || (typeof component === 'object' && component)
+      ? component as Component
+      : undefined
   }
 
   return typeof props.icon === 'function' || typeof props.icon === 'object'
     ? props.icon as Component
     : undefined
+})
+
+const resolvedIconify = computed(() => {
+  if (resolvedDefinition.value?.source === 'iconify') {
+    return resolvedDefinition.value.icon
+  }
+
+  if (typeof props.icon === 'object' && props.icon && 'source' in props.icon && props.icon.source === 'iconify') {
+    return props.icon.icon
+  }
+
+  return undefined
 })
 
 /***********************渲染状态*********************/
@@ -70,7 +88,7 @@ const iconStyle = computed(() => {
   }
 })
 
-const hasIcon = computed(() => Boolean(resolvedSvgText.value || resolvedComponent.value))
+const hasIcon = computed(() => Boolean(resolvedSvgText.value || resolvedComponent.value || resolvedIconify.value))
 
 const resolvedTitle = computed(() => props.title ?? resolvedDefinition.value?.label)
 </script>
@@ -84,6 +102,7 @@ const resolvedTitle = computed(() => props.title ?? resolvedDefinition.value?.la
     aria-hidden="true"
   >
     <component :is="resolvedComponent" v-if="resolvedComponent" class="luma-icon__component" />
+    <IconifyIcon v-else-if="resolvedIconify" class="luma-icon__component" :icon="resolvedIconify" />
     <span v-else class="luma-icon__svg" v-html="resolvedSvgText" />
   </span>
 </template>

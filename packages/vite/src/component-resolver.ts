@@ -20,9 +20,9 @@ const COMPONENT_PACKAGES = new Map<string, string>([
   ['LumaContent', '@luma/core/layout'],
   ['LumaCrudTable', '@luma/core/components'],
   ['LumaHeader', '@luma/core/layout'],
-  ['LumaIcon', '@luma/icons'],
-  ['LumaIconPicker', '@luma/icons'],
-  ['LumaIconPickerDialog', '@luma/icons'],
+  ['LumaIcon', '@luma/icons-vue'],
+  ['LumaIconPicker', '@luma/icons-vue'],
+  ['LumaIconPickerDialog', '@luma/icons-vue'],
   ['LumaInfoTable', '@luma/core/components'],
   ['LumaLayout', '@luma/core/layout'],
   ['LumaPage', '@luma/core/components'],
@@ -40,7 +40,7 @@ function resolveStyle(packageName: string): string | undefined {
   if (packageName.startsWith('@luma/core')) {
     return '@luma/core/style.css'
   }
-  if (packageName === '@luma/icons' || packageName === '@luma/charts') {
+  if (packageName === '@luma/icons-vue' || packageName === '@luma/charts') {
     return `${packageName}/style.css`
   }
 

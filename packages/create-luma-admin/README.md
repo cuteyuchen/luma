@@ -1,6 +1,6 @@
 # create-luma-admin
 
-`create-luma-admin` 是 Luma 的轻量后台基座脚手架，用于生成通过公开包入口消费 `@luma/core` 和 `@luma/icons` 的 Vue 应用。
+`create-luma-admin` 是 Luma 的轻量后台基座脚手架，用于生成通过公开包入口消费 `@luma/core`、`@luma/icons` 和 `@luma/icons-vue` 的 Vue 应用。
 
 ## 使用
 
@@ -32,6 +32,6 @@ pnpm dev
 - `createRequestClient` 请求封装示例。
 - Element Plus、Vue 和 Luma 公共能力的明确 vendor 分包配置。
 
-脚手架生成的项目只通过 `@luma/core`、`@luma/icons` 等公开包入口消费能力，不依赖 monorepo 内部源码路径。
+脚手架生成的项目只通过 `@luma/core`、`@luma/icons`、`@luma/icons-vue` 等公开包入口消费能力，不依赖 monorepo 内部源码路径。
 
 脚手架不会生成用户、角色、菜单、字典、配置等完整系统管理业务；这些应由具体项目按自身接口和权限模型实现。

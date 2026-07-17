@@ -2,7 +2,7 @@
 import type { CockpitWidgetDefinition } from '../registry/types'
 import type { CockpitBaseContext } from '../types'
 import type { CockpitMessageBus } from '../messaging/types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { computed, onBeforeUnmount, ref, shallowReactive, watchEffect } from 'vue'
 import { useCanvasScale } from '../composables/useCanvasScale'
 import { provideCockpitContext } from '../composables/useCockpitContext'

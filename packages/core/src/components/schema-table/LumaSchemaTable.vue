@@ -12,7 +12,7 @@ import type {
   SchemaTableSortChangePayload,
   SchemaTableTreeProps,
 } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElCheckbox, ElLoading, ElTable, ElTableColumn } from 'element-plus'
 import {
   computed,

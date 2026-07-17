@@ -115,6 +115,7 @@
   },
   "dependencies": {
     "@luma/icons": "workspace:*",
+    "@luma/icons-vue": "workspace:*",
     "sortablejs": "^1.15.7"
   },
   "devDependencies": {

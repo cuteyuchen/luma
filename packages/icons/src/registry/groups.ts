@@ -1,10 +1,14 @@
 import type { IconGroupDefinition } from '../types'
-import { iconGroups } from './state'
+import { iconGroups, notifyIconRegistryChange } from './state'
 
 /***********************分组注册*********************/
 export function registerIconGroups(groups: IconGroupDefinition[]): void {
   for (const group of groups) {
     iconGroups.set(group.key, group)
+  }
+
+  if (groups.length) {
+    notifyIconRegistryChange()
   }
 }
 

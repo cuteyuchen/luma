@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LumaLayoutMenuItem } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 
 interface SearchResult {

@@ -1,18 +1,16 @@
-import type { Component } from 'vue'
-
 /***********************图标基础类型*********************/
 export type IconKey = string
 
 export type IconSource = 'local-svg' | 'iconify' | 'component'
 
-export interface IconDefinition {
+export interface IconDefinition<TComponent = unknown> {
   key: IconKey
   label?: string
   group?: string
   source: IconSource
   svgText?: string
   icon?: string
-  component?: Component
+  component?: TComponent
 }
 
 export interface IconGroupDefinition {

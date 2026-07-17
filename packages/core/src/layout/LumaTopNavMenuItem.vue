@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LumaLayoutMenuItem } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElMenuItem, ElSubMenu } from 'element-plus'
 import { computed } from 'vue'
 import LumaMenuBadge from './LumaMenuBadge.vue'

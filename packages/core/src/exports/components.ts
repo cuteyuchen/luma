@@ -99,4 +99,4 @@ export {
   LumaIcon,
   LumaIconPicker,
   LumaIconPickerDialog,
-} from '@luma/icons'
+} from '@luma/icons-vue'

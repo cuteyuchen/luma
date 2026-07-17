@@ -66,8 +66,25 @@ const DEFAULT_DURATION: Partial<Record<BorderBoxVariant, number>> = {
 const rootRef = useTemplateRef<HTMLElement>('rootRef')
 const svgRef = useTemplateRef<SVGSVGElement>('svgRef')
 const elementSize = useElementSize(rootRef)
-const width = computed(() => elementSize.value.width)
-const height = computed(() => elementSize.value.height)
+
+/**
+ * Variants whose decorations were authored against a fixed pixel canvas (mixing
+ * absolute mid-region coordinates with edge-relative ones). Rendering them in a
+ * viewBox with `preserveAspectRatio="none"` scales the whole frame to the
+ * container by its original proportions, instead of letting the absolute
+ * constants drift when the box is smaller than the original design size.
+ */
+const FIXED_VIEWBOX: Partial<Record<BorderBoxVariant, readonly [number, number]>> = {
+  4: [680, 240],
+}
+const hasFixedViewBox = computed(() => props.variant in FIXED_VIEWBOX)
+const measuredWidth = computed(() => elementSize.value.width)
+const measuredHeight = computed(() => elementSize.value.height)
+// Inside a fixed viewBox, geometry is expressed in design-space units.
+const width = computed(() => FIXED_VIEWBOX[props.variant]?.[0] ?? measuredWidth.value)
+const height = computed(() => FIXED_VIEWBOX[props.variant]?.[1] ?? measuredHeight.value)
+const svgViewBox = computed(() => (hasFixedViewBox.value ? `0 0 ${width.value} ${height.value}` : undefined))
+const svgPreserveAspectRatio = computed(() => (hasFixedViewBox.value ? 'none' : undefined))
 const hovered = shallowRef(false)
 const focused = shallowRef(false)
 const viewportPaused = useAnimationPause(rootRef)
@@ -128,6 +145,8 @@ const cornerTransforms = computed(() => [
   `translate(0 ${height.value}) scale(1 -1)`,
   `translate(${width.value} ${height.value}) scale(-1 -1)`,
 ])
+
+const bb1Corners = ['left-top', 'right-top', 'left-bottom', 'right-bottom'] as const
 
 function pulseOpacity(index: number): number {
   return [1, 0.7, 0.5][index - 1] ?? 0.5
@@ -190,8 +209,10 @@ onMounted(() => {
       class="luma-border-box__svg"
       :class="{ 'is-frame-reverse': reverse && (variant === 4 || variant === 5) }"
       focusable="false"
-      :height="height"
-      :width="width"
+      :height="hasFixedViewBox ? undefined : height"
+      :width="hasFixedViewBox ? undefined : width"
+      :viewBox="svgViewBox"
+      :preserveAspectRatio="svgPreserveAspectRatio"
     >
       <template v-if="variant === 1">
         <polygon
@@ -205,44 +226,6 @@ onMounted(() => {
           ${width - 24}, 11 ${width - 38}, 11 ${width - 41}, 8 ${width - 73}, 8 ${width - 75}, 10
           ${width - 81}, 10 ${width - 85}, 6 85, 6 81, 10 75, 10 73, 8 41, 8 38, 11 24, 11 13, 21 13, 24`"
         />
-        <g v-for="(transform, index) in cornerTransforms" :key="index" :transform="transform || undefined">
-          <polygon
-            :fill="primaryColor"
-            points="6,66 6,18 12,12 18,12 24,6 27,6 30,9 36,9 39,6 84,6 81,9 75,9 73.2,7 40.8,7 37.8,10.2 24,10.2 12,21 12,24 9,27 9,51 7.8,54 7.8,63"
-          >
-            <animate
-              attributeName="fill"
-              begin="0s"
-              :dur="halfDurationSeconds"
-              repeatCount="indefinite"
-              :values="`${primaryColor};${secondaryColor};${primaryColor}`"
-            />
-          </polygon>
-          <polygon
-            :fill="secondaryColor"
-            points="27.599999999999998,4.8 38.4,4.8 35.4,7.8 30.599999999999998,7.8"
-          >
-            <animate
-              attributeName="fill"
-              begin="0s"
-              :dur="halfDurationSeconds"
-              repeatCount="indefinite"
-              :values="`${secondaryColor};${primaryColor};${secondaryColor}`"
-            />
-          </polygon>
-          <polygon
-            :fill="primaryColor"
-            points="9,54 9,63 7.199999999999999,66 7.199999999999999,75 7.8,78 7.8,110 8.4,110 8.4,66 9.6,66 9.6,54"
-          >
-            <animate
-              attributeName="fill"
-              begin="0s"
-              :dur="durationSeconds"
-              repeatCount="indefinite"
-              :values="`${primaryColor};${secondaryColor};transparent`"
-            />
-          </polygon>
-        </g>
       </template>
 
       <template v-else-if="variant === 2">
@@ -479,6 +462,56 @@ onMounted(() => {
         <path :d="`M ${width - 5} ${height - 30} L ${width - 5} ${height - 5} L ${width - 30} ${height - 5}`" fill="transparent" :stroke="secondaryColor" />
       </template>
     </svg>
+
+    <template v-if="variant === 1">
+      <svg
+        v-for="corner in bb1Corners"
+        :key="corner"
+        aria-hidden="true"
+        class="luma-border-box__bb1-corner"
+        :class="`luma-border-box__bb1-corner--${corner}`"
+        focusable="false"
+        width="150px"
+        height="150px"
+      >
+        <polygon
+          :fill="primaryColor"
+          points="6,66 6,18 12,12 18,12 24,6 27,6 30,9 36,9 39,6 84,6 81,9 75,9 73.2,7 40.8,7 37.8,10.2 24,10.2 12,21 12,24 9,27 9,51 7.8,54 7.8,63"
+        >
+          <animate
+            attributeName="fill"
+            begin="0s"
+            :dur="halfDurationSeconds"
+            repeatCount="indefinite"
+            :values="`${primaryColor};${secondaryColor};${primaryColor}`"
+          />
+        </polygon>
+        <polygon
+          :fill="secondaryColor"
+          points="27.599999999999998,4.8 38.4,4.8 35.4,7.8 30.599999999999998,7.8"
+        >
+          <animate
+            attributeName="fill"
+            begin="0s"
+            :dur="halfDurationSeconds"
+            repeatCount="indefinite"
+            :values="`${secondaryColor};${primaryColor};${secondaryColor}`"
+          />
+        </polygon>
+        <polygon
+          :fill="primaryColor"
+          points="9,54 9,63 7.199999999999999,66 7.199999999999999,75 7.8,78 7.8,110 8.4,110 8.4,66 9.6,66 9.6,54"
+        >
+          <animate
+            attributeName="fill"
+            begin="0s"
+            :dur="durationSeconds"
+            repeatCount="indefinite"
+            :values="`${primaryColor};${secondaryColor};transparent`"
+          />
+        </polygon>
+      </svg>
+    </template>
 
     <div class="luma-border-box__content">
       <slot />

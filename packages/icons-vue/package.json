@@ -1,16 +1,19 @@
 {
-  "name": "@luma/icons",
+  "name": "@luma/icons-vue",
   "type": "module",
   "version": "0.0.0",
-  "description": "Framework-agnostic Luma icon registry and SVG utilities.",
+  "description": "Vue components and reactive adapters for @luma/icons.",
   "license": "MIT",
   "keywords": [
     "luma",
+    "vue",
     "icons",
     "iconify",
     "svg"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -20,11 +23,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./vite": {
-      "types": "./dist/src/vite/index.d.ts",
-      "import": "./dist/vite.js",
-      "require": "./dist/vite.cjs"
-    }
+    "./style.css": "./dist/icons-vue.css"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -34,8 +33,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build --config vite.config.ts && tsc -p tsconfig.json --emitDeclarationOnly && node ../../scripts/clean-package-dist.mjs dist",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "vite build --config vite.config.ts && vue-tsc -p tsconfig.json --emitDeclarationOnly --outDir dist && node ../../scripts/clean-package-dist.mjs dist",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run --config ../../vitest.config.ts tests"
+  },
+  "peerDependencies": {
+    "@iconify/vue": "^5.0.0",
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "@luma/icons": "workspace:*"
   }
 }

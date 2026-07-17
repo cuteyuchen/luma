@@ -1,17 +1,7 @@
 import { builtinIconDefinitions } from './builtin-icons'
-import LumaIcon from './components/LumaIcon.vue'
-import LumaIconPicker from './components/LumaIconPicker.vue'
-import LumaIconPickerDialog from './components/LumaIconPickerDialog.vue'
 import { registerIcons } from './registry/icons'
 
 registerIcons(builtinIconDefinitions)
-
-/***********************组件导出*********************/
-export {
-  LumaIcon,
-  LumaIconPicker,
-  LumaIconPickerDialog,
-}
 
 export { builtinIconDefinitions }
 
@@ -27,6 +17,7 @@ export {
   registerIcons,
   resolveIconDefinition,
 } from './registry/icons'
+export { subscribeIconRegistry } from './registry/state'
 export {
   applySvgGradient,
   clearIconDataUriCache,
@@ -51,3 +42,4 @@ export type {
   IconKey,
   IconSource,
 } from './types'
+export type { IconRegistryListener } from './registry/state'

@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 
 export type LumaAliasTarget = 'dist' | 'source'
-export type LumaAliasPackage = 'charts' | 'cockpit' | 'core' | 'datav' | 'icons' | 'vben-compat'
+export type LumaAliasPackage = 'charts' | 'cockpit' | 'core' | 'datav' | 'icons' | 'icons-vue' | 'vben-compat'
 
 export interface LumaAliasEntry {
   find: string
@@ -48,10 +48,10 @@ const PACKAGE_ENTRIES: PackageEntry[] = [
     specifier: '@luma/icons/vite',
   },
   {
-    dist: 'packages/icons/dist/icons.css',
-    packageName: 'icons',
-    source: 'packages/icons/src/source-style.css',
-    specifier: '@luma/icons/style.css',
+    dist: 'packages/icons-vue/dist/icons-vue.css',
+    packageName: 'icons-vue',
+    source: 'packages/icons-vue/src/source-style.css',
+    specifier: '@luma/icons-vue/style.css',
   },
   {
     dist: 'packages/charts/dist/charts.css',
@@ -114,6 +114,12 @@ const PACKAGE_ENTRIES: PackageEntry[] = [
     specifier: '@luma/icons',
   },
   {
+    dist: 'packages/icons-vue/dist/index.js',
+    packageName: 'icons-vue',
+    source: 'packages/icons-vue/src/index.ts',
+    specifier: '@luma/icons-vue',
+  },
+  {
     dist: 'packages/core/dist/index.js',
     packageName: 'core',
     source: 'packages/core/src/index.ts',
@@ -129,7 +135,7 @@ const PACKAGE_ENTRIES: PackageEntry[] = [
 
 export function createLumaAliases(options: CreateLumaAliasesOptions): LumaAliasEntry[] {
   const target = options.target ?? 'source'
-  const includedPackages = new Set(options.packages ?? ['charts', 'cockpit', 'core', 'datav', 'icons', 'vben-compat'])
+  const includedPackages = new Set(options.packages ?? ['charts', 'cockpit', 'core', 'datav', 'icons', 'icons-vue', 'vben-compat'])
 
   return PACKAGE_ENTRIES
     .filter(entry => includedPackages.has(entry.packageName))

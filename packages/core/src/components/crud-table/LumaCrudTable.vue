@@ -10,7 +10,7 @@ import type {
   CrudTableSearchPayload,
   CrudToolbarSlotProps,
 } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElButton, ElMessageBox } from 'element-plus'
 import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { LumaPagination } from '../pagination'

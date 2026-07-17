@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance, CSSProperties } from 'vue'
 import type { LumaLayoutMenuItem } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElMenu, ElMenuItem } from 'element-plus'
 import { computed, useTemplateRef } from 'vue'
 import LumaMenuBadge from './LumaMenuBadge.vue'

@@ -1,7 +1,8 @@
 import { mount } from '@vue/test-utils'
+import { registerIcons } from '@luma/icons'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaIcon, LumaIconPicker, LumaIconPickerDialog, registerIcons } from '../src'
+import { LumaIcon, LumaIconPicker, LumaIconPickerDialog } from '../src'
 
 describe('lumaIcon', () => {
   it('可以渲染已注册的 SVG 图标', () => {

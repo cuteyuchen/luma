@@ -2,7 +2,7 @@
 import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types'
 import type { CockpitConfig, CockpitConfigIssue, CockpitDesignerSavePayload, CockpitThemeMode } from '../types'
 import type { DesignerPlacementSelection } from './types'
-import { LumaIcon } from '@luma/icons'
+import { LumaIcon } from '@luma/icons-vue'
 import { ElAlert, ElButton, ElInput, ElMessageBox, ElOption, ElSelect, ElTooltip } from 'element-plus'
 import { computed, ref, watch } from 'vue'
 import { createCockpitMessageBus } from '../messaging/createCockpitMessageBus'
