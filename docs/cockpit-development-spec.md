@@ -35,6 +35,8 @@ interface CockpitLayoutConfig {
 }
 
 interface CockpitRegionConfig {
+  /** 1920 基准画布中的区域总宽像素；列宽按列数均分写入 columns[].width。 */
+  width: number
   columns: Array<{ id: string, width: number }>
   rows: CockpitGridRowConfig[]
 }
@@ -52,9 +54,9 @@ interface CockpitGridRowConfig {
 约束：
 
 - 新布局默认左右各一行一列空槽。
-- 列宽保存为正整数像素，不设置框架上限。
+- 区域宽保存为正整数像素，不设置框架上限；列宽由区域宽按列数均分，不再单独编辑。
 - 行高保存为百分比，编辑后按原比例自动分配，其总和始终为 `100%`。
-- `grid` 行的 cell 数必须与列数一致，每个 cell 最多一个模块。
+- `grid` 行的 cell 数必须与列数一致，每个 cell 最多一个模块；允许区域仅一行。
 - `tabs` 行跨满全部列，`cells` 为空，模块按 `widgets` 顺序显示为 Tab。
 - 模块实例 id 在整个配置中唯一；相同 type 可以创建多个实例。
 - v1/v2 不迁移，消费应用遇到旧持久化配置时丢弃并创建 v3 默认配置。
@@ -63,7 +65,7 @@ interface CockpitGridRowConfig {
 
 - `LumaCockpit` 使用 `v-model:activeLayoutId`，不渲染内置布局导航。
 - 中心通过 `#center="{ context, layout }"` 提供，位于全宽底层画布。
-- 左右区域定位在中心内容上层两侧，宽度为区域各列像素宽度之和。
+- 左右区域定位在中心内容上层两侧，宽度为区域 `width`（列宽为均分结果）。
 - 普通模块和 Tab 行各使用一个视觉 Card；Tab 行只显示激活模块，但保留全部模块实例。
 - Tab 默认项来自 `activeWidgetId`，失效时回退到第一个模块。
 - `scale` 模式使用基准画布等比缩放；`vwvh` 模式把设计尺寸转换为视口单位。
@@ -82,8 +84,8 @@ interface CockpitGridRowConfig {
 ### 左右区域
 
 - 左右区域完全独立，不提供同时修改两侧的全局行列控制。
-- 每侧区域头部常驻展示行数、列数及各列像素宽度设置，无需悬浮或点击展开。
-- Designer 按列宽比例预览，运行时使用真实像素宽度。
+- 每侧区域头部常驻展示行数、列数及区域像素宽度设置，无需悬浮或点击展开。
+- Designer 按列数均分预览，运行时使用区域宽与均分后的列像素宽度。
 - 每行头部常驻展示百分比高度和是否合并为 Tab 行的设置。
 - 缩减会删除模块时拒绝操作，要求先迁移或删除模块。
 
@@ -124,7 +126,7 @@ interface CockpitGridRowConfig {
 ## 6. 验收要求
 
 - 单元测试覆盖配置标准化、左右独立调整、行高分配、缩减保护、Tab 合并/解除和激活项维护。
-- 组件测试覆盖单 Card Tab、列宽比例、中心设计态上下文、共享消息总线和键盘移动替换。
+- 组件测试覆盖单 Card Tab、区域宽均分、中心设计态上下文、共享消息总线和键盘移动替换。
 - E2E 覆盖库模块复制、跨区域移动、替换确认、Tab 切换、保存持久化及中心/模块联动。
 - 浏览器检查 `1440px`、`1263×793`、`1024px` 的深浅主题，不要求移动端。
 - `@luma/cockpit`、独立应用和 Admin 必须通过测试、类型检查和生产构建。

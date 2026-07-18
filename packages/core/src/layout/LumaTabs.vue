@@ -644,7 +644,7 @@ onBeforeUnmount(() => {
 
     <button
       v-if="showRefresh"
-      class="luma-tabs__tool"
+      class="luma-tabs__tool luma-tabs__tool--refresh"
       type="button"
       aria-label="刷新当前页面"
       data-action="refresh-current-tab"
@@ -659,6 +659,8 @@ onBeforeUnmount(() => {
       class="luma-tabs__tool"
       type="button"
       aria-label="更多操作"
+      aria-haspopup="menu"
+      :aria-expanded="moreMenu.visible"
       data-tab-menu-trigger
       @click="openMoreMenu($event)"
     >
@@ -667,9 +669,10 @@ onBeforeUnmount(() => {
 
     <button
       v-if="showMaximize"
-      class="luma-tabs__tool"
+      class="luma-tabs__tool luma-tabs__tool--maximize"
       type="button"
       :aria-label="isMaximized ? '退出内容最大化' : '内容最大化'"
+      data-action="maximize-content"
       @click="toggleMaximize"
     >
       <LumaIcon :name="isMaximized ? 'luma:restore' : 'luma:maximize'" :size="16" />
@@ -980,7 +983,36 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .luma-tabs {
-    height: 44px;
+    height: 40px;
+  }
+
+  .luma-tabs__list {
+    gap: 1px;
+    padding: 3px 4px 0;
+  }
+
+  .luma-tabs__item {
+    min-width: 72px;
+    max-width: min(180px, 42vw);
+  }
+
+  .luma-tabs__tab {
+    gap: 4px;
+    padding: 0 22px 0 8px;
+  }
+
+  .luma-tabs__close {
+    right: 5px;
+  }
+
+  .luma-tabs__tool {
+    flex-basis: 32px;
+    width: 32px;
+  }
+
+  .luma-tabs__tool--refresh,
+  .luma-tabs__tool--maximize {
+    display: none;
   }
 }
 

@@ -171,7 +171,7 @@ defineExpose({
   background: var(--el-fill-color-blank);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .luma-page-layout {
     gap: 12px;
   }
@@ -188,8 +188,8 @@ defineExpose({
   }
 
   .luma-page-layout__query-actions :deep(.el-button) {
-    min-height: 44px;
-    padding-inline: 16px;
+    min-height: 32px;
+    padding-inline: 12px;
   }
 }
 </style>

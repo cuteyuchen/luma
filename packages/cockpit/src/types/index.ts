@@ -12,7 +12,7 @@ export interface CockpitWidgetInstance {
 
 export interface CockpitGridColumnConfig {
   id: string
-  /** 1920 基准画布中的列宽像素。 */
+  /** 由区域宽按列数均分后的列宽像素（运行时/预览用，不单独编辑）。 */
   width: number
 }
 
@@ -37,6 +37,8 @@ export interface CockpitGridRowConfig {
 }
 
 export interface CockpitRegionConfig {
+  /** 1920 基准画布中的区域总宽像素；列宽按列数均分。 */
+  width: number
   columns: CockpitGridColumnConfig[]
   rows: CockpitGridRowConfig[]
 }

@@ -16,6 +16,8 @@ import {
   createGridRow,
   createLayout,
   DEFAULT_COLUMN_WIDTH,
+  DEFAULT_REGION_WIDTH,
+  equalizeRegionColumns,
 } from './defaults'
 
 /***********************配置标准化*********************/
@@ -114,11 +116,18 @@ function normalizeRowHeights(rows: CockpitGridRowConfig[]): void {
 function normalizeRegion(raw: unknown): CockpitRegionConfig {
   const source = isRecord(raw) ? raw : {}
   const columns = normalizeColumns(source.columns)
+  const columnSum = columns.reduce((sum, column) => sum + column.width, 0)
+  const width = Math.round(positive(
+    source.width,
+    columnSum > 0 ? columnSum : DEFAULT_REGION_WIDTH,
+  ))
   const rows = arrayOf(source.rows).map(item => normalizeRow(item, columns.length))
   if (!rows.length)
     rows.push(createGridRow(columns.length))
   normalizeRowHeights(rows)
-  return { columns, rows }
+  const region: CockpitRegionConfig = { width, columns, rows }
+  equalizeRegionColumns(region)
+  return region
 }
 
 function normalizeLayout(raw: unknown): CockpitLayoutConfig {

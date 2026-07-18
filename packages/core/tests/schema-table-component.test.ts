@@ -297,8 +297,13 @@ describe('luma schema table', () => {
     expect(table.props('headerCellClassName')).toBe('header-class')
     expect(columns.map(item => item.props('type'))).toEqual(['selection', 'index', undefined, undefined, undefined])
     expect(columns[2]?.props('minWidth')).toBe(160)
+    expect(columns.at(-1)?.props('width')).toBe(160)
     expect(wrapper.find('.row-action').exists()).toBe(true)
-    expect(wrapper.find('.luma-schema-table__mobile-actions summary').text()).toBe('更多')
+    const mobileActionTrigger = wrapper.find('.luma-schema-table__mobile-actions')
+    expect(mobileActionTrigger.element.tagName).toBe('BUTTON')
+    expect(mobileActionTrigger.text()).toBe('更多')
+    expect(mobileActionTrigger.attributes('aria-haspopup')).toBe('menu')
+    expect(mobileActionTrigger.attributes('aria-expanded')).toBe('false')
 
     table.vm.$emit('selection-change', [rows[0]])
     await nextTick()
@@ -310,6 +315,111 @@ describe('luma schema table', () => {
       page: 2,
       pageSize: 10,
     })
+  })
+
+  it('移动端使用受控 Popover 显示行操作，且在操作、外部点击和 Escape 后关闭', async () => {
+    const originalWidth = window.innerWidth
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 768 })
+    const rows = [
+      { id: 'row-1', name: 'Luma' },
+      { id: 'row-2', name: 'Admin' },
+    ]
+    const actionCalls: string[] = []
+    const TableColumnStub = defineComponent({
+      name: 'ElTableColumn',
+      props: {
+        fixed: [String, Boolean],
+        label: String,
+        prop: String,
+        width: [String, Number],
+      },
+      setup(props, { slots }) {
+        return () => h('section', {
+          'class': 'el-table-column',
+          'data-label': props.label,
+          'data-width': props.width,
+        }, props.label === '操作'
+          ? rows.map((row, index) => h('div', { key: row.id }, slots.default?.({ $index: index, row })))
+          : [])
+      },
+    })
+    const wrapper = mount(LumaSchemaTable, {
+      global: {
+        stubs: {
+          ...elementPlusStubs,
+          ElTableColumn: TableColumnStub,
+        },
+      },
+      props: {
+        columns: [{ field: 'name', label: '名称' }],
+        rowKey: 'id',
+        rows,
+      },
+      slots: {
+        actions: ({ row }) => h('button', {
+          class: 'row-action',
+          type: 'button',
+          onClick: (event: MouseEvent) => {
+            event.stopPropagation()
+            actionCalls.push(String(row?.id))
+          },
+        }, `查看${String(row?.id)}`),
+      },
+    })
+
+    try {
+      await nextTick()
+      const actionColumn = wrapper.findAllComponents({ name: 'ElTableColumn' })
+        .find(column => column.props('label') === '操作')
+      const popovers = wrapper.findAllComponents({ name: 'ElPopover' })
+      const triggers = wrapper.findAll('.luma-schema-table__mobile-actions')
+
+      expect(actionColumn?.props('width')).toBe(72)
+      expect(popovers).toHaveLength(2)
+      expect(popovers[0]?.props()).toMatchObject({
+        placement: 'bottom-end',
+        teleported: true,
+        trigger: 'click',
+        visible: false,
+      })
+
+      await wrapper.setProps({ mobileActionWidth: 84 })
+      expect(actionColumn?.props('width')).toBe(84)
+
+      await triggers[0]?.trigger('click')
+      await nextTick()
+      expect(triggers[0]?.attributes('aria-expanded')).toBe('true')
+      expect(triggers[1]?.attributes('aria-expanded')).toBe('false')
+
+      await triggers[1]?.trigger('click')
+      await nextTick()
+      expect(triggers[0]?.attributes('aria-expanded')).toBe('false')
+      expect(triggers[1]?.attributes('aria-expanded')).toBe('true')
+
+      await wrapper.find('.luma-schema-table__mobile-actions-menu .row-action').trigger('click')
+      await nextTick()
+      expect(actionCalls).toEqual(['row-2'])
+      expect(triggers[1]?.attributes('aria-expanded')).toBe('false')
+
+      await triggers[0]?.trigger('click')
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      await nextTick()
+      expect(triggers[0]?.attributes('aria-expanded')).toBe('false')
+
+      await triggers[0]?.trigger('click')
+      document.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }))
+      await nextTick()
+      expect(triggers[0]?.attributes('aria-expanded')).toBe('false')
+
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 769 })
+      window.dispatchEvent(new Event('resize'))
+      await nextTick()
+      expect(actionColumn?.props('width')).toBe(160)
+    }
+    finally {
+      wrapper.unmount()
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
+    }
   })
 
   it('支持字段插槽、行级隐藏、列设置和树表属性', async () => {

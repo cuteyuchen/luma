@@ -15,7 +15,11 @@ const props = defineProps<{
 }>()
 
 const rowStyle = computed(() => ({ height: `${props.row.height}%` }))
-const gridStyle = computed(() => ({ gridTemplateColumns: props.columns.map(column => `calc(${column.width} * var(--luma-cockpit-x-unit, 1px))`).join(' ') }))
+const gridStyle = computed(() => ({
+  gridTemplateColumns: props.columns
+    .map(column => `calc(${column.width} * var(--luma-cockpit-x-unit, 1px))`)
+    .join(' '),
+}))
 const activeTabId = ref<string | undefined>()
 const visitedTabIds = reactive(new Set<string>())
 const env = useCockpitRuntimeEnv()

@@ -13,7 +13,9 @@ export {
   createRegion,
   createWidgetInstance,
   DEFAULT_COLUMN_WIDTH,
+  DEFAULT_REGION_WIDTH,
   DEFAULT_ROW_HEIGHT,
+  equalizeRegionColumns,
 } from './defaults'
 export {
   migrateCockpitConfig,

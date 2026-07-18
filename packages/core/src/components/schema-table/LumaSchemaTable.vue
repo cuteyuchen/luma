@@ -13,7 +13,7 @@ import type {
   SchemaTableTreeProps,
 } from './types'
 import { LumaIcon } from '@luma/icons-vue'
-import { ElCheckbox, ElLoading, ElTable, ElTableColumn } from 'element-plus'
+import { ElCheckbox, ElLoading, ElPopover, ElTable, ElTableColumn } from 'element-plus'
 import {
   computed,
   nextTick,
@@ -49,6 +49,7 @@ const props = withDefaults(defineProps<{
   indexWidth?: number | string
   loading?: boolean
   mobileActionLabel?: string
+  mobileActionWidth?: number | string
   pageSizes?: number[]
   pagination?: boolean
   rowClassName?: SchemaTableClassName<T>
@@ -74,6 +75,7 @@ const props = withDefaults(defineProps<{
   indexWidth: 64,
   loading: false,
   mobileActionLabel: '更多',
+  mobileActionWidth: 72,
   pageSizes: () => [10, 20, 50, 100],
   pagination: false,
   rowKey: 'id',
@@ -109,6 +111,8 @@ const hiddenColumnFields = shallowRef(new Set<string>())
 const columnOrder = shallowRef<string[]>([])
 const selectedRows = shallowRef<T[]>([])
 const selectedRowKeys = shallowRef<Array<string | number>>([])
+const isMobileViewport = shallowRef(typeof window !== 'undefined' && window.innerWidth <= 768)
+const openMobileActionKey = shallowRef<string | null>(null)
 let resizeObserver: ResizeObserver | undefined
 let resizeLayoutTimer: ReturnType<typeof setTimeout> | undefined
 let draggedColumnField = ''
@@ -152,6 +156,7 @@ const elementRowKey = computed(() => {
 })
 const showPagination = computed(() => props.pagination && props.total > 0)
 const showColumnSettingsPanel = computed(() => props.showColumnSettings || props.columnSettings?.enabled)
+const resolvedActionWidth = computed(() => isMobileViewport.value ? props.mobileActionWidth : props.actionWidth)
 const resolvedErrorText = computed(() => props.error instanceof Error
   ? props.error.message || props.errorText
   : typeof props.error === 'string' ? props.error : props.errorText)
@@ -322,6 +327,34 @@ function resolveRowKey(row: T, index: number): string | number | undefined {
   return typeof value === 'string' || typeof value === 'number' ? value : undefined
 }
 
+function resolveMobileActionKey(row: T, index: number): string {
+  const rowKey = resolveRowKey(row, index)
+  return rowKey === undefined ? `index:${index}` : `row:${typeof rowKey}:${rowKey}`
+}
+
+function isMobileActionOpen(row: T, index: number): boolean {
+  return openMobileActionKey.value === resolveMobileActionKey(row, index)
+}
+
+function handleMobileActionVisible(row: T, index: number, visible: boolean): void {
+  const key = resolveMobileActionKey(row, index)
+  if (visible) {
+    openMobileActionKey.value = key
+  }
+  else if (openMobileActionKey.value === key) {
+    openMobileActionKey.value = null
+  }
+}
+
+function toggleMobileActions(row: T, index: number): void {
+  const key = resolveMobileActionKey(row, index)
+  openMobileActionKey.value = openMobileActionKey.value === key ? null : key
+}
+
+function closeMobileActions(): void {
+  openMobileActionKey.value = null
+}
+
 /***********************事件与尺寸*********************/
 function handleSelectionChange(rows: T[]): void {
   selectedRows.value = rows
@@ -345,6 +378,27 @@ function handleCurrentChange(currentRow: T | null, oldCurrentRow: T | null): voi
 
 function handleExpandChange(row: T, expanded: boolean | T[]): void {
   emit('expandChange', row, expanded)
+}
+
+function syncMobileViewport(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+  const mobile = window.innerWidth <= 768
+  if (mobile === isMobileViewport.value) {
+    return
+  }
+  isMobileViewport.value = mobile
+  if (!mobile) {
+    closeMobileActions()
+  }
+  void nextTick(() => tableRef.value?.doLayout?.())
+}
+
+function handleDocumentKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape') {
+    closeMobileActions()
+  }
 }
 
 function setupResizeObserver(): void {
@@ -377,11 +431,26 @@ watch(() => props.autoResize, () => {
   setupResizeObserver()
 })
 watch(() => [props.columns, props.columnSettings?.storageKey], restoreColumnSettings, { deep: true })
+watch(openMobileActionKey, (key) => {
+  if (typeof document === 'undefined') {
+    return
+  }
+  document.removeEventListener('keydown', handleDocumentKeydown)
+  if (key !== null) {
+    document.addEventListener('keydown', handleDocumentKeydown)
+  }
+})
 onMounted(() => {
   restoreColumnSettings()
+  syncMobileViewport()
   setupResizeObserver()
+  window.addEventListener('resize', syncMobileViewport)
 })
-onBeforeUnmount(teardownResizeObserver)
+onBeforeUnmount(() => {
+  teardownResizeObserver()
+  window.removeEventListener('resize', syncMobileViewport)
+  document.removeEventListener('keydown', handleDocumentKeydown)
+})
 
 defineExpose({
   clearSelection: () => tableRef.value?.clearSelection?.(),
@@ -522,19 +591,37 @@ defineExpose({
           v-if="$slots.actions"
           fixed="right"
           :label="actionLabel"
-          :width="actionWidth"
+          :width="resolvedActionWidth"
           data-field="actions"
         >
           <template #default="{ row, $index }">
             <div class="luma-schema-table__actions luma-schema-table__actions--desktop">
               <slot name="actions" :row="row" :index="$index" />
             </div>
-            <details class="luma-schema-table__mobile-actions">
-              <summary>{{ mobileActionLabel }}</summary>
-              <div class="luma-schema-table__mobile-actions-menu">
+            <ElPopover
+              :visible="isMobileActionOpen(row, $index)"
+              :teleported="true"
+              trigger="click"
+              placement="bottom-end"
+              popper-class="luma-schema-table__mobile-actions-popper"
+              @update:visible="handleMobileActionVisible(row, $index, $event)"
+            >
+              <template #reference>
+                <button
+                  type="button"
+                  class="luma-schema-table__mobile-actions"
+                  aria-haspopup="menu"
+                  :aria-expanded="isMobileActionOpen(row, $index)"
+                  @click.stop="toggleMobileActions(row, $index)"
+                  @keydown.esc.stop.prevent="closeMobileActions"
+                >
+                  {{ mobileActionLabel }}
+                </button>
+              </template>
+              <div class="luma-schema-table__mobile-actions-menu" role="menu" @click.capture="closeMobileActions">
                 <slot name="actions" :row="row" :index="$index" />
               </div>
-            </details>
+            </ElPopover>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -732,29 +819,26 @@ defineExpose({
 }
 
 .luma-schema-table__mobile-actions {
-  position: relative;
   display: none;
-}
-
-.luma-schema-table__mobile-actions > summary {
+  box-sizing: border-box;
+  border: 0;
+  border-radius: var(--el-border-radius-small);
   color: var(--el-color-primary);
+  font: inherit;
+  background: transparent;
   cursor: pointer;
-  list-style: none;
 }
 
 .luma-schema-table__mobile-actions-menu {
-  position: absolute;
-  z-index: var(--luma-z-dropdown);
-  top: calc(100% + 6px);
-  right: 0;
   display: grid;
   min-width: 112px;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: var(--el-border-radius-base);
-  background: var(--el-bg-color-overlay);
-  box-shadow: var(--luma-shadow-base);
+  gap: 6px;
+}
+
+.luma-schema-table__mobile-actions-menu :deep(.el-button) {
+  width: 100%;
+  margin-left: 0;
+  justify-content: flex-start;
 }
 
 @media (max-width: 768px) {
@@ -764,17 +848,19 @@ defineExpose({
 
   .luma-schema-table__toolbar {
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
+    row-gap: 8px;
   }
 
   .luma-schema-table__toolbar-content {
     flex: 1 1 auto;
+    min-width: 0;
     justify-content: flex-start;
   }
 
   .luma-schema-table__toolbar-tools {
-    width: 100%;
+    flex: 0 1 auto;
     min-width: 0;
     justify-content: flex-end;
     gap: 6px;
@@ -806,15 +892,29 @@ defineExpose({
   }
 
   .luma-schema-table__mobile-actions {
-    display: inline-block;
+    display: inline-flex;
+    min-width: 48px;
+    height: 32px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
   }
 
-  .luma-schema-table__mobile-actions > summary {
-    min-height: 44px;
-    padding: 11px 8px;
+  .luma-schema-table__mobile-actions:hover,
+  .luma-schema-table__mobile-actions:focus-visible,
+  .luma-schema-table__mobile-actions[aria-expanded="true"] {
+    background: var(--el-color-primary-light-9);
+    outline: none;
+  }
+
+  .luma-schema-table__body :deep(.el-table__body .el-table__cell) {
+    padding: 8px 0;
+  }
+
+  .luma-schema-table__body :deep(.el-table__body .cell) {
+    min-height: 32px;
+    line-height: 32px;
   }
 }
 </style>
-  retryText?: string
-  retryText: '重新加载',
-  resetColumnSettings,

@@ -46,10 +46,12 @@ function config(): CockpitConfig {
       id: 'layout-a',
       title: '布局 A',
       left: {
+        width: 320,
         columns: [{ id: 'left-column', width: 320 }],
         rows: [{ id: 'left-row', height: 100, mode: 'grid', cells: [{ id: 'left-cell' }], widgets: [] }],
       },
       right: {
+        width: 320,
         columns: [{ id: 'right-column', width: 320 }],
         rows: [{ id: 'right-row', height: 100, mode: 'grid', cells: [{ id: 'right-cell' }], widgets: [] }],
       },
@@ -74,7 +76,7 @@ function mountDesigner(current = config(), slots: Record<string, unknown> = {}) 
 }
 
 describe('lumaCockpitDesigner', () => {
-  it('左右区域直接展示行列与列宽设置，不再依赖悬浮工具层', () => {
+  it('左右区域直接展示行列与区域宽设置，不再依赖悬浮工具层', () => {
     const current = config()
     current.layouts[0].right.rows[0].cells[0].widget = { id: 'right-widget', type: 'stub', title: '右侧模块' }
     const wrapper = mountDesigner(current)
@@ -87,22 +89,23 @@ describe('lumaCockpitDesigner', () => {
     const regionHead = rightRegion.get('[data-role="region-tools"]')
     expect(regionHead.classes()).toContain('luma-cockpit-designer__region-head')
     expect(regionHead.attributes('aria-label')).toBe('右侧区域布局设置')
-    expect(regionHead.findAll('.luma-cockpit-designer__column-field').length).toBeGreaterThan(0)
+    expect(regionHead.findAll('.luma-cockpit-designer__region-width-field')).toHaveLength(1)
+    expect(regionHead.findAll('.luma-cockpit-designer__column-field')).toHaveLength(0)
     expect(rightRegion.get('[data-role="row-tools"]').classes()).toContain('luma-cockpit-designer__grid-row-head')
     expect(rightRegion.get('[data-role="remove-widget"]').attributes('aria-label')).toBe('移除模块 右侧模块')
   })
 
-  it('设计区按配置列宽比例渲染网格', () => {
+  it('设计区按列数均分渲染网格', () => {
     const current = config()
+    current.layouts[0].left.width = 600
     current.layouts[0].left.columns = [
-      { id: 'left-a', width: 200 },
-      { id: 'left-b', width: 400 },
+      { id: 'left-a', width: 300 },
+      { id: 'left-b', width: 300 },
     ]
     current.layouts[0].left.rows[0].cells = [{ id: 'left-a-cell' }, { id: 'left-b-cell' }]
     const wrapper = mountDesigner(current)
     const style = wrapper.get('[data-side="left"] .luma-cockpit-designer__grid-cells').attributes('style')
-    expect(style).toContain('200fr')
-    expect(style).toContain('400fr')
+    expect(style).toContain('minmax(0, 1fr) minmax(0, 1fr)')
   })
 
   it('合并行使用单一 Tab Card 并只预览激活模块', async () => {

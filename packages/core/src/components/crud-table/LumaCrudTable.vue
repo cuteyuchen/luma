@@ -77,6 +77,8 @@ type CrudTableSlots = {
   }) => unknown
 }
 
+type QueryViewportMode = 'desktop' | 'mobile'
+
 /***********************属性与事件*********************/
 const props = withDefaults(defineProps<CrudTableProps>(), {
   rows: () => [],
@@ -148,12 +150,23 @@ const hasToolbarActions = computed(() => showCreate.value || showBatchDelete.val
 const hasToolbarTools = computed(() => showQueryToggle.value || showRefresh.value || showFullscreen.value)
 
 /***********************组合状态*********************/
+const initialMobileViewport = typeof window !== 'undefined'
+  && typeof window.matchMedia === 'function'
+  && window.matchMedia('(max-width: 768px)').matches
+const initialQueryVisibility = {
+  desktop: props.query?.defaultVisible ?? true,
+  mobile: props.query?.mobileDefaultVisible ?? props.query?.defaultVisible ?? true,
+}
 const dataSource = computed(() => props.dataSource)
 const operationLoading = shallowRef(false)
 const isFullscreen = shallowRef(false)
-const queryPanelVisible = shallowRef(props.query?.defaultVisible ?? true)
+const isMobileViewport = shallowRef(initialMobileViewport)
+const queryViewportMode = computed<QueryViewportMode>(() => isMobileViewport.value ? 'mobile' : 'desktop')
+const queryVisibilityByMode = shallowRef<Record<QueryViewportMode, boolean>>(initialQueryVisibility)
+const queryPanelVisible = shallowRef(initialQueryVisibility[initialMobileViewport ? 'mobile' : 'desktop'])
 let querySubmitTimer: ReturnType<typeof setTimeout> | undefined
 let queryResizeObserver: ResizeObserver | undefined
+let mobileMediaQuery: MediaQueryList | undefined
 
 const data = useCrudData({
   dataSource,
@@ -223,9 +236,36 @@ function setupQueryResizeObserver(): void {
   queryResizeObserver.observe(queryRef.value)
 }
 
+function syncMobileViewport(matches: boolean): void {
+  if (isMobileViewport.value === matches) {
+    return
+  }
+
+  isMobileViewport.value = matches
+  queryPanelVisible.value = queryVisibilityByMode.value[queryViewportMode.value]
+  void nextTick(() => {
+    if (queryPanelVisible.value) {
+      setupQueryResizeObserver()
+    }
+    else {
+      queryResizeObserver?.disconnect()
+    }
+    tableRef.value?.doLayout()
+  })
+}
+
+function handleMobileViewportChange(event: MediaQueryListEvent): void {
+  syncMobileViewport(event.matches)
+}
+
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.addEventListener('fullscreenchange', handleFullscreenChange)
+  }
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    mobileMediaQuery = window.matchMedia('(max-width: 768px)')
+    syncMobileViewport(mobileMediaQuery.matches)
+    mobileMediaQuery.addEventListener?.('change', handleMobileViewportChange)
   }
   setupQueryResizeObserver()
 })
@@ -233,6 +273,7 @@ onBeforeUnmount(() => {
   if (typeof document !== 'undefined') {
     document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }
+  mobileMediaQuery?.removeEventListener?.('change', handleMobileViewportChange)
   queryResizeObserver?.disconnect()
   if (querySubmitTimer) {
     clearTimeout(querySubmitTimer)
@@ -244,11 +285,16 @@ watch(() => props.query?.columns, (columns) => {
     updateResponsiveQueryColumns(queryRef.value?.clientWidth ?? 0)
   }
 })
-watch(() => props.query?.defaultVisible, (visible) => {
-  if (visible !== undefined) {
-    queryPanelVisible.value = visible
-  }
-})
+watch(
+  [() => props.query?.defaultVisible, () => props.query?.mobileDefaultVisible],
+  ([defaultVisible, mobileDefaultVisible]) => {
+    queryVisibilityByMode.value = {
+      desktop: defaultVisible ?? true,
+      mobile: mobileDefaultVisible ?? defaultVisible ?? true,
+    }
+    queryPanelVisible.value = queryVisibilityByMode.value[queryViewportMode.value]
+  },
+)
 
 /***********************查询与工具栏*********************/
 function handleSearchClick(): void {
@@ -346,6 +392,10 @@ function handlePageChange(payload: PaginationChangePayload): void {
 
 function toggleQueryPanel(): void {
   queryPanelVisible.value = !queryPanelVisible.value
+  queryVisibilityByMode.value = {
+    ...queryVisibilityByMode.value,
+    [queryViewportMode.value]: queryPanelVisible.value,
+  }
   if (queryPanelVisible.value) {
     void nextTick(() => {
       setupQueryResizeObserver()
@@ -606,6 +656,7 @@ defineExpose({
           :column-settings="table?.columnSettings"
           :auto-resize="table?.autoResize ?? true"
           :action-width="table?.actionWidth"
+          :mobile-action-width="table?.mobileActionWidth"
           :table-props="{ height: '100%', border: true }"
           @selection-change="selectionState.update"
         >
@@ -983,28 +1034,39 @@ defineExpose({
   .luma-crud-table {
     height: auto;
     max-height: none;
+    gap: 12px;
     overflow: visible;
+  }
+
+  .luma-crud-table__query {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .luma-crud-table__query-form :deep(.luma-schema-form__row) {
+    row-gap: 10px;
   }
 
   .luma-crud-table__table-panel {
     flex: 0 0 auto;
+    padding: 12px;
   }
 
   .luma-crud-table__body {
     flex: 0 0 auto;
-    min-height: 280px;
+    min-height: 0;
   }
 
   .luma-crud-table__body :deep(.luma-schema-table) {
     height: auto;
-    min-height: 280px;
+    min-height: 0;
     grid-template-rows: auto auto;
   }
 
   .luma-crud-table__body :deep(.luma-schema-table__scroll) {
     height: auto;
-    min-height: 240px;
-    max-height: min(60vh, 520px);
+    min-height: 160px;
+    max-height: min(56dvh, 480px);
     overflow: auto;
   }
 
@@ -1014,7 +1076,7 @@ defineExpose({
   }
 
   .luma-crud-table__query-actions :deep(.el-button) {
-    min-height: 44px;
+    min-height: 32px;
     margin-left: 0;
   }
 
@@ -1023,7 +1085,7 @@ defineExpose({
   }
 
   .luma-crud-table__toolbar :deep(.el-button) {
-    min-height: 44px;
+    min-height: 32px;
     margin-left: 0;
   }
 
@@ -1040,29 +1102,26 @@ defineExpose({
   }
 
   :global(.luma-crud-table__dialog .el-dialog__header) {
-    padding: 16px;
+    padding: 12px;
   }
 
   :global(.luma-crud-table__dialog .el-dialog__body) {
     min-height: 0;
-    padding: 16px;
+    padding: 12px;
     overflow-y: auto;
   }
 
   :global(.luma-crud-table__dialog .el-dialog__footer) {
-    padding: 12px 16px 16px;
+    padding: 10px 12px 12px;
   }
 
   .luma-crud-table__dialog-footer :deep(.el-button) {
-    min-height: 44px;
+    min-height: 32px;
     margin-left: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .luma-crud-table__query {
-    padding: 12px;
-  }
   .luma-crud-table__dialog-footer :deep(.el-button) {
     flex: 1 1 0;
   }

@@ -28,7 +28,7 @@ import {
   ElMessageBox,
   ElTree,
 } from 'element-plus'
-import { computed, onMounted, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef, useTemplateRef } from 'vue'
 import { adminPermissionCodes } from '../../api/permissions'
 import {
   createSystemUser,
@@ -87,6 +87,8 @@ const batchRoleAssignment = shallowRef(false)
 const roleAssignmentModel = shallowRef<SchemaFormModel>({ roles: [] })
 const roleAssignmentSaving = shallowRef(false)
 const roleAssignmentError = shallowRef('')
+const isMobileViewport = shallowRef(typeof window !== 'undefined' && window.innerWidth <= 768)
+const mobileOrganizationExpanded = shallowRef(false)
 let roleAssignmentClearSelection: ClearSelection | undefined
 
 const organizationTree = computed<OrganizationTreeNode[]>(() => [{
@@ -99,6 +101,10 @@ const organizationLabelMap = computed(() => {
   collectOrganizationLabels(organizationOptions.value, labels)
   return labels
 })
+const currentOrganizationLabel = computed(() => selectedOrganizationId.value
+  ? organizationLabelMap.value.get(selectedOrganizationId.value) ?? selectedOrganizationId.value
+  : '全部机构')
+const organizationPanelExpanded = computed(() => !isMobileViewport.value || mobileOrganizationExpanded.value)
 const roleAssignmentTitle = computed(() => batchRoleAssignment.value
   ? `批量分配角色（已选 ${assigningUsers.value.length} 人）`
   : `分配角色：${assigningUsers.value[0]?.nickname ?? ''}`)
@@ -207,10 +213,12 @@ const columns = computed<SchemaTableColumn[]>(() => [
 const queryConfig = computed(() => ({
   collapsible: true,
   columns: 3,
+  mobileDefaultVisible: false,
   schemas: querySchemas.value,
 }))
 const tableConfig = computed(() => ({
   columns: columns.value,
+  mobileActionWidth: 72,
   rowKey: 'id',
   selection: true,
   showColumnSettings: true,
@@ -364,6 +372,16 @@ function handleOrganizationSearch(keyword: string): void {
   organizationTreeRef.value?.filter(keyword)
 }
 
+function syncMobileViewport(): void {
+  if (typeof window !== 'undefined') {
+    isMobileViewport.value = window.innerWidth <= 768
+  }
+}
+
+function toggleOrganizationPanel(): void {
+  mobileOrganizationExpanded.value = !mobileOrganizationExpanded.value
+}
+
 async function selectOrganization(node: OrganizationTreeNode): Promise<void> {
   selectedOrganizationId.value = node.value
   queryModel.value = { ...queryModel.value, organizationId: node.value }
@@ -508,6 +526,8 @@ const roleAssignmentSchemas = computed<SchemaFormItem[]>(() => [
 ])
 
 onMounted(() => {
+  syncMobileViewport()
+  window.addEventListener('resize', syncMobileViewport)
   void Promise.all([
     fetchSystemRoleOptions(),
     fetchSystemOrganizationOptions(),
@@ -518,32 +538,63 @@ onMounted(() => {
     ElMessage.error(error instanceof Error ? error.message : '用户管理选项加载失败')
   })
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', syncMobileViewport)
+})
 </script>
 
 <template>
   <main class="luma-admin-page luma-admin-user-page">
-    <aside class="luma-admin-user-page__organizations" aria-label="机构筛选">
-      <h2>机构导航</h2>
-      <ElInput
-        :model-value="organizationKeyword"
-        clearable
-        placeholder="搜索机构名称或编码"
-        aria-label="搜索机构名称或编码"
-        @update:model-value="handleOrganizationSearch"
-      />
-      <div class="luma-admin-user-page__organization-tree">
-        <ElTree
-          ref="organizationTreeRef"
-          :data="organizationTree"
-          node-key="value"
-          default-expand-all
-          highlight-current
-          :current-node-key="selectedOrganizationId"
-          :expand-on-click-node="false"
-          :filter-node-method="filterOrganizationNode"
-          :props="{ children: 'children', label: 'label' }"
-          @node-click="selectOrganization"
+    <aside
+      class="luma-admin-user-page__organizations"
+      :class="{ 'is-collapsed': isMobileViewport && !organizationPanelExpanded }"
+      aria-label="机构筛选"
+    >
+      <div class="luma-admin-user-page__organization-header">
+        <h2>机构导航</h2>
+        <div v-if="isMobileViewport" class="luma-admin-user-page__organization-summary">
+          <span :title="currentOrganizationLabel">当前机构：{{ currentOrganizationLabel }}</span>
+          <ElButton
+            class="luma-admin-user-page__organization-toggle"
+            native-type="button"
+            size="small"
+            text
+            aria-controls="user-organization-panel"
+            :aria-expanded="organizationPanelExpanded"
+            :aria-label="organizationPanelExpanded ? '收起机构导航' : '展开机构导航'"
+            @click="toggleOrganizationPanel"
+          >
+            {{ organizationPanelExpanded ? '收起' : '展开' }}
+          </ElButton>
+        </div>
+      </div>
+      <div
+        v-show="organizationPanelExpanded"
+        id="user-organization-panel"
+        class="luma-admin-user-page__organization-content"
+      >
+        <ElInput
+          :model-value="organizationKeyword"
+          clearable
+          placeholder="搜索机构名称或编码"
+          aria-label="搜索机构名称或编码"
+          @update:model-value="handleOrganizationSearch"
         />
+        <div class="luma-admin-user-page__organization-tree">
+          <ElTree
+            ref="organizationTreeRef"
+            :data="organizationTree"
+            node-key="value"
+            default-expand-all
+            highlight-current
+            :current-node-key="selectedOrganizationId"
+            :expand-on-click-node="false"
+            :filter-node-method="filterOrganizationNode"
+            :props="{ children: 'children', label: 'label' }"
+            @node-click="selectOrganization"
+          />
+        </div>
       </div>
     </aside>
 
@@ -715,13 +766,28 @@ onMounted(() => {
   border: 1px solid var(--el-border-color-lighter);
   border-radius: var(--el-border-radius-base);
   background: var(--el-fill-color-blank);
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
-.luma-admin-user-page__organizations h2 {
+.luma-admin-user-page__organization-header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.luma-admin-user-page__organization-header h2 {
   margin: 0;
   color: var(--el-text-color-primary);
   font-size: var(--luma-font-size-base, 14px);
+}
+
+.luma-admin-user-page__organization-content {
+  display: grid;
+  min-height: 0;
+  align-content: start;
+  gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .luma-admin-user-page__organization-tree {
@@ -763,11 +829,50 @@ onMounted(() => {
 
   .luma-admin-user-page__organizations {
     flex: none;
-    grid-template-rows: auto auto auto;
+    gap: 8px;
+    padding: 12px;
+    grid-template-rows: auto auto;
+  }
+
+  .luma-admin-user-page__organizations.is-collapsed {
+    grid-template-rows: auto;
+  }
+
+  .luma-admin-user-page__organization-header {
+    gap: 8px;
+  }
+
+  .luma-admin-user-page__organization-summary {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    color: var(--el-text-color-secondary);
+    font-size: var(--luma-font-size-small, 12px);
+  }
+
+  .luma-admin-user-page__organization-summary > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .luma-admin-user-page__organization-toggle {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding-inline: 8px;
+  }
+
+  .luma-admin-user-page__organization-content {
+    gap: 8px;
+    grid-template-rows: auto auto;
   }
 
   .luma-admin-user-page__organization-tree {
-    max-height: 220px;
+    max-height: 160px;
   }
 
   .luma-admin-user-page :deep(.luma-crud-table) {

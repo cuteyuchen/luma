@@ -31,14 +31,14 @@ function config(): CockpitConfig {
       {
         id: 'layout-a',
         title: '布局 A',
-        left: { columns: [{ id: 'left-col', width: 320 }], rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell', widget: { id: 'left-widget', type: 'stub' } }] }] },
-        right: { columns: [{ id: 'right-col', width: 320 }], rows: [{ id: 'right-row', height: 100, mode: 'tabs', cells: [], activeWidgetId: 'right-a', widgets: [{ id: 'right-a', type: 'stub', title: '甲' }, { id: 'right-b', type: 'stub', title: '乙' }] }] },
+        left: { width: 320, columns: [{ id: 'left-col', width: 320 }], rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell', widget: { id: 'left-widget', type: 'stub' } }] }] },
+        right: { width: 320, columns: [{ id: 'right-col', width: 320 }], rows: [{ id: 'right-row', height: 100, mode: 'tabs', cells: [], activeWidgetId: 'right-a', widgets: [{ id: 'right-a', type: 'stub', title: '甲' }, { id: 'right-b', type: 'stub', title: '乙' }] }] },
       },
       {
         id: 'layout-b',
         title: '布局 B',
-        left: { columns: [{ id: 'left-b-col', width: 320 }], rows: [{ id: 'left-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-b-cell', widget: { id: 'left-b-widget', type: 'stub' } }] }] },
-        right: { columns: [{ id: 'right-b-col', width: 320 }], rows: [{ id: 'right-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-b-cell' }] }] },
+        left: { width: 320, columns: [{ id: 'left-b-col', width: 320 }], rows: [{ id: 'left-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-b-cell', widget: { id: 'left-b-widget', type: 'stub' } }] }] },
+        right: { width: 320, columns: [{ id: 'right-b-col', width: 320 }], rows: [{ id: 'right-b-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-b-cell' }] }] },
       },
     ],
   }
@@ -54,6 +54,7 @@ function titleFallbackConfig(): CockpitConfig {
       id: 'layout-a',
       title: '布局 A',
       left: {
+        width: 600,
         columns: [
           { id: 'left-a', width: 200 },
           { id: 'left-b', width: 200 },
@@ -72,6 +73,7 @@ function titleFallbackConfig(): CockpitConfig {
         }],
       },
       right: {
+        width: 320,
         columns: [{ id: 'right-col', width: 320 }],
         rows: [{ id: 'right-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-cell' }] }],
       },

@@ -35,6 +35,7 @@ const queryConfig = {
 }
 const tableConfig = {
   columns: exampleCrudColumns,
+  mobileActionWidth: 72,
   rowKey: 'id',
   selection: true,
   columnSettings: {

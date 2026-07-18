@@ -120,7 +120,7 @@
     flex: 0 0 auto;
   }
 
-  /* 表单项：不强制压扁 InputNumber 宽高，避免 controls-position=right 错位 */
+  /* 表单项：不强制压扁 InputNumber 宽高 */
   &__field {
     display: inline-flex;
     align-items: center;
@@ -137,7 +137,7 @@
     }
 
     > .el-input-number {
-      width: 118px;
+      width: 132px;
       flex: none;
     }
 
@@ -222,7 +222,7 @@
     background: color-mix(in srgb, var(--luma-cockpit-panel-bg, rgb(6 46 64 / 96%)), #00141e 12%);
 
     .el-input-number {
-      width: 118px;
+      width: 132px;
     }
   }
 
@@ -244,9 +244,9 @@
     }
   }
 
-  &__column-field.luma-cockpit-designer__field {
+  &__region-width-field.luma-cockpit-designer__field {
     .el-input-number {
-      width: 128px;
+      width: 148px;
     }
   }
 
@@ -265,6 +265,7 @@
     gap: 8px;
     min-width: 0;
     min-height: 0;
+    overflow: hidden;
     isolation: isolate;
   }
 
@@ -285,7 +286,7 @@
     }
 
     .el-input-number {
-      width: 128px;
+      width: 148px;
     }
   }
 
@@ -300,24 +301,49 @@
 
   &__grid-cells,
   &__tab-row {
-    flex: 1;
+    flex: 1 1 0;
     width: 100%;
     min-height: 0;
+    height: 100%;
   }
 
+  /* 普通行：强制网格行占满剩余高度，否则 height:100% 子项会按内容塌缩 */
   &__grid-cells {
     display: grid;
     gap: 10px;
+    align-items: stretch;
+    grid-auto-rows: minmax(0, 1fr);
   }
 
+  /* 普通槽高度链：grid 项 → drop-zone → 已放置模块/空槽（绝对铺满，兼容 Sortable 临时节点） */
   &__drop-zone {
-    display: flex;
+    position: relative;
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+  }
+
+  &__drop-zone > .luma-cockpit-designer__placed-widget,
+  &__drop-zone > .luma-cockpit-designer__empty-cell {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     min-width: 0;
     min-height: 0;
   }
 
   &__drop-zone.is-tabs {
+    position: relative;
     display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__drop-zone.is-tabs > .luma-cockpit-designer__tab-card {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
   }
@@ -352,14 +378,20 @@
   &__placed-widget {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 34px minmax(0, 1fr);
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 0;
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
+    padding: 0;
     border: 1px solid var(--luma-cockpit-slot-border, rgb(6 183 253 / 50%));
     border-radius: 4px;
     background: transparent;
+    box-sizing: border-box;
     cursor: grab;
     overflow: hidden;
     isolation: isolate;
@@ -414,10 +446,13 @@
     position: relative;
     min-width: 0;
     min-height: 0;
+    height: 100%;
     overflow: hidden;
 
     > .luma-cockpit-designer__widget-preview,
     > .luma-cockpit-designer__widget-preview-fallback {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
     }
@@ -688,29 +723,23 @@
     }
   }
 
-  /* controls-position=right：保留 EP 默认控件区宽度，避免数字与加减重叠 */
+  /* 左右两侧加减：保留 EP 默认控件布局，避免数字与按钮重叠 */
   .el-input-number {
-    width: 118px;
+    width: 132px;
     line-height: var(--el-component-size);
 
-    &.is-controls-right {
-      .el-input__wrapper {
-        padding-left: 10px;
-        padding-right: 36px;
-      }
+    .el-input__wrapper {
+      padding-left: 36px;
+      padding-right: 36px;
+    }
 
-      .el-input-number__decrease,
-      .el-input-number__increase {
-        width: 28px;
-        height: auto;
-        border-color: var(--el-input-border-color);
-        background: color-mix(in srgb, var(--el-fill-color-blank), transparent 20%);
-        color: var(--el-text-color-regular);
-      }
-
-      .el-input-number__increase {
-        border-bottom: 1px solid var(--el-input-border-color);
-      }
+    .el-input-number__decrease,
+    .el-input-number__increase {
+      width: 32px;
+      height: auto;
+      border-color: var(--el-input-border-color);
+      background: color-mix(in srgb, var(--el-fill-color-blank), transparent 20%);
+      color: var(--el-text-color-regular);
     }
   }
 
@@ -718,7 +747,15 @@
   .el-select__input,
   .el-select__selected-item,
   .el-select__placeholder {
+    width: 100%;
     height: var(--el-component-size);
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
     line-height: var(--el-component-size);
     color: var(--el-input-text-color);
     font-size: 13px;

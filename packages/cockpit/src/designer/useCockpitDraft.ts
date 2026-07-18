@@ -16,6 +16,7 @@ import {
   createGridRow,
   createLayout,
   createWidgetInstance,
+  equalizeRegionColumns,
   normalizeCockpitConfig,
   validateCockpitConfig,
 } from '../config'
@@ -46,7 +47,7 @@ export interface UseCockpitDraftReturn {
   renameLayout: (id: string, title: string) => void
   selectLayout: (id: string) => void
   resizeRegion: (side: CockpitSide, rows: number, columns: number, discardOccupied?: boolean) => boolean
-  setColumnWidth: (side: CockpitSide, columnId: string, width: number) => void
+  setRegionWidth: (side: CockpitSide, width: number) => void
   setRowHeight: (side: CockpitSide, rowId: string, height: number) => void
   setRowTabs: (side: CockpitSide, rowId: string, enabled: boolean) => boolean
   hasWidgetAt: (location: DraftWidgetLocation) => boolean
@@ -212,6 +213,7 @@ export function useCockpitDraft(source: CockpitConfig): UseCockpitDraftReturn {
       region.columns.push(createGridColumn())
     if (region.columns.length > columns)
       region.columns.splice(columns)
+    equalizeRegionColumns(region)
 
     region.rows.forEach((row) => {
       if (row.mode !== 'grid')
@@ -229,11 +231,13 @@ export function useCockpitDraft(source: CockpitConfig): UseCockpitDraftReturn {
     return true
   }
 
-  function setColumnWidth(side: CockpitSide, columnId: string, width: number): void {
+  function setRegionWidth(side: CockpitSide, width: number): void {
     const layout = activeLayout.value
-    const column = layout ? regionOf(layout, side).columns.find(item => item.id === columnId) : undefined
-    if (column && Number.isFinite(width) && width > 0)
-      column.width = Math.round(width)
+    if (!layout || !Number.isFinite(width) || width <= 0)
+      return
+    const region = regionOf(layout, side)
+    region.width = Math.max(region.columns.length, Math.round(width))
+    equalizeRegionColumns(region)
   }
 
   function setRowHeight(side: CockpitSide, rowId: string, height: number): void {
@@ -407,7 +411,7 @@ export function useCockpitDraft(source: CockpitConfig): UseCockpitDraftReturn {
     renameLayout,
     selectLayout,
     resizeRegion,
-    setColumnWidth,
+    setRegionWidth,
     setRowHeight,
     setRowTabs,
     hasWidgetAt,

@@ -147,6 +147,15 @@ async function flushPromises(): Promise<void> {
   await nextTick()
 }
 
+function setViewportWidth(width: number): void {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    value: width,
+    writable: true,
+  })
+  window.dispatchEvent(new Event('resize'))
+}
+
 function mountUserView() {
   return mount(UserView, {
     global: {
@@ -169,6 +178,7 @@ function mountUserView() {
 
 describe('system user view', () => {
   beforeEach(async () => {
+    setViewportWidth(1024)
     await login('admin')
     permissionStore.clear()
     selectedUsers = [sampleUser, secondUser]
@@ -187,9 +197,9 @@ describe('system user view', () => {
     await flushPromises()
 
     const crudTable = wrapper.findComponent(CrudTableStub)
-    const table = crudTable.props('table') as { columns: { field: string }[], selection: boolean, showColumnSettings: boolean }
+    const table = crudTable.props('table') as { columns: { field: string }[], mobileActionWidth: number, selection: boolean, showColumnSettings: boolean }
     const toolbar = crudTable.props('toolbar') as { batchDelete: boolean }
-    const query = crudTable.props('query') as { schemas: { field: string }[] }
+    const query = crudTable.props('query') as { mobileDefaultVisible: boolean, schemas: { field: string }[] }
     const formSchemas = crudTable.props('formSchemas') as { component: string, field: string, required?: boolean }[]
     const dataSource = crudTable.props('dataSource') as Record<string, unknown>
 
@@ -203,6 +213,8 @@ describe('system user view', () => {
       'createdAt',
     ])
     expect(query.schemas.map(schema => schema.field)).toEqual(['keyword', 'roles', 'status'])
+    expect(query.mobileDefaultVisible).toBe(false)
+    expect(table.mobileActionWidth).toBe(72)
     expect(table.selection).toBe(true)
     expect(table.showColumnSettings).toBe(true)
     expect(toolbar.batchDelete).toBe(false)
@@ -228,6 +240,40 @@ describe('system user view', () => {
     }
     const result = await dataSource.fetch({ page: 1, pageSize: 10, query: {} })
     expect(result.items.every(user => ['organization-2', 'organization-3', 'organization-4'].includes(user.organizationId))).toBe(true)
+  })
+
+  it('移动端默认收起机构面板并在视口切换后保留移动端选择', async () => {
+    setViewportWidth(375)
+    permissionStore.setPermissions(resolveUserPermissions())
+    const wrapper = mountUserView()
+    await flushPromises()
+
+    const panel = wrapper.get('#user-organization-panel')
+    const openButton = wrapper.get('button[aria-label="展开机构导航"]')
+    expect(wrapper.get('.luma-admin-user-page__organization-summary').text()).toContain('当前机构：全部机构')
+    expect(openButton.attributes('aria-expanded')).toBe('false')
+    expect(panel.isVisible()).toBe(false)
+
+    await openButton.trigger('click')
+    expect(wrapper.get('button[aria-label="收起机构导航"]').attributes('aria-expanded')).toBe('true')
+    expect(panel.isVisible()).toBe(true)
+    expect(wrapper.get('input[aria-label="搜索机构名称或编码"]').isVisible()).toBe(true)
+
+    await wrapper.get('[data-organization-id="organization-2"]').trigger('click')
+    expect(wrapper.get('.luma-admin-user-page__organization-summary').text()).toContain('平台研发中心')
+
+    await wrapper.get('button[aria-label="收起机构导航"]').trigger('click')
+    expect(panel.isVisible()).toBe(false)
+
+    setViewportWidth(1024)
+    await nextTick()
+    expect(panel.isVisible()).toBe(true)
+    expect(wrapper.find('.luma-admin-user-page__organization-toggle').exists()).toBe(false)
+
+    setViewportWidth(375)
+    await nextTick()
+    expect(panel.isVisible()).toBe(false)
+    expect(wrapper.get('button[aria-label="展开机构导航"]').attributes('aria-expanded')).toBe('false')
   })
 
   it('批量分配角色默认追加，成功后清空选择并刷新', async () => {

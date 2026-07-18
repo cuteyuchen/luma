@@ -1,4 +1,6 @@
 import type { LumaLayoutTabItem, LumaTabStyle } from '../src/layout'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
@@ -113,9 +115,17 @@ describe('luma tabs - menu disabled states', () => {
 describe('luma tabs - more button', () => {
   it('显示更多按钮且点击可触发菜单', async () => {
     const wrapper = mountTabsWithStyle('chrome', '/system')
-    expect(wrapper.find('[data-tab-menu-trigger]').exists()).toBe(true)
-    await wrapper.find('[data-tab-menu-trigger]').trigger('click', { clientX: 10, clientY: 10 })
+    const trigger = wrapper.find('[data-tab-menu-trigger]')
+    expect(trigger.exists()).toBe(true)
+    expect(trigger.attributes('aria-haspopup')).toBe('menu')
+    expect(trigger.attributes('aria-expanded')).toBe('false')
+    await trigger.trigger('click', { clientX: 10, clientY: 10 })
+    expect(trigger.attributes('aria-expanded')).toBe('true')
     expect(wrapper.find('.luma-tabs-context-menu').exists()).toBe(true)
+
+    const refreshItem = wrapper.findAll('.luma-tabs-context-menu button').find(button => button.text().includes('重新加载'))
+    await refreshItem?.trigger('click')
+    expect(wrapper.emitted('refresh')?.[0]).toEqual(['/system'])
     wrapper.unmount()
   })
 
@@ -161,7 +171,7 @@ describe('luma tabs - wheel scroll', () => {
 describe('luma tabs - maximize', () => {
   it('点击最大化按钮抛出 maximize 事件', async () => {
     const wrapper = mountTabsWithStyle('chrome', '/work')
-    await wrapper.findAll('.luma-tabs__tool').at(-1)?.trigger('click')
+    await wrapper.find('[data-action="maximize-content"]').trigger('click')
     expect(wrapper.emitted('maximize')?.[0]).toEqual([true])
     wrapper.unmount()
   })
@@ -175,6 +185,26 @@ describe('luma tabs - maximize', () => {
     await maximizeItem?.trigger('click')
     expect(wrapper.emitted('maximize')?.[0]).toEqual([true])
     wrapper.unmount()
+  })
+})
+
+describe('luma tabs - mobile density', () => {
+  it('移动端保持 40px 高度、收紧标签与工具，并隐藏独立刷新和最大化', async () => {
+    const source = await readFile(join(process.cwd(), 'src/layout/LumaTabs.vue'), 'utf8')
+    const mobileStart = source.indexOf('@media (max-width: 768px)')
+    const mobileEnd = source.indexOf('@media (prefers-reduced-motion: reduce)', mobileStart)
+    const desktopStyles = source.slice(0, mobileStart)
+    const mobileStyles = source.slice(mobileStart, mobileEnd)
+
+    expect(mobileStart).toBeGreaterThan(-1)
+    expect(mobileEnd).toBeGreaterThan(mobileStart)
+    expect(desktopStyles).toMatch(/\.luma-tabs\s*{[\s\S]*?height:\s*var\(--luma-tabbar-height\);/)
+    expect(desktopStyles).toMatch(/\.luma-tabs__tool\s*{[\s\S]*?flex:\s*0 0 36px;[\s\S]*?width:\s*36px;/)
+    expect(mobileStyles).toMatch(/\.luma-tabs\s*{\s*height:\s*40px;/)
+    expect(mobileStyles).toMatch(/\.luma-tabs__item\s*{\s*min-width:\s*72px;/)
+    expect(mobileStyles).toMatch(/\.luma-tabs__tab\s*{[\s\S]*?padding:\s*0 22px 0 8px;/)
+    expect(mobileStyles).toMatch(/\.luma-tabs__tool\s*{\s*flex-basis:\s*32px;\s*width:\s*32px;/)
+    expect(mobileStyles).toMatch(/\.luma-tabs__tool--refresh,\s*\.luma-tabs__tool--maximize\s*{\s*display:\s*none;/)
   })
 })
 

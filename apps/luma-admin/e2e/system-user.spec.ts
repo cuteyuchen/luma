@@ -43,12 +43,78 @@ test('用户管理支持机构筛选、批量启停和批量追加角色', async
   await expect(page.getByRole('button', { name: '批量操作（0）' })).toBeDisabled()
 })
 
-test('用户管理在四档视口下无页面级横向溢出', async ({ page }) => {
+test('用户管理在移动端紧凑显示机构筛选并在五档视口下无页面级横向溢出', async ({ page }) => {
   await openUserManagement(page)
 
-  for (const width of [375, 768, 1024, 1440]) {
-    await page.setViewportSize({ height: 900, width })
+  await page.setViewportSize({ height: 812, width: 375 })
+  await expect(page.getByText('当前机构：全部机构', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '展开机构导航', exact: true })).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeHidden()
+  await expect(page.locator('.luma-crud-table__query')).toBeHidden()
+  await expectNoPageOverflow(page)
+
+  const metrics = await page.evaluate(() => {
+    const actionTrigger = document.querySelector('.luma-schema-table__mobile-actions') as HTMLElement | null
+    const toolbarButton = document.querySelector('.luma-schema-table__toolbar .el-button') as HTMLElement | null
+    const firstBodyRow = document.querySelector('.luma-schema-table__body .el-table__body tbody tr') as HTMLElement | null
+    const actionColumn = document.querySelector('.luma-schema-table__body .el-table__header th.el-table-fixed-column--right') as HTMLElement | null
+    return {
+      actionColumnWidth: actionColumn?.getBoundingClientRect().width ?? 0,
+      actionHeight: actionTrigger?.getBoundingClientRect().height ?? 0,
+      rowHeight: firstBodyRow?.getBoundingClientRect().height ?? 0,
+      toolbarButtonHeight: toolbarButton?.getBoundingClientRect().height ?? 0,
+    }
+  })
+  expect(metrics.actionHeight).toBeGreaterThan(0)
+  expect(metrics.actionHeight).toBeLessThanOrEqual(32)
+  expect(metrics.toolbarButtonHeight).toBeGreaterThan(0)
+  expect(metrics.toolbarButtonHeight).toBeLessThanOrEqual(32)
+  expect(metrics.rowHeight).toBeGreaterThan(0)
+  expect(metrics.rowHeight).toBeLessThanOrEqual(52)
+  expect(metrics.actionColumnWidth).toBeGreaterThan(0)
+  expect(metrics.actionColumnWidth).toBeLessThanOrEqual(84)
+
+  const moreButton = page.locator('.luma-schema-table__mobile-actions').first()
+  await expect(moreButton).toBeVisible()
+  await moreButton.click()
+  await expect(moreButton).toHaveAttribute('aria-expanded', 'true')
+  const viewAction = page.locator('.luma-schema-table__mobile-actions-popper [data-action="view-user"]').first()
+  await expect(viewAction).toBeVisible()
+  await viewAction.click()
+  await expect(page.getByRole('dialog').or(page.getByRole('heading', { name: /查看|用户/ }))).toBeVisible()
+  await page.keyboard.press('Escape')
+
+  await page.getByRole('button', { name: '展开机构导航', exact: true }).click()
+  await expect(page.getByRole('button', { name: '收起机构导航', exact: true })).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeVisible()
+  const treeHeight = await page.locator('.luma-admin-user-page__organization-tree').evaluate(element => element.getBoundingClientRect().height)
+  expect(treeHeight).toBeLessThanOrEqual(160)
+
+  for (const width of [660, 768]) {
+    await page.setViewportSize({ height: width === 660 ? 1178 : 900, width })
     await expect(page.getByRole('heading', { name: '机构导航' })).toBeVisible()
+    await expect(page.getByRole('button', { name: '收起机构导航', exact: true })).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByLabel('搜索机构名称或编码')).toBeVisible()
     await expectNoPageOverflow(page)
   }
+
+  await page.setViewportSize({ height: 900, width: 1024 })
+  await expect(page.locator('.luma-admin-user-page__organization-toggle')).toHaveCount(0)
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeVisible()
+  await expect(page.locator('.luma-crud-table__query')).toBeVisible()
+  await expectNoPageOverflow(page)
+
+  await page.setViewportSize({ height: 812, width: 375 })
+  await expect(page.getByRole('button', { name: '收起机构导航', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '收起机构导航', exact: true }).click()
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeHidden()
+
+  await page.setViewportSize({ height: 900, width: 1024 })
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeVisible()
+  await page.setViewportSize({ height: 812, width: 375 })
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeHidden()
+
+  await page.setViewportSize({ height: 900, width: 1440 })
+  await expect(page.getByLabel('搜索机构名称或编码')).toBeVisible()
+  await expectNoPageOverflow(page)
 })

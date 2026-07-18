@@ -12,10 +12,12 @@ function sourceConfig(): CockpitConfig {
       id: 'layout',
       title: '布局',
       left: {
+        width: 640,
         columns: [{ id: 'left-a', width: 320 }, { id: 'left-b', width: 320 }],
         rows: [{ id: 'left-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'left-cell-a' }, { id: 'left-cell-b' }] }],
       },
       right: {
+        width: 320,
         columns: [{ id: 'right-a', width: 320 }],
         rows: [{ id: 'right-row', height: 100, mode: 'grid', widgets: [], cells: [{ id: 'right-cell' }] }],
       },
@@ -48,8 +50,17 @@ describe('v3 useCockpitDraft', () => {
     expect(draft.resizeRegion('left', 2, 3)).toBe(true)
     expect(draft.activeLayout.value!.left.rows).toHaveLength(2)
     expect(draft.activeLayout.value!.left.columns).toHaveLength(3)
+    expect(draft.activeLayout.value!.left.columns.reduce((sum, column) => sum + column.width, 0)).toBe(640)
     expect(draft.activeLayout.value!.right.rows).toHaveLength(1)
     expect(draft.activeLayout.value!.right.columns).toHaveLength(1)
+  })
+
+  it('设置区域宽后按列数均分列宽', () => {
+    const draft = useCockpitDraft(sourceConfig())
+    draft.setRegionWidth('left', 900)
+    const left = draft.activeLayout.value!.left
+    expect(left.width).toBe(900)
+    expect(left.columns.map(column => column.width)).toEqual([450, 450])
   })
 
   it('缩减含模块的列被阻止，显式丢弃才会执行', () => {

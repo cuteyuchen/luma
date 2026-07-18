@@ -15,6 +15,7 @@ const defaultConfig: CockpitConfig = {
       id: 'layout-overview',
       title: '综合态势',
       left: {
+        width: 420,
         columns: [{ id: 'left-overview-column', width: 420 }],
         rows: [
           {
@@ -38,6 +39,7 @@ const defaultConfig: CockpitConfig = {
         ],
       },
       right: {
+        width: 420,
         columns: [{ id: 'right-overview-column', width: 420 }],
         rows: [
           {
@@ -65,6 +67,7 @@ const defaultConfig: CockpitConfig = {
       id: 'layout-analysis',
       title: '运行分析',
       left: {
+        width: 420,
         columns: [{ id: 'left-analysis-column', width: 420 }],
         rows: [
           {
@@ -81,6 +84,7 @@ const defaultConfig: CockpitConfig = {
         ],
       },
       right: {
+        width: 420,
         columns: [{ id: 'right-analysis-column', width: 420 }],
         rows: [
           {

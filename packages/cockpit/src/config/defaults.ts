@@ -14,6 +14,7 @@ import type {
 /** v3 移除了分类、页面与中心组件配置。 */
 export const COCKPIT_SCHEMA_VERSION = 3
 export const DEFAULT_COLUMN_WIDTH = 320
+export const DEFAULT_REGION_WIDTH = 420
 export const DEFAULT_ROW_HEIGHT = 100
 
 /***********************ID 生成*********************/
@@ -37,6 +38,20 @@ export function createGridColumn(width = DEFAULT_COLUMN_WIDTH): CockpitGridColum
   return { id: createCockpitId('column'), width }
 }
 
+/** 将区域总宽按列数均分写入各列 width（像素取整，余数分给前几列）。 */
+export function equalizeRegionColumns(region: Pick<CockpitRegionConfig, 'width' | 'columns'>): void {
+  const count = Math.max(1, region.columns.length)
+  const total = Math.max(count, Math.round(region.width) || DEFAULT_REGION_WIDTH)
+  region.width = total
+  const base = Math.floor(total / count)
+  let remainder = total - base * count
+  region.columns.forEach((column) => {
+    column.width = base + (remainder > 0 ? 1 : 0)
+    if (remainder > 0)
+      remainder -= 1
+  })
+}
+
 export function createGridCell(): CockpitGridCellConfig {
   return { id: createCockpitId('cell') }
 }
@@ -55,10 +70,12 @@ export function createGridRow(
   }
 }
 
-export function createRegion(columnCount = 1, rowCount = 1): CockpitRegionConfig {
-  const columns = Array.from({ length: Math.max(1, columnCount) }, createGridColumn)
+export function createRegion(columnCount = 1, rowCount = 1, width = DEFAULT_REGION_WIDTH): CockpitRegionConfig {
+  const columns = Array.from({ length: Math.max(1, columnCount) }, () => createGridColumn())
   const rows = Array.from({ length: Math.max(1, rowCount) }, () => createGridRow(columns.length, 'grid', 100 / Math.max(1, rowCount)))
-  return { columns, rows }
+  const region: CockpitRegionConfig = { width, columns, rows }
+  equalizeRegionColumns(region)
+  return region
 }
 
 export function createLayout(title = '新布局'): CockpitLayoutConfig {

@@ -90,6 +90,7 @@ defineExpose({
 
 @media (max-width: 640px) {
   .luma-pagination {
+    row-gap: 4px;
     justify-content: flex-start;
   }
 

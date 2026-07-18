@@ -243,6 +243,49 @@ export const elementPlusStubs = {
       </nav>
     `,
   }),
+  ElPopover: defineComponent({
+    name: 'ElPopover',
+    inheritAttrs: false,
+    props: {
+      placement: String,
+      popperClass: String,
+      teleported: Boolean,
+      trigger: String,
+      visible: Boolean,
+      width: [String, Number],
+    },
+    emits: ['update:visible'],
+    mounted() {
+      document.addEventListener('click', this.handleDocumentClick)
+    },
+    beforeUnmount() {
+      document.removeEventListener('click', this.handleDocumentClick)
+    },
+    methods: {
+      handleDocumentClick(event: Event) {
+        const root = this.$refs.root as HTMLElement | undefined
+        if (this.visible && root && !root.contains(event.target as Node)) {
+          this.$emit('update:visible', false)
+        }
+      },
+      toggleVisible() {
+        this.$emit('update:visible', !this.visible)
+      },
+    },
+    template: `
+      <span
+        ref="root"
+        class="el-popover-stub"
+        :data-placement="placement"
+        :data-teleported="String(teleported)"
+        :data-trigger="trigger"
+        v-bind="$attrs"
+      >
+        <span class="el-popover-stub__reference" @click="toggleVisible"><slot name="reference" /></span>
+        <div v-if="visible" class="el-popover-stub__content" :class="popperClass"><slot /></div>
+      </span>
+    `,
+  }),
   ElScrollbar: defineComponent({
     name: 'ElScrollbar',
     template: '<div class="el-scrollbar"><slot /></div>',

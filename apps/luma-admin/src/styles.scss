@@ -134,11 +134,16 @@ button {
     width: calc(100vw - 24px) !important;
   }
 
-  .luma-admin-dialog .el-dialog__header,
-  .luma-admin-dialog .el-dialog__body,
+  .luma-admin-dialog .el-dialog__header {
+    padding: 12px;
+  }
+
+  .luma-admin-dialog .el-dialog__body {
+    padding: 12px;
+  }
+
   .luma-admin-dialog .el-dialog__footer {
-    padding-right: 16px;
-    padding-left: 16px;
+    padding: 10px 12px 12px;
   }
 }
 

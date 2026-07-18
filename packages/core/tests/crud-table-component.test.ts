@@ -137,6 +137,55 @@ describe('luma crud table', () => {
     expect(queryToggleButton.attributes('aria-label')).toBe('显示筛选条件')
   })
 
+  it('移动端使用独立的查询默认状态并透传紧凑操作列宽', async () => {
+    const listeners = new Set<(event: MediaQueryListEvent) => void>()
+    const mediaQuery = {
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.add(listener),
+      matches: true,
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.delete(listener),
+    }
+    vi.stubGlobal('matchMedia', vi.fn(() => mediaQuery))
+
+    try {
+      const wrapper = mount(LumaCrudTable, {
+        global: { stubs: elementPlusStubs },
+        props: {
+          query: {
+            mobileDefaultVisible: false,
+            schemas: [{ field: 'keyword', label: '关键词' }],
+          },
+          rows: [{ id: 'row-1', name: 'Luma' }],
+          table: {
+            columns: [{ field: 'name', label: '名称' }],
+            mobileActionWidth: 72,
+          },
+        },
+      })
+      await flushPromises()
+
+      const queryPanel = wrapper.find('.luma-crud-table__query')
+      const queryToggle = wrapper.find('[data-action="toggle-query-panel"]')
+      expect(queryPanel.isVisible()).toBe(false)
+      expect(wrapper.findComponent(LumaSchemaTable).props('mobileActionWidth')).toBe(72)
+
+      await queryToggle.trigger('click')
+      expect(queryPanel.isVisible()).toBe(true)
+
+      listeners.forEach(listener => listener({ matches: false } as MediaQueryListEvent))
+      await nextTick()
+      expect(queryPanel.isVisible()).toBe(true)
+
+      listeners.forEach(listener => listener({ matches: true } as MediaQueryListEvent))
+      await nextTick()
+      expect(queryPanel.isVisible()).toBe(true)
+
+      wrapper.unmount()
+    }
+    finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('仅在传入标题时显示工具栏标题，并允许业务操作显式放在左侧', () => {
     const wrapper = mount(LumaCrudTable, {
       global: { stubs: elementPlusStubs },

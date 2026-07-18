@@ -44,12 +44,17 @@ function validateRegion(region: CockpitRegionConfig, path: string[], widgetIds: 
     issues.push({ level: 'error', message: '区域至少需要一列。', path })
   if (!region.rows.length)
     issues.push({ level: 'error', message: '区域至少需要一行。', path })
+  if (!(region.width > 0))
+    issues.push({ level: 'error', message: '区域宽度必须大于 0 像素。', path })
   const columnIds = new Set<string>()
+  const columnSum = region.columns.reduce((sum, column) => sum + column.width, 0)
   region.columns.forEach((column) => {
     addDuplicateIssue(columnIds, issues, column.id, '列', [...path, column.id])
     if (!(column.width > 0))
       issues.push({ level: 'error', message: '列宽必须大于 0 像素。', path: [...path, column.id] })
   })
+  if (region.columns.length && region.width > 0 && columnSum !== region.width)
+    issues.push({ level: 'error', message: '列宽总和必须等于区域宽度。', path })
   const rowIds = new Set<string>()
   region.rows.forEach((row) => {
     addDuplicateIssue(rowIds, issues, row.id, '行', [...path, row.id])

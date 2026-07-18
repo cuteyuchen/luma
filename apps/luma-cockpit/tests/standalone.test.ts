@@ -76,6 +76,8 @@ describe('独立驾驶舱应用', () => {
     expect(config.title).toBe('全国智慧运行态势')
     expect(config.layouts).toHaveLength(2)
     expect(config.layouts.map(layout => layout.title)).toEqual(['综合态势', '运行分析'])
+    expect(config.layouts[0].left.width).toBe(420)
+    expect(config.layouts[0].right.width).toBe(420)
     expect(config.layouts[0].left.columns[0].width).toBe(420)
     expect(config.layouts[0].right.columns[0].width).toBe(420)
     expect(config.layouts[0].left.rows.reduce((sum, row) => sum + row.height, 0)).toBe(100)

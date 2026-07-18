@@ -148,7 +148,7 @@ defineExpose({
 @media (max-width: 768px) {
   .luma-page {
     gap: 12px;
-    padding: 16px;
+    padding: 12px;
   }
 
   .luma-page__header {

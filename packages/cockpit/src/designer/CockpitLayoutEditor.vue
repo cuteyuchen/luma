@@ -47,9 +47,8 @@ function definitionFor(type: string): CockpitWidgetDefinition | undefined {
 }
 
 function columnTemplate(): string {
-  return region.value?.columns
-    .map(column => `minmax(0, ${Math.max(1, column.width)}fr)`)
-    .join(' ') ?? 'minmax(0, 1fr)'
+  const count = region.value?.columns.length ?? 1
+  return Array.from({ length: Math.max(1, count) }, () => 'minmax(0, 1fr)').join(' ')
 }
 
 function activeWidgetFor(row: CockpitGridRowConfig): CockpitWidgetInstance | undefined {
@@ -183,14 +182,13 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
     >
       <div class="luma-cockpit-designer__region-head-meta">
         <strong>{{ side === 'left' ? '左侧区域' : '右侧区域' }}</strong>
-        <span>调整网格结构与列宽</span>
+        <span>调整网格结构与区域宽</span>
       </div>
       <label class="luma-cockpit-designer__field">
         <span>行</span>
         <ElInputNumber
           :model-value="region?.rows.length ?? 1"
           :min="1"
-          controls-position="right"
           :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域行数`"
           @change="resize($event ?? 1, region?.columns.length ?? 1)"
         />
@@ -200,26 +198,29 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
         <ElInputNumber
           :model-value="region?.columns.length ?? 1"
           :min="1"
-          controls-position="right"
           :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域列数`"
           @change="resize(region?.rows.length ?? 1, $event ?? 1)"
         />
       </label>
-      <label v-for="(column, index) in region?.columns ?? []" :key="column.id" class="luma-cockpit-designer__field luma-cockpit-designer__column-field">
-        <span>列宽 {{ index + 1 }}</span>
+      <label class="luma-cockpit-designer__field luma-cockpit-designer__region-width-field">
+        <span>区域宽</span>
         <ElInputNumber
-          :model-value="column.width"
-          :min="1"
-          controls-position="right"
-          :aria-label="`列 ${index + 1} 宽度像素`"
-          @change="draft.setColumnWidth(side, column.id, $event ?? column.width)"
+          :model-value="region?.width ?? 0"
+          :min="Math.max(1, region?.columns.length ?? 1)"
+          :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域宽度像素`"
+          @change="draft.setRegionWidth(side, $event ?? region?.width ?? 0)"
         />
         <em>px</em>
       </label>
     </header>
 
     <div v-if="region" class="luma-cockpit-designer__grid-rows">
-      <section v-for="(row, rowIndex) in region.rows" :key="row.id" class="luma-cockpit-designer__grid-row" :style="{ flexBasis: `${row.height}%` }">
+      <section
+        v-for="(row, rowIndex) in region.rows"
+        :key="row.id"
+        class="luma-cockpit-designer__grid-row"
+        :style="{ flex: `${row.height} 1 0` }"
+      >
         <header
           class="luma-cockpit-designer__grid-row-head"
           data-role="row-tools"
@@ -234,7 +235,6 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
               :min="1"
               :max="100"
               :precision="3"
-              controls-position="right"
               :aria-label="`第 ${rowIndex + 1} 行高度百分比`"
               @change="draft.setRowHeight(side, row.id, $event ?? row.height)"
             />

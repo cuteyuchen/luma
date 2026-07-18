@@ -113,10 +113,12 @@ const columns: SchemaTableColumn[] = [
 const queryConfig = {
   collapsible: true,
   columns: 3,
+  mobileDefaultVisible: false,
   schemas: querySchemas,
 }
 const tableConfig = {
   columns,
+  mobileActionWidth: 72,
   rowKey: 'id',
   showColumnSettings: true,
 }

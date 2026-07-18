@@ -206,6 +206,7 @@ onBeforeUnmount(() => {
       v-if="designerVisible"
       class="standalone-app__designer"
       role="dialog"
+      aria-modal="true"
       aria-label="驾驶舱配置"
       :style="{ '--luma-cockpit-designer-title-image': `url(${designerTitleImage})` }"
     >
@@ -217,7 +218,20 @@ onBeforeUnmount(() => {
         :theme-mode="standaloneResolvedThemeMode"
         @save="handleSave"
         @cancel="closeDesigner"
-      />
+      >
+        <template #title-actions>
+          <ElTooltip content="关闭">
+            <ElButton
+              class="standalone-app__designer-close"
+              circle
+              aria-label="关闭模块设置"
+              @click="closeDesigner"
+            >
+              <LumaIcon name="luma:close" :size="16" />
+            </ElButton>
+          </ElTooltip>
+        </template>
+      </LumaCockpitDesigner>
     </div>
   </div>
 </template>
@@ -243,6 +257,15 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 2050;
+}
+
+.standalone-app__designer-close {
+  --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-floating-bg, #19374b), transparent 14%);
+  --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 18%);
+  --el-button-text-color: var(--luma-cockpit-title-text, #fff);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), transparent 84%);
+  --el-button-hover-border-color: var(--luma-cockpit-accent, #00cbf4);
+  --el-button-hover-text-color: var(--luma-cockpit-title-text, #fff);
 }
 
 .standalone-app__actions {

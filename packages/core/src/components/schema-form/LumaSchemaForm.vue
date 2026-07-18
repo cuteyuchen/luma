@@ -728,6 +728,14 @@ defineExpose({
 }
 
 @media (max-width: 768px) {
+  .luma-schema-form {
+    gap: 12px;
+  }
+
+  .luma-schema-form__row {
+    row-gap: 10px;
+  }
+
   .luma-schema-form__row :deep(.el-col.el-col) {
     max-width: 100%;
     flex: 0 0 100%;
@@ -737,15 +745,16 @@ defineExpose({
   .luma-schema-form :deep(.el-select__wrapper),
   .luma-schema-form :deep(.el-input-number),
   .luma-schema-form :deep(.el-date-editor) {
-    min-height: 44px;
+    min-height: 32px;
   }
 
   .luma-schema-form__actions {
+    padding-top: 12px;
     justify-content: stretch;
   }
 
   .luma-schema-form__actions :deep(.el-button) {
-    min-height: 44px;
+    min-height: 32px;
     flex: 1 1 auto;
   }
 }
@@ -769,5 +778,4 @@ defineExpose({
   }
 }
 </style>
-  clearValidate,
-  getFieldComponent,
+

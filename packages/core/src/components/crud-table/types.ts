@@ -63,6 +63,7 @@ export interface CrudQueryConfig {
   collapsible?: boolean
   defaultCollapsed?: boolean
   defaultVisible?: boolean
+  mobileDefaultVisible?: boolean
   collapsedRows?: number
   labelWidth?: number | string
   searchText?: string
@@ -79,6 +80,7 @@ export interface CrudTableConfig {
   columnSettings?: SchemaTableColumnSettings
   autoResize?: boolean
   actionWidth?: number | string
+  mobileActionWidth?: number | string
   emptyText?: string
 }
 
