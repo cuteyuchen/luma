@@ -23,6 +23,14 @@ export interface PlaygroundControl {
    * 显式置 true 会输出 prop="value"，false 会输出 :prop="value"。
    */
   asString?: boolean
+  /**
+   * 仅用于表单调试、不写入生成代码的虚拟字段（如 colors 拆成 color1/color2）。
+   */
+  omitFromCode?: boolean
+  /**
+   * 按当前 model 决定是否隐藏该控件（如边框变体不支持的字段）。
+   */
+  hidden?: boolean | ((model: Record<string, unknown>) => boolean)
 }
 
 const props = withDefaults(defineProps<{
@@ -48,12 +56,31 @@ const props = withDefaults(defineProps<{
   columns: 2,
 })
 
-/** 当前属性值集合，由页面通过 v-model 提供并保持响应式。 */
+/**
+ * 当前属性值集合，由页面通过 v-model 提供并保持响应式。
+ * 必须用 v-model（或 :model-value + @update:model-value），单向 :model-value 时表单改值不会回写。
+ *
+ * LumaSchemaForm 会整体替换 model 对象；这里就地 merge，兼容父页 reactive() 绑定，
+ * 避免引用断开导致预览不更新。
+ */
 const model = defineModel<Record<string, unknown>>({ required: true })
+
+function handleModelUpdate(next: Record<string, unknown>): void {
+  // 只合并回写，不删除隐藏控件对应的键，避免切换 variant 后丢失暂存值。
+  Object.assign(model.value, next)
+}
+
+function isControlHidden(control: PlaygroundControl): boolean {
+  if (typeof control.hidden === 'function')
+    return control.hidden(model.value)
+  return Boolean(control.hidden)
+}
+
+const visibleControls = computed(() => props.controls.filter(control => !isControlHidden(control)))
 
 /** 把 Playground 控件定义映射为 LumaSchemaForm 的 schema。 */
 const schemas = computed<SchemaFormItem[]>(() =>
-  props.controls.map((control) => {
+  visibleControls.value.map((control) => {
     const label = control.label ?? control.key
     const help = control.hint
 
@@ -115,7 +142,7 @@ function kebab(name: string): string {
 
 /** 把一个属性渲染成模板中的 attribute 片段。 */
 function attrFor(control: PlaygroundControl, value: unknown): string | null {
-  if (isEmpty(value))
+  if (control.omitFromCode || isEmpty(value))
     return null
 
   const name = kebab(control.key)
@@ -131,7 +158,7 @@ const generatedCode = computed(() => {
   if (props.codeGen)
     return props.codeGen(model.value)
 
-  const attrs = props.controls
+  const attrs = visibleControls.value
     .map(c => attrFor(c, model.value[c.key]))
     .filter((a): a is string => a !== null)
 
@@ -173,11 +200,12 @@ const generatedCode = computed(() => {
 
     <div class="playground__controls">
       <LumaSchemaForm
-        v-model="model"
+        :model-value="model"
         :schemas="schemas"
         :columns="columns"
         label-position="top"
         compact
+        @update:model-value="handleModelUpdate"
       />
     </div>
 
@@ -222,6 +250,7 @@ const generatedCode = computed(() => {
 
 .playground__stage--dark {
   background: radial-gradient(120% 120% at 50% 0%, #0b1f3a 0%, #050d1c 70%, #030814 100%);
+  color: #edf9ff;
 }
 
 .playground__stage--plain {

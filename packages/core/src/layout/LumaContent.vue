@@ -27,7 +27,10 @@ defineExpose({
   min-width: 0;
   min-height: 0;
   padding: 14px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   background: var(--el-bg-color-page);
 }
 

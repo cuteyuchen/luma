@@ -22,6 +22,10 @@ const playModel = reactive<Record<string, unknown>>({
   showValue: true,
   sort: false,
   max: 0,
+  color1: '#35c8ff',
+  color2: '#6ff7cd',
+  color3: '#796cff',
+  color4: '#ff9f43',
 })
 
 const playControls: PlaygroundControl[] = [
@@ -38,6 +42,10 @@ const playControls: PlaygroundControl[] = [
     ],
   },
   { key: 'max', label: '满刻度 max', type: 'number', min: 0, max: 500, step: 10, hint: '0 表示取最大值' },
+  { key: 'color1', label: '配色 colors[0]', type: 'color', omitFromCode: true },
+  { key: 'color2', label: '配色 colors[1]', type: 'color', omitFromCode: true },
+  { key: 'color3', label: '配色 colors[2]', type: 'color', omitFromCode: true },
+  { key: 'color4', label: '配色 colors[3]', type: 'color', omitFromCode: true },
 ]
 
 const modernCode = `<script setup lang="ts">
@@ -91,7 +99,7 @@ const propRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaCapsuleChart"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="200"
     >
       <LumaCapsuleChart
@@ -100,6 +108,12 @@ const propRows: PropRow[] = [
         :show-value="playModel.showValue as boolean"
         :sort="(playModel.sort as 'asc' | 'desc') || false"
         :max="(playModel.max as number) || undefined"
+        :colors="[
+          playModel.color1 as string,
+          playModel.color2 as string,
+          playModel.color3 as string,
+          playModel.color4 as string,
+        ]"
         style="height: 240px; width: 360px;"
       />
     </Playground>

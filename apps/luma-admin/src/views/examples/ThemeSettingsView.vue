@@ -47,13 +47,17 @@ const previewStyle = computed(() => ({
 </script>
 
 <template>
-  <main class="luma-admin-example">
-    <LumaPage title="主题与动画" description="使用 LumaThemeSettingsPanel 驱动主题、动画和布局偏好。">
+  <main class="luma-admin-example is-fill">
+    <LumaPage title="主题与动画" description="使用 LumaThemeSettingsPanel 驱动主题、动画和布局偏好。" fill>
       <template #actions>
         <LumaIcon name="luma:palette" :size="22" title="主题设置" />
       </template>
       <div class="theme-entry">
-        <div><strong>全局偏好设置</strong><p>内嵌面板与右侧设置抽屉共享同一份偏好，修改后会立即作用于当前系统。</p></div><ElButton type="primary" @click="openAdminSettings">
+        <div>
+          <strong>全局偏好设置</strong>
+          <p>内嵌面板与右侧设置抽屉共享同一份偏好，修改后会立即作用于当前系统。</p>
+        </div>
+        <ElButton type="primary" @click="openAdminSettings">
           打开右侧全局设置
         </ElButton>
       </div>
@@ -83,18 +87,50 @@ const previewStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
+.luma-admin-example.is-fill :deep(.luma-page__body) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.theme-entry {
+  display: flex;
+  flex: none;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  margin-bottom: 16px;
+  border: 1px solid var(--el-color-primary-light-7);
+  border-radius: 10px;
+  background: var(--el-color-primary-light-9);
+}
+
+.theme-entry p {
+  margin: 6px 0 0;
+  color: var(--el-text-color-secondary);
+}
+
 .luma-admin-example__theme-layout {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   gap: 24px;
-  align-items: flex-start;
+  align-items: stretch;
+  min-height: 0;
+  overflow: hidden;
 }
-.theme-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;margin-bottom:20px;border:1px solid var(--el-color-primary-light-7);border-radius:10px;background:var(--el-color-primary-light-9)}.theme-entry p{margin:6px 0 0;color:var(--el-text-color-secondary)}
 
 .luma-admin-example__theme-panel {
+  display: flex;
   flex: 0 1 380px;
+  flex-direction: column;
   width: min(100%, 380px);
+  max-height: 100%;
+  min-height: 0;
   padding: 16px;
+  overflow: hidden;
   border: 1px solid var(--el-border-color-light);
   border-radius: 8px;
   background: var(--el-bg-color);
@@ -102,9 +138,22 @@ const previewStyle = computed(() => ({
 
 .luma-admin-example__theme-detail {
   display: flex;
-  flex: 1;
+  flex: 1 1 280px;
   flex-direction: column;
   gap: 16px;
   min-width: 280px;
+  min-height: 0;
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  .luma-admin-example.is-fill :deep(.luma-page__body),
+  .luma-admin-example__theme-layout {
+    overflow: auto;
+  }
+
+  .luma-admin-example__theme-panel {
+    max-height: min(70vh, 640px);
+  }
 }
 </style>

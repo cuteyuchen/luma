@@ -15,7 +15,11 @@ const playModel = reactive<Record<string, unknown>>({
   showLabel: true,
   borderWidth: 3,
   borderRadius: 5,
+  borderGap: 3,
   textColor: '#ffffff',
+  color1: '#00c0ff',
+  color2: '#4dfffe',
+  localGradient: false,
 })
 
 // 在线调试的控件定义
@@ -24,8 +28,12 @@ const playControls: PlaygroundControl[] = [
   { key: 'shape', label: '外形 shape', type: 'select', options: [{ label: 'bar', value: 'bar' }, { label: 'capsule', value: 'capsule' }] },
   { key: 'showLabel', label: '显示文本 showLabel', type: 'boolean' },
   { key: 'borderWidth', label: '边框宽 borderWidth', type: 'number', min: 0, max: 20, step: 1 },
+  { key: 'borderGap', label: '边框间距 borderGap', type: 'number', min: 0, max: 20, step: 1 },
   { key: 'borderRadius', label: '圆角 borderRadius', type: 'number', min: 0, max: 30, step: 1 },
   { key: 'textColor', label: '文本颜色 textColor', type: 'color' },
+  { key: 'color1', label: '填充色 colors[0]', type: 'color', omitFromCode: true },
+  { key: 'color2', label: '填充色 colors[1]', type: 'color', omitFromCode: true },
+  { key: 'localGradient', label: '局部渐变 localGradient', type: 'boolean' },
 ]
 
 const modernCode = `<LumaPercentPond :value="72" shape="capsule" />
@@ -60,7 +68,7 @@ const propRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaPercentPond"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="160"
     >
       <LumaPercentPond
@@ -68,8 +76,11 @@ const propRows: PropRow[] = [
         :shape="playModel.shape as 'bar' | 'capsule'"
         :show-label="playModel.showLabel as boolean"
         :border-width="playModel.borderWidth as number"
+        :border-gap="playModel.borderGap as number"
         :border-radius="playModel.borderRadius as number"
         :text-color="playModel.textColor as string"
+        :colors="[playModel.color1 as string, playModel.color2 as string]"
+        :local-gradient="playModel.localGradient as boolean"
         style="width: 320px; height: 60px;"
       />
     </Playground>

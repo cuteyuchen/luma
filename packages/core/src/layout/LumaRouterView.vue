@@ -123,14 +123,19 @@ defineExpose({
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  width: 100%;
   min-width: 0;
   min-height: 0;
+  /* 仅由 LumaContent 承担纵向滚动，避免移动端双重滚动容器互相截断 */
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .luma-router-view :deep(> *) {
-  min-height: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .luma-router-view__progress {

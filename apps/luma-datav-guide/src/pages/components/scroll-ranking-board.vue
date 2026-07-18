@@ -24,6 +24,7 @@ const playModel = reactive<Record<string, unknown>>({
   visibleRows: 4,
   interval: 2000,
   sort: 'desc',
+  autoplay: true,
 })
 
 const playControls: PlaygroundControl[] = [
@@ -40,6 +41,7 @@ const playControls: PlaygroundControl[] = [
       { label: '降序 desc', value: 'desc' },
     ],
   },
+  { key: 'autoplay', label: '自动轮播 autoplay', type: 'boolean' },
 ]
 
 const config: ScrollRankingBoardConfig = {
@@ -115,7 +117,7 @@ const configRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaScrollRankingBoard"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="300"
     >
       <LumaScrollRankingBoard
@@ -124,6 +126,7 @@ const configRows: PropRow[] = [
         :visible-rows="playModel.visibleRows as number"
         :interval="playModel.interval as number"
         :sort="(playModel.sort as 'asc' | 'desc') || false"
+        :autoplay="playModel.autoplay as boolean"
         style="height: 240px; width: 100%;"
       />
     </Playground>

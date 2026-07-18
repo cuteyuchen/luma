@@ -29,6 +29,7 @@ const menus = [
       },
     ],
     path: '/system',
+    redirect: '/system/user',
     title: '系统管理',
   },
 ]
@@ -190,13 +191,13 @@ describe('luma layout', () => {
     expect(wrapper.emitted('menuSelect')?.[0]).toEqual(['/system/user'])
   })
 
-  it('混合导航会自动拆分菜单并把一级菜单下钻到首个子项', async () => {
+  it('混合导航默认只切换顶级分组并展示其侧栏子菜单', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
-        activeMenuPath: '/system/user',
+        activeMenuPath: '/dashboard',
         menus,
         preferences: createLayoutPreferences('mixed-nav'),
       },
@@ -204,15 +205,40 @@ describe('luma layout', () => {
 
     expect(wrapper.findComponent(LumaTopNav).props('mode')).toBe('flat')
     expect(wrapper.find('[data-menu-path="/system"]').exists()).toBe(true)
-    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
     expect(wrapper.findComponent(LumaHeader).findComponent(LumaBreadcrumb).exists()).toBe(false)
     expect(wrapper.find('.luma-layout__main > .luma-breadcrumb').exists()).toBe(true)
 
     await wrapper.find('[data-menu-path="/system"]').trigger('click')
+
+    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system')
+    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.emitted('topMenuSelect')?.at(-1)).toEqual(['/system'])
+    expect(wrapper.emitted('menuSelect')).toBeUndefined()
+  })
+
+  it('混合导航开启自动激活后会优先采用目录重定向', async () => {
+    const wrapper = mount(LumaLayout, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        activeMenuPath: '/dashboard',
+        menus,
+        preferences: createDefaultPreferences({
+          app: { layout: 'mixed-nav' },
+          sidebar: { autoActivateChild: true },
+        }),
+      },
+    })
+
+    await wrapper.find('[data-menu-path="/system"]').trigger('click')
+
+    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
     expect(wrapper.emitted('menuSelect')?.at(-1)).toEqual(['/system/user'])
   })
 
-  it('混合导航会随一级菜单是否有子级自动隐藏和显示侧栏', async () => {
+  it('混合导航会随浏览分组和实际路由同步隐藏或显示侧栏', async () => {
     const wrapper = mount(LumaLayout, {
       global: {
         stubs: elementPlusStubs,
@@ -226,12 +252,38 @@ describe('luma layout', () => {
 
     expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
 
+    await wrapper.find('[data-menu-path="/system"]').trigger('click')
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(true)
+    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+
     await wrapper.setProps({ activeMenuPath: '/system/user' })
     expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(true)
     expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
 
     await wrapper.setProps({ activeMenuPath: '/dashboard' })
     expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+  })
+
+  it('混合导航关闭侧栏后使用树形顶部菜单访问子项', async () => {
+    const wrapper = mount(LumaLayout, {
+      global: {
+        stubs: elementPlusStubs,
+      },
+      props: {
+        activeMenuPath: '/system/user',
+        menus,
+        preferences: createDefaultPreferences({
+          app: { layout: 'mixed-nav' },
+          sidebar: { enable: false },
+        }),
+      },
+    })
+
+    expect(wrapper.findComponent(LumaTopNav).props('mode')).toBe('tree')
+    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+
+    await wrapper.find('[data-menu-path="/system/user"]').trigger('click')
+    expect(wrapper.emitted('menuSelect')?.at(-1)).toEqual(['/system/user'])
   })
 
   it('路由驱动模式会解析访问标签、限制数量并在关闭后进入 fallback', async () => {

@@ -16,6 +16,8 @@ const playModel = reactive<Record<string, unknown>>({
   duration: 1000,
   color: '#6ff7cd',
   fontSize: 40,
+  fontWeight: 'normal',
+  textAlign: 'center',
 })
 
 const playControls: PlaygroundControl[] = [
@@ -26,6 +28,26 @@ const playControls: PlaygroundControl[] = [
   { key: 'duration', label: '动画时长 duration', type: 'number', min: 0, max: 4000, step: 100, hint: '毫秒' },
   { key: 'color', label: '颜色 color', type: 'color' },
   { key: 'fontSize', label: '字号 fontSize', type: 'number', min: 12, max: 96, step: 2 },
+  {
+    key: 'fontWeight',
+    label: '字重 fontWeight',
+    type: 'select',
+    options: [
+      { label: 'normal', value: 'normal' },
+      { label: 'bold', value: 'bold' },
+      { label: '600', value: '600' },
+    ],
+  },
+  {
+    key: 'textAlign',
+    label: '对齐 textAlign',
+    type: 'select',
+    options: [
+      { label: 'left', value: 'left' },
+      { label: 'center', value: 'center' },
+      { label: 'right', value: 'right' },
+    ],
+  },
 ]
 
 const live = ref(1286)
@@ -34,8 +56,20 @@ const timer = window.setInterval(() => {
 }, 2000)
 onBeforeUnmount(() => window.clearInterval(timer))
 
-const modernCode = `<LumaDigitalFlop :value="1286" suffix=" 台" :font-size="40" color="#6ff7cd" />
-<LumaDigitalFlop :value="98.6" suffix="%" :precision="1" />`
+const modernCode = `<LumaDigitalFlop
+  :value="1286"
+  suffix=" 台"
+  :font-size="40"
+  color="#6ff7cd"
+  style="width: 200px; height: 56px;"
+/>
+<LumaDigitalFlop
+  :value="98.6"
+  suffix="%"
+  :precision="1"
+  :font-size="40"
+  style="width: 160px; height: 56px;"
+/>`
 
 const configCode = `<!-- DataV 原生 config：number 为数组，content 用 {nt} 占位 -->
 <LumaDigitalFlop :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }" />`
@@ -76,7 +110,7 @@ const propRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaDigitalFlop"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="180"
     >
       <LumaDigitalFlop
@@ -87,6 +121,9 @@ const propRows: PropRow[] = [
         :duration="playModel.duration as number"
         :color="playModel.color as string"
         :font-size="playModel.fontSize as number"
+        :font-weight="playModel.fontWeight as string"
+        :text-align="playModel.textAlign as 'left' | 'center' | 'right'"
+        style="width: 280px; height: 56px;"
       />
     </Playground>
 
@@ -94,10 +131,23 @@ const propRows: PropRow[] = [
       title="现代 props"
       description="value + suffix + precision 直接表达常见指标。"
       :code="modernCode"
+      :min-height="140"
     >
       <div class="flop-row">
-        <LumaDigitalFlop :value="1286" suffix=" 台" :font-size="40" color="#6ff7cd" />
-        <LumaDigitalFlop :value="98.6" suffix="%" :precision="1" :font-size="40" />
+        <LumaDigitalFlop
+          :value="1286"
+          suffix=" 台"
+          :font-size="40"
+          color="#6ff7cd"
+          style="width: 200px; height: 56px;"
+        />
+        <LumaDigitalFlop
+          :value="98.6"
+          suffix="%"
+          :precision="1"
+          :font-size="40"
+          style="width: 160px; height: 56px;"
+        />
       </div>
     </DemoBlock>
 
@@ -105,16 +155,28 @@ const propRows: PropRow[] = [
       title="DataV 原生 config"
       description="number 数组与 {nt} 模板串保持上游语义。"
       :code="configCode"
+      :min-height="140"
     >
-      <LumaDigitalFlop :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }" :font-size="40" />
+      <LumaDigitalFlop
+        :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }"
+        :font-size="40"
+        style="width: 200px; height: 56px;"
+      />
     </DemoBlock>
 
     <DemoBlock
       title="实时数值"
       description="每 2 秒更新一次，观察滚动过渡。"
       :code="liveCode"
+      :min-height="140"
     >
-      <LumaDigitalFlop :value="live" :duration="900" :font-size="46" color="#35c8ff" />
+      <LumaDigitalFlop
+        :value="live"
+        :duration="900"
+        :font-size="46"
+        color="#35c8ff"
+        style="width: 220px; height: 60px;"
+      />
     </DemoBlock>
 
     <h2>属性</h2>

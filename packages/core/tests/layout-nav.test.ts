@@ -43,6 +43,18 @@ describe('menu layout helpers', () => {
     expect(resolveNavigationTarget(menus[1])).toBe('/about')
   })
 
+  it('resolveNavigationTarget 会优先采用目录的显式重定向', () => {
+    expect(resolveNavigationTarget({
+      children: [
+        { externalLink: 'https://example.com', path: '/resources/docs', title: '外链文档' },
+        { path: '/resources/guide', title: '内嵌指南' },
+      ],
+      path: '/resources',
+      redirect: '/resources/guide',
+      title: '外部资源',
+    })).toBe('/resources/guide')
+  })
+
   it('会跳过隐藏菜单并支持递归查找外链项', () => {
     const extendedMenus = [
       {
@@ -183,5 +195,41 @@ describe('luma top nav', () => {
     expect(wrapper.findAll('.el-menu-item')).toHaveLength(2)
     expect(wrapper.text()).toContain('仪表盘')
     expect(wrapper.text()).toContain('关于')
+  })
+
+  it('一级叶子菜单在 activePath 命中后会标记 is-active', async () => {
+    const wrapper = mount(LumaTopNav, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        activePath: '/dashboard/workplace',
+        menus,
+        mode: 'tree',
+      },
+    })
+
+    expect(wrapper.find('[data-menu-path="/dashboard/workplace"]').classes()).toContain('is-active')
+
+    await wrapper.setProps({ activePath: '/about' })
+
+    expect(wrapper.find('[data-menu-path="/about"]').classes()).toContain('is-active')
+    expect(wrapper.find('[data-menu-path="/dashboard/workplace"]').classes()).not.toContain('is-active')
+  })
+
+  it('flat 模式会按顶级路径标记选中项', async () => {
+    const wrapper = mount(LumaTopNav, {
+      global: { stubs: elementPlusStubs },
+      props: {
+        activePath: '/dashboard',
+        menus,
+        mode: 'flat',
+      },
+    })
+
+    expect(wrapper.find('[data-menu-path="/dashboard"]').classes()).toContain('is-active')
+
+    await wrapper.setProps({ activePath: '/about' })
+
+    expect(wrapper.find('[data-menu-path="/about"]').classes()).toContain('is-active')
+    expect(wrapper.find('[data-menu-path="/dashboard"]').classes()).not.toContain('is-active')
   })
 })

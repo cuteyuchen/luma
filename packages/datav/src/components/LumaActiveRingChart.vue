@@ -188,10 +188,50 @@ watch([() => props.config, () => props.items], resetActiveIndex)
 </template>
 
 <style scoped>
-.dv-active-ring-chart { position: relative; }
-.active-ring-chart-container { width: 100%; height: 100%; }
-.active-ring-info { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-.active-ring-info .dv-digital-flop { width: 100px; height: 30px; min-height: 0; }
-.active-ring-name { width: 100px; height: 30px; overflow: hidden; color: #fff; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.luma-active-ring-controls { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; white-space: nowrap; }
+/* 对齐 DataV：根与图表容器 100% 占满父级，信息层 absolute 叠在中间 */
+.dv-active-ring-chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.active-ring-chart-container {
+  width: 100%;
+  height: 100%;
+}
+.active-ring-info {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.active-ring-info .dv-digital-flop {
+  width: 100px;
+  height: 30px;
+  min-height: 0;
+}
+.active-ring-name {
+  width: 100px;
+  height: 30px;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.luma-active-ring-controls {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+  white-space: nowrap;
+}
 </style>

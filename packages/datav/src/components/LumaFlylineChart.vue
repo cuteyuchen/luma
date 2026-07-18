@@ -192,7 +192,26 @@ function handleClick(event: MouseEvent): void {
 </template>
 
 <style scoped>
-.luma-flyline-chart { display: flex; width: 100%; height: 100%; min-width: 0; min-height: 0; flex-direction: column; background-size: 100% 100%; }
-.luma-flyline-chart svg { display: block; width: 100%; height: 100%; }
-.luma-flyline-chart text { text-anchor: middle; dominant-baseline: middle; }
+/* 根节点尺寸由父级给出；SVG 绝对定位铺满，避免进文档流后与 ResizeObserver 互相撑高 */
+.luma-flyline-chart {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-size: 100% 100%;
+}
+.luma-flyline-chart svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.luma-flyline-chart text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
 </style>

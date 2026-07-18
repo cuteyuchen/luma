@@ -261,55 +261,58 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
               :data-cockpit-drag-source="JSON.stringify(locationForCell(row, cell.id))"
               data-role="placed-widget"
             >
-              <CockpitWidgetPreview
-                v-if="definitionFor(cell.widget.type)"
-                :cockpit-id="cockpitId"
-                :definition="definitionFor(cell.widget.type)!"
-                :instance-id="cell.widget.id"
-                :layout-id="draft.activeLayout.value?.id ?? ''"
-                :message-bus="previewMessageBus"
-              />
-              <div v-else class="luma-cockpit-designer__widget-preview-fallback">
-                未注册模块
-              </div>
-              <footer class="luma-cockpit-designer__placed-widget-footer">
+              <!-- 与 Tab 多模块一致：名称与操作区固定在顶部 -->
+              <header class="luma-cockpit-designer__placed-widget-header">
                 <span>{{ cell.widget.title ?? cell.widget.type }}</span>
-              </footer>
-              <div class="luma-cockpit-designer__placed-widget-actions">
-                <ElTooltip content="选择并移动模块" placement="top">
-                  <ElButton
-                    class="luma-cockpit-designer__widget-action"
-                    data-role="select-move-source"
-                    :aria-label="`选择移动模块 ${cell.widget.title ?? cell.widget.type}`"
-                    :aria-pressed="isSelectedLocation(locationForCell(row, cell.id))"
-                    @mousedown.stop
-                    @click.stop="selectPlaced(locationForCell(row, cell.id), cell.widget)"
-                  >
-                    <LumaIcon name="luma:more" :size="12" />
-                  </ElButton>
-                </ElTooltip>
-                <ElTooltip v-if="canUseAsTarget(locationForCell(row, cell.id))" content="移动并替换到此槽位" placement="top">
-                  <ElButton
-                    class="luma-cockpit-designer__widget-action"
-                    data-role="keyboard-target"
-                    :aria-label="`移动并替换 ${cell.widget.title ?? cell.widget.type}`"
-                    @mousedown.stop
-                    @click.stop="placeSelection(locationForCell(row, cell.id))"
-                  >
-                    <LumaIcon name="luma:plus" :size="12" />
-                  </ElButton>
-                </ElTooltip>
-                <ElTooltip content="移除模块" placement="top">
-                  <ElButton
-                    type="danger"
-                    class="luma-cockpit-designer__widget-action"
-                    data-role="remove-widget"
-                    :aria-label="`移除模块 ${cell.widget.title ?? cell.widget.type}`"
-                    @click="removeWidget(locationForCell(row, cell.id))"
-                  >
-                    <LumaIcon name="luma:close" :size="12" />
-                  </ElButton>
-                </ElTooltip>
+                <div class="luma-cockpit-designer__placed-widget-actions">
+                  <ElTooltip content="选择并移动模块" placement="top">
+                    <ElButton
+                      class="luma-cockpit-designer__widget-action"
+                      data-role="select-move-source"
+                      :aria-label="`选择移动模块 ${cell.widget.title ?? cell.widget.type}`"
+                      :aria-pressed="isSelectedLocation(locationForCell(row, cell.id))"
+                      @mousedown.stop
+                      @click.stop="selectPlaced(locationForCell(row, cell.id), cell.widget)"
+                    >
+                      <LumaIcon name="luma:more" :size="12" />
+                    </ElButton>
+                  </ElTooltip>
+                  <ElTooltip v-if="canUseAsTarget(locationForCell(row, cell.id))" content="移动并替换到此槽位" placement="top">
+                    <ElButton
+                      class="luma-cockpit-designer__widget-action"
+                      data-role="keyboard-target"
+                      :aria-label="`移动并替换 ${cell.widget.title ?? cell.widget.type}`"
+                      @mousedown.stop
+                      @click.stop="placeSelection(locationForCell(row, cell.id))"
+                    >
+                      <LumaIcon name="luma:plus" :size="12" />
+                    </ElButton>
+                  </ElTooltip>
+                  <ElTooltip content="移除模块" placement="top">
+                    <ElButton
+                      type="danger"
+                      class="luma-cockpit-designer__widget-action"
+                      data-role="remove-widget"
+                      :aria-label="`移除模块 ${cell.widget.title ?? cell.widget.type}`"
+                      @click="removeWidget(locationForCell(row, cell.id))"
+                    >
+                      <LumaIcon name="luma:close" :size="12" />
+                    </ElButton>
+                  </ElTooltip>
+                </div>
+              </header>
+              <div class="luma-cockpit-designer__placed-widget-body">
+                <CockpitWidgetPreview
+                  v-if="definitionFor(cell.widget.type)"
+                  :cockpit-id="cockpitId"
+                  :definition="definitionFor(cell.widget.type)!"
+                  :instance-id="cell.widget.id"
+                  :layout-id="draft.activeLayout.value?.id ?? ''"
+                  :message-bus="previewMessageBus"
+                />
+                <div v-else class="luma-cockpit-designer__widget-preview-fallback">
+                  未注册模块
+                </div>
               </div>
             </article>
             <ElButton

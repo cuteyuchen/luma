@@ -6,6 +6,7 @@ import { computed } from 'vue'
 
 /***********************属性定义*********************/
 const props = withDefaults(defineProps<{
+  cockpitUrl: string
   resolvedThemeMode: ResolvedThemeMode
   userName?: string
 }>(), {
@@ -14,7 +15,6 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   logout: []
-  openCockpit: []
   openProfile: []
   openSettings: []
   toggleTheme: [event: MouseEvent]
@@ -31,10 +31,6 @@ function handleToggleTheme(event: MouseEvent): void {
 
 function handleOpenSettings(): void {
   emit('openSettings')
-}
-
-function handleOpenCockpit(): void {
-  emit('openCockpit')
 }
 
 function handleOpenProfile(): void {
@@ -62,11 +58,14 @@ function handleLogout(): void {
     <ElButton
       v-authority="'cockpit:view'"
       circle
+      :href="props.cockpitUrl"
+      rel="noopener noreferrer"
+      tag="a"
+      target="_blank"
       text
       title="驾驶舱"
       aria-label="进入驾驶舱"
       data-action="open-cockpit"
-      @click="handleOpenCockpit"
     >
       <LumaIcon name="app:cockpit" :size="16" />
     </ElButton>

@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   activeMenuPath: '',
   activeTabPath: '',
-  headerHeight: '64px',
+  headerHeight: '50px',
   showHeader: true,
   menus: () => [],
   fixedTabs: () => [],
@@ -110,6 +110,7 @@ const isMobileViewport = shallowRef(false)
 const mobileMenuOpen = shallowRef(false)
 const isContentMaximized = shallowRef(false)
 const routeTabs = shallowRef<LumaLayoutTabItem[]>([])
+const selectedTopMenuPath = shallowRef('')
 const visitHistory = shallowRef<string[]>([])
 const resolvedTabMaxCount = computed(() => props.tabMaxCount ?? props.preferences.tabbar.maxCount)
 let mobileMediaQuery: MediaQueryList | undefined
@@ -275,7 +276,19 @@ const breadcrumbPreferences = computed(() => ({
 }))
 const globalSearchEnabled = computed(() => props.preferences.header.globalSearch ?? true)
 const globalSearchShortcutEnabled = computed(() => props.preferences.shortcutKeys?.globalSearch ?? true)
-const resolvedActiveTopMenuPath = computed(() => resolveActiveTopMenuPath(props.menus, resolvedActiveMenuPath.value))
+const routeActiveTopMenuPath = computed(() => resolveActiveTopMenuPath(props.menus, resolvedActiveMenuPath.value))
+const usesSplitTopNavigation = computed(() => (
+  props.preferences.app.layout === 'mixed-nav'
+  && props.preferences.sidebar.enable
+))
+const resolvedActiveTopMenuPath = computed(() => {
+  if (!usesSplitTopNavigation.value) {
+    return routeActiveTopMenuPath.value
+  }
+
+  const selectedMenu = props.menus.find(item => !item.hidden && item.path === selectedTopMenuPath.value)
+  return selectedMenu?.path ?? routeActiveTopMenuPath.value
+})
 const resolvedMenus = computed(() => {
   const menus = splitMenusByLayout({
     activeTopMenuPath: resolvedActiveTopMenuPath.value,
@@ -297,14 +310,28 @@ const showHeaderBreadcrumb = computed(() => (
   && hasSidebar.value
   && !hasTopMenus.value
 ))
-const resolvedTopMenuMode = computed(() => props.preferences.app.layout === 'mixed-nav' ? 'flat' : 'tree')
+const resolvedTopMenuMode = computed(() => usesSplitTopNavigation.value ? 'flat' : 'tree')
 const resolvedTopMenuActivePath = computed(() => (
-  props.preferences.app.layout === 'top-nav'
+  resolvedTopMenuMode.value === 'tree'
     ? resolvedActiveMenuPath.value
     : resolvedActiveTopMenuPath.value
 ))
 const mobileMenus = computed(() => hasTopMenus.value ? topMenus.value : sidebarMenus.value)
 const hasMobileMenus = computed(() => mobileMenus.value.some(item => !item.hidden))
+
+watch(
+  () => [
+    injectedRoute?.fullPath,
+    resolvedActiveMenuPath.value,
+    props.menus,
+    props.preferences.app.layout,
+    props.preferences.sidebar.enable,
+  ] as const,
+  () => {
+    selectedTopMenuPath.value = routeActiveTopMenuPath.value
+  },
+  { immediate: true },
+)
 
 watch(
   () => [props.preferences.app.dynamicTitle ?? true, injectedRoute?.meta.title, props.title] as const,
@@ -487,10 +514,24 @@ function handleMenuSelect(path: string): void {
 
 function handleTopMenuSelect(path: string): void {
   const item = findMenuItemByPath(props.menus, path)
-  const target = resolveNavigationTarget(item) || path
+  const visibleChildren = item?.children?.filter(child => !child.hidden) ?? []
+  const externalAction = Boolean(item?.externalLink) && item?.externalTarget !== '_self'
+
+  if (usesSplitTopNavigation.value && item && (visibleChildren.length > 0 || !externalAction)) {
+    selectedTopMenuPath.value = item.path
+  }
 
   emit('topMenuSelect', path)
-  handleMenuSelect(target)
+
+  if (
+    usesSplitTopNavigation.value
+    && visibleChildren.length > 0
+    && !props.preferences.sidebar.autoActivateChild
+  ) {
+    return
+  }
+
+  handleMenuSelect(resolveNavigationTarget(item) || path)
 }
 
 function handleDiscoverySelect(path: string): void {

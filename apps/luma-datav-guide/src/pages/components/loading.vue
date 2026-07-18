@@ -15,6 +15,8 @@ const playModel = reactive<Record<string, unknown>>({
   variant: 'ring',
   status: 'loading',
   duration: 1500,
+  color1: '#02bcfe',
+  color2: '#3be6cb',
 })
 
 const playControls: PlaygroundControl[] = [
@@ -41,6 +43,8 @@ const playControls: PlaygroundControl[] = [
     ],
   },
   { key: 'duration', label: '时长 duration', type: 'number', min: 500, max: 4000, step: 100, hint: '毫秒' },
+  { key: 'color1', label: '渐变起色 colors[0]', type: 'color', omitFromCode: true },
+  { key: 'color2', label: '渐变止色 colors[1]', type: 'color', omitFromCode: true },
 ]
 
 const basicCode = `<LumaLoading label="加载中..." />`
@@ -71,7 +75,7 @@ const propRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaLoading"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="200"
     >
       <LumaLoading
@@ -80,6 +84,7 @@ const propRows: PropRow[] = [
         :variant="playModel.variant as 'ring' | 'dots' | 'pulse'"
         :status="playModel.status as 'loading' | 'success' | 'error'"
         :duration="playModel.duration as number"
+        :colors="[playModel.color1 as string, playModel.color2 as string]"
       />
     </Playground>
 

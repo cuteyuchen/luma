@@ -138,13 +138,22 @@ const columns = computed<ConicalColumn[]>(() => {
 </template>
 
 <style scoped>
+/* 与 DataV 一致：容器占满父级，SVG 用测量尺寸绘制但不撑开容器 */
 .dv-conical-column-chart {
+  position: relative;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
-svg {
+.dv-conical-column-chart svg {
+  position: absolute;
+  inset: 0;
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 text {

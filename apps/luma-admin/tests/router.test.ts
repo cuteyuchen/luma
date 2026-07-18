@@ -141,6 +141,7 @@ describe('luma admin router', () => {
         ],
         icon: 'app:examples',
         path: '/examples',
+        redirect: '/examples/overview',
         title: '功能示例',
       },
       {
@@ -165,6 +166,7 @@ describe('luma admin router', () => {
         ],
         icon: 'app:system',
         path: '/system',
+        redirect: '/system/user',
         title: '系统管理',
       },
     ])
@@ -175,6 +177,7 @@ describe('luma admin router', () => {
 
     expect(router.hasRoute('Dashboard')).toBe(true)
     expect(router.hasRoute('Profile')).toBe(true)
+    expect(router.hasRoute('AdminCockpit')).toBe(false)
     expect(router.hasRoute('System')).toBe(false)
   })
 

@@ -89,30 +89,37 @@ defineExpose({
   justify-content: space-between;
   min-width: 0;
   flex: 0 0 auto;
-  padding: 0 20px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--el-border-color-lighter);
   background: var(--el-bg-color);
-  box-shadow: var(--luma-shadow-light);
 }
 
 .luma-header__left {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .luma-header__toggle {
   order: -1;
   flex: none;
-  width: 44px;
-  height: 44px;
-  margin-left: -8px;
+  width: 32px;
+  height: 32px;
+  margin-left: -4px;
+  padding: 0;
+  border-radius: 6px;
+  color: var(--el-text-color-regular);
+}
+
+.luma-header__toggle:hover {
+  color: var(--el-text-color-primary);
+  background: var(--el-fill-color-light);
 }
 
 .luma-header__toggle.is-after-title {
   order: initial;
-  margin-right: -8px;
+  margin-right: -4px;
   margin-left: 0;
 }
 
@@ -121,8 +128,8 @@ defineExpose({
 }
 
 .luma-header__toggle svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentcolor;
   stroke-linecap: round;
@@ -133,8 +140,9 @@ defineExpose({
   min-width: 0;
   overflow: hidden;
   color: var(--el-text-color-primary);
-  font-size: calc(var(--luma-font-size-base, 14px) + 2px);
+  font-size: var(--luma-font-size-base, 14px);
   font-weight: 600;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -142,9 +150,10 @@ defineExpose({
 .luma-header__navigation {
   display: flex;
   flex: 1 1 auto;
+  align-items: center;
   align-self: stretch;
   min-width: 0;
-  margin-left: 32px;
+  margin-left: 12px;
   overflow: hidden;
 }
 
@@ -152,7 +161,8 @@ defineExpose({
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  margin-left: 24px;
+  align-items: center;
+  margin-left: 12px;
   overflow: hidden;
 }
 
@@ -160,32 +170,27 @@ defineExpose({
   display: flex;
   flex: none;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  margin-left: 8px;
 }
 
 @media (max-width: 1024px) {
   .luma-header {
-    padding: 0 16px;
+    padding: 0 10px;
   }
 
-  .luma-header__navigation {
-    margin-left: 16px;
-  }
-
+  .luma-header__navigation,
   .luma-header__breadcrumb {
-    margin-left: 16px;
+    margin-left: 8px;
   }
 }
 
 @media (max-width: 768px) {
   .luma-header {
-    padding: 0 12px;
+    padding: 0 10px;
   }
 
-  .luma-header__navigation {
-    display: none;
-  }
-
+  .luma-header__navigation,
   .luma-header__breadcrumb {
     display: none;
   }

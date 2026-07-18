@@ -13,6 +13,8 @@ import PropsTable from '@/components/PropsTable.vue'
 const playModel = reactive<Record<string, unknown>>({
   theme: 'dark',
   autoResize: true,
+  loading: false,
+  chartType: 'line',
 })
 
 const playControls: PlaygroundControl[] = [
@@ -25,8 +27,23 @@ const playControls: PlaygroundControl[] = [
       { label: '默认 default', value: '' },
     ],
   },
+  {
+    key: 'chartType',
+    label: '示例图表',
+    type: 'select',
+    options: [
+      { label: '折线 line', value: 'line' },
+      { label: '柱状 bar', value: 'bar' },
+    ],
+    omitFromCode: true,
+  },
   { key: 'autoResize', label: '自动重绘 autoResize', type: 'boolean' },
+  { key: 'loading', label: '加载态 loading', type: 'boolean' },
 ]
+
+const playOption = computed(() =>
+  playModel.chartType === 'bar' ? barOption.value : lineOption.value,
+)
 
 const lineOption = computed<LumaChartsOption>(() => ({
   grid: { left: 44, right: 20, top: 30, bottom: 32 },
@@ -150,13 +167,14 @@ const methodRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaCharts"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="300"
     >
       <LumaCharts
-        :option="lineOption"
+        :option="playOption"
         :theme="(playModel.theme as string) || undefined"
         :auto-resize="playModel.autoResize as boolean"
+        :loading="playModel.loading as boolean"
         style="height: 260px; width: 360px;"
       />
     </Playground>
@@ -191,7 +209,7 @@ const methodRows: PropRow[] = [
       surface="plain"
       :min-height="80"
     >
-      <p style="margin: 0; color: var(--guide-text-muted); font-size: 13px;">
+      <p style="margin: 0; color: var(--guide-text-muted, rgb(207 238 255 / 72%)); font-size: 13px;">
         见右侧「查看代码」，此处仅展示配置写法。
       </p>
     </DemoBlock>
@@ -206,7 +224,7 @@ const methodRows: PropRow[] = [
       surface="plain"
       :min-height="80"
     >
-      <p style="margin: 0; color: var(--guide-text-muted); font-size: 13px;">
+      <p style="margin: 0; color: var(--guide-text-muted, rgb(207 238 255 / 72%)); font-size: 13px;">
         见「查看代码」，导出图片等操作直接调用 ref 上的方法。
       </p>
     </DemoBlock>

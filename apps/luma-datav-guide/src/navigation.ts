@@ -28,7 +28,6 @@ export const navGroups: GuideNavGroup[] = [
       { slug: 'introduction', title: '介绍', summary: '组件包定位与两套 API' },
       { slug: 'installation', title: '安装与注册', summary: '安装、全局与按需注册' },
       { slug: 'theming', title: '主题变量', summary: 'CSS 变量与深浅色映射' },
-      { slug: 'embedding', title: '嵌入 Admin', summary: '以外链形式接入后台菜单' },
     ],
   },
   {

@@ -814,10 +814,12 @@ defineExpose({
 .luma-crud-table {
   box-sizing: border-box;
   display: flex;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  max-height: 100%;
   min-height: 0;
   min-width: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 16px;
   overflow: hidden;
@@ -977,6 +979,35 @@ defineExpose({
 }
 
 @media (max-width: 768px) {
+  /* 移动端改为内容自然撑开，由外层 LumaContent 滚动，避免 height:100% + overflow:hidden 截断 */
+  .luma-crud-table {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .luma-crud-table__table-panel {
+    flex: 0 0 auto;
+  }
+
+  .luma-crud-table__body {
+    flex: 0 0 auto;
+    min-height: 280px;
+  }
+
+  .luma-crud-table__body :deep(.luma-schema-table) {
+    height: auto;
+    min-height: 280px;
+    grid-template-rows: auto auto;
+  }
+
+  .luma-crud-table__body :deep(.luma-schema-table__scroll) {
+    height: auto;
+    min-height: 240px;
+    max-height: min(60vh, 520px);
+    overflow: auto;
+  }
+
   .luma-crud-table__query-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

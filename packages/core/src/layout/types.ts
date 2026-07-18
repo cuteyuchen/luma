@@ -6,6 +6,7 @@ export type LumaMenuBadgeTone = 'danger' | 'info' | 'primary' | 'success' | 'war
 
 export interface LumaLayoutMenuItem {
   path: string
+  redirect?: string
   title: string
   badge?: number | string
   badgeTone?: LumaMenuBadgeTone

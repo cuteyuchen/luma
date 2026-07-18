@@ -3,7 +3,7 @@ import type { PlaygroundControl } from '@/components/Playground.vue'
 import type { PropRow } from '@/components/PropsTable.vue'
 import type { DataValueItem } from '@luma/datav'
 import { LumaActiveRingChart } from '@luma/datav'
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
 import ComponentDoc from '@/components/ComponentDoc.vue'
 import DemoBlock from '@/components/DemoBlock.vue'
 import Playground from '@/components/Playground.vue'
@@ -19,12 +19,31 @@ const items: DataValueItem[] = [
 const playModel = reactive<Record<string, unknown>>({
   interval: 2500,
   autoplay: true,
+  radius: 55,
+  activeRadius: 65,
+  lineWidth: 20,
+  unit: '台',
+  showOriginValue: false,
 })
 
 const playControls: PlaygroundControl[] = [
   { key: 'interval', label: '切换间隔 interval', type: 'number', min: 500, max: 6000, step: 250, hint: '毫秒' },
   { key: 'autoplay', label: '自动轮播 autoplay', type: 'boolean' },
+  { key: 'radius', label: '基础半径 radius(%)', type: 'number', min: 30, max: 80, step: 1, omitFromCode: true },
+  { key: 'activeRadius', label: '激活半径 activeRadius(%)', type: 'number', min: 40, max: 90, step: 1, omitFromCode: true },
+  { key: 'lineWidth', label: '线宽 lineWidth', type: 'number', min: 4, max: 40, step: 1, omitFromCode: true },
+  { key: 'unit', label: '中心单位 unit', type: 'text', omitFromCode: true },
+  { key: 'showOriginValue', label: '显示原值 showOriginValue', type: 'boolean', omitFromCode: true },
 ]
+
+const playConfig = computed(() => ({
+  radius: `${playModel.radius}%`,
+  activeRadius: `${playModel.activeRadius}%`,
+  lineWidth: playModel.lineWidth as number,
+  digitalFlopUnit: playModel.unit as string,
+  showOriginValue: playModel.showOriginValue as boolean,
+  activeTimeGap: playModel.interval as number,
+}))
 
 const modernCode = `<script setup lang="ts">
 import { LumaActiveRingChart } from '@luma/datav'
@@ -89,13 +108,14 @@ const configRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaActiveRingChart"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="280"
     >
       <LumaActiveRingChart
         :items="items"
         :interval="playModel.interval as number"
         :autoplay="playModel.autoplay as boolean"
+        :config="playConfig"
         style="height: 240px; width: 360px;"
       />
     </Playground>

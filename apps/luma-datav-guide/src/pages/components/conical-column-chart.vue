@@ -101,7 +101,7 @@ const propRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaConicalColumnChart"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="300"
     >
       <LumaConicalColumnChart

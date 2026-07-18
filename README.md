@@ -61,7 +61,7 @@ createLumaAdmin({
      ↑                  ↑
      └──────── @luma/core  ←  apps/luma-admin
      ↑
-@luma/cockpit  ←  apps/luma-admin, apps/luma-cockpit
+@luma/cockpit  ←  apps/luma-cockpit
      ↑
 @luma/vben-compat  ←  apps/vben-compat-demo
 

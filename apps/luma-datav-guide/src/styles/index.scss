@@ -9,12 +9,14 @@
   --guide-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
-/* 文档内容区：LumaContent 内的滚动容器留出阅读边距 */
+/* 文档内容区：占满内容区全宽 */
 .luma-content .guide-doc,
 .luma-content .component-doc {
-  max-width: 940px;
-  margin: 0 auto;
-  padding: 28px 32px 72px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 28px 36px 72px;
+  box-sizing: border-box;
 }
 
 a {
@@ -244,6 +246,19 @@ a:hover {
 .demo-block__stage--dark {
   background:
     radial-gradient(120% 120% at 50% 0%, #0b1f3a 0%, #050d1c 70%, #030814 100%);
+  color: #edf9ff;
+}
+
+/* 深色舞台上的说明文字勿用主题深色字，避免看不清 */
+.demo-block__stage--dark,
+.playground__stage--dark {
+  --guide-text-muted: rgb(207 238 255 / 72%);
+  color: #edf9ff;
+}
+
+.demo-block__stage--dark p,
+.playground__stage--dark p {
+  color: rgb(207 238 255 / 82%);
 }
 
 .demo-block__stage--plain {

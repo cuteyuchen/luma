@@ -29,18 +29,21 @@ const playModel = reactive<Record<string, unknown>>({
   lineColor: '#35c8ff',
   lineWidth: 1,
   curvature: 5,
+  relative: true,
 })
 
 const playControls: PlaygroundControl[] = [
-  { key: 'lineColor', label: '连线色 line.color', type: 'color' },
-  { key: 'lineWidth', label: '连线宽度 line.width', type: 'number', min: 1, max: 6, step: 1 },
-  { key: 'curvature', label: '连线曲率 curvature', type: 'number', min: 1, max: 10, step: 1 },
+  { key: 'lineColor', label: '连线色 line.color', type: 'color', omitFromCode: true },
+  { key: 'lineWidth', label: '连线宽度 line.width', type: 'number', min: 1, max: 6, step: 1, omitFromCode: true },
+  { key: 'curvature', label: '连线曲率 curvature', type: 'number', min: 1, max: 10, step: 1, omitFromCode: true },
+  { key: 'relative', label: '相对坐标 relative', type: 'boolean', omitFromCode: true },
 ]
 
 // 把固定拓扑数据与可调字段合并成一份 config 传给组件
 const playConfig = computed<FlylineEnhancedConfig>(() => ({
   ...config,
   curvature: playModel.curvature as number,
+  relative: playModel.relative as boolean,
   line: { color: playModel.lineColor as string, width: playModel.lineWidth as number },
 }))
 
@@ -110,7 +113,7 @@ const configRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaFlylineChartEnhanced"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="400"
       :code-gen="playCodeGen"
     >

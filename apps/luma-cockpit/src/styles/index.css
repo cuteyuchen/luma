@@ -335,7 +335,76 @@ body {
 
 .standalone-app__designer {
   overflow: hidden;
-  background: rgb(6 46 64 / 80%);
+  background: var(--luma-cockpit-designer-body-bg, rgb(6 46 64 / 80%));
+}
+
+/* 下拉/对话框 teleport 到 body，按全局主题注入 EP 弹层 token */
+:root {
+  --luma-cockpit-ep-overlay-bg: rgb(247 252 255 / 98%);
+  --luma-cockpit-ep-panel-bg: rgb(255 255 255 / 96%);
+  --luma-cockpit-ep-text: #15394a;
+  --luma-cockpit-ep-text-secondary: #456879;
+  --luma-cockpit-ep-border: rgb(39 139 178 / 48%);
+  --luma-cockpit-ep-fill: rgb(8 127 175 / 8%);
+  --luma-cockpit-ep-accent: #087faf;
+  --luma-cockpit-ep-danger: #d9465f;
+}
+
+:root[data-luma-theme='dark'] {
+  --luma-cockpit-ep-overlay-bg: rgb(3 38 52 / 98%);
+  --luma-cockpit-ep-panel-bg: rgb(3 40 55 / 96%);
+  --luma-cockpit-ep-text: #d9f4ff;
+  --luma-cockpit-ep-text-secondary: #a9d6e3;
+  --luma-cockpit-ep-border: rgb(32 216 255 / 56%);
+  --luma-cockpit-ep-fill: rgb(0 215 255 / 10%);
+  --luma-cockpit-ep-accent: #00d7ff;
+  --luma-cockpit-ep-danger: #ff667d;
+}
+
+.el-popper.el-select__popper,
+.el-overlay-dialog .el-message-box,
+.el-message-box {
+  --el-bg-color-overlay: var(--luma-cockpit-ep-overlay-bg);
+  --el-bg-color: var(--luma-cockpit-ep-panel-bg);
+  --el-text-color-primary: var(--luma-cockpit-ep-text);
+  --el-text-color-regular: var(--luma-cockpit-ep-text-secondary);
+  --el-border-color: var(--luma-cockpit-ep-border);
+  --el-border-color-light: color-mix(in srgb, var(--luma-cockpit-ep-border), transparent 28%);
+  --el-fill-color-light: var(--luma-cockpit-ep-fill);
+  --el-color-primary: var(--luma-cockpit-ep-accent);
+  --el-color-danger: var(--luma-cockpit-ep-danger);
+  --el-border-radius-base: 4px;
+}
+
+.el-popper.el-select__popper {
+  border: 1px solid var(--luma-cockpit-ep-border);
+  background: var(--luma-cockpit-ep-overlay-bg);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
+}
+
+.el-popper.el-select__popper .el-select-dropdown__item {
+  color: var(--luma-cockpit-ep-text);
+}
+
+.el-popper.el-select__popper .el-select-dropdown__item.is-hovering,
+.el-popper.el-select__popper .el-select-dropdown__item:hover {
+  background: var(--luma-cockpit-ep-fill);
+}
+
+.el-popper.el-select__popper .el-select-dropdown__item.is-selected {
+  color: var(--luma-cockpit-ep-accent);
+  font-weight: 600;
+}
+
+.el-message-box {
+  border: 1px solid var(--luma-cockpit-ep-border);
+  background: var(--luma-cockpit-ep-panel-bg);
+  border-radius: 6px;
+}
+
+.el-message-box__title,
+.el-message-box__content {
+  color: var(--luma-cockpit-ep-text);
 }
 
 .standalone-app__designer .luma-cockpit-designer__empty-cell:hover:not(:disabled),

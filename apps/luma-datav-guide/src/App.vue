@@ -2,6 +2,7 @@
 import { LumaLayout, LumaRouterView } from '@luma/core/layout'
 import { LumaThemeSettingsPanel } from '@luma/core/theme'
 import { LumaIcon } from '@luma/icons-vue'
+import { ElDrawer } from 'element-plus'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { guideMenus } from './navigation'
@@ -19,14 +20,23 @@ const route = useRoute()
 const router = useRouter()
 
 /**
- * 内嵌到 Admin（externalLink 带 ?embed=1）时隐藏 Header，
- * 单独访问文档站时显示完整顶栏。首帧优先读 URL，避免路由就绪前闪现。
+ * 内嵌到 Admin iframe（或 URL 带 embed=1）时隐藏 Header，
+ * 单独访问文档站时显示完整顶栏。首帧优先读 URL / iframe 上下文，避免路由就绪前闪现。
  */
 const isEmbed = computed(() => {
   if (route.query.embed === '1') {
     return true
   }
   if (typeof window !== 'undefined') {
+    try {
+      if (window.self !== window.top) {
+        return true
+      }
+    }
+    catch {
+      // 跨域父页面时访问 top 可能抛错，仍视为内嵌
+      return true
+    }
     return new URLSearchParams(window.location.search).get('embed') === '1'
       || window.location.hash.includes('embed=1')
   }
@@ -84,7 +94,7 @@ function handleMenuSelect(path: string): void {
         :aria-label="resolvedThemeMode === 'dark' ? '切换到亮色' : '切换到暗色'"
         @click="toggleTheme"
       >
-        <LumaIcon :name="resolvedThemeMode === 'dark' ? 'ep:sunny' : 'ep:moon'" />
+        <LumaIcon :name="resolvedThemeMode === 'dark' ? 'luma:sun' : 'luma:moon'" :size="18" />
       </button>
       <button
         class="guide-action"
@@ -92,7 +102,7 @@ function handleMenuSelect(path: string): void {
         aria-label="外观设置"
         @click="settingsVisible = true"
       >
-        <LumaIcon name="ep:setting" />
+        <LumaIcon name="luma:settings" :size="18" />
       </button>
     </template>
 

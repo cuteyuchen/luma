@@ -36,6 +36,7 @@ export interface LumaPreferences {
     menuMaxWidth: number
   }
   sidebar: {
+    autoActivateChild: boolean
     collapsed: boolean
     enable: boolean
     width: number

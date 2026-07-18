@@ -121,10 +121,11 @@ const formattedNumbers = computed(() => displayed.value.map((value, index) => (
   ?? value.toFixed(precision.value)
 )))
 const renderedContent = computed(() => {
+  // 现代 props 仅传 value 时也要有 {nt} 占位，否则模板为空看不见数字
   const template = props.content
     ?? (props.prefix !== undefined || props.suffix !== undefined
       ? `${props.prefix ?? ''}{nt}${props.suffix ?? ''}`
-      : props.config?.content ?? '')
+      : props.config?.content ?? '{nt}')
   return template
     .split('{nt}')
     .map((part, index) => `${part}${formattedNumbers.value[index] ?? ''}`)
@@ -157,7 +158,8 @@ onBeforeUnmount(cancelAnimation)
     :style="rootStyle"
     :aria-label="renderedContent"
   >
-    <svg class="luma-digital-flop__svg" width="100%" height="100%" aria-hidden="true">
+    <!-- 与 DataV canvas 一致：铺满容器；绝对定位避免作为内容撑高根节点 -->
+    <svg class="luma-digital-flop__svg" aria-hidden="true">
       <text
         class="luma-digital-flop__value"
         :x="textX"

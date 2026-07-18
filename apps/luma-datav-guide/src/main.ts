@@ -1,4 +1,6 @@
 import type { IconDefinition } from '@luma/icons'
+// 确保内置 luma:* 图标完成注册（侧栏 guide:* 与顶栏主题按钮依赖）
+import '@luma/icons'
 import { createLumaAdmin } from '@luma/core'
 import LumaDatav from '@luma/datav'
 import ElementPlus from 'element-plus'

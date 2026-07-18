@@ -158,6 +158,7 @@ export interface SidebarMenuItem {
   badgeType?: LumaMenuBadgeType
   badgeTone?: LumaMenuBadgeTone
   path: string
+  redirect?: string
   title: string
   children: SidebarMenuItem[]
   icon?: string

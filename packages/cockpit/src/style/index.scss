@@ -453,22 +453,6 @@
     }
   }
 
-  &__region :is(input:not([type='radio']):not([type='checkbox']), select),
-  &__properties input,
-  &__library select {
-    min-height: var(--luma-cockpit-designer-control-height);
-    border: 1px solid var(--luma-cockpit-border, rgb(255 255 255 / 12%));
-    border-radius: var(--luma-cockpit-designer-control-radius);
-    outline: 0;
-    background: var(--luma-cockpit-bg, #10131a);
-    color: var(--luma-cockpit-text, #e5eaf3);
-
-    &:focus {
-      border-color: var(--luma-cockpit-accent, #409eff);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--luma-cockpit-accent, #409eff), transparent 82%);
-    }
-  }
-
   &__toolbar {
     display: flex;
     align-items: center;
@@ -1266,154 +1250,33 @@
   }
 }
 
-/* Element Plus 控件由 Designer 直接使用；仅覆盖语义变量和布局，不重绘其交互状态。 */
-.luma-cockpit-designer {
-  --el-color-primary: var(--luma-cockpit-accent);
-  --el-bg-color: var(--luma-cockpit-panel-bg);
-  --el-bg-color-overlay: var(--luma-cockpit-floating-bg);
-  --el-fill-color-blank: var(--luma-cockpit-panel-bg);
-  --el-fill-color-light: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 18%);
-  --el-fill-color-lighter: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 32%);
-  --el-text-color-primary: var(--luma-cockpit-text);
-  --el-text-color-regular: var(--luma-cockpit-text-secondary);
-  --el-text-color-secondary: var(--luma-cockpit-text-muted);
-  --el-border-color: var(--luma-cockpit-border);
-  --el-border-color-light: var(--luma-cockpit-border);
-  --el-border-radius-base: var(--luma-cockpit-designer-control-radius);
-
-  &__heading {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  &__layout-controls {
-    .el-select {
-      width: 168px;
-    }
-
-    > .el-input {
-      width: 180px;
-    }
-  }
-
-  &__field {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    color: var(--luma-cockpit-text-secondary);
-    font-size: 12px;
-
-    > .el-input-number {
-      width: 92px;
-    }
-
-    em {
-      color: var(--luma-cockpit-text-muted);
-      font-size: 12px;
-      font-style: normal;
-    }
-  }
-
-  &__issues {
-    display: grid;
-    gap: 8px;
-    padding: 10px 16px;
-    background: var(--luma-cockpit-panel-bg);
-  }
-
-  &__region-head .el-input-number {
-    width: 80px;
-  }
-
-  &__region-controls .el-input-number,
-  &__grid-row-head .el-input-number {
-    width: 78px;
-  }
-
-  &__tabs-switch {
-    margin-left: auto;
-  }
-
-  &__empty-cell.el-button {
-    display: inline-flex;
-    gap: 7px;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    margin: 0;
-    white-space: normal;
-
-    .luma-icon {
-      flex: none;
-    }
-  }
-
-  &__placed-widget {
-    .el-button {
-      flex: none;
-    }
-  }
-
-  &__tab-widget-title.el-button {
-    min-height: 0;
-    margin-right: auto;
-    padding: 0;
-    color: inherit;
-    font: inherit;
-  }
-
-  &__library-card.el-button {
-    display: grid;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    align-content: start;
-    align-items: start;
-    justify-items: start;
-    text-align: left;
-    white-space: normal;
-
-    &.is-selected {
-      border-color: var(--luma-cockpit-accent);
-      box-shadow: inset 0 0 0 1px var(--luma-cockpit-accent);
-    }
-  }
-
-  &__library-empty {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-
-  .el-button + .el-button {
-    margin-left: 0;
-  }
-}
-
+/* Element Plus：运行时 Card Tab / 错误重试；Designer 控件见 _designer-v3.scss */
 .luma-cockpit-card__tab.el-button {
   --el-button-bg-color: transparent;
-  --el-button-border-color: var(--luma-cockpit-border);
+  --el-button-border-color: transparent;
   --el-button-text-color: var(--luma-cockpit-text-secondary);
   --el-button-hover-bg-color: var(--luma-cockpit-selected);
-  --el-button-hover-border-color: var(--luma-cockpit-border);
+  --el-button-hover-border-color: transparent;
   --el-button-hover-text-color: var(--luma-cockpit-title-text);
   --el-button-active-bg-color: var(--luma-cockpit-selected);
-  --el-button-active-border-color: var(--luma-cockpit-accent);
+  --el-button-active-border-color: transparent;
   --el-button-active-text-color: var(--luma-cockpit-title-text);
   min-width: 44px;
   min-height: 44px;
   padding: 0 12px;
   font-size: 14px;
+  border-radius: 0;
+  box-shadow: none;
 
   &.is-active {
-    border-color: var(--luma-cockpit-accent);
     color: var(--luma-cockpit-title-text);
+    font-weight: 600;
     box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent);
   }
 
   &:focus-visible {
     outline: 2px solid var(--luma-cockpit-focus-ring);
-    outline-offset: 2px;
+    outline-offset: -2px;
   }
 }
 
@@ -1421,6 +1284,12 @@
   display: inline-flex;
   gap: 6px;
   align-items: center;
+  --el-button-bg-color: var(--luma-cockpit-surface);
+  --el-button-border-color: var(--luma-cockpit-border);
+  --el-button-text-color: var(--luma-cockpit-text);
+  --el-button-hover-bg-color: var(--luma-cockpit-selected);
+  --el-button-hover-border-color: var(--luma-cockpit-accent);
+  --el-button-hover-text-color: var(--luma-cockpit-title-text);
 }
 
 @include meta.load-css('designer-v3');

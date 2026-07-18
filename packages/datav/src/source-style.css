@@ -296,14 +296,27 @@
 .luma-loading.is-error .luma-loading__state-mark { color: #ff718b; font-weight: 700; }
 .luma-loading__label { font-size: 15px; }
 
+/*
+ * 高度默认取字号推导的 --luma-digital-flop-height，避免 height:100% 在父级
+ * 无明确高度时塌成 0；父级需要铺满时可内联 style="height:100%"。
+ * SVG absolute 铺满，不参与文档流（对齐 DataV canvas 铺满容器）。
+ */
 .luma-digital-flop {
   position: relative;
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: var(--luma-digital-flop-height);
+  height: var(--luma-digital-flop-height, 30px);
+  min-height: var(--luma-digital-flop-height, 30px);
+  overflow: hidden;
 }
-.luma-digital-flop__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.luma-digital-flop__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
 
 /* Ponds */
 .luma-percent-pond {
@@ -313,21 +326,53 @@
   height: 32px;
   min-height: 32px;
   flex-direction: column;
+  overflow: hidden;
 }
-.luma-percent-pond__svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.luma-percent-pond__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 .luma-percent-pond__progress { transition: all .3s; }
 .luma-percent-pond__label { font-size: 25px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
 
+/*
+ * 对齐 DataV `.dv-water-pond-level`：根节点仅 position:relative，
+ * SVG absolute 铺满，不参与高度计算。未设宽高时用 min-* 兜底，
+ * 业务侧仍应显式指定 width/height（或父级明确高度）。
+ */
 .luma-water-level-pond {
   position: relative;
+  display: block;
   width: 100%;
   height: 100%;
   min-width: 96px;
   min-height: 96px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
-.luma-water-level-pond__svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-.luma-water-level-pond__label { font-size: 25px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
-.luma-water-level-pond__border { fill: none; stroke-width: 3; }
+.luma-water-level-pond__svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.luma-water-level-pond__label {
+  font-size: 25px;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.luma-water-level-pond__border {
+  fill: none;
+  stroke-width: 3;
+}
 
 /* Ring and bar charts */
 .luma-active-ring { display: grid; grid-template-columns: minmax(120px, 42%) minmax(0, 1fr); gap: 18px; width: 100%; height: 100%; min-height: 160px; align-items: center; }

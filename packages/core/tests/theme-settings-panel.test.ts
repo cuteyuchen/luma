@@ -81,10 +81,26 @@ describe('luma theme settings panel', () => {
 
     const findRow = (label: string) => wrapper.findAll('.luma-theme-settings__row').find(row => row.text().includes(label))
     const showSidebar = findRow('显示侧边栏')?.find('input.el-switch')
+    const autoActivateChild = findRow('自动进入首个子菜单')?.find('input.el-switch')
     const collapse = findRow('折叠菜单')?.find('input.el-switch')
 
     expect((showSidebar?.element as HTMLInputElement).disabled).toBe(false)
+    expect((autoActivateChild?.element as HTMLInputElement).disabled).toBe(true)
     expect((collapse?.element as HTMLInputElement).disabled).toBe(true)
+  })
+
+  it('混合导航可以开启自动进入首个子菜单', async () => {
+    const wrapper = mountPanel()
+    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
+    const row = wrapper.findAll('.luma-theme-settings__row')
+      .find(item => item.text().includes('自动进入首个子菜单'))
+    const input = row?.find('input.el-switch')
+
+    expect((input?.element as HTMLInputElement).disabled).toBe(false)
+    await input?.setValue(true)
+
+    const updates = wrapper.emitted('update:preferences') as [ReturnType<typeof createDefaultPreferences>][]
+    expect(updates?.at(-1)?.[0].sidebar.autoActivateChild).toBe(true)
   })
 
   it('showLayout 为 false 时不渲染布局模式切换', () => {

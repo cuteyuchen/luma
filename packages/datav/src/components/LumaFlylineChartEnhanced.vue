@@ -188,7 +188,26 @@ function handleClick(event: MouseEvent): void {
 </template>
 
 <style scoped>
-.luma-flyline-chart-enhanced { display: flex; width: 100%; height: 100%; min-width: 0; min-height: 0; flex-direction: column; background-size: 100% 100%; }
-.luma-flyline-chart-enhanced svg { display: block; width: 100%; height: 100%; }
-.luma-flyline-chart-enhanced text { text-anchor: middle; dominant-baseline: middle; }
+/* 与 LumaFlylineChart / DataV 一致：SVG 不参与文档流高度计算 */
+.luma-flyline-chart-enhanced {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-size: 100% 100%;
+}
+.luma-flyline-chart-enhanced svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.luma-flyline-chart-enhanced text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
 </style>

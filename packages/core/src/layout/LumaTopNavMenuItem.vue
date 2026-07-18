@@ -4,10 +4,14 @@ import { LumaIcon } from '@luma/icons-vue'
 import { ElMenuItem, ElSubMenu } from 'element-plus'
 import { computed } from 'vue'
 import LumaMenuBadge from './LumaMenuBadge.vue'
+import { includesMenuPath } from './state/menu-layout'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
+  activePath?: string
   item: LumaLayoutMenuItem
-}>()
+}>(), {
+  activePath: '',
+})
 
 const emit = defineEmits<{
   select: [path: string]
@@ -16,6 +20,8 @@ const emit = defineEmits<{
 const visibleChildren = computed(() => props.item.children?.filter(child => !child.hidden) ?? [])
 // 新开页外链只是“打开动作”，不进入 ElMenu 选中态追踪，避免点击后高亮与实际页面错位。
 const isExternalAction = computed(() => Boolean(props.item.externalLink) && props.item.externalTarget !== '_self')
+// ElMenu 的 default-active 在路由切换后对“一级即叶子”项偶发不同步，这里用路径显式驱动选中样式。
+const isActive = computed(() => Boolean(props.activePath) && includesMenuPath(props.item, props.activePath))
 
 function handleSelect(path: string): void {
   emit('select', path)
@@ -23,7 +29,11 @@ function handleSelect(path: string): void {
 </script>
 
 <template>
-  <ElSubMenu v-if="visibleChildren.length" :index="item.path">
+  <ElSubMenu
+    v-if="visibleChildren.length"
+    :index="item.path"
+    :class="{ 'is-active': isActive }"
+  >
     <template #title>
       <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
       <span class="luma-top-nav-menu-item__label">
@@ -37,6 +47,7 @@ function handleSelect(path: string): void {
       v-for="child in visibleChildren"
       :key="child.path"
       :item="child"
+      :active-path="activePath"
       @select="handleSelect"
     />
   </ElSubMenu>
@@ -44,6 +55,7 @@ function handleSelect(path: string): void {
   <li
     v-else-if="isExternalAction"
     class="el-menu-item luma-top-nav-menu-item--external"
+    :class="{ 'is-active': isActive }"
     role="menuitem"
     tabindex="-1"
     @click="handleSelect(item.path)"
@@ -56,7 +68,12 @@ function handleSelect(path: string): void {
     <span class="luma-top-nav-menu-item__external" aria-hidden="true">↗</span>
   </li>
 
-  <ElMenuItem v-else :index="item.path" @click="handleSelect(item.path)">
+  <ElMenuItem
+    v-else
+    :index="item.path"
+    :class="{ 'is-active': isActive }"
+    @click="handleSelect(item.path)"
+  >
     <LumaIcon v-if="item.icon" :name="item.icon" :size="16" />
     <span class="luma-top-nav-menu-item__label">
       <span>{{ item.title }}</span>

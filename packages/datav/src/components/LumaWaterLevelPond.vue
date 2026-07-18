@@ -119,7 +119,18 @@ defineExpose({ getWavePaths: () => waves.value.map(wave => wave.path) })
     @mouseenter="animation.onMouseEnter"
     @mouseleave="animation.onMouseLeave"
   >
-    <svg ref="svgRef" :viewBox="`0 0 ${Math.max(1, width)} ${Math.max(1, height)}`" preserveAspectRatio="none" aria-hidden="true">
+    <!--
+      与 DataV 一致：SVG 绝对定位铺满容器，不参与文档流，
+      避免 viewBox 随 clientHeight 更新时形成高度无限增长。
+      外层宽高需由使用方或样式提供（height:100% 依赖父级明确高度）。
+    -->
+    <svg
+      ref="svgRef"
+      class="luma-water-level-pond__svg"
+      :viewBox="`0 0 ${Math.max(1, width)} ${Math.max(1, height)}`"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
       <defs>
         <linearGradient :id="borderGradientId" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop v-for="stop in stops" :key="stop.offset" :offset="`${stop.offset}%`" :stop-color="stop.color" />
@@ -143,11 +154,3 @@ defineExpose({ getWavePaths: () => waves.value.map(wave => wave.path) })
     </svg>
   </div>
 </template>
-
-<style scoped>
-.dv-water-pond-level { position: relative; }
-.dv-water-pond-level svg { width: 100%; height: 100%; }
-.dv-water-pond-level text { font-size: 25px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
-.dv-water-pond-level ellipse,
-.dv-water-pond-level rect { fill: none; stroke-width: 3; }
-</style>

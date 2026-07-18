@@ -27,13 +27,15 @@ const playModel = reactive<Record<string, unknown>>({
   orbitColor: '#67e0e3',
   lineWidth: 1,
   curvature: 5,
+  relative: true,
 })
 
 const playControls: PlaygroundControl[] = [
-  { key: 'flylineColor', label: '飞线色 flylineColor', type: 'color' },
-  { key: 'orbitColor', label: '轨道色 orbitColor', type: 'color' },
-  { key: 'lineWidth', label: '飞线宽度 lineWidth', type: 'number', min: 1, max: 6, step: 1 },
-  { key: 'curvature', label: '飞线曲率 curvature', type: 'number', min: 1, max: 10, step: 1 },
+  { key: 'flylineColor', label: '飞线色 flylineColor', type: 'color', omitFromCode: true },
+  { key: 'orbitColor', label: '轨道色 orbitColor', type: 'color', omitFromCode: true },
+  { key: 'lineWidth', label: '飞线宽度 lineWidth', type: 'number', min: 1, max: 6, step: 1, omitFromCode: true },
+  { key: 'curvature', label: '飞线曲率 curvature', type: 'number', min: 1, max: 10, step: 1, omitFromCode: true },
+  { key: 'relative', label: '相对坐标 relative', type: 'boolean', omitFromCode: true },
 ]
 
 // 把固定坐标数据与可调字段合并成一份 config 传给组件
@@ -43,6 +45,7 @@ const playConfig = computed<Partial<FlylineChartConfig>>(() => ({
   orbitColor: playModel.orbitColor as string,
   lineWidth: playModel.lineWidth as number,
   curvature: playModel.curvature as number,
+  relative: playModel.relative as boolean,
 }))
 
 // 生成 config 用法代码（属性无法平铺表达，改为渲染完整 config 对象）
@@ -112,7 +115,7 @@ const configRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaFlylineChart"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="380"
       :code-gen="playCodeGen"
     >

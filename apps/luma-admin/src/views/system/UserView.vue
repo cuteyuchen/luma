@@ -698,19 +698,24 @@ onMounted(() => {
 .luma-admin-user-page {
   display: grid;
   min-width: 0;
-  align-items: start;
+  min-height: 0;
+  align-items: stretch;
   gap: 16px;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .luma-admin-user-page__organizations {
   display: grid;
   min-width: 0;
+  min-height: 0;
+  align-content: start;
   gap: 12px;
   padding: 16px;
   border: 1px solid var(--el-border-color-lighter);
   border-radius: var(--el-border-radius-base);
   background: var(--el-fill-color-blank);
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .luma-admin-user-page__organizations h2 {
@@ -720,21 +725,55 @@ onMounted(() => {
 }
 
 .luma-admin-user-page__organization-tree {
-  max-height: calc(100vh - 300px);
+  min-height: 0;
+  max-height: none;
   overflow: auto;
+}
+
+.luma-admin-user-page__organization-tree :deep(.el-tree-node__content) {
+  box-sizing: border-box;
+  height: auto;
+  min-height: var(--el-tree-node-content-height, 26px);
+  padding-block: 3px;
+}
+
+.luma-admin-user-page__organization-tree :deep(.el-tree-node__label) {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .luma-admin-user-page :deep(.luma-crud-table) {
   min-width: 0;
+  min-height: 0;
 }
 
 @media (max-width: 768px) {
   .luma-admin-user-page {
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    min-height: auto;
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+
+  .luma-admin-user-page__organizations {
+    flex: none;
+    grid-template-rows: auto auto auto;
   }
 
   .luma-admin-user-page__organization-tree {
-    max-height: 240px;
+    max-height: 220px;
+  }
+
+  .luma-admin-user-page :deep(.luma-crud-table) {
+    flex: none;
+    height: auto;
+    max-height: none;
   }
 }
 </style>

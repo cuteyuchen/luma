@@ -33,6 +33,10 @@ const playModel = reactive<Record<string, unknown>>({
   hoverPause: true,
   carousel: 'single',
   index: true,
+  headerHeight: 35,
+  headerBGC: '#35c8ff',
+  oddRowBGC: '#102742',
+  evenRowBGC: '#18385a',
 })
 
 const playControls: PlaygroundControl[] = [
@@ -49,6 +53,10 @@ const playControls: PlaygroundControl[] = [
     ],
   },
   { key: 'index', label: '序号列 index', type: 'boolean' },
+  { key: 'headerHeight', label: '表头高 headerHeight', type: 'number', min: 20, max: 80, step: 1 },
+  { key: 'headerBGC', label: '表头背景 headerBGC', type: 'color' },
+  { key: 'oddRowBGC', label: '奇数行背景 oddRowBGC', type: 'color' },
+  { key: 'evenRowBGC', label: '偶数行背景 evenRowBGC', type: 'color' },
 ]
 
 // 把固定数据与可调字段合并成一份 config 传给组件
@@ -59,6 +67,10 @@ const playConfig = computed<ScrollBoardConfig>(() => ({
   hoverPause: playModel.hoverPause as boolean,
   carousel: playModel.carousel as 'single' | 'page',
   index: playModel.index as boolean,
+  headerHeight: playModel.headerHeight as number,
+  headerBGC: playModel.headerBGC as string,
+  oddRowBGC: playModel.oddRowBGC as string,
+  evenRowBGC: playModel.evenRowBGC as string,
 }))
 
 const configCode = `<script setup lang="ts">
@@ -148,7 +160,7 @@ const configRows: PropRow[] = [
       description="实时修改属性，预览效果与代码同步更新。"
       component-name="LumaScrollBoard"
       :controls="playControls"
-      :model-value="playModel"
+      v-model="playModel"
       :min-height="300"
       :code-gen="playCodeGen"
     >
@@ -173,7 +185,7 @@ const configRows: PropRow[] = [
       surface="plain"
       :min-height="80"
     >
-      <p style="margin: 0; color: var(--guide-text-muted); font-size: 13px;">
+      <p style="margin: 0; color: var(--guide-text-muted, rgb(207 238 255 / 72%)); font-size: 13px;">
         现代 API 用对象数组替代二维数组，配合 columns 声明列。
       </p>
     </DemoBlock>

@@ -326,16 +326,6 @@ export default defineEventHandler(async (event) => {
         return ok(sandbox.config)
       }
 
-      // 驾驶舱配置：GET 供运行态加载（仅需登录），PUT 需编辑权限
-      if (path === '/cockpit/config' && method === 'GET')
-        return ok(sandbox.cockpitConfig)
-      if (path === '/cockpit/config' && method === 'PUT') {
-        requirePermission(auth.user, 'cockpit:edit')
-        const body = await readRequiredBody<Record<string, unknown>>(event)
-        sandbox.cockpitConfig = { ...body }
-        return ok(sandbox.cockpitConfig)
-      }
-
       const query = getQuery(event)
       if (path === '/system/users' && method === 'GET') {
         requirePermission(auth.user, 'system:user:list')

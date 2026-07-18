@@ -2,7 +2,6 @@ export type AdminRoleCode = 'admin' | 'guest' | 'operator'
 
 /***********************权限码定义*********************/
 export const adminPermissionCodes = {
-  cockpitEdit: 'cockpit:edit',
   cockpitView: 'cockpit:view',
   dashboardView: 'dashboard:view',
   examplesDictionary: 'examples:dictionary',
@@ -40,7 +39,6 @@ const initialRolePermissions: Record<AdminRoleCode, string[]> = {
   admin: [
     adminPermissionCodes.dashboardView,
     adminPermissionCodes.cockpitView,
-    adminPermissionCodes.cockpitEdit,
     adminPermissionCodes.systemUserList,
     adminPermissionCodes.systemUserCreate,
     adminPermissionCodes.systemUserUpdate,

@@ -393,6 +393,7 @@ export function createSidebarMenus(
           : {}),
         icon: node.icon,
         path: node.path,
+        ...(node.redirect ? { redirect: node.redirect } : {}),
         title: node.title,
       }
     })

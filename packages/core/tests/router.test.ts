@@ -326,6 +326,7 @@ describe('router menu helpers', () => {
         ],
         id: 'parent',
         path: '/parent',
+        redirect: '/parent/visible',
         title: '父菜单',
       },
     ]))
@@ -342,6 +343,7 @@ describe('router menu helpers', () => {
         ],
         icon: undefined,
         path: '/parent',
+        redirect: '/parent/visible',
         title: '父菜单',
       },
     ])

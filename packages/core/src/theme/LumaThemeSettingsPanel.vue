@@ -248,6 +248,9 @@ function setColor(color: string): void {
             <span>显示侧边栏</span><ElSwitch :model-value="preferences.sidebar.enable" @update:model-value="update({ sidebar: { enable: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row">
+            <span>自动进入首个子菜单</span><ElSwitch :model-value="preferences.sidebar.autoActivateChild" :disabled="!availability.sidebarAutoActivateChild" @update:model-value="update({ sidebar: { autoActivateChild: Boolean($event) } })" />
+          </div>
+          <div class="luma-theme-settings__row">
             <span>折叠菜单</span><ElSwitch :model-value="preferences.sidebar.collapsed" :disabled="!availability.sidebarCollapsed" @update:model-value="update({ sidebar: { collapsed: Boolean($event) } })" />
           </div>
           <div class="luma-theme-settings__row is-stacked" :class="{ 'is-disabled': !availability.sidebarWidth }">

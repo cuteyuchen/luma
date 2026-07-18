@@ -2,17 +2,36 @@
 // 框架只定义结构并读取语义变量，具体皮肤由消费应用覆盖。
 
 .luma-cockpit-designer {
+  /* Element Plus 语义变量：全部映射到 cockpit token，避免硬编码与双套主题冲突 */
   --el-color-primary: var(--luma-cockpit-accent, #00cbf4);
+  --el-color-success: var(--luma-cockpit-success, #1dffa0);
+  --el-color-warning: var(--luma-cockpit-warning, #e6a23c);
+  --el-color-danger: var(--luma-cockpit-danger, #f56c6c);
   --el-bg-color: var(--luma-cockpit-panel-bg, rgb(6 46 64 / 80%));
   --el-bg-color-overlay: var(--luma-cockpit-floating-bg, #19374b);
-  --el-fill-color-blank: transparent;
-  --el-fill-color-light: rgb(0 74 106 / 40%);
-  --el-text-color-primary: var(--luma-cockpit-text, #fff);
+  --el-bg-color-page: var(--luma-cockpit-designer-body-bg, rgb(6 46 64 / 80%));
+  --el-fill-color-blank: var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%));
+  --el-fill-color-light: color-mix(in srgb, var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%)), transparent 12%);
+  --el-fill-color-lighter: color-mix(in srgb, var(--luma-cockpit-floating-bg, #19374b), transparent 28%);
+  --el-text-color-primary: var(--luma-cockpit-text, #d7eeff);
   --el-text-color-regular: var(--luma-cockpit-text-secondary, #d7efff);
   --el-text-color-secondary: var(--luma-cockpit-text-muted, #9dcdf8);
+  --el-text-color-placeholder: var(--luma-cockpit-text-muted, #9dcdf8);
   --el-border-color: var(--luma-cockpit-border, rgb(6 183 253 / 50%));
-  --el-border-color-light: var(--luma-cockpit-border, rgb(6 183 253 / 50%));
-  --el-border-radius-base: 0;
+  --el-border-color-hover: var(--luma-cockpit-accent, #00cbf4);
+  --el-border-color-light: color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 28%);
+  --el-border-color-lighter: color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 48%);
+  --el-border-radius-base: 4px;
+  --el-border-radius-small: 3px;
+  --el-disabled-bg-color: color-mix(in srgb, var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%)), transparent 30%);
+  --el-disabled-text-color: color-mix(in srgb, var(--luma-cockpit-text-muted, #9dcdf8), transparent 20%);
+  --el-disabled-border-color: color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 50%);
+  --el-input-bg-color: var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%));
+  --el-input-text-color: var(--luma-cockpit-text, #d7eeff);
+  --el-input-border-color: var(--luma-cockpit-border, rgb(6 183 253 / 50%));
+  --el-input-hover-border-color: var(--luma-cockpit-accent, #00cbf4);
+  --el-input-focus-border-color: var(--luma-cockpit-accent, #00cbf4);
+  --el-mask-color: rgb(2 12 20 / 52%);
 
   display: grid;
   grid-template-rows: 60px 92px auto minmax(0, 1fr) 64px;
@@ -81,47 +100,58 @@
   }
 
   &__layout-controls {
+    flex-wrap: wrap;
     width: 100%;
+    min-width: 0;
   }
 
   &__layout-controls > .el-input {
-    width: 180px;
+    width: 200px;
+    flex: 0 0 auto;
   }
 
   &__layout-controls .el-select {
-    width: 266px;
+    width: 220px;
+    flex: 0 0 auto;
   }
 
   &__layout-tools {
     margin-left: 2px;
+    flex: 0 0 auto;
   }
 
+  /* 表单项：不强制压扁 InputNumber 宽高，避免 controls-position=right 错位 */
   &__field {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex: 0 0 auto;
     color: var(--luma-cockpit-text-secondary, #d7efff);
     font-size: 13px;
     white-space: nowrap;
+    line-height: 1;
 
     > span {
       color: inherit;
+      flex: none;
     }
 
     > .el-input-number {
-      width: 76px;
+      width: 118px;
+      flex: none;
     }
 
     em {
       color: var(--luma-cockpit-text-muted, #9dcdf8);
       font-size: 11px;
       font-style: normal;
+      flex: none;
     }
   }
 
   &__layout-controls > &__field {
-    gap: 12px;
-    font-size: 16px;
+    gap: 10px;
+    font-size: 14px;
     font-weight: 600;
   }
 
@@ -184,15 +214,15 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 10px;
+    gap: 8px 12px;
     min-height: 44px;
-    padding: 6px 10px;
+    padding: 8px 10px;
     border: 1px solid color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), var(--luma-cockpit-accent, #00cbf4) 24%);
     border-radius: 5px;
     background: color-mix(in srgb, var(--luma-cockpit-panel-bg, rgb(6 46 64 / 96%)), #00141e 12%);
 
     .el-input-number {
-      width: 72px;
+      width: 118px;
     }
   }
 
@@ -216,7 +246,7 @@
 
   &__column-field.luma-cockpit-designer__field {
     .el-input-number {
-      width: 76px;
+      width: 128px;
     }
   }
 
@@ -241,9 +271,9 @@
   &__grid-row-head {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 4px 8px;
+    gap: 8px 10px;
+    min-height: 40px;
+    padding: 6px 8px;
     border: 1px solid color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 30%);
     border-radius: 4px;
     background: color-mix(in srgb, var(--luma-cockpit-control-bg, rgb(3 47 63 / 94%)), transparent 12%);
@@ -255,7 +285,7 @@
     }
 
     .el-input-number {
-      width: 76px;
+      width: 128px;
     }
   }
 
@@ -301,30 +331,28 @@
     min-height: 0;
     margin: 0;
     padding: 8px;
-    border: 1px solid var(--luma-cockpit-slot-border, rgb(6 183 253 / 50%));
-    border-radius: 4px;
-    color: var(--luma-cockpit-text-secondary, #d7efff);
-    background: transparent;
+    border-radius: var(--el-border-radius-base);
     font-size: 16px;
     white-space: normal;
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
-      border-color: var(--luma-cockpit-accent, #00cbf4);
-      color: var(--luma-cockpit-title-text, #fff);
-      background: rgb(0 203 244 / 8%);
-      box-shadow: inset 0 0 18px rgb(6 183 253 / 18%);
+      box-shadow: inset 0 0 18px color-mix(in srgb, var(--luma-cockpit-accent), transparent 82%);
     }
 
     &:disabled {
-      border-style: solid;
-      color: var(--luma-cockpit-text-secondary, #d7efff);
       opacity: 1;
+    }
+
+    .luma-icon {
+      flex: none;
     }
   }
 
   &__placed-widget {
     position: relative;
+    display: grid;
+    grid-template-rows: 34px minmax(0, 1fr);
     width: 100%;
     height: 100%;
     min-width: 0;
@@ -350,25 +378,22 @@
     }
   }
 
-  &__placed-widget-footer {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  /* 与 tab-card 顶栏同构：名称左、操作右 */
+  &__placed-widget-header {
     z-index: 3;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
     min-width: 0;
-    min-height: 28px;
-    padding: 4px 86px 4px 7px;
+    min-height: 34px;
+    padding: 0 4px 0 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--luma-cockpit-slot-border, rgb(6 183 253 / 50%)), transparent 18%);
     background: var(--luma-cockpit-caption-bg, rgb(2 35 49 / 42%));
     backdrop-filter: blur(7px);
 
-    > span,
-    .luma-cockpit-designer__tab-widget-title {
+    > span {
+      flex: 1 1 auto;
       min-width: 0;
-      margin: 0;
       overflow: hidden;
       color: var(--luma-cockpit-text, #fff);
       font-size: 12px;
@@ -379,13 +404,23 @@
   }
 
   &__placed-widget-actions {
-    position: absolute;
-    right: 3px;
-    bottom: 2px;
-    z-index: 4;
     display: flex;
     gap: 3px;
     align-items: center;
+    flex: 0 0 auto;
+  }
+
+  &__placed-widget-body {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+
+    > .luma-cockpit-designer__widget-preview,
+    > .luma-cockpit-designer__widget-preview-fallback {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   &__widget-action.el-button,
@@ -399,8 +434,7 @@
     height: 24px;
     min-height: 24px;
     padding: 0;
-    border-image: none;
-    border-radius: 3px;
+    border-radius: var(--el-border-radius-small);
     opacity: 0.72;
   }
 
@@ -413,7 +447,8 @@
   }
 
   &__placed-widget:hover &__widget-action,
-  &__placed-widget:focus-within &__widget-action {
+  &__placed-widget:focus-within &__widget-action,
+  &__placed-widget-header:hover &__widget-action {
     opacity: 1;
   }
 
@@ -462,11 +497,7 @@
     min-height: 32px;
     padding: 0 8px;
     overflow: hidden;
-    border: 0;
-    border-image: none;
     border-radius: 0;
-    color: var(--luma-cockpit-text-secondary, #d7efff);
-    background: transparent;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -597,10 +628,7 @@
     margin: 0;
     padding: 5px 4px;
     overflow: hidden;
-    border: 0;
     border-radius: 0;
-    color: var(--luma-cockpit-text, #fff);
-    background: transparent;
     backdrop-filter: blur(7px);
     font-size: 12px;
     font-weight: 700;
@@ -631,81 +659,143 @@
     min-width: 72px;
   }
 
+  /* —— Element Plus 控件：token + 默认尺寸，不强制压扁宽高 —— */
+  .el-input,
+  .el-select,
+  .el-input-number {
+    --el-component-size: 32px;
+    --el-input-height: 32px;
+  }
+
   .el-input__wrapper,
   .el-select__wrapper,
   .el-input-number .el-input__wrapper {
-    min-height: 34px;
-    border: 1px solid;
-    border-image: linear-gradient(269.69deg, rgb(51 156 201 / 60%) 0.53%, #44c6ff 49.94%, rgb(51 156 201 / 60%) 100%) 1;
-    border-radius: 0;
-    background: var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%));
-    box-shadow: none;
+    min-height: var(--el-component-size);
+    height: var(--el-component-size);
+    padding: 0 10px;
+    border-radius: var(--el-border-radius-base);
+    background-color: var(--el-fill-color-blank);
+    box-shadow: 0 0 0 1px var(--el-input-border-color) inset;
 
-    &.is-focus,
     &:hover {
-      box-shadow: inset 0 0 10px rgb(6 183 253 / 20%);
+      box-shadow: 0 0 0 1px var(--el-input-hover-border-color) inset;
+    }
+
+    &.is-focus {
+      box-shadow:
+        0 0 0 1px var(--el-input-focus-border-color) inset,
+        0 0 0 2px color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), transparent 78%);
     }
   }
 
-  // 行列 / 列宽 / 行高 的设置项：使用原生 InputNumber 控件，去掉实心背景与粗渐变边框
-  &__region-head,
-  &__grid-row-head {
-    .el-input-number .el-input__wrapper {
-      min-height: 30px;
-      border: 0;
-      border-image: none;
-      border-bottom: 1px solid color-mix(in srgb, var(--luma-cockpit-border, rgb(6 183 253 / 50%)), transparent 45%);
-      border-radius: 0;
-      background: transparent;
+  /* controls-position=right：保留 EP 默认控件区宽度，避免数字与加减重叠 */
+  .el-input-number {
+    width: 118px;
+    line-height: var(--el-component-size);
 
-      &.is-focus,
-      &:hover {
-        border-bottom-color: var(--luma-cockpit-accent, #00cbf4);
-        box-shadow: none;
+    &.is-controls-right {
+      .el-input__wrapper {
+        padding-left: 10px;
+        padding-right: 36px;
       }
-    }
 
-    .el-input-number__decrease,
-    .el-input-number__increase {
-      border: 0;
-      background: transparent;
+      .el-input-number__decrease,
+      .el-input-number__increase {
+        width: 28px;
+        height: auto;
+        border-color: var(--el-input-border-color);
+        background: color-mix(in srgb, var(--el-fill-color-blank), transparent 20%);
+        color: var(--el-text-color-regular);
+      }
+
+      .el-input-number__increase {
+        border-bottom: 1px solid var(--el-input-border-color);
+      }
     }
   }
 
   .el-input__inner,
   .el-select__input,
-  .el-select__selected-item {
-    color: var(--luma-cockpit-text, #fff);
-    font-size: 14px;
+  .el-select__selected-item,
+  .el-select__placeholder {
+    height: var(--el-component-size);
+    line-height: var(--el-component-size);
+    color: var(--el-input-text-color);
+    font-size: 13px;
   }
 
-  .el-select__suffix,
-  .el-input-number__decrease,
-  .el-input-number__increase {
-    color: var(--luma-cockpit-text-secondary, #d7efff);
+  .el-select__placeholder {
+    color: var(--el-text-color-placeholder);
+  }
+
+  .el-select__suffix {
+    color: var(--el-text-color-regular);
   }
 
   .el-button {
-    min-height: 34px;
-    border: 1px solid;
-    border-image: linear-gradient(269.69deg, rgb(51 156 201 / 60%) 0.53%, #44c6ff 49.94%, rgb(51 156 201 / 60%) 100%) 1;
-    border-radius: 4px;
-    color: var(--luma-cockpit-text-secondary, #d7efff);
-    background: var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%));
+    --el-button-bg-color: var(--luma-cockpit-control-bg, rgb(0 74 106 / 40%));
+    --el-button-border-color: var(--luma-cockpit-border, rgb(6 183 253 / 50%));
+    --el-button-text-color: var(--luma-cockpit-text-secondary, #d7efff);
+    --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), transparent 82%);
+    --el-button-hover-border-color: var(--luma-cockpit-accent, #00cbf4);
+    --el-button-hover-text-color: var(--luma-cockpit-title-text, #fff);
+    --el-button-active-bg-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), transparent 72%);
+    --el-button-active-border-color: var(--luma-cockpit-accent, #00cbf4);
+    --el-button-active-text-color: var(--luma-cockpit-title-text, #fff);
+    --el-button-disabled-bg-color: var(--el-disabled-bg-color);
+    --el-button-disabled-border-color: var(--el-disabled-border-color);
+    --el-button-disabled-text-color: var(--el-disabled-text-color);
+    height: var(--el-component-size, 32px);
+    min-height: var(--el-component-size, 32px);
+    padding: 0 12px;
+    border-radius: var(--el-border-radius-base);
     box-shadow: none;
 
-    &:hover,
     &:focus-visible {
-      color: #fff;
-      background: rgb(0 120 158 / 52%);
-      box-shadow: inset 0 0 10px rgb(6 183 253 / 22%);
+      outline: 2px solid var(--luma-cockpit-focus-ring, var(--luma-cockpit-accent, #00cbf4));
+      outline-offset: 2px;
     }
   }
 
   .el-button.is-circle {
-    width: 34px;
-    min-width: 34px;
+    width: var(--el-component-size, 32px);
+    min-width: var(--el-component-size, 32px);
+    height: var(--el-component-size, 32px);
+    min-height: var(--el-component-size, 32px);
     padding: 0;
+  }
+
+  .el-button--primary,
+  &__save.el-button {
+    --el-button-bg-color: var(--luma-cockpit-accent, #00cbf4);
+    --el-button-border-color: var(--luma-cockpit-accent, #00cbf4);
+    --el-button-text-color: #fff;
+    --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), #fff 12%);
+    --el-button-hover-border-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), #fff 12%);
+    --el-button-hover-text-color: #fff;
+    --el-button-active-bg-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), #000 10%);
+    --el-button-active-border-color: color-mix(in srgb, var(--luma-cockpit-accent, #00cbf4), #000 10%);
+    --el-button-active-text-color: #fff;
+  }
+
+  .el-button--danger {
+    --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 78%);
+    --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 40%);
+    --el-button-text-color: var(--luma-cockpit-danger, #f56c6c);
+    --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 62%);
+    --el-button-hover-border-color: var(--luma-cockpit-danger, #f56c6c);
+    --el-button-hover-text-color: #fff;
+    --el-button-active-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 48%);
+    --el-button-active-border-color: var(--luma-cockpit-danger, #f56c6c);
+    --el-button-active-text-color: #fff;
+  }
+
+  .el-button--danger.is-plain {
+    --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 90%);
+    --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 55%);
+    --el-button-text-color: var(--luma-cockpit-danger, #f56c6c);
+    --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 78%);
+    --el-button-hover-text-color: var(--luma-cockpit-danger, #f56c6c);
   }
 
   &__widget-action.el-button,
@@ -715,7 +805,7 @@
     min-width: 24px;
     height: 24px;
     min-height: 24px;
-    border-image: none;
+    border-radius: var(--el-border-radius-small);
   }
 
   &__tab-action.el-button,
@@ -728,31 +818,45 @@
 
   &__widget-action.el-button--danger,
   &__tab-action.el-button--danger {
-    border-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 40%);
-    color: #fff;
-    background: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 28%);
+    --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 72%);
+    --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 40%);
+    --el-button-text-color: #fff;
   }
 
-  .el-button--danger.is-plain {
-    color: var(--luma-cockpit-danger, #f56c6c);
-    background: rgb(245 108 108 / 10%);
+  &__empty-cell.el-button {
+    --el-button-bg-color: transparent;
+    --el-button-border-color: var(--luma-cockpit-slot-border, var(--luma-cockpit-border));
+    --el-button-text-color: var(--luma-cockpit-text-secondary);
+    --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 92%);
+    --el-button-hover-border-color: var(--luma-cockpit-accent);
+    --el-button-hover-text-color: var(--luma-cockpit-title-text);
+    --el-button-disabled-bg-color: transparent;
+    --el-button-disabled-border-color: var(--luma-cockpit-slot-border, var(--luma-cockpit-border));
+    --el-button-disabled-text-color: var(--luma-cockpit-text-secondary);
   }
 
-  .el-button--primary,
-  &__save.el-button {
-    border-color: #0f8dff;
-    border-image: none;
-    color: #fff;
-    background: #0f8dff;
+  &__tab-widget-title.el-button,
+  &__library-select.el-button {
+    --el-button-bg-color: transparent;
+    --el-button-border-color: transparent;
+    --el-button-text-color: inherit;
+    --el-button-hover-bg-color: transparent;
+    --el-button-hover-border-color: transparent;
+    --el-button-hover-text-color: inherit;
   }
 
   .el-switch {
-    --el-switch-on-color: #00cbf4;
-    --el-switch-off-color: rgb(0 74 106 / 72%);
+    --el-switch-on-color: var(--luma-cockpit-accent, #00cbf4);
+    --el-switch-off-color: color-mix(in srgb, var(--luma-cockpit-control-bg, rgb(0 74 106 / 72%)), #000 20%);
   }
 
   .el-alert {
-    border-radius: 0;
+    --el-alert-bg-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 88%);
+    --el-alert-border-color: color-mix(in srgb, var(--luma-cockpit-danger, #f56c6c), transparent 55%);
+    --el-alert-title-color: var(--luma-cockpit-text);
+    border-radius: var(--el-border-radius-base);
+    background-color: var(--el-alert-bg-color);
+    border: 1px solid var(--el-alert-border-color);
   }
 
   .el-button + .el-button {
@@ -766,7 +870,6 @@
   .is-drag-chosen {
     box-shadow: 0 0 0 2px var(--luma-cockpit-drop-target, rgb(0 215 255 / 34%));
   }
-
 }
 
 @media (max-width: 1180px) {

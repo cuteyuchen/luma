@@ -34,6 +34,7 @@ const preferences = adminPreferences
 const settingsVisible = adminSettingsVisible
 const resolvedThemeMode = adminResolvedThemeMode
 const routeRefreshKey = shallowRef(0)
+const cockpitUrl = import.meta.env.VITE_COCKPIT_URL?.trim() || 'http://localhost:5180/'
 
 /***********************路由状态*********************/
 const route = useRoute()
@@ -91,12 +92,6 @@ function handleToggleTheme(event: MouseEvent): void {
 
 function handleOpenSettings(): void {
   openAdminSettings()
-}
-
-function handleOpenCockpit(): void {
-  if (route.path !== '/cockpit') {
-    void router.push('/cockpit')
-  }
 }
 
 function handleOpenProfile(): void {
@@ -208,10 +203,10 @@ async function handleTabRefresh(path: string): Promise<void> {
 
     <template #headerActions>
       <AppHeaderActions
+        :cockpit-url="cockpitUrl"
         :resolved-theme-mode="resolvedThemeMode"
         :user-name="userName"
         @logout="handleLogout"
-        @open-cockpit="handleOpenCockpit"
         @open-profile="handleOpenProfile"
         @open-settings="handleOpenSettings"
         @toggle-theme="handleToggleTheme"

@@ -36,10 +36,12 @@ export async function expectNoPageOverflow(page: Page): Promise<void> {
 }
 
 export async function openTopMenu(page: Page, name: string): Promise<void> {
-  const item = page.getByRole('menuitem', { name, exact: true }).last()
+  const items = page.getByRole('menuitem', { name, exact: true })
+  let item = items.filter({ visible: true }).last()
 
-  if (!await item.isVisible().catch(() => false)) {
+  if (!await item.count()) {
     await page.locator('.luma-top-nav .el-sub-menu__icon-more').click()
+    item = items.filter({ visible: true }).last()
   }
 
   await item.click()

@@ -4,7 +4,18 @@ import type { LumaMenuRecord, LumaStaticMenuRecord } from '@luma/core/router'
 // DataV 组件指南站按环境区分：开发用本地 dev server，生产用独立部署域名，
 // 均通过 VITE_DATAV_GUIDE_URL 注入，缺省时回退到本地地址。
 // 说明：此处作为后端菜单种子的一部分，运行时由 mock-api 进程读取环境变量。
-const datavGuideUrl = process.env.VITE_DATAV_GUIDE_URL || 'http://localhost:5175/'
+// 内嵌时带 embed=1，指南站据此隐藏自身 Header（iframe 上下文也会自动隐藏）。
+const datavGuideUrl = (() => {
+  const base = process.env.VITE_DATAV_GUIDE_URL || 'http://localhost:5175/'
+  try {
+    const url = new URL(base)
+    url.searchParams.set('embed', '1')
+    return url.toString()
+  }
+  catch {
+    return base.includes('?') ? `${base}&embed=1` : `${base.replace(/\/?$/, '/')}?embed=1`
+  }
+})()
 
 /***********************静态菜单种子*********************/
 // 工作台 / 个人中心属于 Admin 壳层的静态路由，前端也会内置一份同名静态菜单；

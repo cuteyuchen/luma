@@ -27,12 +27,8 @@ interface DomainSnapshot {
   system: MockSystemState
 }
 
-/** 驾驶舱配置以通用 JSON 结构存储，mock 不感知 @luma/cockpit 内部模型 */
-export type CockpitConfigRecord = Record<string, unknown>
-
 export interface Sandbox {
   config: AdminSystemConfig
-  cockpitConfig: CockpitConfigRecord
   createdAt: number
   id: string
   lastAccessedAt: number
@@ -45,52 +41,6 @@ const initialConfig: AdminSystemConfig = {
   layout: 'mixed-nav',
   tabbarEnable: true,
   transitionEnable: true,
-}
-
-/**
- * 中性默认驾驶舱配置，用于演示真实 HTTP 加载/保存流程。
- * 名称保持中性，不含任何行业术语。
- */
-const initialCockpitConfig: CockpitConfigRecord = {
-  schemaVersion: 3,
-  id: 'admin-demo-cockpit',
-  title: '应用驾驶舱',
-  activeLayoutId: 'layout-a',
-  layouts: [
-    {
-      id: 'layout-a',
-      title: '布局 A',
-      left: {
-        columns: [{ id: 'left-column-a', width: 320 }],
-        rows: [
-          {
-            id: 'left-row-a',
-            height: 100,
-            mode: 'grid',
-            cells: [
-              {
-                id: 'left-cell-a',
-                widget: { id: 'w-a', type: 'stub-widget', title: '示例模块' },
-              },
-            ],
-            widgets: [],
-          },
-        ],
-      },
-      right: {
-        columns: [{ id: 'right-column-a', width: 320 }],
-        rows: [
-          {
-            id: 'right-row-a',
-            height: 100,
-            mode: 'grid',
-            cells: [{ id: 'right-cell-a' }],
-            widgets: [],
-          },
-        ],
-      },
-    },
-  ],
 }
 
 function capture(): DomainSnapshot {
@@ -145,7 +95,6 @@ export function createSandbox(id: string): Sandbox {
   const now = Date.now()
   const sandbox: Sandbox = {
     config: clone(initialConfig),
-    cockpitConfig: clone(initialCockpitConfig),
     createdAt: now,
     id,
     lastAccessedAt: now,
@@ -173,7 +122,6 @@ export function resetSandbox(id: string): void {
   const sandbox = getSandbox(id)
   sandbox.snapshot = clone(seed)
   sandbox.config = clone(initialConfig)
-  sandbox.cockpitConfig = clone(initialCockpitConfig)
 }
 
 export function cleanupSandboxes(): void {

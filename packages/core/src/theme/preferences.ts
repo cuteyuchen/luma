@@ -9,6 +9,7 @@ import type {
 export interface PreferenceAvailability {
   headerMenuAlign: boolean
   headerMenuMaxWidth: boolean
+  sidebarAutoActivateChild: boolean
   sidebarCollapsed: boolean
   sidebarWidth: boolean
   tabbarCache: boolean
@@ -35,6 +36,7 @@ export function createDefaultPreferences(defaults: LumaPreferencesDefaults = {})
       menuMaxWidth: 1120,
     },
     sidebar: {
+      autoActivateChild: false,
       collapsed: false,
       enable: true,
       width: 280,
@@ -170,6 +172,7 @@ export function resolvePreferenceAvailability(preferences: LumaPreferences): Pre
   return {
     headerMenuAlign: headerMenuEnabled,
     headerMenuMaxWidth: headerMenuEnabled,
+    sidebarAutoActivateChild: preferences.app.layout === 'mixed-nav' && sidebarEnabled,
     sidebarCollapsed: sidebarEnabled,
     sidebarWidth: sidebarEnabled,
     tabbarCache: preferences.tabbar.enable,

@@ -70,7 +70,7 @@ export default defineConfig(({ command }) => ({
       },
       ...(command === 'serve'
         ? createLumaAliases({
-            packages: ['charts', 'cockpit', 'core', 'icons', 'icons-vue'],
+            packages: ['charts', 'core', 'icons', 'icons-vue'],
             workspaceRoot,
           })
         : []),

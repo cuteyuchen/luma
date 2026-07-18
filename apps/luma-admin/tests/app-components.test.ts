@@ -52,12 +52,15 @@ describe('app header actions', () => {
         },
       },
       props: {
+        cockpitUrl: 'http://localhost:5180/',
         resolvedThemeMode: 'dark',
         userName: '管理员',
       },
     })
 
     expect(wrapper.find('[data-action="toggle-theme"]').exists()).toBe(true)
+    expect(wrapper.find('[data-action="open-cockpit"]').attributes('href')).toBe('http://localhost:5180/')
+    expect(wrapper.find('[data-action="open-cockpit"]').attributes('target')).toBe('_blank')
     expect(wrapper.find('[data-action="open-settings"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="open-settings"]').attributes('aria-label')).toBe('偏好设置')
     expect(wrapper.find('[data-action="open-profile"]').exists()).toBe(true)

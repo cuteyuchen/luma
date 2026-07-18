@@ -62,11 +62,15 @@ export function findMenuTrailByPath(
 }
 
 /**
- * 解析菜单项的导航目标：有子级时下钻到首个可导航子项。
+ * 解析菜单项的导航目标：优先使用显式重定向，否则下钻到首个可导航子项。
  */
 export function resolveNavigationTarget(item?: LumaLayoutMenuItem): string {
   if (!item) {
     return ''
+  }
+
+  if (item.redirect) {
+    return item.redirect
   }
 
   const children = item.children?.filter(child => !child.hidden) ?? []

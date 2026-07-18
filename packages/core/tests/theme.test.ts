@@ -117,6 +117,9 @@ describe('theme runtime', () => {
       header: {
         globalSearch: true,
       },
+      sidebar: {
+        autoActivateChild: false,
+      },
       shortcutKeys: {
         globalSearch: true,
       },
@@ -183,6 +186,7 @@ describe('theme runtime', () => {
     expect(merged.app.dynamicTitle).toBe(true)
     expect(merged.breadcrumb.enable).toBe(true)
     expect(merged.header.globalSearch).toBe(true)
+    expect(merged.sidebar.autoActivateChild).toBe(false)
     expect(merged.shortcutKeys.globalSearch).toBe(true)
     expect(merged.theme.fontSize).toBe(14)
   })
@@ -217,7 +221,7 @@ describe('theme runtime', () => {
     expect(element.style.getPropertyValue('--luma-color-primary')).toBe('#16a34a')
     expect(element.style.getPropertyValue('--el-color-primary')).toBe('#16a34a')
     expect(element.style.getPropertyValue('--luma-radius-scale')).toBe('0.75')
-    expect(element.style.getPropertyValue('--luma-header-height')).toBe('64px')
+    expect(element.style.getPropertyValue('--luma-header-height')).toBe('50px')
     expect(element.style.getPropertyValue('--luma-tabbar-height')).toBe('40px')
     expect(element.style.getPropertyValue('--luma-sidebar-width')).toBe('280px')
     expect(element.style.getPropertyValue('--luma-font-size-base')).toBe('18px')
@@ -248,6 +252,7 @@ describe('theme runtime', () => {
     }))).toMatchObject({
       headerMenuAlign: false,
       headerMenuMaxWidth: false,
+      sidebarAutoActivateChild: false,
       sidebarCollapsed: true,
       sidebarWidth: true,
       tabbarCache: true,
@@ -257,8 +262,15 @@ describe('theme runtime', () => {
       app: { layout: 'top-nav' },
     }))).toMatchObject({
       headerMenuAlign: true,
+      sidebarAutoActivateChild: false,
       sidebarCollapsed: false,
       sidebarWidth: false,
+    })
+
+    expect(resolvePreferenceAvailability(createDefaultPreferences({
+      app: { layout: 'mixed-nav' },
+    }))).toMatchObject({
+      sidebarAutoActivateChild: true,
     })
   })
 

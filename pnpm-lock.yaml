@@ -62,9 +62,6 @@ importers:
       '@luma/charts':
         specifier: workspace:*
         version: link:../../packages/charts
-      '@luma/cockpit':
-        specifier: workspace:*
-        version: link:../../packages/cockpit
       '@luma/core':
         specifier: workspace:*
         version: link:../../packages/core

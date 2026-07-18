@@ -285,20 +285,23 @@ onBeforeUnmount(() => {
 }
 
 .standalone-app__layouts :deep(.el-button) {
+  --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
+  --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  --el-button-text-color: var(--luma-cockpit-text-secondary);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 88%);
+  --el-button-hover-border-color: var(--luma-cockpit-accent);
+  --el-button-hover-text-color: var(--luma-cockpit-title-text);
   min-height: 36px;
   padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
   border-radius: 2px;
-  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
-  color: var(--luma-cockpit-text-secondary);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  cursor: pointer;
+  box-shadow: none;
 }
 
 .standalone-app__layouts :deep(.el-button.is-active) {
-  border-color: var(--luma-cockpit-accent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--luma-cockpit-accent), transparent 80%), transparent);
-  color: var(--luma-cockpit-title-text);
+  --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 84%);
+  --el-button-border-color: var(--luma-cockpit-accent);
+  --el-button-text-color: var(--luma-cockpit-title-text);
   box-shadow: inset 0 -2px 0 var(--luma-cockpit-accent), 0 0 12px color-mix(in srgb, var(--luma-cockpit-accent), transparent 78%);
 }
 
@@ -324,22 +327,22 @@ onBeforeUnmount(() => {
 }
 
 .standalone-app__actions :deep(.el-button) {
+  --el-button-bg-color: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
+  --el-button-border-color: color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  --el-button-text-color: var(--luma-cockpit-text-secondary);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 88%);
+  --el-button-hover-border-color: var(--luma-cockpit-accent);
+  --el-button-hover-text-color: var(--luma-cockpit-title-text);
+  --el-button-active-bg-color: color-mix(in srgb, var(--luma-cockpit-accent), transparent 80%);
+  --el-button-active-border-color: var(--luma-cockpit-accent);
+  --el-button-active-text-color: var(--luma-cockpit-title-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
   min-width: 44px;
-  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
   border-radius: 2px;
-  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
-  color: inherit;
-  cursor: pointer;
-}
-
-.standalone-app__actions :deep(.el-button:hover) {
-  border-color: var(--luma-cockpit-accent);
-  background: color-mix(in srgb, var(--luma-cockpit-accent), transparent 88%);
-  color: var(--luma-cockpit-title-text);
+  box-shadow: none;
 }
 
 .standalone-app__actions button:focus-visible {
