@@ -9,8 +9,8 @@ dist-*
 .env
 .env.*
 !.env.example
-!apps/luma-admin/.env.development
-!apps/luma-admin/.env.production.example
+!apps/lumal-admin/.env.development
+!apps/lumal-admin/.env.production.example
 .nitro/
 .output/
 .idea/
@@ -22,6 +22,6 @@ output
 .tmp-ref
 docs/.vitepress/cache
 docs/.vitepress/dist
-apps/luma-docs/dist
-apps/luma-docs/.vitepress/cache
-apps/luma-docs/src/.vitepress/cache
+apps/lumal-docs/dist
+apps/lumal-docs/.vitepress/cache
+apps/lumal-docs/src/.vitepress/cache

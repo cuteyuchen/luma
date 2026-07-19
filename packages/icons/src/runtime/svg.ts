@@ -36,7 +36,7 @@ export function composeSvgIcons(svgTexts: string[]): string {
   const firstAttributes = validIcons[0]!.match(/<svg\b([^>]*)>/i)?.[1]?.trim()
   const layers = validIcons.map((svg, index) => {
     const content = svg.replace(/^\s*<svg\b[^>]*>/i, '').replace(/<\/svg>\s*$/i, '')
-    return `<g data-luma-icon-layer="${index}">${content}</g>`
+    return `<g data-lumal-icon-layer="${index}">${content}</g>`
   }).join('')
 
   return `<svg${firstAttributes ? ` ${firstAttributes}` : ''}>${layers}</svg>`
@@ -77,7 +77,7 @@ function createGradientMarkup(options: Required<Pick<IconGradientOptions, 'id'>>
 }
 
 export function applySvgGradient(svgText: string, options: IconGradientOptions): string {
-  const gradientId = options.id ?? 'luma-icon-gradient'
+  const gradientId = options.id ?? 'lumal-icon-gradient'
   const gradientMarkup = createGradientMarkup({ ...options, id: gradientId })
   const svgWithDefs = svgText.replace(/<svg([^>]*)>/, `<svg$1>${gradientMarkup}`)
 

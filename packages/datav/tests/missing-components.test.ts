@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 import {
-  LumaCharts,
-  LumaFlylineChart,
-  LumaFlylineChartEnhanced,
-  LumaFullScreenContainer,
+  LumalCharts,
+  LumalFlylineChart,
+  LumalFlylineChartEnhanced,
+  LumalFullScreenContainer,
 } from '../src'
 import { randomDuration } from '../src/flyline-utils'
 
@@ -115,12 +115,12 @@ describe('remaining DataV components', () => {
 
   it('full screen container width mode scales the stage by container width', async () => {
     // 容器 clientWidth=400（见 beforeEach），设计宽 800 → scale 0.5
-    const wrapper = mount(LumaFullScreenContainer, {
+    const wrapper = mount(LumalFullScreenContainer, {
       props: { height: 400, mode: 'width', width: 800 },
       slots: { default: '全屏内容' },
     })
     await flushFrames()
-    const stage = wrapper.get('.luma-full-screen-container__stage')
+    const stage = wrapper.get('.lumal-full-screen-container__stage')
     expect(wrapper.text()).toBe('全屏内容')
     expect(stage.attributes('style')).toContain('width: 800px')
     expect(stage.attributes('style')).toContain('height: 400px')
@@ -128,22 +128,22 @@ describe('remaining DataV components', () => {
   })
 
   it('full screen container defaults to width mode', async () => {
-    const wrapper = mount(LumaFullScreenContainer, {
+    const wrapper = mount(LumalFullScreenContainer, {
       props: { height: 400, width: 800 },
       slots: { default: '内容' },
     })
     await flushFrames()
-    expect(wrapper.get('.luma-full-screen-container').attributes('data-mode')).toBe('width')
+    expect(wrapper.get('.lumal-full-screen-container').attributes('data-mode')).toBe('width')
   })
 
   it('full screen container scale mode preserves aspect ratio and centers the stage', async () => {
     // 容器 400×200，设计 800×800 → scale=min(0.5,0.25)=0.25，水平居中
-    const wrapper = mount(LumaFullScreenContainer, {
+    const wrapper = mount(LumalFullScreenContainer, {
       props: { height: 800, mode: 'scale', width: 800 },
       slots: { default: '内容' },
     })
     await flushFrames()
-    const stage = wrapper.get('.luma-full-screen-container__stage')
+    const stage = wrapper.get('.lumal-full-screen-container__stage')
     const style = stage.attributes('style') ?? ''
     expect(style).toContain('width: 800px')
     expect(style).toContain('scale(0.25)')
@@ -152,23 +152,23 @@ describe('remaining DataV components', () => {
   })
 
   it('full screen container vwvh mode stretches to the viewport with design units', async () => {
-    const wrapper = mount(LumaFullScreenContainer, {
+    const wrapper = mount(LumalFullScreenContainer, {
       props: { height: 1000, mode: 'vwvh', width: 2000 },
       slots: { default: '内容' },
     })
     await flushFrames()
-    const stage = wrapper.get('.luma-full-screen-container__stage')
+    const stage = wrapper.get('.lumal-full-screen-container__stage')
     const style = stage.attributes('style') ?? ''
     expect(style).toContain('width: 100vw')
     expect(style).toContain('height: 100vh')
     // 100/2000 = 0.05vw, 100/1000 = 0.1vh
-    expect(style).toContain('--luma-fsc-x-unit: 0.05vw')
-    expect(style).toContain('--luma-fsc-y-unit: 0.1vh')
+    expect(style).toContain('--lumal-fsc-x-unit: 0.05vw')
+    expect(style).toContain('--lumal-fsc-y-unit: 0.1vh')
   })
 
   it('renders the original flyline quadratic path and emits dev coordinates', async () => {
     const onPosition = vi.fn()
-    const wrapper = mount(LumaFlylineChart, {
+    const wrapper = mount(LumalFlylineChart, {
       props: {
         config: {
           centerPoint: [0.5, 0.5],
@@ -190,7 +190,7 @@ describe('remaining DataV components', () => {
 
   it('flyline animation keeps running while hovered like DataV 2.10.0', async () => {
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
-    const wrapper = mount(LumaFlylineChart, {
+    const wrapper = mount(LumalFlylineChart, {
       props: {
         config: {
           centerPoint: [0.5, 0.5],
@@ -205,7 +205,7 @@ describe('remaining DataV components', () => {
   })
 
   it('flyline keeps the DataV 2.10.0 config field names and legacy aliases', async () => {
-    const wrapper = mount(LumaFlylineChart, {
+    const wrapper = mount(LumalFlylineChart, {
       props: {
         config: {
           bgImgUrl: '/map.png',
@@ -245,7 +245,7 @@ describe('remaining DataV components', () => {
       ],
       relative: true,
     }
-    const wrapper = mount(LumaFlylineChartEnhanced, { props: { config } })
+    const wrapper = mount(LumalFlylineChartEnhanced, { props: { config } })
     await flushFrames()
     expect(wrapper.attributes('style')).toContain('/enhanced-map.png')
     expect(wrapper.find('path').attributes('d')).toBe('M40,40 Q239.4642749893,60.2678625054 320,140')
@@ -257,7 +257,7 @@ describe('remaining DataV components', () => {
     const option = { xAxis: {}, yAxis: {}, series: [{ data: [1, 2], type: 'bar' as const }] }
     const click = vi.fn()
     const initOptions = { renderer: 'svg' as const }
-    const wrapper = mount(LumaCharts, {
+    const wrapper = mount(LumalCharts, {
       attrs: { onClick: click },
       props: { initOptions, option, setOptionOptions: { lazyUpdate: true }, theme: 'dark' },
     })
@@ -279,7 +279,7 @@ describe('remaining DataV components', () => {
       xAxis: { data: ['一', '二', '三'] },
       yAxis: { data: 'value' },
     }
-    const wrapper = mount(LumaCharts, { props: { config } })
+    const wrapper = mount(LumalCharts, { props: { config } })
     await flushFrames()
     await nextTick()
 

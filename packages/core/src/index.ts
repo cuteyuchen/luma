@@ -1,10 +1,10 @@
 export {
-  createLumaAdmin,
+  createLumalAdmin,
 } from './app'
 export type {
-  CreateLumaAdminOptions,
-  LumaAdminContext,
-  LumaAdminInstance,
+  CreateLumalAdminOptions,
+  LumalAdminContext,
+  LumalAdminInstance,
 } from './app'
 export * from './dictionary'
 export * from './exports/components'

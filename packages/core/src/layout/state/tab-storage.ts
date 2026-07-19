@@ -1,4 +1,4 @@
-import type { LumaLayoutTabItem } from '../types'
+import type { LumalLayoutTabItem } from '../types'
 
 /***********************快照结构*********************/
 export const TAB_SNAPSHOT_VERSION = 1
@@ -6,7 +6,7 @@ export const DEFAULT_MAX_VISIT_HISTORY = 50
 
 export interface TabSnapshot {
   v: number
-  tabs: Array<Pick<LumaLayoutTabItem, 'closable' | 'icon' | 'path' | 'pinned' | 'title'>>
+  tabs: Array<Pick<LumalLayoutTabItem, 'closable' | 'icon' | 'path' | 'pinned' | 'title'>>
   history: string[]
 }
 
@@ -18,19 +18,19 @@ export interface TabSnapshotStorage {
 
 export interface RestoreContext {
   /** 路由声明的永久固定标签（closable=false）。 */
-  fixedTabs: LumaLayoutTabItem[]
+  fixedTabs: LumalLayoutTabItem[]
   /** 当前路由路径，始终会被合并入恢复结果。 */
   currentPath: string
   /** 当前路由生成的标签补充信息。 */
-  currentTab?: LumaLayoutTabItem
+  currentTab?: LumalLayoutTabItem
   /** 过滤无效或隐藏路由的判断函数。 */
   isValidPath?: (path: string) => boolean
   /** 刷新标题和图标的解析器。 */
-  resolveTab?: (path: string) => Partial<LumaLayoutTabItem> | undefined
+  resolveTab?: (path: string) => Partial<LumalLayoutTabItem> | undefined
 }
 
 export interface PersistContext {
-  tabs: LumaLayoutTabItem[]
+  tabs: LumalLayoutTabItem[]
   history: string[]
   maxHistory?: number
 }
@@ -160,12 +160,12 @@ export function clearTabSnapshot(storage: TabSnapshotStorage, storageKey: string
 export function restoreTabsFromSnapshot(
   snapshot: TabSnapshot | undefined,
   context: RestoreContext,
-): { tabs: LumaLayoutTabItem[], history: string[] } {
+): { tabs: LumalLayoutTabItem[], history: string[] } {
   const fixedTabs = context.fixedTabs.map(tab => ({ ...tab, pinned: true, closable: false }))
   const fixedPaths = new Set(fixedTabs.map(tab => tab.path))
   const isValid = context.isValidPath ?? (() => true)
 
-  const fromSnapshot: LumaLayoutTabItem[] = []
+  const fromSnapshot: LumalLayoutTabItem[] = []
 
   if (snapshot) {
     for (const item of snapshot.tabs) {
@@ -187,12 +187,12 @@ export function restoreTabsFromSnapshot(
     }
   }
 
-  let tabs: LumaLayoutTabItem[] = [...fixedTabs, ...fromSnapshot]
+  let tabs: LumalLayoutTabItem[] = [...fixedTabs, ...fromSnapshot]
 
   // 始终补入当前路由。
   if (context.currentPath) {
     const refreshed = context.resolveTab?.(context.currentPath) ?? {}
-    const currentEntry: LumaLayoutTabItem = {
+    const currentEntry: LumalLayoutTabItem = {
       closable: true,
       icon: refreshed.icon,
       path: context.currentPath,

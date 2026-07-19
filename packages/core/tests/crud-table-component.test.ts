@@ -2,10 +2,10 @@ import type { CrudToolbarSlotProps } from '../src/exports/components'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { h, nextTick } from 'vue'
-import { deriveCrudFormSchemas, LumaCrudTable } from '../src/components/crud-table'
-import { LumaPagination } from '../src/components/pagination'
-import { LumaSchemaForm } from '../src/components/schema-form'
-import { LumaSchemaTable } from '../src/components/schema-table'
+import { deriveCrudFormSchemas, LumalCrudTable } from '../src/components/crud-table'
+import { LumalPagination } from '../src/components/pagination'
+import { LumalSchemaForm } from '../src/components/schema-form'
+import { LumalSchemaTable } from '../src/components/schema-table'
 import { createDictionaryStore, dictionaryContextKey } from '../src/dictionary'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
@@ -14,7 +14,7 @@ async function flushPromises(): Promise<void> {
   await nextTick()
 }
 
-describe('luma crud table', () => {
+describe('lumal crud table', () => {
   it('会从列配置派生编辑表单并保留字典及显示范围', () => {
     expect(deriveCrudFormSchemas([
       {
@@ -49,7 +49,7 @@ describe('luma crud table', () => {
   })
 
   it('会组合查询表单、表格、分页和 Element Plus 操作按钮', () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -71,7 +71,7 @@ describe('luma crud table', () => {
         rows: [
           {
             id: 'row-1',
-            name: 'Luma',
+            name: 'Lumal',
           },
         ],
         rowKey: 'id',
@@ -79,19 +79,19 @@ describe('luma crud table', () => {
       },
     })
 
-    expect(wrapper.find('.luma-page').exists()).toBe(false)
-    expect(wrapper.find('.luma-schema-table__toolbar-title').text()).toBe('项目列表')
-    expect(wrapper.find('.luma-crud-table__query').exists()).toBe(true)
-    expect(wrapper.findComponent(LumaSchemaForm).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaSchemaTable).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaPagination).exists()).toBe(true)
+    expect(wrapper.find('.lumal-page').exists()).toBe(false)
+    expect(wrapper.find('.lumal-schema-table__toolbar-title').text()).toBe('项目列表')
+    expect(wrapper.find('.lumal-crud-table__query').exists()).toBe(true)
+    expect(wrapper.findComponent(LumalSchemaForm).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalSchemaTable).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalPagination).exists()).toBe(true)
     expect(wrapper.find('[data-action="search"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="reset"]').exists()).toBe(true)
     expect(wrapper.find('[data-action="create"]').exists()).toBe(true)
   })
 
   it('会把表格标题、默认右侧新增和筛选、刷新、全屏、列设置放在同一工具栏', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         dataSource: {
@@ -111,10 +111,10 @@ describe('luma crud table', () => {
 
     await flushPromises()
 
-    const toolbar = wrapper.find('.luma-schema-table__toolbar')
-    const toolbarTitle = toolbar.find('.luma-schema-table__toolbar-title')
-    const actions = toolbar.find('.luma-crud-table__toolbar')
-    const tools = toolbar.find('.luma-schema-table__toolbar-tools')
+    const toolbar = wrapper.find('.lumal-schema-table__toolbar')
+    const toolbarTitle = toolbar.find('.lumal-schema-table__toolbar-title')
+    const actions = toolbar.find('.lumal-crud-table__toolbar')
+    const tools = toolbar.find('.lumal-schema-table__toolbar-tools')
     const createButton = actions.find('[data-action="create"]')
     const queryToggleButton = tools.find('[data-action="toggle-query-panel"]')
     const refreshButton = tools.find('[data-action="refresh"]')
@@ -133,7 +133,7 @@ describe('luma crud table', () => {
     expect(queryToggleButton.attributes('aria-label')).toBe('隐藏筛选条件')
 
     await queryToggleButton.trigger('click')
-    expect(wrapper.find('.luma-crud-table__query').isVisible()).toBe(false)
+    expect(wrapper.find('.lumal-crud-table__query').isVisible()).toBe(false)
     expect(queryToggleButton.attributes('aria-label')).toBe('显示筛选条件')
   })
 
@@ -147,14 +147,14 @@ describe('luma crud table', () => {
     vi.stubGlobal('matchMedia', vi.fn(() => mediaQuery))
 
     try {
-      const wrapper = mount(LumaCrudTable, {
+      const wrapper = mount(LumalCrudTable, {
         global: { stubs: elementPlusStubs },
         props: {
           query: {
             mobileDefaultVisible: false,
             schemas: [{ field: 'keyword', label: '关键词' }],
           },
-          rows: [{ id: 'row-1', name: 'Luma' }],
+          rows: [{ id: 'row-1', name: 'Lumal' }],
           table: {
             columns: [{ field: 'name', label: '名称' }],
             mobileActionWidth: 72,
@@ -164,14 +164,14 @@ describe('luma crud table', () => {
       await flushPromises()
 
       const isQueryPanelShown = () => {
-        const panel = wrapper.find('.luma-crud-table__query')
+        const panel = wrapper.find('.lumal-crud-table__query')
         const style = panel.attributes('style') ?? ''
         return panel.exists() && !/display:\s*none/.test(style)
       }
       const queryToggle = wrapper.find('[data-action="toggle-query-panel"]')
       expect(isQueryPanelShown()).toBe(false)
       expect(queryToggle.attributes('aria-expanded')).toBe('false')
-      expect(wrapper.findComponent(LumaSchemaTable).props('mobileActionWidth')).toBe(72)
+      expect(wrapper.findComponent(LumalSchemaTable).props('mobileActionWidth')).toBe(72)
 
       await queryToggle.trigger('click')
       await flushPromises()
@@ -194,7 +194,7 @@ describe('luma crud table', () => {
   })
 
   it('仅在传入标题时显示工具栏标题，并允许业务操作显式放在左侧', () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -207,22 +207,22 @@ describe('luma crud table', () => {
       },
     })
 
-    expect(wrapper.find('.luma-schema-table__toolbar-title').text()).toBe('数据列表')
-    expect(wrapper.find('.luma-crud-table__toolbar').classes()).toContain('is-left')
+    expect(wrapper.find('.lumal-schema-table__toolbar-title').text()).toBe('数据列表')
+    expect(wrapper.find('.lumal-crud-table__toolbar').classes()).toContain('is-left')
 
-    const wrapperWithoutTitle = mount(LumaCrudTable, {
+    const wrapperWithoutTitle = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
         rows: [],
       },
     })
-    expect(wrapperWithoutTitle.find('.luma-schema-table__toolbar-title').exists()).toBe(false)
+    expect(wrapperWithoutTitle.find('.lumal-schema-table__toolbar-title').exists()).toBe(false)
   })
 
   it('toolbar-actions 插槽会实时提供选择状态并可清空选择', async () => {
-    const row = { id: 'row-1', name: 'Luma' }
-    const wrapper = mount(LumaCrudTable, {
+    const row = { id: 'row-1', name: 'Lumal' }
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -244,7 +244,7 @@ describe('luma crud table', () => {
       },
     })
 
-    const table = wrapper.findComponent(LumaSchemaTable)
+    const table = wrapper.findComponent(LumalSchemaTable)
     table.vm.$emit('selectionChange', [row], ['row-1'])
     await nextTick()
 
@@ -272,7 +272,7 @@ describe('luma crud table', () => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
     try {
-      const wrapper = mount(LumaCrudTable, {
+      const wrapper = mount(LumalCrudTable, {
         global: { stubs: elementPlusStubs },
         props: {
           columns: [{ field: 'name', label: '名称' }],
@@ -282,7 +282,7 @@ describe('luma crud table', () => {
           rows: [],
         },
       })
-      const queryForm = wrapper.findComponent(LumaSchemaForm)
+      const queryForm = wrapper.findComponent(LumalSchemaForm)
 
       resizeCallback?.([{ contentRect: { width: 600 } } as ResizeObserverEntry], {} as ResizeObserver)
       await nextTick()
@@ -317,7 +317,7 @@ describe('luma crud table', () => {
   })
 
   it('允许应用通过 create-action 插槽替换默认新增按钮', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -353,13 +353,13 @@ describe('luma crud table', () => {
   })
 
   it('点击搜索会触发 search 并携带查询模型', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
         queryModel: {
-          keyword: 'Luma',
+          keyword: 'Lumal',
         },
         querySchemas: [
           {
@@ -382,13 +382,13 @@ describe('luma crud table', () => {
 
     expect(wrapper.emitted('search')?.[0]).toEqual([
       {
-        keyword: 'Luma',
+        keyword: 'Lumal',
       },
     ])
   })
 
   it('点击重置会恢复查询默认值并触发 reset', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -429,7 +429,7 @@ describe('luma crud table', () => {
   })
 
   it('分页变化会透传 page-change', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -459,7 +459,7 @@ describe('luma crud table', () => {
   })
 
   it('会渲染默认插槽作为表格扩展内容', () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -477,7 +477,7 @@ describe('luma crud table', () => {
       },
     })
 
-    expect(wrapper.find('.luma-crud-table__extra').text()).toBe('当前展示示例数据')
+    expect(wrapper.find('.lumal-crud-table__extra').text()).toBe('当前展示示例数据')
   })
 
   it('查询表单和表格列会复用 dictionary 字典能力', async () => {
@@ -496,7 +496,7 @@ describe('luma crud table', () => {
       }),
     })
 
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: {
@@ -547,7 +547,7 @@ describe('luma crud table', () => {
         ],
       }),
     })
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: { store },
@@ -581,7 +581,7 @@ describe('luma crud table', () => {
 
     await flushPromises()
 
-    const table = wrapper.findComponent(LumaSchemaTable)
+    const table = wrapper.findComponent(LumalSchemaTable)
     expect(table.props('columns').map((column: { field: string }) => column.field)).toEqual(['status', 'internal'])
 
     const formatter = table.findAllComponents({ name: 'ElTableColumn' })[0]?.props('formatter') as
@@ -592,7 +592,7 @@ describe('luma crud table', () => {
     await wrapper.find('[data-action="create"]').trigger('click')
     await flushPromises()
 
-    const dialogForm = wrapper.findAllComponents(LumaSchemaForm).at(-1)
+    const dialogForm = wrapper.findAllComponents(LumalSchemaForm).at(-1)
     expect(dialogForm?.props('schemas').map((schema: { field: string }) => schema.field)).toEqual(['status', 'remark'])
     expect(dialogForm?.props('labelWidth')).toBe(88)
     expect(dialogForm?.findAllComponents({ name: 'ElOption' }).map(item => item.props('label'))).toEqual(['启用', '停用'])
@@ -601,7 +601,7 @@ describe('luma crud table', () => {
   it('会通过标准 dataSource 加载数据并随查询分页刷新', async () => {
     const fetch = vi.fn()
       .mockResolvedValueOnce({
-        items: [{ id: 'row-1', name: 'Luma' }],
+        items: [{ id: 'row-1', name: 'Lumal' }],
         total: 21,
       })
       .mockResolvedValueOnce({
@@ -609,7 +609,7 @@ describe('luma crud table', () => {
         total: 21,
       })
 
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -624,7 +624,7 @@ describe('luma crud table', () => {
           fetch,
         },
         queryModel: {
-          keyword: 'Luma',
+          keyword: 'Lumal',
         },
         querySchemas: [
           {
@@ -641,11 +641,11 @@ describe('luma crud table', () => {
       page: 1,
       pageSize: 10,
       query: {
-        keyword: 'Luma',
+        keyword: 'Lumal',
       },
     })
-    expect(wrapper.findComponent(LumaSchemaTable).props('rows')).toEqual([{ id: 'row-1', name: 'Luma' }])
-    expect(wrapper.findComponent(LumaPagination).props('total')).toBe(21)
+    expect(wrapper.findComponent(LumalSchemaTable).props('rows')).toEqual([{ id: 'row-1', name: 'Lumal' }])
+    expect(wrapper.findComponent(LumalPagination).props('total')).toBe(21)
 
     await wrapper.find('[data-action="next"]').trigger('click')
     await flushPromises()
@@ -654,10 +654,10 @@ describe('luma crud table', () => {
       page: 2,
       pageSize: 10,
       query: {
-        keyword: 'Luma',
+        keyword: 'Lumal',
       },
     })
-    expect(wrapper.findComponent(LumaSchemaTable).props('rows')).toEqual([{ id: 'row-2', name: 'Admin' }])
+    expect(wrapper.findComponent(LumalSchemaTable).props('rows')).toEqual([{ id: 'row-2', name: 'Admin' }])
   })
 
   it('会通过 dataSource 执行新增、编辑、删除和批量删除', async () => {
@@ -673,7 +673,7 @@ describe('luma crud table', () => {
       update: vi.fn().mockResolvedValue({}),
     }
 
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -709,20 +709,20 @@ describe('luma crud table', () => {
 
     api.openCreate()
     await nextTick()
-    wrapper.findAllComponents(LumaSchemaForm).at(-1)?.vm.$emit('submit', { name: '新名称' })
+    wrapper.findAllComponents(LumalSchemaForm).at(-1)?.vm.$emit('submit', { name: '新名称' })
     await flushPromises()
     expect(dataSource.create).toHaveBeenCalledWith({ name: '新名称' })
 
     api.openEdit(row)
     await nextTick()
-    wrapper.findAllComponents(LumaSchemaForm).at(-1)?.vm.$emit('submit', { name: '修改后' })
+    wrapper.findAllComponents(LumalSchemaForm).at(-1)?.vm.$emit('submit', { name: '修改后' })
     await flushPromises()
     expect(dataSource.update).toHaveBeenCalledWith(row, { name: '修改后' })
 
     await api.removeRow(row)
     expect(dataSource.remove).toHaveBeenCalledWith(row)
 
-    wrapper.findComponent(LumaSchemaTable).vm.$emit('selectionChange', [row], ['row-1'])
+    wrapper.findComponent(LumalSchemaTable).vm.$emit('selectionChange', [row], ['row-1'])
     await nextTick()
     await wrapper.find('[data-action="batch-remove"]').trigger('click')
     await flushPromises()
@@ -730,10 +730,10 @@ describe('luma crud table', () => {
   })
 
   it('删除确认优先使用 actions 配置并可阻止数据变更', async () => {
-    const row = { id: 'row-1', name: 'Luma' }
+    const row = { id: 'row-1', name: 'Lumal' }
     const confirmRemove = vi.fn().mockResolvedValue(false)
     const remove = vi.fn().mockResolvedValue({})
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         actions: { confirmRemove },
@@ -756,7 +756,7 @@ describe('luma crud table', () => {
   })
 
   it('支持配置对象、查询折叠、列设置和导出事件', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         query: {
@@ -777,22 +777,22 @@ describe('luma crud table', () => {
           showColumnSettings: true,
         },
         toolbar: { export: true },
-        rows: [{ id: 'row-1', name: 'Luma' }],
+        rows: [{ id: 'row-1', name: 'Lumal' }],
       },
     })
 
-    expect(wrapper.findAll('.luma-schema-form__item')).toHaveLength(2)
-    expect(wrapper.find('.luma-schema-table__column-settings').exists()).toBe(true)
+    expect(wrapper.findAll('.lumal-schema-form__item')).toHaveLength(2)
+    expect(wrapper.find('.lumal-schema-table__column-settings').exists()).toBe(true)
 
     await wrapper.find('[data-action="toggle-query"]').trigger('click')
-    expect(wrapper.findAll('.luma-schema-form__item')).toHaveLength(3)
+    expect(wrapper.findAll('.lumal-schema-form__item')).toHaveLength(3)
 
-    wrapper.findComponent(LumaSchemaTable).vm.$emit('selectionChange', [{ id: 'row-1', name: 'Luma' }], ['row-1'])
+    wrapper.findComponent(LumalSchemaTable).vm.$emit('selectionChange', [{ id: 'row-1', name: 'Lumal' }], ['row-1'])
     await wrapper.find('[data-action="export"]').trigger('click')
 
     expect(wrapper.emitted('export')?.[0]).toEqual([{
       query: {},
-      selectedRows: [{ id: 'row-1', name: 'Luma' }],
+      selectedRows: [{ id: 'row-1', name: 'Lumal' }],
     }])
     const api = wrapper.vm as unknown as {
       getSelectedRowKeys: () => Array<string | number>
@@ -801,7 +801,7 @@ describe('luma crud table', () => {
   })
 
   it('支持按行控制默认操作按钮', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         actions: {
@@ -828,7 +828,7 @@ describe('luma crud table', () => {
     const fetch = vi.fn()
       .mockRejectedValueOnce(new Error('列表加载失败'))
       .mockResolvedValueOnce({ items: [{ id: 'row-1', name: '恢复成功' }], total: 1 })
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -837,16 +837,16 @@ describe('luma crud table', () => {
     })
 
     await flushPromises()
-    expect(wrapper.find('.luma-crud-table__error').text()).toContain('列表加载失败')
+    expect(wrapper.find('.lumal-crud-table__error').text()).toContain('列表加载失败')
 
     await wrapper.find('[data-action="retry"]').trigger('click')
     await flushPromises()
-    expect(wrapper.find('.luma-crud-table__error').exists()).toBe(false)
-    expect(wrapper.findComponent(LumaSchemaTable).props('rows')).toEqual([{ id: 'row-1', name: '恢复成功' }])
+    expect(wrapper.find('.lumal-crud-table__error').exists()).toBe(false)
+    expect(wrapper.findComponent(LumalSchemaTable).props('rows')).toEqual([{ id: 'row-1', name: '恢复成功' }])
   })
 
   it('保存失败时保留弹窗并恢复可提交状态', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -861,23 +861,23 @@ describe('luma crud table', () => {
 
     api.openCreate()
     await nextTick()
-    wrapper.findAllComponents(LumaSchemaForm).at(-1)?.vm.$emit('submit', { name: '新项目' })
+    wrapper.findAllComponents(LumalSchemaForm).at(-1)?.vm.$emit('submit', { name: '新项目' })
     await flushPromises()
     await flushPromises()
 
     expect(wrapper.find('.el-dialog').exists()).toBe(true)
-    expect(wrapper.find('.luma-crud-table__dialog-error').text()).toContain('保存失败')
+    expect(wrapper.find('.lumal-crud-table__dialog-error').text()).toContain('保存失败')
     expect(api.isLoading()).toBe(false)
     expect(wrapper.emitted('operationError')).toHaveLength(1)
   })
 
   it('支持 Drawer 编辑器并转发 query、table、form 和 footer 插槽', async () => {
-    const wrapper = mount(LumaCrudTable, {
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         dataSource: {
           create: vi.fn().mockResolvedValue({}),
-          fetch: vi.fn().mockResolvedValue({ items: [{ id: 'row-1', name: 'Luma' }], total: 1 }),
+          fetch: vi.fn().mockResolvedValue({ items: [{ id: 'row-1', name: 'Lumal' }], total: 1 }),
         },
         editor: { type: 'drawer', width: '640px' },
         query: {
@@ -908,8 +908,8 @@ describe('luma crud table', () => {
 
   it('支持查询值变化防抖提交、定制导出和全屏控制器', async () => {
     const exportHandler = vi.fn()
-    const fetch = vi.fn().mockResolvedValue({ items: [{ id: 'row-1', name: 'Luma' }], total: 1 })
-    const wrapper = mount(LumaCrudTable, {
+    const fetch = vi.fn().mockResolvedValue({ items: [{ id: 'row-1', name: 'Lumal' }], total: 1 })
+    const wrapper = mount(LumalCrudTable, {
       global: { stubs: elementPlusStubs },
       props: {
         dataSource: { fetch },
@@ -930,15 +930,15 @@ describe('luma crud table', () => {
 
     await flushPromises()
     fetch.mockClear()
-    await wrapper.find('input[name="keyword"]').setValue('Luma')
+    await wrapper.find('input[name="keyword"]').setValue('Lumal')
     await new Promise(resolve => setTimeout(resolve, 1))
     await flushPromises()
-    expect(fetch).toHaveBeenCalledWith(expect.objectContaining({ query: { keyword: 'Luma' } }))
+    expect(fetch).toHaveBeenCalledWith(expect.objectContaining({ query: { keyword: 'Lumal' } }))
 
     await wrapper.find('[data-action="export"]').trigger('click')
     await flushPromises()
     expect(exportHandler).toHaveBeenCalledWith(expect.objectContaining({
-      rows: [{ id: 'row-1', name: 'Luma' }],
+      rows: [{ id: 'row-1', name: 'Lumal' }],
       selectedRows: [],
     }))
 

@@ -1,4 +1,4 @@
-import type { LumaLayoutTabItem } from '../src/layout/types'
+import type { LumalLayoutTabItem } from '../src/layout/types'
 import { describe, expect, it } from 'vitest'
 import {
   appendTab,
@@ -18,9 +18,9 @@ import {
   unpinTab,
 } from '../src/layout'
 
-type TabSeed = Partial<LumaLayoutTabItem> & Pick<LumaLayoutTabItem, 'path' | 'title'>
+type TabSeed = Partial<LumalLayoutTabItem> & Pick<LumalLayoutTabItem, 'path' | 'title'>
 
-function buildTabs(seeds: TabSeed[]): LumaLayoutTabItem[] {
+function buildTabs(seeds: TabSeed[]): LumalLayoutTabItem[] {
   return seeds.map(seed => ({
     closable: true,
     icon: undefined,
@@ -33,7 +33,7 @@ function buildTabs(seeds: TabSeed[]): LumaLayoutTabItem[] {
   }))
 }
 
-function createTabs(): LumaLayoutTabItem[] {
+function createTabs(): LumalLayoutTabItem[] {
   return buildTabs([
     { closable: false, path: '/home', pinned: true, title: '首页' },
     { path: '/work', title: '工作台' },

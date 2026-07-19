@@ -1,4 +1,4 @@
-import type { SchemaFormItem, SchemaFormModel } from '@luma/core/components'
+import type { SchemaFormItem, SchemaFormModel } from '@lumal/core/components'
 import type { UseVbenFormInput, UseVbenFormOptions, UseVbenFormReturn } from '../types'
 import { computed, reactive, shallowRef, toRef, watch } from 'vue'
 import { adaptVbenFormSchemas } from './adapter'
@@ -32,7 +32,7 @@ export function useVbenForm(options: UseVbenFormInput = {}): UseVbenFormReturn {
   const formInstance = shallowRef<unknown>()
   const model = reactive<SchemaFormModel>({})
 
-  const lumaSchemas = computed(() => adaptVbenFormSchemas(optionsRef.value.schemas))
+  const lumalSchemas = computed(() => adaptVbenFormSchemas(optionsRef.value.schemas))
 
   function getFieldsValue(): SchemaFormModel {
     return {
@@ -49,7 +49,7 @@ export function useVbenForm(options: UseVbenFormInput = {}): UseVbenFormReturn {
   }
 
   function resetFields(): void {
-    replaceModel(model, createInitialModel(lumaSchemas.value, optionsRef.value))
+    replaceModel(model, createInitialModel(lumalSchemas.value, optionsRef.value))
   }
 
   function handleSubmit(nextModel: SchemaFormModel = getFieldsValue()): void {
@@ -61,7 +61,7 @@ export function useVbenForm(options: UseVbenFormInput = {}): UseVbenFormReturn {
   }
 
   watch(
-    lumaSchemas,
+    lumalSchemas,
     (schemas) => {
       const initialModel = createInitialModel(schemas, optionsRef.value)
 
@@ -78,7 +78,7 @@ export function useVbenForm(options: UseVbenFormInput = {}): UseVbenFormReturn {
     'modelValue': getFieldsValue(),
     'onSubmit': handleSubmit,
     'onUpdate:modelValue': handleUpdateModel,
-    'schemas': lumaSchemas.value,
+    'schemas': lumalSchemas.value,
     'showActions': optionsRef.value.showActions,
     'submitText': optionsRef.value.submitText,
   }))
@@ -88,7 +88,7 @@ export function useVbenForm(options: UseVbenFormInput = {}): UseVbenFormReturn {
     {
       getFieldsValue,
       getFormInstance: () => formInstance.value,
-      getLumaSchemas: () => lumaSchemas.value,
+      getLumalSchemas: () => lumalSchemas.value,
       handleSubmit,
       handleUpdateModel,
       resetFields,

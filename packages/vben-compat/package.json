@@ -1,11 +1,11 @@
 {
-  "name": "@luma/vben-compat",
+  "name": "@lumal/vben-compat",
   "type": "module",
   "version": "0.0.1-beta",
-  "description": "Luma compatibility adapters for common Vben Admin APIs.",
+  "description": "Lumal compatibility adapters for common Vben Admin APIs.",
   "license": "MIT",
   "keywords": [
-    "luma",
+    "lumal",
     "vue",
     "vben",
     "admin",
@@ -38,6 +38,6 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@luma/core": "0.0.1-beta"
+    "@lumal/core": "0.0.1-beta"
   }
 }

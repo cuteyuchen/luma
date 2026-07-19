@@ -4,7 +4,7 @@ import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types
 import type { CockpitGridRowConfig, CockpitSide, CockpitWidgetInstance } from '../types'
 import type { DesignerPlacementSelection } from './types'
 import type { DraftWidgetLocation, UseCockpitDraftReturn } from './useCockpitDraft'
-import { LumaIcon } from '@luma/icons-vue'
+import { LumalIcon } from '@lumal/icons-vue'
 import { ElButton, ElInputNumber, ElMessage, ElSwitch, ElTooltip } from 'element-plus'
 import { computed, nextTick } from 'vue'
 import CockpitWidgetDropZone from './CockpitWidgetDropZone.vue'
@@ -173,18 +173,18 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
 </script>
 
 <template>
-  <section class="luma-cockpit-designer__region" :data-side="side">
+  <section class="lumal-cockpit-designer__region" :data-side="side">
     <header
-      class="luma-cockpit-designer__region-head"
+      class="lumal-cockpit-designer__region-head"
       data-role="region-tools"
       role="group"
       :aria-label="`${side === 'left' ? '左侧' : '右侧'}区域布局设置`"
     >
-      <div class="luma-cockpit-designer__region-head-meta">
+      <div class="lumal-cockpit-designer__region-head-meta">
         <strong>{{ side === 'left' ? '左侧区域' : '右侧区域' }}</strong>
         <span>调整网格结构与区域宽</span>
       </div>
-      <label class="luma-cockpit-designer__field">
+      <label class="lumal-cockpit-designer__field">
         <span>行</span>
         <ElInputNumber
           :model-value="region?.rows.length ?? 1"
@@ -193,7 +193,7 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
           @change="resize($event ?? 1, region?.columns.length ?? 1)"
         />
       </label>
-      <label class="luma-cockpit-designer__field">
+      <label class="lumal-cockpit-designer__field">
         <span>列</span>
         <ElInputNumber
           :model-value="region?.columns.length ?? 1"
@@ -202,7 +202,7 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
           @change="resize(region?.rows.length ?? 1, $event ?? 1)"
         />
       </label>
-      <label class="luma-cockpit-designer__field luma-cockpit-designer__region-width-field">
+      <label class="lumal-cockpit-designer__field lumal-cockpit-designer__region-width-field">
         <span>区域宽</span>
         <ElInputNumber
           :model-value="region?.width ?? 0"
@@ -214,21 +214,21 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
       </label>
     </header>
 
-    <div v-if="region" class="luma-cockpit-designer__grid-rows">
+    <div v-if="region" class="lumal-cockpit-designer__grid-rows">
       <section
         v-for="(row, rowIndex) in region.rows"
         :key="row.id"
-        class="luma-cockpit-designer__grid-row"
+        class="lumal-cockpit-designer__grid-row"
         :style="{ flex: `${row.height} 1 0` }"
       >
         <header
-          class="luma-cockpit-designer__grid-row-head"
+          class="lumal-cockpit-designer__grid-row-head"
           data-role="row-tools"
           role="group"
           :aria-label="`${side === 'left' ? '左侧' : '右侧'}第 ${rowIndex + 1} 行布局设置`"
         >
           <strong>第 {{ rowIndex + 1 }} 行</strong>
-          <label class="luma-cockpit-designer__field">
+          <label class="lumal-cockpit-designer__field">
             <span>行高</span>
             <ElInputNumber
               :model-value="row.height"
@@ -240,13 +240,13 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
             />
             <em>%</em>
           </label>
-          <label class="luma-cockpit-designer__tabs-switch">
+          <label class="lumal-cockpit-designer__tabs-switch">
             <span>合并列</span>
             <ElSwitch :model-value="row.mode === 'tabs'" @change="setTabs(row, Boolean($event))" />
           </label>
         </header>
 
-        <div v-if="row.mode === 'grid'" class="luma-cockpit-designer__grid-cells" :style="{ gridTemplateColumns: columnTemplate() }">
+        <div v-if="row.mode === 'grid'" class="lumal-cockpit-designer__grid-cells" :style="{ gridTemplateColumns: columnTemplate() }">
           <CockpitWidgetDropZone
             v-for="cell in row.cells"
             :key="cell.id"
@@ -256,52 +256,52 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
           >
             <article
               v-if="cell.widget"
-              class="luma-cockpit-designer__placed-widget luma-cockpit-designer__drag-item"
+              class="lumal-cockpit-designer__placed-widget lumal-cockpit-designer__drag-item"
               :class="{ 'is-keyboard-selected': isSelectedLocation(locationForCell(row, cell.id)) }"
               :data-cockpit-drag-source="JSON.stringify(locationForCell(row, cell.id))"
               data-role="placed-widget"
             >
               <!-- 与 Tab 多模块一致：名称与操作区固定在顶部 -->
-              <header class="luma-cockpit-designer__placed-widget-header">
+              <header class="lumal-cockpit-designer__placed-widget-header">
                 <span>{{ cell.widget.title ?? cell.widget.type }}</span>
-                <div class="luma-cockpit-designer__placed-widget-actions">
+                <div class="lumal-cockpit-designer__placed-widget-actions">
                   <ElTooltip content="选择并移动模块" placement="top">
                     <ElButton
-                      class="luma-cockpit-designer__widget-action"
+                      class="lumal-cockpit-designer__widget-action"
                       data-role="select-move-source"
                       :aria-label="`选择移动模块 ${cell.widget.title ?? cell.widget.type}`"
                       :aria-pressed="isSelectedLocation(locationForCell(row, cell.id))"
                       @mousedown.stop
                       @click.stop="selectPlaced(locationForCell(row, cell.id), cell.widget)"
                     >
-                      <LumaIcon name="luma:more" :size="12" />
+                      <LumalIcon name="lumal:more" :size="12" />
                     </ElButton>
                   </ElTooltip>
                   <ElTooltip v-if="canUseAsTarget(locationForCell(row, cell.id))" content="移动并替换到此槽位" placement="top">
                     <ElButton
-                      class="luma-cockpit-designer__widget-action"
+                      class="lumal-cockpit-designer__widget-action"
                       data-role="keyboard-target"
                       :aria-label="`移动并替换 ${cell.widget.title ?? cell.widget.type}`"
                       @mousedown.stop
                       @click.stop="placeSelection(locationForCell(row, cell.id))"
                     >
-                      <LumaIcon name="luma:plus" :size="12" />
+                      <LumalIcon name="lumal:plus" :size="12" />
                     </ElButton>
                   </ElTooltip>
                   <ElTooltip content="移除模块" placement="top">
                     <ElButton
                       type="danger"
-                      class="luma-cockpit-designer__widget-action"
+                      class="lumal-cockpit-designer__widget-action"
                       data-role="remove-widget"
                       :aria-label="`移除模块 ${cell.widget.title ?? cell.widget.type}`"
                       @click="removeWidget(locationForCell(row, cell.id))"
                     >
-                      <LumaIcon name="luma:close" :size="12" />
+                      <LumalIcon name="lumal:close" :size="12" />
                     </ElButton>
                   </ElTooltip>
                 </div>
               </header>
-              <div class="luma-cockpit-designer__placed-widget-body">
+              <div class="lumal-cockpit-designer__placed-widget-body">
                 <CockpitWidgetPreview
                   v-if="definitionFor(cell.widget.type)"
                   :cockpit-id="cockpitId"
@@ -310,14 +310,14 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
                   :layout-id="draft.activeLayout.value?.id ?? ''"
                   :message-bus="previewMessageBus"
                 />
-                <div v-else class="luma-cockpit-designer__widget-preview-fallback">
+                <div v-else class="lumal-cockpit-designer__widget-preview-fallback">
                   未注册模块
                 </div>
               </div>
             </article>
             <ElButton
               v-else
-              class="luma-cockpit-designer__empty-cell"
+              class="lumal-cockpit-designer__empty-cell"
               plain
               :disabled="!placementSelection"
               data-role="keyboard-target"
@@ -330,25 +330,25 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
 
         <CockpitWidgetDropZone
           v-else
-          class="luma-cockpit-designer__tab-row"
+          class="lumal-cockpit-designer__tab-row"
           allow-multiple
-          drag-handle=".luma-cockpit-designer__tab-move"
-          sortable-target=".luma-cockpit-designer__tab-list"
+          drag-handle=".lumal-cockpit-designer__tab-move"
+          sortable-target=".lumal-cockpit-designer__tab-list"
           :target="locationForTabs(row)"
           @drop="handleDrop(locationForTabs(row), $event)"
         >
-          <section class="luma-cockpit-designer__tab-card" :class="{ 'is-empty': !row.widgets.length }">
-            <header class="luma-cockpit-designer__tab-list" role="tablist" :aria-label="`${side === 'left' ? '左侧' : '右侧'}第 ${rowIndex + 1} 行模块`">
+          <section class="lumal-cockpit-designer__tab-card" :class="{ 'is-empty': !row.widgets.length }">
+            <header class="lumal-cockpit-designer__tab-list" role="tablist" :aria-label="`${side === 'left' ? '左侧' : '右侧'}第 ${rowIndex + 1} 行模块`">
               <div
                 v-for="(widget, widgetIndex) in row.widgets"
                 :key="widget.id"
-                class="luma-cockpit-designer__tab-item luma-cockpit-designer__drag-item"
+                class="lumal-cockpit-designer__tab-item lumal-cockpit-designer__drag-item"
                 :class="{ 'is-active': row.activeWidgetId === widget.id, 'is-keyboard-selected': isSelectedLocation(locationForTabs(row, widget.id)) }"
                 :data-cockpit-drag-source="JSON.stringify(locationForTabs(row, widget.id))"
               >
                 <ElButton
                   text
-                  class="luma-cockpit-designer__tab-widget-title"
+                  class="lumal-cockpit-designer__tab-widget-title"
                   role="tab"
                   :id="`designer-tab-${widget.id}`"
                   :aria-controls="`designer-tabpanel-${row.id}`"
@@ -361,42 +361,42 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
                 </ElButton>
                 <ElTooltip content="拖拽或选择移动 Tab" placement="top">
                   <ElButton
-                    class="luma-cockpit-designer__tab-action luma-cockpit-designer__tab-move"
+                    class="lumal-cockpit-designer__tab-action lumal-cockpit-designer__tab-move"
                     data-role="select-move-source"
                     :aria-label="`选择移动 Tab ${widget.title ?? widget.type}`"
                     :aria-pressed="isSelectedLocation(locationForTabs(row, widget.id))"
                     @mousedown.stop
                     @click.stop="selectPlaced(locationForTabs(row, widget.id), widget)"
                   >
-                    <LumaIcon name="luma:more" :size="11" />
+                    <LumalIcon name="lumal:more" :size="11" />
                   </ElButton>
                 </ElTooltip>
                 <ElTooltip content="移除 Tab" placement="top">
                   <ElButton
                     type="danger"
-                    class="luma-cockpit-designer__tab-action"
+                    class="lumal-cockpit-designer__tab-action"
                     data-role="remove-widget"
                     :aria-label="`移除 Tab 模块 ${widget.title ?? widget.type}`"
                     @mousedown.stop
                     @click.stop="removeWidget(locationForTabs(row, widget.id))"
                   >
-                    <LumaIcon name="luma:close" :size="11" />
+                    <LumalIcon name="lumal:close" :size="11" />
                   </ElButton>
                 </ElTooltip>
               </div>
               <ElTooltip v-if="row.widgets.length && placementSelection" content="移入此 Tab 行" placement="top">
                 <ElButton
-                  class="luma-cockpit-designer__tab-target"
+                  class="lumal-cockpit-designer__tab-target"
                   data-role="keyboard-target"
                   aria-label="移入此 Tab 行"
                   @click="placeSelection(locationForTabs(row))"
                 >
-                  <LumaIcon name="luma:plus" :size="12" />
+                  <LumalIcon name="lumal:plus" :size="12" />
                 </ElButton>
               </ElTooltip>
             </header>
             <div
-              class="luma-cockpit-designer__tab-preview"
+              class="lumal-cockpit-designer__tab-preview"
               role="tabpanel"
               :id="`designer-tabpanel-${row.id}`"
               :aria-labelledby="activeWidgetFor(row) ? `designer-tab-${activeWidgetFor(row)!.id}` : undefined"
@@ -411,13 +411,13 @@ async function handleTabKeydown(row: CockpitGridRowConfig, index: number, event:
                   :layout-id="draft.activeLayout.value?.id ?? ''"
                   :message-bus="previewMessageBus"
                 />
-                <div v-else class="luma-cockpit-designer__widget-preview-fallback">
+                <div v-else class="lumal-cockpit-designer__widget-preview-fallback">
                   未注册模块
                 </div>
               </template>
               <ElButton
                 v-else
-                class="luma-cockpit-designer__empty-cell"
+                class="lumal-cockpit-designer__empty-cell"
                 plain
                 :disabled="!placementSelection"
                 data-role="keyboard-target"

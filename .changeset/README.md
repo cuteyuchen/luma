@@ -1,6 +1,6 @@
 # Changesets
 
-Changesets records release intent for Luma's public workspace packages. Private applications are neither versioned nor published.
+Changesets records release intent for Lumal's public workspace packages. Private applications are neither versioned nor published.
 
 - `pnpm changeset`: create a changeset for a user-facing package change.
 - `pnpm changeset:status`: preview pending package version changes.

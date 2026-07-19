@@ -1,4 +1,4 @@
-import type { LumaLayoutTabItem } from '../types'
+import type { LumalLayoutTabItem } from '../types'
 
 export interface AppendTabOptions {
   /** 最大标签数，0 表示不限制。 */
@@ -7,7 +7,7 @@ export interface AppendTabOptions {
 
 /***********************分组工具*********************/
 /** 固定标签始终排在左侧，且不会被批量关闭或最大数量淘汰。 */
-export function sortTabsByPinned(tabs: LumaLayoutTabItem[]): LumaLayoutTabItem[] {
+export function sortTabsByPinned(tabs: LumalLayoutTabItem[]): LumalLayoutTabItem[] {
   return [...tabs].sort((a, b) => {
     const ap = a.pinned === true ? 1 : 0
     const bp = b.pinned === true ? 1 : 0
@@ -22,10 +22,10 @@ export function sortTabsByPinned(tabs: LumaLayoutTabItem[]): LumaLayoutTabItem[]
  * - 超过 maxCount 时，从最早的可关闭非固定标签开始移除（保留固定标签和当前活动标签）。
  */
 export function appendTab(
-  tabs: LumaLayoutTabItem[],
-  tab: LumaLayoutTabItem,
+  tabs: LumalLayoutTabItem[],
+  tab: LumalLayoutTabItem,
   options: AppendTabOptions = {},
-): LumaLayoutTabItem[] {
+): LumalLayoutTabItem[] {
   const exists = tabs.some(item => item.path === tab.path)
   const nextTabs = exists ? [...tabs] : [...tabs, tab]
   const maxCount = options.maxCount ?? 0
@@ -58,10 +58,10 @@ export function appendTab(
  * 受保护标签数量超过限制时允许暂时超限。
  */
 export function clampTabCount(
-  tabs: LumaLayoutTabItem[],
+  tabs: LumalLayoutTabItem[],
   maxCount: number,
   activePath: string,
-): LumaLayoutTabItem[] {
+): LumalLayoutTabItem[] {
   if (maxCount <= 0 || tabs.length <= maxCount) {
     return [...tabs]
   }
@@ -85,13 +85,13 @@ export function clampTabCount(
 
 /***********************单页与批量关闭*********************/
 /** 关闭指定标签，返回新标签列表；不可关闭或固定的标签会被忽略。 */
-export function closeTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function closeTab(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   return tabs.filter(
     item => !(item.path === path && item.closable !== false && item.pinned !== true),
   )
 }
 
-export function closeTabsLeft(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function closeTabsLeft(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   const index = tabs.findIndex(tab => tab.path === path)
   if (index <= 0) {
     return [...tabs]
@@ -102,7 +102,7 @@ export function closeTabsLeft(tabs: LumaLayoutTabItem[], path: string): LumaLayo
   )
 }
 
-export function closeTabsRight(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function closeTabsRight(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   const index = tabs.findIndex(tab => tab.path === path)
   if (index === -1 || index >= tabs.length - 1) {
     return [...tabs]
@@ -113,11 +113,11 @@ export function closeTabsRight(tabs: LumaLayoutTabItem[], path: string): LumaLay
   )
 }
 
-export function closeOtherTabs(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function closeOtherTabs(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   return tabs.filter(tab => tab.path === path || tab.closable === false || tab.pinned === true)
 }
 
-export function closeAllTabs(tabs: LumaLayoutTabItem[]): LumaLayoutTabItem[] {
+export function closeAllTabs(tabs: LumalLayoutTabItem[]): LumalLayoutTabItem[] {
   // 至少保留固定标签；没有固定标签时保留首个标签。
   const pinned = tabs.filter(tab => tab.closable === false || tab.pinned === true)
   if (pinned.length > 0) {
@@ -131,7 +131,7 @@ export function closeAllTabs(tabs: LumaLayoutTabItem[]): LumaLayoutTabItem[] {
  * 固定标签：将指定标签置为 pinned=true 并移到左侧固定组。
  * 路由声明 closable=false 的标签原本就不可关闭，等价于永久固定。
  */
-export function pinTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function pinTab(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   let found = false
   const next = tabs.map((tab) => {
     if (tab.path === path) {
@@ -147,7 +147,7 @@ export function pinTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabIt
 /**
  * 取消固定：仅当标签是用户可取消固定的（非路由声明 closable=false）时才取消。
  */
-export function unpinTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTabItem[] {
+export function unpinTab(tabs: LumalLayoutTabItem[], path: string): LumalLayoutTabItem[] {
   let found = false
   const next = tabs.map((tab) => {
     if (tab.path === path && tab.closable !== false) {
@@ -162,17 +162,17 @@ export function unpinTab(tabs: LumaLayoutTabItem[], path: string): LumaLayoutTab
 }
 
 /** 标签是否为路由声明的永久固定标签（不可取消固定）。 */
-export function isPermanentlyPinned(tab: LumaLayoutTabItem): boolean {
+export function isPermanentlyPinned(tab: LumalLayoutTabItem): boolean {
   return tab.closable === false
 }
 
 /** 标签是否可被用户取消固定。 */
-export function canUnpinTab(tab: LumaLayoutTabItem): boolean {
+export function canUnpinTab(tab: LumalLayoutTabItem): boolean {
   return tab.pinned === true && tab.closable !== false
 }
 
 /** 标签是否可被用户固定（非永久固定且当前未固定）。 */
-export function canPinTab(tab: LumaLayoutTabItem): boolean {
+export function canPinTab(tab: LumalLayoutTabItem): boolean {
   return tab.pinned !== true && tab.closable !== false
 }
 
@@ -208,7 +208,7 @@ export function pushVisitHistory(
  * tabs 为已经移除被关闭标签后的剩余列表；priorClosedIndex 为被关闭标签在原始列表中的位置。
  */
 export function resolveNextActivePath(
-  tabs: LumaLayoutTabItem[],
+  tabs: LumalLayoutTabItem[],
   closedPath: string,
   history: string[] = [],
   options: { useHistory?: boolean, priorClosedIndex?: number } = {},
@@ -252,10 +252,10 @@ export function resolveNextActivePath(
  * 同组内按目标位置插入。
  */
 export function reorderTab(
-  tabs: LumaLayoutTabItem[],
+  tabs: LumalLayoutTabItem[],
   fromPath: string,
   toPath: string,
-): LumaLayoutTabItem[] {
+): LumalLayoutTabItem[] {
   const fromIndex = tabs.findIndex(tab => tab.path === fromPath)
   const toIndex = tabs.findIndex(tab => tab.path === toPath)
 
@@ -282,7 +282,7 @@ export function reorderTab(
 /***********************标签缓存 keepAlive 名单*********************/
 /** 仅当开启缓存时返回需要缓存的路径集合。 */
 export function resolveCachedTabPaths(
-  tabs: LumaLayoutTabItem[],
+  tabs: LumalLayoutTabItem[],
   options: { enable?: boolean } = {},
 ): string[] {
   if (options.enable === false) {

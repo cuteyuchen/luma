@@ -5,13 +5,13 @@ import type {
   CreateTopMenusOptions,
   FindAccessibleMenuOptions,
   GlobComponentResolverOptions,
-  LumaMenuBadgeTone,
-  LumaMenuBadgeType,
-  LumaMenuInputRecord,
-  LumaMenuRecord,
-  LumaRouteAuthority,
-  LumaRouteMeta,
-  LumaRouteRecord,
+  LumalMenuBadgeTone,
+  LumalMenuBadgeType,
+  LumalMenuInputRecord,
+  LumalMenuRecord,
+  LumalRouteAuthority,
+  LumalRouteMeta,
+  LumalRouteRecord,
   MenuNode,
   MenuRecordFieldNames,
   MenuRouteConflictKind,
@@ -35,15 +35,15 @@ export type {
   CreateTopMenusOptions,
   FindAccessibleMenuOptions,
   GlobComponentResolverOptions,
-  LumaMenuBadgeTone,
-  LumaMenuBadgeType,
-  LumaMenuComponent,
-  LumaMenuInputRecord,
-  LumaMenuRecord,
-  LumaRouteAuthority,
-  LumaRouteMeta,
-  LumaRouteRecord,
-  LumaStaticMenuRecord,
+  LumalMenuBadgeTone,
+  LumalMenuBadgeType,
+  LumalMenuComponent,
+  LumalMenuInputRecord,
+  LumalMenuRecord,
+  LumalRouteAuthority,
+  LumalRouteMeta,
+  LumalRouteRecord,
+  LumalStaticMenuRecord,
   MenuNode,
   MenuNodeId,
   MenuRecordFieldNames,
@@ -73,22 +73,22 @@ interface InternalMenuNode extends Omit<MenuNode, 'children'> {
 
 /***********************标准字段归一化*********************/
 export function normalizeMenuRecords(
-  records: LumaMenuInputRecord[],
+  records: LumalMenuInputRecord[],
   options: NormalizeMenuRecordsOptions = {},
 ): NormalizedMenuNode[] {
   const { fieldNames } = options
   const standardRecords = fieldNames
     ? records.map(record => mapRawRecord(record as Record<string, unknown>, fieldNames))
-    : (records as LumaMenuRecord[])
+    : (records as LumalMenuRecord[])
 
   return normalizeMenuNodes(standardRecords.map(record => convertMenuRecord(record)))
 }
 
 /**
- * 按 fieldNames 把非标准菜单记录映射为标准 LumaMenuRecord。
+ * 按 fieldNames 把非标准菜单记录映射为标准 LumalMenuRecord。
  * 未配置的字段回退到标准位置，children 递归复用同一份映射。
  */
-function mapRawRecord(raw: Record<string, unknown>, fieldNames: MenuRecordFieldNames): LumaMenuRecord {
+function mapRawRecord(raw: Record<string, unknown>, fieldNames: MenuRecordFieldNames): LumalMenuRecord {
   const pick = (key: keyof MenuRecordFieldNames, fallback: unknown): unknown => {
     const source = fieldNames[key]
 
@@ -99,8 +99,8 @@ function mapRawRecord(raw: Record<string, unknown>, fieldNames: MenuRecordFieldN
     return fallback
   }
 
-  const baseMeta = (raw.meta as LumaRouteMeta | undefined) ?? {}
-  const meta: LumaRouteMeta = { ...baseMeta }
+  const baseMeta = (raw.meta as LumalRouteMeta | undefined) ?? {}
+  const meta: LumalRouteMeta = { ...baseMeta }
   assignDefined(meta, 'activeMenu', pick('activeMenu', baseMeta.activeMenu))
   assignDefined(meta, 'badge', pick('badge', baseMeta.badge))
   assignDefined(meta, 'badgeType', pick('badgeType', baseMeta.badgeType))
@@ -114,7 +114,7 @@ function mapRawRecord(raw: Record<string, unknown>, fieldNames: MenuRecordFieldN
   assignDefined(meta, 'hideInBreadcrumb', pick('hideInBreadcrumb', baseMeta.hideInBreadcrumb))
   assignDefined(meta, 'keepAlive', pick('keepAlive', baseMeta.keepAlive))
 
-  const record: LumaMenuRecord = {
+  const record: LumalMenuRecord = {
     meta,
     path: (pick('path', raw.path) as string | undefined) ?? '',
   }
@@ -147,13 +147,13 @@ function mapRawRecord(raw: Record<string, unknown>, fieldNames: MenuRecordFieldN
   return record
 }
 
-function assignDefined(target: LumaRouteMeta, key: string, value: unknown): void {
+function assignDefined(target: LumalRouteMeta, key: string, value: unknown): void {
   if (value !== undefined) {
     target[key] = value
   }
 }
 
-function convertMenuRecord(record: LumaMenuRecord): MenuNode {
+function convertMenuRecord(record: LumalMenuRecord): MenuNode {
   const meta = record.meta ?? {}
   const title = resolveRouteTitle(record, meta)
   const name = record.name ?? createRouteName(record.path)
@@ -163,10 +163,10 @@ function convertMenuRecord(record: LumaMenuRecord): MenuNode {
   const externalLink = record.externalLink
     ?? (typeof meta.externalLink === 'string' ? meta.externalLink : undefined)
   const badgeType = meta.badgeType === 'dot' || meta.badgeType === 'text'
-    ? meta.badgeType as LumaMenuBadgeType
+    ? meta.badgeType as LumalMenuBadgeType
     : undefined
   const badgeTone = ['primary', 'success', 'warning', 'danger', 'info'].includes(String(meta.badgeTone))
-    ? meta.badgeTone as LumaMenuBadgeTone
+    ? meta.badgeTone as LumalMenuBadgeTone
     : undefined
 
   return {
@@ -193,7 +193,7 @@ function convertMenuRecord(record: LumaMenuRecord): MenuNode {
   } as MenuNode
 }
 
-function resolveRouteTitle(record: LumaMenuRecord, meta: LumaRouteMeta): string {
+function resolveRouteTitle(record: LumalMenuRecord, meta: LumalRouteMeta): string {
   if (typeof meta.title === 'string' && meta.title) {
     return meta.title
   }
@@ -201,7 +201,7 @@ function resolveRouteTitle(record: LumaMenuRecord, meta: LumaRouteMeta): string 
   return record.name ?? record.path
 }
 
-function normalizePermissionRequirement(value: LumaRouteAuthority | undefined): string[] {
+function normalizePermissionRequirement(value: LumalRouteAuthority | undefined): string[] {
   if (Array.isArray(value)) {
     return value.filter(Boolean)
   }
@@ -298,15 +298,15 @@ function sortMenuNodes(nodes: InternalMenuNode[]): InternalMenuNode[] {
 export function createRouteRecords(
   nodes: NormalizedMenuNode[],
   options: CreateRouteRecordsOptions = {},
-): LumaRouteRecord[] {
+): LumalRouteRecord[] {
   return nodes.map(node => createRouteRecord(node, options))
 }
 
 function createRouteRecord(
   node: NormalizedMenuNode,
   options: CreateRouteRecordsOptions,
-): LumaRouteRecord {
-  const route: LumaRouteRecord = {
+): LumalRouteRecord {
+  const route: LumalRouteRecord = {
     meta: {
       ...node.meta,
       permissions: node.permissions,
@@ -455,14 +455,14 @@ export function createRouteRegistry(router: RouteRegistryRouterLike): RouteRegis
   const registeredNames: string[] = []
   const removeRoutes: Array<() => void> = []
 
-  function collectRouteNames(route: LumaRouteRecord): string[] {
+  function collectRouteNames(route: LumalRouteRecord): string[] {
     return [
       route.name,
       ...(route.children?.flatMap(collectRouteNames) ?? []),
     ]
   }
 
-  function register(routes: LumaRouteRecord[]): void {
+  function register(routes: LumalRouteRecord[]): void {
     for (const route of routes) {
       if (route.name && router.hasRoute(route.name)) {
         continue
@@ -577,7 +577,7 @@ function createRouteName(value: string): string {
 /***********************统一菜单路由运行时*********************/
 interface MenuRouteState {
   menus: NormalizedMenuNode[]
-  routes: LumaRouteRecord[]
+  routes: LumalRouteRecord[]
 }
 
 interface MenuRouteIdentity {
@@ -798,7 +798,7 @@ function prepareMenuRouteState(
 
 function protectStaticComponentLoaders(
   menus: NormalizedMenuNode[],
-  routes: LumaRouteRecord[],
+  routes: LumalRouteRecord[],
   options: CreateMenuRouteRuntimeOptions,
 ): void {
   menus.forEach((menu, index) => {
@@ -926,7 +926,7 @@ function cloneRootItems<T>(items: T[]): T[] {
 }
 
 function assertMenuInputPaths(
-  records: LumaMenuInputRecord[],
+  records: LumalMenuInputRecord[],
   normalizeOptions: NormalizeMenuRecordsOptions | undefined,
   source: MenuRouteSource,
 ): void {
@@ -950,7 +950,7 @@ function assertMenuInputPaths(
 
     const children = childrenField in raw ? raw[childrenField] : raw.children
     if (Array.isArray(children)) {
-      assertMenuInputPaths(children as LumaMenuInputRecord[], normalizeOptions, source)
+      assertMenuInputPaths(children as LumalMenuInputRecord[], normalizeOptions, source)
     }
   }
 }
@@ -963,7 +963,7 @@ export function createMenuRouteRuntime(options: CreateMenuRouteRuntimeOptions): 
   const staticRegistry = createRouteRegistry(options.router)
   const remoteRegistry = createRouteRegistry(options.router)
   const emptyState = (): MenuRouteState => ({ menus: [], routes: [] })
-  const staticMenuInputs = (options.staticMenus ?? []) as unknown as LumaMenuInputRecord[]
+  const staticMenuInputs = (options.staticMenus ?? []) as unknown as LumalMenuInputRecord[]
   assertMenuInputPaths(staticMenuInputs, undefined, 'static')
   let staticState = prepareMenuRouteState(
     normalizeMenuRecords(staticMenuInputs),
@@ -1032,7 +1032,7 @@ export function createMenuRouteRuntime(options: CreateMenuRouteRuntimeOptions): 
 
     const currentGeneration = loadGeneration
     const request = (async () => {
-      let records: LumaMenuInputRecord[]
+      let records: LumalMenuInputRecord[]
       try {
         records = await options.loadRemoteMenus!()
       }

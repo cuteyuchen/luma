@@ -95,10 +95,10 @@ onMounted(() => {
     return
   sortable = Sortable.create(sortableElement, {
     animation: 160,
-    group: { name: 'luma-cockpit-designer-modules', pull: true, put: true },
+    group: { name: 'lumal-cockpit-designer-modules', pull: true, put: true },
     handle: props.dragHandle || undefined,
     sort: props.allowMultiple,
-    draggable: '.luma-cockpit-designer__drag-item',
+    draggable: '.lumal-cockpit-designer__drag-item',
     ghostClass: 'is-drag-ghost',
     chosenClass: 'is-drag-chosen',
     onMove: canMove,
@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="zoneRef" class="luma-cockpit-designer__drop-zone" :class="{ 'is-tabs': allowMultiple }">
+  <div ref="zoneRef" class="lumal-cockpit-designer__drop-zone" :class="{ 'is-tabs': allowMultiple }">
     <slot />
   </div>
 </template>

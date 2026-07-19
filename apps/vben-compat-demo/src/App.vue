@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { SchemaFormModel, SchemaTableRow } from '@luma/core/components'
+import type { SchemaFormModel, SchemaTableRow } from '@lumal/core/components'
 import {
-  LumaCrudTable,
-  LumaIcon,
-  LumaSchemaForm,
-} from '@luma/core/components'
+  LumalCrudTable,
+  LumalIcon,
+  LumalSchemaForm,
+} from '@lumal/core/components'
 import {
   useVbenForm,
   useVbenVxeGrid,
-} from '@luma/vben-compat'
+} from '@lumal/vben-compat'
 import { shallowRef } from 'vue'
 
 /***********************示例数据*********************/
 const users: SchemaTableRow[] = [
   {
     id: 1,
-    name: 'Luma',
+    name: 'Lumal',
     role: 'admin',
     status: 'enabled',
   },
@@ -38,7 +38,7 @@ const formMessage = shallowRef('等待提交兼容表单')
 
 const [, formApi] = useVbenForm({
   model: {
-    keyword: 'Luma',
+    keyword: 'Lumal',
     status: 'enabled',
   },
   schemas: [
@@ -165,13 +165,13 @@ function handleFormModelUpdate(model: SchemaFormModel): void {
 <template>
   <main class="compat-demo">
     <section class="compat-demo__header">
-      <LumaIcon name="compat:vben" color="#0f766e" :size="40" />
+      <LumalIcon name="compat:vben" color="#0f766e" :size="40" />
       <div class="compat-demo__heading">
         <h1 class="compat-demo__title">
           Vben 兼容迁移示例
         </h1>
         <p class="compat-demo__description">
-          使用 @luma/vben-compat 驱动 Luma 原生组件。
+          使用 @lumal/vben-compat 驱动 Lumal 原生组件。
         </p>
       </div>
     </section>
@@ -180,7 +180,7 @@ function handleFormModelUpdate(model: SchemaFormModel): void {
       <h2 class="compat-demo__section-title">
         useVbenForm
       </h2>
-      <LumaSchemaForm
+      <LumalSchemaForm
         v-bind="formApi.schemaFormProps.value"
         @update:model-value="handleFormModelUpdate"
       />
@@ -190,13 +190,13 @@ function handleFormModelUpdate(model: SchemaFormModel): void {
     </section>
 
     <section class="compat-demo__panel compat-demo__panel--wide">
-      <LumaCrudTable v-bind="gridApi.crudTableProps.value">
+      <LumalCrudTable v-bind="gridApi.crudTableProps.value">
         <template #default>
           <span class="compat-demo__message">
             {{ gridMessage }}
           </span>
         </template>
-      </LumaCrudTable>
+      </LumalCrudTable>
     </section>
   </main>
 </template>

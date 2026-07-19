@@ -1,11 +1,11 @@
-import LumaIcon from './components/LumaIcon.vue'
-import LumaIconPicker from './components/LumaIconPicker.vue'
-import LumaIconPickerDialog from './components/LumaIconPickerDialog.vue'
+import LumalIcon from './components/LumalIcon.vue'
+import LumalIconPicker from './components/LumalIconPicker.vue'
+import LumalIconPickerDialog from './components/LumalIconPickerDialog.vue'
 
 export {
-  LumaIcon,
-  LumaIconPicker,
-  LumaIconPickerDialog,
+  LumalIcon,
+  LumalIconPicker,
+  LumalIconPickerDialog,
 }
 export { useIconRegistry } from './composables/useIconRegistry'
 export type { UseIconRegistryReturn } from './composables/useIconRegistry'

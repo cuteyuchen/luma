@@ -1,15 +1,15 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  LumaActiveRingChart,
-  LumaBorderBox,
-  LumaCapsuleChart,
-  LumaConicalColumnChart,
-  LumaDecoration,
-  LumaDigitalFlop,
-  LumaLoading,
-  LumaPercentPond,
-  LumaWaterLevelPond,
+  LumalActiveRingChart,
+  LumalBorderBox,
+  LumalCapsuleChart,
+  LumalConicalColumnChart,
+  LumalDecoration,
+  LumalDigitalFlop,
+  LumalLoading,
+  LumalPercentPond,
+  LumalWaterLevelPond,
 } from '../src'
 
 vi.mock('echarts', () => ({
@@ -37,28 +37,28 @@ afterEach(() => {
 
 describe('visual primitives', () => {
   it('覆盖 13 种边框并保留内容插槽', async () => {
-    const wrapper = mount(LumaBorderBox, { props: { variant: 1 }, slots: { default: '驾驶舱内容' } })
+    const wrapper = mount(LumalBorderBox, { props: { variant: 1 }, slots: { default: '驾驶舱内容' } })
     for (let variant = 1; variant <= 13; variant += 1) {
       await wrapper.setProps({ variant })
-      expect(wrapper.get('.luma-border-box').attributes('data-variant')).toBe(String(variant))
+      expect(wrapper.get('.lumal-border-box').attributes('data-variant')).toBe(String(variant))
     }
-    expect(wrapper.get('.luma-border-box__content').text()).toBe('驾驶舱内容')
+    expect(wrapper.get('.lumal-border-box__content').text()).toBe('驾驶舱内容')
   })
 
   it('覆盖 12 种装饰并应用颜色、方向和时长', async () => {
-    const wrapper = mount(LumaDecoration, {
+    const wrapper = mount(LumalDecoration, {
       props: { colors: ['#123456', '#abcdef'], duration: 1200, reverse: true, variant: 1 },
     })
     for (let variant = 1; variant <= 12; variant += 1) {
       await wrapper.setProps({ variant })
-      expect(wrapper.get('.luma-decoration').attributes('data-variant')).toBe(String(variant))
+      expect(wrapper.get('.lumal-decoration').attributes('data-variant')).toBe(String(variant))
     }
     expect(wrapper.classes()).toContain('is-reverse')
-    expect(wrapper.attributes('style')).toContain('--luma-datav-duration: 1200ms')
+    expect(wrapper.attributes('style')).toContain('--lumal-datav-duration: 1200ms')
   })
 
   it('loading 支持状态、尺寸和样式变体', () => {
-    const wrapper = mount(LumaLoading, { props: { label: '同步完成', size: 32, status: 'success', variant: 'pulse' } })
+    const wrapper = mount(LumalLoading, { props: { label: '同步完成', size: 32, status: 'success', variant: 'pulse' } })
     expect(wrapper.attributes('role')).toBe('status')
     expect(wrapper.classes()).toContain('is-success')
     expect(wrapper.attributes('data-variant')).toBe('pulse')
@@ -68,7 +68,7 @@ describe('visual primitives', () => {
 
 describe('numeric components', () => {
   it('digital flop 支持精度、前后缀和格式化函数', async () => {
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: { duration: 0, precision: 1, prefix: '¥', suffix: '万', value: 12.34 },
     })
     expect(wrapper.text()).toBe('¥12.3万')
@@ -88,7 +88,7 @@ describe('numeric components', () => {
     }))
     vi.stubGlobal('cancelAnimationFrame', cancel)
 
-    const wrapper = mount(LumaDigitalFlop, { props: { duration: 100, precision: 0, value: 0 } })
+    const wrapper = mount(LumalDigitalFlop, { props: { duration: 100, precision: 0, value: 0 } })
     await wrapper.setProps({ value: 100 })
     expect(callbacks.has(1)).toBe(true)
 
@@ -119,7 +119,7 @@ describe('numeric components', () => {
     }))
     vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => callbacks.delete(id)))
 
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: { animationCurve: 'easeInQuad', duration: 100, precision: 0, value: 0 },
     })
     await wrapper.setProps({ value: 100 })
@@ -135,7 +135,7 @@ describe('numeric components', () => {
   })
 
   it('percent pond 将输入限制在 0 到 100 并支持格式化', async () => {
-    const wrapper = mount(LumaPercentPond, { props: { value: 125 } })
+    const wrapper = mount(LumalPercentPond, { props: { value: 125 } })
     expect(wrapper.attributes('aria-valuenow')).toBe('100')
     expect(wrapper.text()).toContain('100%')
     await wrapper.setProps({ formatter: value => `完成 ${value}`, value: -8 })
@@ -144,11 +144,11 @@ describe('numeric components', () => {
   })
 
   it('water level pond 限制边界并限制波浪数量', () => {
-    const wrapper = mount(LumaWaterLevelPond, { props: { shape: 'rounded', value: 48, waveCount: 8 } })
+    const wrapper = mount(LumalWaterLevelPond, { props: { shape: 'rounded', value: 48, waveCount: 8 } })
     expect(wrapper.attributes('aria-valuenow')).toBe('48')
     expect(wrapper.classes()).toContain('is-rounded')
     expect((wrapper.vm as unknown as { getWavePaths: () => unknown[] }).getWavePaths()).toHaveLength(1)
-    expect(wrapper.findAll('.luma-water-level-pond__water path')).toHaveLength(1)
+    expect(wrapper.findAll('.lumal-water-level-pond__water path')).toHaveLength(1)
   })
 })
 
@@ -162,7 +162,7 @@ describe('data charts', () => {
   it('active ring 支持受控选择并仅在用户点击时发出 select', async () => {
     const onUpdate = vi.fn()
     const onSelect = vi.fn()
-    const wrapper = mount(LumaActiveRingChart, {
+    const wrapper = mount(LumalActiveRingChart, {
       props: {
         'activeKey': 'a',
         'autoplay': false,
@@ -177,8 +177,8 @@ describe('data charts', () => {
   })
 
   it('capsule 与 conical chart 支持排序、单位和数值显示', () => {
-    const capsule = mount(LumaCapsuleChart, { props: { items, showValue: true, sort: 'desc', unit: '次' } })
-    const conical = mount(LumaConicalColumnChart, { props: { items, showValue: true, sort: 'asc', unit: '%' } })
+    const capsule = mount(LumalCapsuleChart, { props: { items, showValue: true, sort: 'desc', unit: '次' } })
+    const conical = mount(LumalConicalColumnChart, { props: { items, showValue: true, sort: 'asc', unit: '%' } })
     expect(capsule.find('.label-column div').text()).toBe('乙')
     expect(capsule.text()).toContain('60')
     expect(capsule.text()).toContain('次')

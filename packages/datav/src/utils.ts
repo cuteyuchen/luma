@@ -17,10 +17,10 @@ export function cssSize(value: number | string | undefined): string | undefined 
 
 export function colorStyle(colors?: readonly [string, string], background?: string, duration?: number): CSSProperties {
   return {
-    '--luma-datav-background': background,
-    '--luma-datav-duration': duration === undefined ? undefined : `${Math.max(0, duration)}ms`,
-    '--luma-datav-primary': colors?.[0],
-    '--luma-datav-secondary': colors?.[1],
+    '--lumal-datav-background': background,
+    '--lumal-datav-duration': duration === undefined ? undefined : `${Math.max(0, duration)}ms`,
+    '--lumal-datav-primary': colors?.[0],
+    '--lumal-datav-secondary': colors?.[1],
   } as CSSProperties
 }
 

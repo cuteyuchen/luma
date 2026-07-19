@@ -83,7 +83,7 @@ describe('create auth session', () => {
   it('会聚合 token 读写并判断登录态', () => {
     const session = createAuthSession({
       storage: createMemoryStorage(),
-      tokenKey: 'luma:token',
+      tokenKey: 'lumal:token',
     })
 
     expect(session.isAuthenticated()).toBe(false)
@@ -141,7 +141,7 @@ describe('create auth session', () => {
   })
 
   it('未注入 storage 时也能在无 Web Storage 环境兜底工作', () => {
-    const session = createAuthSession({ tokenKey: 'luma:fallback' })
+    const session = createAuthSession({ tokenKey: 'lumal:fallback' })
 
     session.setToken('token-x')
     expect(session.getToken()).toBe('token-x')

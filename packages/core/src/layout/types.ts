@@ -1,24 +1,24 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import type { LumaTabStyle } from '../theme/types'
+import type { LumalTabStyle } from '../theme/types'
 
-export type LumaMenuBadgeType = 'dot' | 'text'
-export type LumaMenuBadgeTone = 'danger' | 'info' | 'primary' | 'success' | 'warning'
+export type LumalMenuBadgeType = 'dot' | 'text'
+export type LumalMenuBadgeTone = 'danger' | 'info' | 'primary' | 'success' | 'warning'
 
-export interface LumaLayoutMenuItem {
+export interface LumalLayoutMenuItem {
   path: string
   redirect?: string
   title: string
   badge?: number | string
-  badgeTone?: LumaMenuBadgeTone
-  badgeType?: LumaMenuBadgeType
-  children?: LumaLayoutMenuItem[]
+  badgeTone?: LumalMenuBadgeTone
+  badgeType?: LumalMenuBadgeType
+  children?: LumalLayoutMenuItem[]
   externalLink?: string
   externalTarget?: '_blank' | '_self'
   hidden?: boolean
   icon?: string
 }
 
-export interface LumaLayoutTabItem {
+export interface LumalLayoutTabItem {
   path: string
   title: string
   closable?: boolean
@@ -27,10 +27,10 @@ export interface LumaLayoutTabItem {
   pinned?: boolean
 }
 
-export type LumaLayoutRouteTabFilter = (route: RouteLocationNormalizedLoaded) => boolean
+export type LumalLayoutRouteTabFilter = (route: RouteLocationNormalizedLoaded) => boolean
 
-export type LumaLayoutRouteTabResolver = (
+export type LumalLayoutRouteTabResolver = (
   route: RouteLocationNormalizedLoaded,
-) => LumaLayoutTabItem | undefined
+) => LumalLayoutTabItem | undefined
 
-export type { LumaTabStyle }
+export type { LumalTabStyle }

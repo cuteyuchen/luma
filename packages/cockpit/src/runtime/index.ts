@@ -1,6 +1,6 @@
 import type { App } from 'vue'
-import LumaCockpitComp from './LumaCockpit.vue'
-import LumaCockpitCardComp from './LumaCockpitCard.vue'
+import LumalCockpitComp from './LumalCockpit.vue'
+import LumalCockpitCardComp from './LumalCockpitCard.vue'
 
 /***********************组件安装包装*********************/
 type WithInstall<T> = T & { install: (app: App) => void }
@@ -16,21 +16,21 @@ function withInstall<T extends Record<string, unknown>>(component: T, name: stri
 }
 
 /***********************导出*********************/
-export const LumaCockpit = withInstall(
-  LumaCockpitComp as unknown as Record<string, unknown>,
-  'LumaCockpit',
-) as typeof LumaCockpitComp & { install: (app: App) => void }
+export const LumalCockpit = withInstall(
+  LumalCockpitComp as unknown as Record<string, unknown>,
+  'LumalCockpit',
+) as typeof LumalCockpitComp & { install: (app: App) => void }
 
-export const LumaCockpitCard = withInstall(
-  LumaCockpitCardComp as unknown as Record<string, unknown>,
-  'LumaCockpitCard',
-) as typeof LumaCockpitCardComp & { install: (app: App) => void }
+export const LumalCockpitCard = withInstall(
+  LumalCockpitCardComp as unknown as Record<string, unknown>,
+  'LumalCockpitCard',
+) as typeof LumalCockpitCardComp & { install: (app: App) => void }
 
 export type { CockpitCardComponent, CockpitCardProps, CockpitCardTab } from './card'
 export { cockpitRuntimeEnvKey, useCockpitRuntimeEnv } from './context'
 export type { CockpitRuntimeEnv } from './context'
-export { default as LumaCockpitCanvas } from './LumaCockpitCanvas.vue'
-export { default as LumaCockpitContainer } from './LumaCockpitContainer.vue'
-export { default as LumaCockpitRegion } from './LumaCockpitRegion.vue'
-export { default as LumaCockpitWidgetHost } from './LumaCockpitWidgetHost.vue'
+export { default as LumalCockpitCanvas } from './LumalCockpitCanvas.vue'
+export { default as LumalCockpitContainer } from './LumalCockpitContainer.vue'
+export { default as LumalCockpitRegion } from './LumalCockpitRegion.vue'
+export { default as LumalCockpitWidgetHost } from './LumalCockpitWidgetHost.vue'
 export { resolveCockpitComponent } from './resolveComponent'

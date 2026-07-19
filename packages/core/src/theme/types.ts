@@ -1,9 +1,9 @@
 export type ThemeMode = 'dark' | 'light' | 'system'
 export type ResolvedThemeMode = Exclude<ThemeMode, 'system'>
-export type LumaLayoutMode = 'mixed-nav' | 'sidebar-nav' | 'top-nav'
-export type LumaTransitionName = 'fade' | 'fade-bottom' | 'fade-side' | 'zoom-fade'
-export type LumaHeaderMenuAlign = 'center' | 'left' | 'right'
-export type LumaTabStyle = 'brisk' | 'card' | 'chrome' | 'plain'
+export type LumalLayoutMode = 'mixed-nav' | 'sidebar-nav' | 'top-nav'
+export type LumalTransitionName = 'fade' | 'fade-bottom' | 'fade-side' | 'zoom-fade'
+export type LumalHeaderMenuAlign = 'center' | 'left' | 'right'
+export type LumalTabStyle = 'brisk' | 'card' | 'chrome' | 'plain'
 
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Record<string, unknown> ? DeepPartial<T[K]> : T[K]
@@ -17,12 +17,12 @@ export interface ThemeState {
 
 export type ThemeOptions = Partial<ThemeState>
 
-export type ThemeTokens = Record<`--luma-${string}`, string>
+export type ThemeTokens = Record<`--lumal-${string}`, string>
 
-export interface LumaPreferences {
+export interface LumalPreferences {
   app: {
     dynamicTitle: boolean
-    layout: LumaLayoutMode
+    layout: LumalLayoutMode
   }
   breadcrumb: {
     enable: boolean
@@ -32,7 +32,7 @@ export interface LumaPreferences {
   }
   header: {
     globalSearch: boolean
-    menuAlign: LumaHeaderMenuAlign
+    menuAlign: LumalHeaderMenuAlign
     menuMaxWidth: number
   }
   sidebar: {
@@ -52,7 +52,7 @@ export interface LumaPreferences {
     showMaximize: boolean
     showMore: boolean
     showRefresh: boolean
-    styleType: LumaTabStyle
+    styleType: LumalTabStyle
     visitHistory: boolean
     wheelable: boolean
   }
@@ -68,12 +68,12 @@ export interface LumaPreferences {
   transition: {
     enable: boolean
     loading: boolean
-    name: LumaTransitionName
+    name: LumalTransitionName
     progress: boolean
   }
 }
 
-export type LumaPreferencesDefaults = DeepPartial<LumaPreferences>
+export type LumalPreferencesDefaults = DeepPartial<LumalPreferences>
 
 export interface ThemeRuntimeEnvironment {
   document?: Document
@@ -88,7 +88,7 @@ export interface PreferencesStorage {
 
 export interface CreatePreferencesStoreOptions {
   autoApply?: boolean
-  defaults?: LumaPreferencesDefaults
+  defaults?: LumalPreferencesDefaults
   runtime?: ThemeRuntimeEnvironment
   storage: PreferencesStorage
   storageKey: string
@@ -96,11 +96,11 @@ export interface CreatePreferencesStoreOptions {
 
 export interface PreferencesStore {
   readonly resolvedThemeMode: import('vue').Ref<ResolvedThemeMode>
-  readonly state: import('vue').Ref<LumaPreferences>
+  readonly state: import('vue').Ref<LumalPreferences>
   apply: () => ResolvedThemeMode
   dispose: () => void
-  exportCurrent: () => LumaPreferences
-  patch: (next?: LumaPreferencesDefaults) => void
+  exportCurrent: () => LumalPreferences
+  patch: (next?: LumalPreferencesDefaults) => void
   reset: () => void
 }
 

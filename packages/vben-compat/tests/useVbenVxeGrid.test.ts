@@ -7,7 +7,7 @@ import {
 } from '../src'
 
 describe('useVbenVxeGrid', () => {
-  it('会把常见 Vben grid columns 适配为 LumaSchemaTable columns', () => {
+  it('会把常见 Vben grid columns 适配为 LumalSchemaTable columns', () => {
     const columns = adaptVbenGridColumns([
       {
         field: 'name',
@@ -46,7 +46,7 @@ describe('useVbenVxeGrid', () => {
     ])
   })
 
-  it('会生成可绑定给 LumaCrudTable 的 props', () => {
+  it('会生成可绑定给 LumalCrudTable 的 props', () => {
     const [register, gridApi] = useVbenVxeGrid({
       gridOptions: {
         columns: [
@@ -76,7 +76,7 @@ describe('useVbenVxeGrid', () => {
 
     const gridInstance = { refresh: () => undefined }
     register(gridInstance)
-    gridApi.setRows([{ id: 1, name: 'Luma' }], 1)
+    gridApi.setRows([{ id: 1, name: 'Lumal' }], 1)
 
     expect(gridApi.getGridInstance()).toBe(gridInstance)
     expect(gridApi.crudTableProps.value.title).toBe('用户列表')
@@ -86,14 +86,14 @@ describe('useVbenVxeGrid', () => {
     expect(gridApi.crudTableProps.value.searchText).toBe('查询')
     expect(gridApi.crudTableProps.value.pageSize).toBe(20)
     expect(gridApi.crudTableProps.value.pageSizes).toEqual([20, 50])
-    expect(gridApi.crudTableProps.value.rows).toEqual([{ id: 1, name: 'Luma' }])
+    expect(gridApi.crudTableProps.value.rows).toEqual([{ id: 1, name: 'Lumal' }])
     expect(gridApi.crudTableProps.value.total).toBe(1)
   })
 
   it('会通过 proxyConfig.ajax.query 加载数据并更新 rows 和 total', async () => {
     const query = vi.fn(() => Promise.resolve({
       items: [
-        { id: 1, name: 'Luma' },
+        { id: 1, name: 'Lumal' },
       ],
       total: 8,
     }))
@@ -122,7 +122,7 @@ describe('useVbenVxeGrid', () => {
       page: 1,
       pageSize: 10,
     })
-    expect(gridApi.getRows()).toEqual([{ id: 1, name: 'Luma' }])
+    expect(gridApi.getRows()).toEqual([{ id: 1, name: 'Lumal' }])
     expect(gridApi.getTotal()).toBe(8)
     expect(gridApi.crudTableProps.value.loading).toBe(false)
   })
@@ -132,7 +132,7 @@ describe('useVbenVxeGrid', () => {
       {
         data: {
           records: [
-            { id: 1, name: 'Luma' },
+            { id: 1, name: 'Lumal' },
           ],
           totalCount: 3,
         },
@@ -150,7 +150,7 @@ describe('useVbenVxeGrid', () => {
 
     expect(result).toEqual({
       rows: [
-        { id: 1, name: 'Luma' },
+        { id: 1, name: 'Lumal' },
       ],
       total: 3,
     })
@@ -169,7 +169,7 @@ describe('useVbenVxeGrid', () => {
     })
     const [, gridApi] = useVbenVxeGrid(options)
 
-    expect(gridApi.getLumaColumns()[0]?.field).toBe('name')
+    expect(gridApi.getLumalColumns()[0]?.field).toBe('name')
 
     options.value = {
       gridOptions: {
@@ -182,7 +182,7 @@ describe('useVbenVxeGrid', () => {
       },
     }
 
-    expect(gridApi.getLumaColumns()[0]?.field).toBe('status')
+    expect(gridApi.getLumalColumns()[0]?.field).toBe('status')
   })
 
   it('会映射工具栏、操作列、勾选列和表格配置', () => {

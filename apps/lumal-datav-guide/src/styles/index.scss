@@ -1,0 +1,335 @@
+/**
+ * DataV 指南站文档内容样式。
+ * 布局、顶栏、侧边栏、主题切换与全文搜索均由 @lumal/core 的 LumalLayout 提供，
+ * 这里只负责文档正文（指南页 / 组件页 / 演示块 / 代码块 / 属性表）的排版。
+ * 颜色统一走 Element Plus CSS 变量，自动适配亮/暗主题。
+ */
+
+:root {
+  --guide-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+/* 文档内容区：占满内容区全宽 */
+.lumal-content .guide-doc,
+.lumal-content .component-doc {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 28px 36px 72px;
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--el-color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 文档排版（指南页 + 组件页共用）---------- */
+.guide-doc__head,
+.component-doc__head {
+  margin-bottom: 28px;
+}
+
+.guide-doc__eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--el-color-primary);
+}
+
+.guide-doc h1,
+.component-doc h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+}
+
+.guide-doc__lead,
+.component-doc__intro {
+  margin: 0;
+  color: var(--el-text-color-secondary);
+  font-size: 15px;
+}
+
+.component-doc__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+.component-doc__map {
+  color: var(--el-text-color-secondary);
+}
+
+.guide-doc__section {
+  margin-bottom: 8px;
+}
+
+.guide-doc h2,
+.component-doc h2 {
+  margin: 36px 0 12px;
+  padding-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  border-bottom: 1px solid var(--el-border-color);
+}
+
+.guide-doc h3,
+.component-doc h3 {
+  margin: 24px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.guide-doc p,
+.component-doc p {
+  margin: 0 0 14px;
+  color: var(--el-text-color-regular);
+}
+
+.guide-list {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: var(--el-text-color-regular);
+}
+
+.guide-list li {
+  margin-bottom: 6px;
+}
+
+.guide-doc :not(pre) > code,
+.component-doc :not(pre) > code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--el-fill-color-light);
+  font-family: var(--guide-font-mono);
+  font-size: 12.5px;
+  color: var(--el-color-primary);
+}
+
+/* ---------- 提示块 ---------- */
+.guide-doc__note {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border-left: 3px solid var(--el-color-primary);
+  background: var(--el-fill-color-light);
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+}
+
+.guide-doc__note--warn {
+  border-left-color: var(--el-color-warning);
+}
+
+.brand-panel {
+  padding: 16px 18px;
+  margin: 0 0 16px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 12px;
+  background: var(--el-bg-color);
+}
+
+/* ---------- 代码块 ---------- */
+.code-block {
+  position: relative;
+  margin: 0 0 16px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 10px;
+  background: var(--el-fill-color-darker);
+  overflow: hidden;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--guide-font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--el-text-color-primary);
+}
+
+.code-block code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.code-block__copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
+  background: var(--el-bg-color);
+  color: var(--el-text-color-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.code-block__copy:hover {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+}
+
+/* ---------- 演示块 ---------- */
+.demo-block {
+  margin: 0 0 24px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--el-bg-color);
+}
+
+.demo-block__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px 10px;
+}
+
+.demo-block__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+}
+
+.demo-block__desc {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary);
+}
+
+.demo-block__toggle {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.demo-block__toggle:hover {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+}
+
+.demo-block__stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  padding: 28px 24px;
+}
+
+/* 演示舞台：驾驶舱组件多为深色底，这里固定深色科技底以还原真实观感 */
+.demo-block__stage--dark {
+  background:
+    radial-gradient(120% 120% at 50% 0%, #0b1f3a 0%, #050d1c 70%, #030814 100%);
+  color: #edf9ff;
+}
+
+/* 深色舞台上的说明文字勿用主题深色字，避免看不清 */
+.demo-block__stage--dark,
+.playground__stage--dark {
+  --guide-text-muted: rgb(207 238 255 / 72%);
+  color: #edf9ff;
+}
+
+.demo-block__stage--dark p,
+.playground__stage--dark p {
+  color: rgb(207 238 255 / 82%);
+}
+
+.demo-block__stage--plain {
+  background: var(--el-fill-color-lighter);
+}
+
+.demo-block .code-block {
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--el-border-color);
+  border-radius: 0;
+}
+
+/* ---------- 属性表 ---------- */
+.props-table {
+  margin: 0 0 16px;
+}
+
+.props-table__title {
+  margin: 24px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.props-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--el-border-color);
+  border-radius: 10px;
+}
+
+.props-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.props-table th,
+.props-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--el-border-color);
+  text-align: left;
+  vertical-align: top;
+  color: var(--el-text-color-regular);
+}
+
+.props-table tr:last-child td {
+  border-bottom: none;
+}
+
+.props-table th {
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.props-table td:first-child code,
+.props-table__type {
+  white-space: nowrap;
+}
+
+.props-table td code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--el-fill-color-light);
+  font-family: var(--guide-font-mono);
+  font-size: 12px;
+  color: var(--el-color-primary);
+}
+
+.props-table td:last-child {
+  color: var(--el-text-color-secondary);
+}

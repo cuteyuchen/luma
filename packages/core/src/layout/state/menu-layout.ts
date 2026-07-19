@@ -1,11 +1,11 @@
-import type { LumaLayoutMode } from '../../theme/types'
-import type { LumaLayoutMenuItem } from '../types'
+import type { LumalLayoutMode } from '../../theme/types'
+import type { LumalLayoutMenuItem } from '../types'
 
 /***********************菜单命中判断*********************/
 /**
  * 判断菜单项（含子级）是否覆盖指定路径。
  */
-export function includesMenuPath(item: LumaLayoutMenuItem, path: string): boolean {
+export function includesMenuPath(item: LumalLayoutMenuItem, path: string): boolean {
   if (item.hidden) {
     return false
   }
@@ -18,9 +18,9 @@ export function includesMenuPath(item: LumaLayoutMenuItem, path: string): boolea
 }
 
 export function findMenuItemByPath(
-  menus: LumaLayoutMenuItem[],
+  menus: LumalLayoutMenuItem[],
   path: string,
-): LumaLayoutMenuItem | undefined {
+): LumalLayoutMenuItem | undefined {
   for (const item of menus) {
     if (item.hidden) {
       continue
@@ -40,9 +40,9 @@ export function findMenuItemByPath(
 }
 
 export function findMenuTrailByPath(
-  menus: LumaLayoutMenuItem[],
+  menus: LumalLayoutMenuItem[],
   path: string,
-): LumaLayoutMenuItem[] {
+): LumalLayoutMenuItem[] {
   for (const item of menus) {
     if (item.hidden) {
       continue
@@ -64,7 +64,7 @@ export function findMenuTrailByPath(
 /**
  * 解析菜单项的导航目标：优先使用显式重定向，否则下钻到首个可导航子项。
  */
-export function resolveNavigationTarget(item?: LumaLayoutMenuItem): string {
+export function resolveNavigationTarget(item?: LumalLayoutMenuItem): string {
   if (!item) {
     return ''
   }
@@ -85,21 +85,21 @@ export function resolveNavigationTarget(item?: LumaLayoutMenuItem): string {
 /**
  * 在菜单树中解析与当前路径匹配的顶层菜单路径，用于 mixed-nav 高亮顶部项。
  */
-export function resolveActiveTopMenuPath(menus: LumaLayoutMenuItem[], path: string): string {
+export function resolveActiveTopMenuPath(menus: LumalLayoutMenuItem[], path: string): string {
   const matched = menus.find(item => includesMenuPath(item, path))
   return matched?.path ?? ''
 }
 
 /***********************布局拆分*********************/
 export interface SplitMenusByLayoutOptions {
-  menus: LumaLayoutMenuItem[]
-  layout: LumaLayoutMode
+  menus: LumalLayoutMenuItem[]
+  layout: LumalLayoutMode
   activeTopMenuPath?: string
 }
 
 export interface SplitMenusByLayoutResult {
-  topMenus: LumaLayoutMenuItem[]
-  sidebarMenus: LumaLayoutMenuItem[]
+  topMenus: LumalLayoutMenuItem[]
+  sidebarMenus: LumalLayoutMenuItem[]
 }
 
 /**

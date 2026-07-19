@@ -1,4 +1,4 @@
-export { default as LumaCrudTable } from './LumaCrudTable.vue'
+export { default as LumalCrudTable } from './LumalCrudTable.vue'
 export { deriveCrudFormSchemas } from './schema'
 export type {
   CrudActionsConfig,

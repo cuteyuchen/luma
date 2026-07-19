@@ -12,8 +12,8 @@ export {
   useVbenVxeGrid,
 } from './grid'
 export type {
-  LumaCrudTableCompatProps,
-  LumaSchemaFormCompatProps,
+  LumalCrudTableCompatProps,
+  LumalSchemaFormCompatProps,
   UseVbenFormInput,
   UseVbenFormOptions,
   UseVbenFormReturn,

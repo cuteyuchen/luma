@@ -1,8 +1,8 @@
-# Luma 驾驶舱 v3 开发规格
+# Lumal 驾驶舱 v3 开发规格
 
 ## 1. 职责边界
 
-`@luma/cockpit` 是通用布局和组件编排框架：
+`@lumal/cockpit` 是通用布局和组件编排框架：
 
 - 提供 v3 配置模型、左右区域运行时、Designer、模块注册表和消息总线。
 - 不提供分类、页面、中央组件注册表或中央组件业务配置。
@@ -63,7 +63,7 @@ interface CockpitGridRowConfig {
 
 ## 3. 运行时
 
-- `LumaCockpit` 使用 `v-model:activeLayoutId`，不渲染内置布局导航。
+- `LumalCockpit` 使用 `v-model:activeLayoutId`，不渲染内置布局导航。
 - 中心通过 `#center="{ context, layout }"` 提供，位于全宽底层画布。
 - 左右区域定位在中心内容上层两侧，宽度为区域 `width`（列宽为均分结果）。
 - 普通模块和 Tab 行各使用一个视觉 Card；Tab 行只显示激活模块，但保留全部模块实例。
@@ -131,4 +131,4 @@ interface CockpitGridRowConfig {
 - 组件测试覆盖单 Card Tab、区域宽均分、中心设计态上下文、共享消息总线和键盘移动替换。
 - E2E 覆盖库模块复制、跨区域移动、替换确认、Tab 切换、保存持久化及中心/模块联动。
 - 浏览器检查 `1440px`、`1263×793`、`1024px` 的深浅主题，不要求移动端。
-- `@luma/cockpit`、独立应用和 Admin 必须通过测试、类型检查和生产构建。
+- `@lumal/cockpit`、独立应用和 Admin 必须通过测试、类型检查和生产构建。

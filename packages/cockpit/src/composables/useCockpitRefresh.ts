@@ -8,7 +8,7 @@ import { useCockpitContext } from './useCockpitContext'
 
 /**
  * 订阅全局 `cockpit:refresh`，在 handler 中重新请求接口。
- * 必须在 LumaCockpit 模块树内调用。
+ * 必须在 LumalCockpit 模块树内调用。
  */
 export function useCockpitRefresh(handler: (message: CockpitMessage<CockpitRefreshPayload>) => void): void {
   const context = useCockpitContext()

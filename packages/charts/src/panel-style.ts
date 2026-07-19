@@ -4,8 +4,8 @@ import type { CSSProperties } from 'vue'
 export type ChartPanelWidth = number | string
 
 export type ChartPanelStyle = CSSProperties & {
-  '--luma-chart-panel-chart-width'?: string
-  '--luma-chart-panel-table-width'?: string
+  '--lumal-chart-panel-chart-width'?: string
+  '--lumal-chart-panel-table-width'?: string
 }
 
 function toCssSize(value: ChartPanelWidth | undefined): string | undefined {
@@ -32,11 +32,11 @@ export function resolveChartPanelStyle(options: {
   const style: ChartPanelStyle = {}
 
   if (chartWidth) {
-    style['--luma-chart-panel-chart-width'] = chartWidth
+    style['--lumal-chart-panel-chart-width'] = chartWidth
   }
 
   if (tableWidth) {
-    style['--luma-chart-panel-table-width'] = tableWidth
+    style['--lumal-chart-panel-table-width'] = tableWidth
   }
 
   return Object.keys(style).length > 0 ? style : undefined

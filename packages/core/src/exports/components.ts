@@ -1,6 +1,6 @@
 export {
   deriveCrudFormSchemas,
-  LumaCrudTable,
+  LumalCrudTable,
 } from '../components/crud-table'
 export type {
   CrudActionsConfig,
@@ -27,29 +27,29 @@ export type {
   CrudToolbarSlotProps,
 } from '../components/crud-table'
 export {
-  LumaInfoTable,
+  LumalInfoTable,
 } from '../components/info-table'
 export type {
   InfoTableItem,
   InfoTableProps,
 } from '../components/info-table'
 export {
-  LumaPage,
+  LumalPage,
 } from '../components/page'
 export {
-  LumaPageLayout,
+  LumalPageLayout,
 } from '../components/page-layout'
 export type {
   PageLayoutProps,
 } from '../components/page-layout'
 export {
-  LumaPagination,
+  LumalPagination,
 } from '../components/pagination'
 export type {
   PaginationChangePayload,
 } from '../components/pagination'
 export {
-  LumaSchemaForm,
+  LumalSchemaForm,
 } from '../components/schema-form'
 export type {
   NormalizedSchemaFormItem,
@@ -72,7 +72,7 @@ export type {
   SchemaFormValueResolver,
 } from '../components/schema-form'
 export {
-  LumaSchemaTable,
+  LumalSchemaTable,
 } from '../components/schema-table'
 export type {
   NormalizedSchemaTableColumn,
@@ -93,10 +93,10 @@ export type {
   SchemaTableTreeProps,
 } from '../components/schema-table'
 export {
-  LumaAccessControl,
+  LumalAccessControl,
 } from '../permission'
 export {
-  LumaIcon,
-  LumaIconPicker,
-  LumaIconPickerDialog,
-} from '@luma/icons-vue'
+  LumalIcon,
+  LumalIconPicker,
+  LumalIconPickerDialog,
+} from '@lumal/icons-vue'

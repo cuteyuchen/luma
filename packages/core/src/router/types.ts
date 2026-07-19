@@ -2,11 +2,11 @@ import type { Component } from 'vue'
 
 export type MenuNodeId = string
 
-export type LumaRouteAuthority = string | string[]
-export type LumaMenuBadgeType = 'dot' | 'text'
-export type LumaMenuBadgeTone = 'primary' | 'success' | 'warning' | 'danger' | 'info'
+export type LumalRouteAuthority = string | string[]
+export type LumalMenuBadgeType = 'dot' | 'text'
+export type LumalMenuBadgeTone = 'primary' | 'success' | 'warning' | 'danger' | 'info'
 
-export interface LumaRouteMeta {
+export interface LumalRouteMeta {
   title?: string
   icon?: string
   order?: number
@@ -15,43 +15,43 @@ export interface LumaRouteMeta {
   activeMenu?: string
   keepAlive?: boolean
   affixTab?: boolean
-  authority?: LumaRouteAuthority
+  authority?: LumalRouteAuthority
   badge?: string | number
-  badgeType?: LumaMenuBadgeType
-  badgeTone?: LumaMenuBadgeTone
+  badgeType?: LumalMenuBadgeType
+  badgeTone?: LumalMenuBadgeTone
   hideInBreadcrumb?: boolean
-  roles?: LumaRouteAuthority
+  roles?: LumalRouteAuthority
   externalLink?: string
   externalTarget?: '_blank' | '_self'
   topMenu?: boolean
   [key: string]: unknown
 }
 
-export interface LumaMenuRecord {
+export interface LumalMenuRecord {
   path: string
-  children?: LumaMenuRecord[]
+  children?: LumalMenuRecord[]
   component?: string
-  meta?: LumaRouteMeta
+  meta?: LumalRouteMeta
   name?: string
   redirect?: string
   externalLink?: string
 }
 
-export type LumaMenuComponent = Component | (() => Promise<unknown>)
-export type MenuRouteComponent = LumaMenuComponent
+export type LumalMenuComponent = Component | (() => Promise<unknown>)
+export type MenuRouteComponent = LumalMenuComponent
 
 /**
  * 静态菜单可以直接绑定 Vue 组件或懒加载器；字符串组件仍交给 componentResolver 解析。
  */
-export interface LumaStaticMenuRecord extends Omit<LumaMenuRecord, 'children' | 'component'> {
-  children?: LumaStaticMenuRecord[]
-  component?: string | LumaMenuComponent
+export interface LumalStaticMenuRecord extends Omit<LumalMenuRecord, 'children' | 'component'> {
+  children?: LumalStaticMenuRecord[]
+  component?: string | LumalMenuComponent
 }
 
 /**
  * 非标准菜单记录：字段名由后端决定，需要通过 fieldNames 显式映射到标准字段。
  */
-export type LumaMenuInputRecord = LumaMenuRecord | Record<string, unknown>
+export type LumalMenuInputRecord = LumalMenuRecord | Record<string, unknown>
 
 /**
  * 标准字段 -> 源字段名的映射，用于适配非标准后端菜单结构。
@@ -85,13 +85,13 @@ export interface NormalizeMenuRecordsOptions {
 export interface MenuNode {
   activeMenu?: string
   badge?: string | number
-  badgeType?: LumaMenuBadgeType
-  badgeTone?: LumaMenuBadgeTone
+  badgeType?: LumalMenuBadgeType
+  badgeTone?: LumalMenuBadgeTone
   id: MenuNodeId
   path: string
   title: string
   children?: MenuNode[]
-  component?: string | LumaMenuComponent
+  component?: string | LumalMenuComponent
   icon?: string
   keepAlive?: boolean
   meta?: Record<string, unknown>
@@ -137,9 +137,9 @@ export interface CreateRouteRecordsOptions {
   componentResolver?: RouteComponentResolver
 }
 
-export interface LumaRouteRecord {
+export interface LumalRouteRecord {
   path: string
-  children?: LumaRouteRecord[]
+  children?: LumalRouteRecord[]
   component?: unknown
   redirect?: string
   meta: {
@@ -155,8 +155,8 @@ export interface LumaRouteRecord {
 
 export interface SidebarMenuItem {
   badge?: string | number
-  badgeType?: LumaMenuBadgeType
-  badgeTone?: LumaMenuBadgeTone
+  badgeType?: LumalMenuBadgeType
+  badgeTone?: LumalMenuBadgeTone
   path: string
   redirect?: string
   title: string
@@ -185,7 +185,7 @@ export interface FindAccessibleMenuOptions {
  * vue-router 的最小子集，避免在类型层强依赖 vue-router 具体版本。
  */
 export interface RouteRegistryRouterLike {
-  addRoute: (route: LumaRouteRecord) => (() => void) | unknown
+  addRoute: (route: LumalRouteRecord) => (() => void) | unknown
   getRoutes?: () => readonly { name?: string | symbol, path: string }[]
   hasRoute: (name: string) => boolean
   removeRoute: (name: string) => void
@@ -203,7 +203,7 @@ export interface MenuRouteRuntimeRouterLike extends RouteRegistryRouterLike {
  * 动态路由注册器：负责注册后端下发的动态路由并支持整体重置。
  */
 export interface RouteRegistry {
-  register: (routes: LumaRouteRecord[]) => void
+  register: (routes: LumalRouteRecord[]) => void
   reset: () => void
   readonly names: readonly string[]
 }
@@ -222,8 +222,8 @@ export interface MenuRouteErrorContext {
 
 export interface CreateMenuRouteRuntimeOptions {
   router: MenuRouteRuntimeRouterLike
-  staticMenus?: LumaStaticMenuRecord[]
-  loadRemoteMenus?: () => Promise<LumaMenuInputRecord[]>
+  staticMenus?: LumalStaticMenuRecord[]
+  loadRemoteMenus?: () => Promise<LumalMenuInputRecord[]>
   remoteNormalizeOptions?: NormalizeMenuRecordsOptions
   componentResolver?: RouteComponentResolver
   fallbackComponent?: () => Promise<unknown>
@@ -239,7 +239,7 @@ export interface MenuRouteRuntime {
   readonly remoteLoaded: boolean
   readonly remoteMenus: NormalizedMenuNode[]
   readonly routeNames: readonly string[]
-  readonly routes: LumaRouteRecord[]
+  readonly routes: LumalRouteRecord[]
   readonly sidebarMenus: SidebarMenuItem[]
   readonly staticMenus: NormalizedMenuNode[]
   readonly topMenus: SidebarMenuItem[]

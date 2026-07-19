@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "datav-guide",
-      "cwd": "apps/luma-datav-guide",
+      "cwd": "apps/lumal-datav-guide",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
       "port": 5175,
@@ -11,7 +11,7 @@
     },
     {
       "name": "cockpit",
-      "cwd": "apps/luma-cockpit",
+      "cwd": "apps/lumal-cockpit",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev", "--port", "5199", "--strictPort", "--host", "127.0.0.1"],
       "port": 5199,
@@ -19,7 +19,7 @@
     },
     {
       "name": "mock-api",
-      "cwd": "apps/luma-mock-api",
+      "cwd": "apps/lumal-mock-api",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
       "port": 5320,
@@ -27,7 +27,7 @@
     },
     {
       "name": "admin",
-      "cwd": "apps/luma-admin",
+      "cwd": "apps/lumal-admin",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev", "--port", "5188", "--strictPort"],
       "port": 5188,

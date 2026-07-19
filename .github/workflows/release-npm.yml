@@ -74,12 +74,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm --filter @luma/icons publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/icons-vue publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/core publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/charts publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/datav publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/cockpit publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/vben-compat publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter @luma/vite publish --no-git-checks --tag "$NPM_DIST_TAG"
-          pnpm --filter create-luma-admin publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/icons publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/icons-vue publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/core publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/charts publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/datav publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/cockpit publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/vben-compat publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter @lumal/vite publish --no-git-checks --tag "$NPM_DIST_TAG"
+          pnpm --filter create-lumal-admin publish --no-git-checks --tag "$NPM_DIST_TAG"

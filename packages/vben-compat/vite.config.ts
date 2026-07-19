@@ -17,7 +17,7 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'cjs' ? 'cjs' : 'js'}`,
     },
     rollupOptions: {
-      external: id => id === 'vue' || id === '@luma/core' || id.startsWith('@luma/core/'),
+      external: id => id === 'vue' || id === '@lumal/core' || id.startsWith('@lumal/core/'),
     },
   },
 })

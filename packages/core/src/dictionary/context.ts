@@ -19,7 +19,7 @@ export function useDictionaryContext(optional = false): DictionaryContext | null
   const context = inject(dictionaryContextKey, activeDictionaryContext)
 
   if (!context && !optional) {
-    throw new Error('Luma dictionary context is not installed.')
+    throw new Error('Lumal dictionary context is not installed.')
   }
 
   return context

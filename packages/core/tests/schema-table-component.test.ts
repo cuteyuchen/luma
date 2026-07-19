@@ -1,22 +1,22 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
-import { LumaSchemaTable } from '../src/components/schema-table'
+import { LumalSchemaTable } from '../src/components/schema-table'
 import { createDictionaryStore, dictionaryContextKey } from '../src/dictionary'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
-describe('luma schema table', () => {
+describe('lumal schema table', () => {
   it('会使用 Element Plus 表格组件渲染可见列，并保留 formatter', () => {
     const rows = [
       {
         id: 'row-1',
-        name: 'Luma',
+        name: 'Lumal',
         status: 'enabled',
         secret: '不可见',
       },
     ]
 
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -57,7 +57,7 @@ describe('luma schema table', () => {
   })
 
   it('没有数据时会把空状态文案交给 Element Plus 表格', () => {
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -92,7 +92,7 @@ describe('luma schema table', () => {
       }),
     })
 
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: {
@@ -153,7 +153,7 @@ describe('luma schema table', () => {
       template: '<span class="el-tag"><slot /></span>',
     })
 
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: {
@@ -182,11 +182,11 @@ describe('luma schema table', () => {
     await Promise.resolve()
     await wrapper.vm.$nextTick()
 
-    const tags = wrapper.findAll('.luma-schema-table__dictionary-tag')
+    const tags = wrapper.findAll('.lumal-schema-table__dictionary-tag')
 
     expect(tags.map(tag => tag.text())).toEqual(['启用', '停用'])
-    expect(tags[0]?.attributes('style')).toContain('--luma-dictionary-color: #16a34a')
-    expect(wrapper.findAll('.luma-schema-table__dictionary-dot')).toHaveLength(2)
+    expect(tags[0]?.attributes('style')).toContain('--lumal-dictionary-color: #16a34a')
+    expect(wrapper.findAll('.lumal-schema-table__dictionary-dot')).toHaveLength(2)
   })
 
   it('dictType 会优先于手工 options 自动翻译并应用字典颜色', async () => {
@@ -209,7 +209,7 @@ describe('luma schema table', () => {
       },
     })
 
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: { store },
@@ -233,19 +233,19 @@ describe('luma schema table', () => {
     await Promise.resolve()
     await nextTick()
 
-    expect(wrapper.find('.luma-schema-table__dictionary-tag').text()).toBe('高优先级')
-    expect(wrapper.find('.luma-schema-table__dictionary-tag').attributes('style')).toContain(
-      '--luma-dictionary-color: #ef4444',
+    expect(wrapper.find('.lumal-schema-table__dictionary-tag').text()).toBe('高优先级')
+    expect(wrapper.find('.lumal-schema-table__dictionary-tag').attributes('style')).toContain(
+      '--lumal-dictionary-color: #ef4444',
     )
   })
 
   it('会渲染选择列、序号列、分页、透传属性并转发交互事件', async () => {
     const rows = [
-      { id: 'row-1', name: 'Luma', status: 'enabled' },
+      { id: 'row-1', name: 'Lumal', status: 'enabled' },
       { id: 'row-2', name: 'Admin', status: 'disabled' },
     ]
 
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -299,7 +299,7 @@ describe('luma schema table', () => {
     expect(columns[2]?.props('minWidth')).toBe(160)
     expect(columns.at(-1)?.props('width')).toBe(160)
     expect(wrapper.find('.row-action').exists()).toBe(true)
-    const mobileActionTrigger = wrapper.find('.luma-schema-table__mobile-actions')
+    const mobileActionTrigger = wrapper.find('.lumal-schema-table__mobile-actions')
     expect(mobileActionTrigger.element.tagName).toBe('BUTTON')
     expect(mobileActionTrigger.text()).toBe('更多')
     expect(mobileActionTrigger.attributes('aria-haspopup')).toBe('menu')
@@ -321,7 +321,7 @@ describe('luma schema table', () => {
     const originalWidth = window.innerWidth
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 768 })
     const rows = [
-      { id: 'row-1', name: 'Luma' },
+      { id: 'row-1', name: 'Lumal' },
       { id: 'row-2', name: 'Admin' },
     ]
     const actionCalls: string[] = []
@@ -343,7 +343,7 @@ describe('luma schema table', () => {
           : [])
       },
     })
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         stubs: {
           ...elementPlusStubs,
@@ -372,7 +372,7 @@ describe('luma schema table', () => {
       const actionColumn = wrapper.findAllComponents({ name: 'ElTableColumn' })
         .find(column => column.props('label') === '操作')
       const popovers = wrapper.findAllComponents({ name: 'ElPopover' })
-      const triggers = wrapper.findAll('.luma-schema-table__mobile-actions')
+      const triggers = wrapper.findAll('.lumal-schema-table__mobile-actions')
 
       expect(actionColumn?.props('width')).toBe(72)
       expect(popovers).toHaveLength(2)
@@ -396,7 +396,7 @@ describe('luma schema table', () => {
       expect(triggers[0]?.attributes('aria-expanded')).toBe('false')
       expect(triggers[1]?.attributes('aria-expanded')).toBe('true')
 
-      await wrapper.find('.luma-schema-table__mobile-actions-menu .row-action').trigger('click')
+      await wrapper.find('.lumal-schema-table__mobile-actions-menu .row-action').trigger('click')
       await nextTick()
       expect(actionCalls).toEqual(['row-2'])
       expect(triggers[1]?.attributes('aria-expanded')).toBe('false')
@@ -423,7 +423,7 @@ describe('luma schema table', () => {
   })
 
   it('支持字段插槽、行级隐藏、列设置和树表属性', async () => {
-    const rows = [{ children: [], id: 'row-1', name: 'Luma', secret: true, status: 'enabled' }]
+    const rows = [{ children: [], id: 'row-1', name: 'Lumal', secret: true, status: 'enabled' }]
     const TableColumnStub = defineComponent({
       name: 'ElTableColumn',
       setup(_props, { slots }) {
@@ -433,7 +433,7 @@ describe('luma schema table', () => {
         }))
       },
     })
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: {
         stubs: {
           ...elementPlusStubs,
@@ -466,16 +466,16 @@ describe('luma schema table', () => {
 
     expect(wrapper.find('.hidden-row-cell').exists()).toBe(false)
     expect(wrapper.find('.custom-table-cell').text()).toBe('enabled')
-    expect(wrapper.find('.luma-schema-table__column-settings').exists()).toBe(true)
+    expect(wrapper.find('.lumal-schema-table__column-settings').exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'ElTable' }).props('defaultExpandAll')).toBe(true)
     expect(wrapper.findComponent({ name: 'ElTable' }).props('treeProps')).toEqual({ children: 'children' })
 
-    await wrapper.findAll('.luma-schema-table__column-options input')[1]?.setValue(false)
+    await wrapper.findAll('.lumal-schema-table__column-options input')[1]?.setValue(false)
     expect(wrapper.find('.custom-table-cell').exists()).toBe(false)
   })
 
   it('工具栏插槽与列设置共享同一工具栏层级', () => {
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -488,9 +488,9 @@ describe('luma schema table', () => {
       },
     })
 
-    const toolbar = wrapper.find('.luma-schema-table__toolbar')
+    const toolbar = wrapper.find('.lumal-schema-table__toolbar')
     expect(toolbar.find('.custom-toolbar-action').exists()).toBe(true)
-    const tools = toolbar.find('.luma-schema-table__toolbar-tools')
+    const tools = toolbar.find('.lumal-schema-table__toolbar-tools')
     expect(tools.find('.custom-toolbar-tool').exists()).toBe(true)
     expect(tools.find('[aria-label="列设置"]').exists()).toBe(true)
   })
@@ -500,7 +500,7 @@ describe('luma schema table', () => {
       hidden: ['status'],
       order: ['status', 'name'],
     }))
-    const wrapper = mount(LumaSchemaTable, {
+    const wrapper = mount(LumalSchemaTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columnSettings: {
@@ -512,14 +512,14 @@ describe('luma schema table', () => {
           { field: 'name', label: '名称' },
           { field: 'status', label: '状态' },
         ],
-        rows: [{ id: 'row-1', name: 'Luma', status: 'enabled' }],
+        rows: [{ id: 'row-1', name: 'Lumal', status: 'enabled' }],
       },
     })
 
     await nextTick()
     expect(wrapper.findAllComponents({ name: 'ElTableColumn' }).map(item => item.props('prop'))).toEqual(['name'])
 
-    await wrapper.find('.luma-schema-table__column-options-header button').trigger('click')
+    await wrapper.find('.lumal-schema-table__column-options-header button').trigger('click')
     await nextTick()
     expect(wrapper.findAllComponents({ name: 'ElTableColumn' }).map(item => item.props('prop'))).toEqual(['name', 'status'])
     expect(JSON.parse(localStorage.getItem('schema-table-columns') ?? '{}')).toEqual({
@@ -529,8 +529,8 @@ describe('luma schema table', () => {
   })
 
   it('会转发排序、筛选、行点击、当前行、展开和重试事件', async () => {
-    const row = { id: 'row-1', name: 'Luma' }
-    const wrapper = mount(LumaSchemaTable, {
+    const row = { id: 'row-1', name: 'Lumal' }
+    const wrapper = mount(LumalSchemaTable, {
       global: { stubs: elementPlusStubs },
       props: {
         columns: [{ field: 'name', label: '名称' }],
@@ -553,11 +553,11 @@ describe('luma schema table', () => {
     expect(wrapper.emitted('expandChange')?.[0]).toEqual([row, true])
 
     await wrapper.setProps({ error: new Error('加载失败') })
-    await wrapper.find('.luma-schema-table__error button').trigger('click')
-    expect(wrapper.find('.luma-schema-table__error').text()).toContain('加载失败')
+    await wrapper.find('.lumal-schema-table__error button').trigger('click')
+    expect(wrapper.find('.lumal-schema-table__error').text()).toContain('加载失败')
     expect(wrapper.emitted('retry')).toHaveLength(1)
 
     await wrapper.setProps({ error: '' })
-    expect(wrapper.find('.luma-schema-table__error').exists()).toBe(false)
+    expect(wrapper.find('.lumal-schema-table__error').exists()).toBe(false)
   })
 })

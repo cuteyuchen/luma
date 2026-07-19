@@ -2,9 +2,9 @@ import type {
   CrudTablePageChangePayload,
   CrudTableQueryModel,
   SchemaTableRow,
-} from '@luma/core/components'
+} from '@lumal/core/components'
 import type {
-  LumaCrudTableCompatProps,
+  LumalCrudTableCompatProps,
   UseVbenVxeGridInput,
   UseVbenVxeGridReturn,
 } from '../types'
@@ -30,7 +30,7 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
   const queryModel = reactive<CrudTableQueryModel>({})
 
   const gridOptions = computed(() => resolveVbenGridOptions(optionsRef.value))
-  const lumaColumns = computed(() => adaptVbenGridColumns(gridOptions.value.columns))
+  const lumalColumns = computed(() => adaptVbenGridColumns(gridOptions.value.columns))
   const querySchemas = computed(() => adaptVbenGridQuerySchemas(gridOptions.value))
   const pagination = computed(() => gridOptions.value.pagerConfig !== false && gridOptions.value.pagerConfig?.enabled !== false)
   const pageSizes = computed(() => {
@@ -135,8 +135,8 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
     return reload()
   }
 
-  const crudTableProps = computed<LumaCrudTableCompatProps>(() => ({
-    'columns': lumaColumns.value,
+  const crudTableProps = computed<LumalCrudTableCompatProps>(() => ({
+    'columns': lumalColumns.value,
     'actions': gridOptions.value.actions,
     'emptyText': error.value instanceof Error
       ? error.value.message
@@ -166,7 +166,7 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
     'toolbar': gridOptions.value.toolbarConfig,
     'table': {
       ...gridOptions.value.tableConfig,
-      columns: lumaColumns.value,
+      columns: lumalColumns.value,
       rowKey: gridOptions.value.rowKey,
       selection: gridOptions.value.columns?.some(column => column.type === 'checkbox'),
     },
@@ -180,7 +180,7 @@ export function useVbenVxeGrid(options: UseVbenVxeGridInput = {}): UseVbenVxeGri
       clearError,
       getError: () => error.value,
       getGridInstance: () => gridInstance.value,
-      getLumaColumns: () => lumaColumns.value,
+      getLumalColumns: () => lumalColumns.value,
       getQueryModel,
       getRows: () => rows.value,
       getTotal: () => total.value,

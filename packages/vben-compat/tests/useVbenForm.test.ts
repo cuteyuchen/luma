@@ -3,7 +3,7 @@ import { shallowRef } from 'vue'
 import { adaptVbenFormSchemas, useVbenForm } from '../src'
 
 describe('useVbenForm', () => {
-  it('会把常见 Vben 表单 schema 适配为 LumaSchemaForm schema', () => {
+  it('会把常见 Vben 表单 schema 适配为 LumalSchemaForm schema', () => {
     const schemas = adaptVbenFormSchemas([
       {
         component: 'Input',
@@ -11,7 +11,7 @@ describe('useVbenForm', () => {
           disabled: true,
           placeholder: '请输入名称',
         },
-        defaultValue: 'Luma',
+        defaultValue: 'Lumal',
         fieldName: 'name',
         label: '名称',
         required: true,
@@ -44,7 +44,7 @@ describe('useVbenForm', () => {
     expect(schemas).toEqual([
       {
         component: 'input',
-        defaultValue: 'Luma',
+        defaultValue: 'Lumal',
         field: 'name',
         label: '名称',
         placeholder: '请输入名称',
@@ -80,7 +80,7 @@ describe('useVbenForm', () => {
     ])
   })
 
-  it('会提供 Vben 风格 register 和表单方法，并生成 LumaSchemaForm props', () => {
+  it('会提供 Vben 风格 register 和表单方法，并生成 LumalSchemaForm props', () => {
     const [register, formApi] = useVbenForm({
       model: {
         name: '旧名称',

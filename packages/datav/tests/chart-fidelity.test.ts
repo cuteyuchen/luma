@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaActiveRingChart, LumaCapsuleChart, LumaConicalColumnChart, LumaDigitalFlop } from '../src'
+import { LumalActiveRingChart, LumalCapsuleChart, LumalConicalColumnChart, LumalDigitalFlop } from '../src'
 
 const chartMocks = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -93,7 +93,7 @@ afterEach(() => {
 
 describe('DataV chart fidelity', () => {
   it('active ring 保留上游 pie option、半径动画、中心翻牌和销毁清理', async () => {
-    const wrapper = mount(LumaActiveRingChart, {
+    const wrapper = mount(LumalActiveRingChart, {
       props: {
         config: {
           activeRadius: '50%',
@@ -147,7 +147,7 @@ describe('DataV chart fidelity', () => {
       opacity: '0.6',
       stroke: '#123456',
     })
-    expect(wrapper.getComponent(LumaDigitalFlop).props('config').style).toMatchObject({
+    expect(wrapper.getComponent(LumalDigitalFlop).props('config').style).toMatchObject({
       shadowBlur: 4,
       shadowColor: '#fedcba',
     })
@@ -167,7 +167,7 @@ describe('DataV chart fidelity', () => {
   })
 
   it('active ring 使用完整上游调色板并允许低于 250ms 的切换间隔', async () => {
-    const wrapper = mount(LumaActiveRingChart, {
+    const wrapper = mount(LumalActiveRingChart, {
       props: {
         config: {
           activeTimeGap: 100,
@@ -190,7 +190,7 @@ describe('DataV chart fidelity', () => {
   })
 
   it('capsule 保留上游标签列、五等分刻度、数组深合并颜色与独立单位', () => {
-    const wrapper = mount(LumaCapsuleChart, {
+    const wrapper = mount(LumalCapsuleChart, {
       props: {
         config: {
           colors: ['#ff0000'],
@@ -215,7 +215,7 @@ describe('DataV chart fidelity', () => {
   })
 
   it('capsule 默认不显示数值，显式 max 与排序入口不改变上游布局', () => {
-    const wrapper = mount(LumaCapsuleChart, {
+    const wrapper = mount(LumalCapsuleChart, {
       props: {
         items: [
           { key: 'a', label: '甲', value: 30 },
@@ -232,7 +232,7 @@ describe('DataV chart fidelity', () => {
   })
 
   it('conical 按上游降序和二次贝塞尔公式响应容器尺寸', async () => {
-    const wrapper = mount(LumaConicalColumnChart, {
+    const wrapper = mount(LumalConicalColumnChart, {
       props: {
         config: {
           columnColor: 'rgba(0, 194, 255, 0.4)',
@@ -265,7 +265,7 @@ describe('DataV chart fidelity', () => {
   })
 
   it('conical 仅让显式 items API 覆盖单柱颜色', async () => {
-    const wrapper = mount(LumaConicalColumnChart, {
+    const wrapper = mount(LumalConicalColumnChart, {
       props: {
         items: [{ key: 'a', label: '甲', value: 10, color: '#ff0000' }],
       },

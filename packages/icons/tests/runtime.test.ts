@@ -10,7 +10,7 @@ import {
   validateMonochromeSvg,
 } from '../src'
 
-describe('@luma/icons runtime', () => {
+describe('@lumal/icons runtime', () => {
   const svgText = '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M2 2h12v12H2z"/></svg>'
 
   it('可以把 SVG 文本转换成 data URI', () => {
@@ -23,13 +23,13 @@ describe('@luma/icons runtime', () => {
 
   it('可以在运行时注入渐变定义', () => {
     const result = applySvgGradient(svgText, {
-      id: 'luma-gradient-test',
+      id: 'lumal-gradient-test',
       from: '#1677ff',
       to: '#52c41a',
     })
 
     expect(result).toContain('linearGradient')
-    expect(result).toContain('url(#luma-gradient-test)')
+    expect(result).toContain('url(#lumal-gradient-test)')
   })
 
   it('可以通过已注册图标生成 data URI', () => {
@@ -63,7 +63,7 @@ describe('@luma/icons runtime', () => {
     ])
 
     expect(result).toContain('<svg viewBox="0 0 16 16">')
-    expect(result).toContain('data-luma-icon-layer="0"')
-    expect(result).toContain('data-luma-icon-layer="1"')
+    expect(result).toContain('data-lumal-icon-layer="0"')
+    expect(result).toContain('data-lumal-icon-layer="1"')
   })
 })

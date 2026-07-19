@@ -1,4 +1,4 @@
-export { default as LumaSchemaForm } from './LumaSchemaForm.vue'
+export { default as LumalSchemaForm } from './LumalSchemaForm.vue'
 export {
   normalizeSchemaFormItems,
   resolveSchemaFormInitialModel,

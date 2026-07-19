@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaDecoration } from '../src'
+import { LumalDecoration } from '../src'
 
 const signatures = [
   { animate: 16, circles: 0, paths: 0, polygons: 0, polylines: 0, rects: 33, svgs: 1, uses: 0 },
@@ -51,11 +51,11 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('lumaDecoration DataV SVG fidelity', () => {
+describe('lumalDecoration DataV SVG fidelity', () => {
   it('12 variants preserve the upstream SVG element signatures and defaults', () => {
     signatures.forEach((signature, index) => {
       const variant = index + 1 as 1
-      const wrapper = mount(LumaDecoration, { props: { variant } })
+      const wrapper = mount(LumalDecoration, { props: { variant } })
 
       expect(wrapper.findAll('svg')).toHaveLength(signature.svgs)
       if (variant === 1 || variant === 3)
@@ -74,34 +74,34 @@ describe('lumaDecoration DataV SVG fidelity', () => {
         expect(wrapper.findAll('rect')).toHaveLength(signature.rects)
       }
       expect(wrapper.findAll('use')).toHaveLength(signature.uses)
-      expect(wrapper.attributes('style')).toContain(`--luma-datav-primary: ${defaultColors[index]}`)
+      expect(wrapper.attributes('style')).toContain(`--lumal-datav-primary: ${defaultColors[index]}`)
       wrapper.unmount()
     })
   })
 
   it('creates upstream random geometry once per instance and preserves it across updates', async () => {
-    const wrapper = mount(LumaDecoration, { props: { variant: 1 } })
-    const initial = wrapper.findAll('.luma-decoration__mark').map(mark => ({
+    const wrapper = mount(LumalDecoration, { props: { variant: 1 } })
+    const initial = wrapper.findAll('.lumal-decoration__mark').map(mark => ({
       begin: mark.find('animate').exists() ? mark.find('animate').attributes('begin') : '',
       x: mark.attributes('x'),
       y: mark.attributes('y'),
     }))
     await wrapper.setProps({ background: '#001122' })
-    expect(wrapper.findAll('.luma-decoration__mark')).toHaveLength(initial.length)
-    expect(wrapper.findAll('.luma-decoration__mark').map(mark => ({
+    expect(wrapper.findAll('.lumal-decoration__mark')).toHaveLength(initial.length)
+    expect(wrapper.findAll('.lumal-decoration__mark').map(mark => ({
       begin: mark.find('animate').exists() ? mark.find('animate').attributes('begin') : '',
       x: mark.attributes('x'),
       y: mark.attributes('y'),
     }))).toEqual(initial)
 
     await wrapper.setProps({ variant: 6 })
-    const bars = wrapper.findAll('.luma-decoration__bar').map(bar => ({
+    const bars = wrapper.findAll('.lumal-decoration__bar').map(bar => ({
       fill: bar.attributes('fill'),
       height: bar.attributes('height'),
       y: bar.attributes('y'),
     }))
     await wrapper.setProps({ background: '#112233' })
-    expect(wrapper.findAll('.luma-decoration__bar').map(bar => ({
+    expect(wrapper.findAll('.lumal-decoration__bar').map(bar => ({
       fill: bar.attributes('fill'),
       height: bar.attributes('height'),
       y: bar.attributes('y'),
@@ -109,80 +109,80 @@ describe('lumaDecoration DataV SVG fidelity', () => {
   })
 
   it('keeps referenced SVG ids unique and preserves the seven-stage sequence', () => {
-    const first = mount(LumaDecoration, { props: { variant: 9 } })
-    const second = mount(LumaDecoration, { props: { variant: 9 } })
+    const first = mount(LumalDecoration, { props: { variant: 9 } })
+    const second = mount(LumalDecoration, { props: { variant: 9 } })
     const firstPolygon = first.get('defs > polygon')
     const secondPolygon = second.get('defs > polygon')
     expect(firstPolygon.attributes('id')).not.toBe(secondPolygon.attributes('id'))
     expect(first.get('use').attributes('href')).toBe(`#${firstPolygon.attributes('id')}`)
 
-    const sequence = mount(LumaDecoration, { props: { duration: 4200, variant: 10 } })
+    const sequence = mount(LumalDecoration, { props: { duration: 4200, variant: 10 } })
     const ids = sequence.findAll('animate[id]').map(animation => animation.attributes('id'))
     expect(new Set(ids)).toHaveLength(7)
-    expect(sequence.findAll('.luma-decoration__segment')).toHaveLength(3)
-    expect(sequence.findAll('.luma-decoration__segment')[0]?.get('animate[id]').attributes('dur')).toBe('4.2s')
+    expect(sequence.findAll('.lumal-decoration__segment')).toHaveLength(3)
+    expect(sequence.findAll('.lumal-decoration__segment')[0]?.get('animate[id]').attributes('dur')).toBe('4.2s')
   })
 
   it('maps duration and reverse to upstream orientation and scan direction', () => {
-    const line = mount(LumaDecoration, {
+    const line = mount(LumalDecoration, {
       props: { color: ['#123456', '#abcdef'], dur: 1.2, reverse: true, variant: 2 },
     })
     expect(line.get('rect animate').attributes('attributeName')).toBe('height')
     expect(line.get('rect animate').attributes('dur')).toBe('1.2s')
-    expect(line.attributes('style')).toContain('--luma-datav-duration: 1200ms')
+    expect(line.attributes('style')).toContain('--lumal-datav-duration: 1200ms')
 
-    const ring = mount(LumaDecoration, { props: { dur: 4.2, reverse: true, variant: 9 } })
+    const ring = mount(LumalDecoration, { props: { dur: 4.2, reverse: true, variant: 9 } })
     expect(ring.get('animateTransform').attributes('dur')).toBe('4.2s')
     expect(ring.get('animateTransform').attributes('values')).toContain('-360')
 
-    const radar = mount(LumaDecoration, { props: { haloDur: 1.4, scanDur: 5, variant: 12 } })
+    const radar = mount(LumalDecoration, { props: { haloDur: 1.4, scanDur: 5, variant: 12 } })
     expect(radar.get('animateTransform').attributes('dur')).toBe('5s')
     expect(radar.findAll('circle animate')[0]?.attributes('dur')).toBe('1.4s')
   })
 
   it('preserves every upstream animation timeline and keyframe sequence', () => {
-    const one = mount(LumaDecoration, { props: { variant: 1 } })
-    expect(one.findAll('.luma-decoration__mark animate').every(animation => animation.attributes('dur') === '1s')).toBe(true)
-    expect(one.findAll('rect:not(.luma-decoration__mark) animate')[0]?.attributes('dur')).toBe('2s')
+    const one = mount(LumalDecoration, { props: { variant: 1 } })
+    expect(one.findAll('.lumal-decoration__mark animate').every(animation => animation.attributes('dur') === '1s')).toBe(true)
+    expect(one.findAll('rect:not(.lumal-decoration__mark) animate')[0]?.attributes('dur')).toBe('2s')
 
-    const two = mount(LumaDecoration, { props: { variant: 2 } })
+    const two = mount(LumalDecoration, { props: { variant: 2 } })
     expect(two.get('animate').attributes()).toMatchObject({
       calcMode: 'spline',
       dur: '6s',
       keySplines: '.42,0,.58,1',
     })
 
-    const three = mount(LumaDecoration, { props: { variant: 3 } })
+    const three = mount(LumalDecoration, { props: { variant: 3 } })
     expect(three.findAll('animate').every((animation) => {
       const seconds = Number.parseFloat(animation.attributes('dur'))
       return seconds >= 1 && seconds <= 2
     })).toBe(true)
 
-    const four = mount(LumaDecoration, { props: { variant: 4 } })
-    expect(four.get('.luma-decoration__line-reveal').attributes('style')).toContain('animation-duration: 3s')
+    const four = mount(LumalDecoration, { props: { variant: 4 } })
+    expect(four.get('.lumal-decoration__line-reveal').attributes('style')).toContain('animation-duration: 3s')
 
-    const five = mount(LumaDecoration, { props: { variant: 5 } })
+    const five = mount(LumalDecoration, { props: { variant: 5 } })
     expect(five.findAll('animate').every(animation => animation.attributes('dur') === '1.2s')).toBe(true)
     expect(five.get('animate').attributes('keySplines')).toBe('.4,1,.49,.98')
 
-    const six = mount(LumaDecoration, { props: { variant: 6 } })
-    expect(six.findAll('.luma-decoration__bar animate:first-child').every((animation) => {
+    const six = mount(LumalDecoration, { props: { variant: 6 } })
+    expect(six.findAll('.lumal-decoration__bar animate:first-child').every((animation) => {
       const seconds = Number.parseFloat(animation.attributes('dur'))
       return seconds >= 1.5 && seconds <= 2.5
     })).toBe(true)
-    expect(six.get('.luma-decoration__bar animate:last-child').attributes('values').split(';')).toHaveLength(3)
+    expect(six.get('.lumal-decoration__bar animate:last-child').attributes('values').split(';')).toHaveLength(3)
 
-    const nine = mount(LumaDecoration, { props: { variant: 9 } })
+    const nine = mount(LumalDecoration, { props: { variant: 9 } })
     const ringAnimations = nine.findAll('circle animateTransform')
     expect(ringAnimations[0]?.attributes('values')).toBe('0 50 50;360 50 50')
     expect(ringAnimations[1]?.attributes('values')).toBe('0 50 50;-360 50 50')
     expect(nine.findAll('use animateTransform')[19]?.attributes('begin')).toBe('2.85s')
 
-    const ten = mount(LumaDecoration, { props: { variant: 10 } })
+    const ten = mount(LumalDecoration, { props: { variant: 10 } })
     expect(ten.findAll('animate[id]')).toHaveLength(7)
-    expect(ten.findAll('.luma-decoration__segment')[1]?.get('animate[id]').attributes('begin')).toContain('.end + 1s')
+    expect(ten.findAll('.lumal-decoration__segment')[1]?.get('animate[id]').attributes('begin')).toContain('.end + 1s')
 
-    const twelve = mount(LumaDecoration, { props: { variant: 12 } })
+    const twelve = mount(LumalDecoration, { props: { variant: 12 } })
     expect(twelve.get('use animateTransform').attributes('dur')).toBe('3s')
     expect(twelve.findAll('circle animate').map(animation => animation.attributes('dur'))).toEqual(['2s', '2s'])
   })
@@ -196,7 +196,7 @@ describe('lumaDecoration DataV SVG fidelity', () => {
     Object.defineProperty(SVGSVGElement.prototype, 'unpauseAnimations', { configurable: true, value: unpause })
 
     try {
-      const wrapper = mount(LumaDecoration, { props: { variant: 9 } })
+      const wrapper = mount(LumalDecoration, { props: { variant: 9 } })
       await nextTick()
       await wrapper.trigger('mouseenter')
       await nextTick()
@@ -213,7 +213,7 @@ describe('lumaDecoration DataV SVG fidelity', () => {
 
       installMatchMedia(true)
       const pauseCount = pause.mock.calls.length
-      const reduced = mount(LumaDecoration, { props: { variant: 12 } })
+      const reduced = mount(LumalDecoration, { props: { variant: 12 } })
       await nextTick()
       expect(reduced.classes()).toContain('is-animation-paused')
       expect(pause.mock.calls.length).toBeGreaterThan(pauseCount)
@@ -259,7 +259,7 @@ describe('lumaDecoration DataV SVG fidelity', () => {
     })
 
     try {
-      const wrapper = mount(LumaDecoration, { props: { variant: 8 } })
+      const wrapper = mount(LumalDecoration, { props: { variant: 8 } })
       const runFrame = (): void => {
         const entry = [...frames.entries()].at(-1)
         if (!entry)

@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import { createDefaultPreferences, LumaThemeSettingsPanel } from '../src/theme'
+import { createDefaultPreferences, LumalThemeSettingsPanel } from '../src/theme'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
 function mountPanel() {
-  const wrapper = mount(LumaThemeSettingsPanel, {
+  const wrapper = mount(LumalThemeSettingsPanel, {
     global: {
       stubs: elementPlusStubs,
     },
@@ -16,11 +16,11 @@ function mountPanel() {
   return wrapper
 }
 
-describe('luma theme settings panel', () => {
+describe('lumal theme settings panel', () => {
   it('切换外观模式会更新 preferences 并抛出 change', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[0]?.trigger('click')
-    const darkButton = wrapper.findAll('.luma-theme-settings__mode-card')
+    await wrapper.findAll('.lumal-theme-settings__tab')[0]?.trigger('click')
+    const darkButton = wrapper.findAll('.lumal-theme-settings__mode-card')
       .find(button => button.text() === '深色')
 
     await darkButton?.trigger('click')
@@ -32,8 +32,8 @@ describe('luma theme settings panel', () => {
 
   it('选择预设主题色会写入 colorPrimary', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[0]?.trigger('click')
-    const colorButton = wrapper.find('.luma-theme-settings__color-card')
+    await wrapper.findAll('.lumal-theme-settings__tab')[0]?.trigger('click')
+    const colorButton = wrapper.find('.lumal-theme-settings__color-card')
 
     await colorButton.trigger('click')
 
@@ -43,8 +43,8 @@ describe('luma theme settings panel', () => {
 
   it('关闭标签页开关会同步禁用缓存和持久化开关', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
-    const findRow = (label: string) => wrapper.findAll('.luma-theme-settings__row').find(row => row.text().includes(label))
+    await wrapper.findAll('.lumal-theme-settings__tab')[1]?.trigger('click')
+    const findRow = (label: string) => wrapper.findAll('.lumal-theme-settings__row').find(row => row.text().includes(label))
     const enableInput = findRow('启用标签栏')?.find('input.el-switch')
     await enableInput?.setValue(false)
 
@@ -60,8 +60,8 @@ describe('luma theme settings panel', () => {
 
   it('切换标签风格会写入 styleType 且发出 change', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
-    const styleButtons = wrapper.findAll('.luma-theme-settings__tab-style button')
+    await wrapper.findAll('.lumal-theme-settings__tab')[1]?.trigger('click')
+    const styleButtons = wrapper.findAll('.lumal-theme-settings__tab-style button')
     const plain = styleButtons.find(b => b.text().includes('朴素'))
     await plain?.trigger('click')
 
@@ -70,16 +70,16 @@ describe('luma theme settings panel', () => {
   })
 
   it('顶部导航保留侧栏偏好入口但禁用当前无效的折叠设置', async () => {
-    const wrapper = mount(LumaThemeSettingsPanel, {
+    const wrapper = mount(LumalThemeSettingsPanel, {
       global: { stubs: elementPlusStubs },
       props: {
         preferences: createDefaultPreferences({ app: { layout: 'top-nav' } }),
       },
     })
 
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
+    await wrapper.findAll('.lumal-theme-settings__tab')[1]?.trigger('click')
 
-    const findRow = (label: string) => wrapper.findAll('.luma-theme-settings__row').find(row => row.text().includes(label))
+    const findRow = (label: string) => wrapper.findAll('.lumal-theme-settings__row').find(row => row.text().includes(label))
     const showSidebar = findRow('显示侧边栏')?.find('input.el-switch')
     const autoActivateChild = findRow('自动进入首个子菜单')?.find('input.el-switch')
     const collapse = findRow('折叠菜单')?.find('input.el-switch')
@@ -91,8 +91,8 @@ describe('luma theme settings panel', () => {
 
   it('混合导航可以开启自动进入首个子菜单', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
-    const row = wrapper.findAll('.luma-theme-settings__row')
+    await wrapper.findAll('.lumal-theme-settings__tab')[1]?.trigger('click')
+    const row = wrapper.findAll('.lumal-theme-settings__row')
       .find(item => item.text().includes('自动进入首个子菜单'))
     const input = row?.find('input.el-switch')
 
@@ -104,7 +104,7 @@ describe('luma theme settings panel', () => {
   })
 
   it('showLayout 为 false 时不渲染布局模式切换', () => {
-    const wrapper = mount(LumaThemeSettingsPanel, {
+    const wrapper = mount(LumalThemeSettingsPanel, {
       global: { stubs: elementPlusStubs },
       props: {
         preferences: createDefaultPreferences(),
@@ -118,19 +118,19 @@ describe('luma theme settings panel', () => {
   it('提供三页签和四种可选择的动画预览', async () => {
     const wrapper = mountPanel()
 
-    expect(wrapper.findAll('.luma-theme-settings__tab').map(tab => tab.text())).toEqual(['外观', '布局', '通用'])
-    expect(wrapper.findAll('.luma-theme-settings__transition-card')).toHaveLength(4)
+    expect(wrapper.findAll('.lumal-theme-settings__tab').map(tab => tab.text())).toEqual(['外观', '布局', '通用'])
+    expect(wrapper.findAll('.lumal-theme-settings__transition-card')).toHaveLength(4)
 
-    await wrapper.findAll('.luma-theme-settings__tab')[1]?.trigger('click')
-    expect(wrapper.findAll('.luma-theme-settings__layout-card')).toHaveLength(3)
+    await wrapper.findAll('.lumal-theme-settings__tab')[1]?.trigger('click')
+    expect(wrapper.findAll('.lumal-theme-settings__layout-card')).toHaveLength(3)
 
-    await wrapper.find('.luma-theme-settings__transition-card.is-zoom-fade').trigger('click')
+    await wrapper.find('.lumal-theme-settings__transition-card.is-zoom-fade').trigger('click')
     const updates = wrapper.emitted('update:preferences') as [ReturnType<typeof createDefaultPreferences>][]
     expect(updates.at(-1)?.[0].transition.name).toBe('zoom-fade')
   })
 
   it('会按消费方 defaults 重置偏好并抛出 reset', async () => {
-    const wrapper = mount(LumaThemeSettingsPanel, {
+    const wrapper = mount(LumalThemeSettingsPanel, {
       global: { stubs: elementPlusStubs },
       props: {
         defaults: {
@@ -144,7 +144,7 @@ describe('luma theme settings panel', () => {
       },
     })
 
-    await wrapper.find('.luma-theme-settings__reset').trigger('click')
+    await wrapper.find('.lumal-theme-settings__reset').trigger('click')
 
     const reset = wrapper.emitted('reset') as [ReturnType<typeof createDefaultPreferences>][]
     expect(reset[0]?.[0]).toMatchObject({
@@ -155,8 +155,8 @@ describe('luma theme settings panel', () => {
 
   it('通用设置会更新动态标题、搜索快捷键和面包屑开关', async () => {
     const wrapper = mountPanel()
-    await wrapper.findAll('.luma-theme-settings__tab')[2]?.trigger('click')
-    const findRow = (label: string) => wrapper.findAll('.luma-theme-settings__row').find(row => row.text().includes(label))
+    await wrapper.findAll('.lumal-theme-settings__tab')[2]?.trigger('click')
+    const findRow = (label: string) => wrapper.findAll('.lumal-theme-settings__row').find(row => row.text().includes(label))
 
     await findRow('动态页面标题')?.find('input.el-switch').setValue(false)
     await findRow('全局搜索')?.find('input.el-switch').setValue(false)
@@ -173,7 +173,7 @@ describe('luma theme settings panel', () => {
 
   it('外观设置会更新受限的全局字号', async () => {
     const wrapper = mountPanel()
-    const fontRow = wrapper.findAll('.luma-theme-settings__row').find(row => row.text().includes('全局字号'))
+    const fontRow = wrapper.findAll('.lumal-theme-settings__row').find(row => row.text().includes('全局字号'))
     const input = fontRow?.find('input.el-input-number')
 
     expect(input?.attributes('min')).toBe('12')

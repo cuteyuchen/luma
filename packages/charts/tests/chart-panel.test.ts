@@ -1,12 +1,12 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import { LumaChartPanel } from '../src'
+import { LumalChartPanel } from '../src'
 
-describe('luma chart panel', () => {
+describe('lumal chart panel', () => {
   it('loading 时展示加载状态，不渲染图表', () => {
-    const wrapper = mount(LumaChartPanel, {
+    const wrapper = mount(LumalChartPanel, {
       global: {
-        stubs: { LumaChart: true, VChart: true },
+        stubs: { LumalChart: true, VChart: true },
       },
       props: {
         loading: true,
@@ -19,9 +19,9 @@ describe('luma chart panel', () => {
   })
 
   it('noData 时展示空状态文案', () => {
-    const wrapper = mount(LumaChartPanel, {
+    const wrapper = mount(LumalChartPanel, {
       global: {
-        stubs: { LumaChart: true, VChart: true },
+        stubs: { LumalChart: true, VChart: true },
       },
       props: {
         emptyText: '暂无数据',
@@ -34,9 +34,9 @@ describe('luma chart panel', () => {
 
   it('支持查询区、表格视图和导出事件', async () => {
     const onExport = vi.fn()
-    const wrapper = mount(LumaChartPanel, {
+    const wrapper = mount(LumalChartPanel, {
       global: {
-        stubs: { LumaChart: true, VChart: true },
+        stubs: { LumalChart: true, VChart: true },
       },
       props: {
         options: {},
@@ -52,16 +52,16 @@ describe('luma chart panel', () => {
     })
 
     expect(wrapper.text()).toContain('统计周期')
-    expect(wrapper.get('.luma-chart-panel__summary').text()).toContain('120 次访问')
-    await wrapper.findAll('.luma-chart-panel__view-toggle button')[1]!.trigger('click')
+    expect(wrapper.get('.lumal-chart-panel__summary').text()).toContain('120 次访问')
+    await wrapper.findAll('.lumal-chart-panel__view-toggle button')[1]!.trigger('click')
     expect(wrapper.text()).toContain('120')
-    await wrapper.get('.luma-chart-panel__actions > button').trigger('click')
+    await wrapper.get('.lumal-chart-panel__actions > button').trigger('click')
     expect(onExport).toHaveBeenCalledWith('table')
   })
 
   it('错误状态可以触发重试', async () => {
     const onRetry = vi.fn()
-    const wrapper = mount(LumaChartPanel, {
+    const wrapper = mount(LumalChartPanel, {
       props: {
         error: new Error('服务暂不可用'),
         onRetry,

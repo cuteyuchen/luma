@@ -1,0 +1,35 @@
+{
+  "name": "create-lumal-admin",
+  "type": "module",
+  "version": "0.0.1-beta",
+  "description": "Create a minimal Lumal admin application.",
+  "license": "MIT",
+  "keywords": [
+    "lumal",
+    "vue",
+    "admin",
+    "scaffold",
+    "create"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "create-lumal-admin": "./dist/cli.js"
+  },
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/clean-package-dist.mjs dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config ../../vitest.config.ts tests"
+  }
+}

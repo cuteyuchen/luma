@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaBorderBox } from '../src'
+import { LumalBorderBox } from '../src'
 
 class ResizeObserverMock {
   static instances: ResizeObserverMock[] = []
@@ -69,9 +69,9 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('lumaBorderBox DataV SVG fidelity', () => {
+describe('lumalBorderBox DataV SVG fidelity', () => {
   it('支持 DataV 原生 color、backgroundColor 与 borderBox8 dur 属性', async () => {
-    const wrapper = mount(LumaBorderBox, {
+    const wrapper = mount(LumalBorderBox, {
       props: {
         backgroundColor: '#010203',
         color: ['#112233', '#445566'],
@@ -82,7 +82,7 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
     flushAnimationFrames()
     await nextTick()
 
-    expect(wrapper.attributes('style')).toContain('--luma-datav-duration: 4000ms')
+    expect(wrapper.attributes('style')).toContain('--lumal-datav-duration: 4000ms')
     expect(wrapper.get('polygon').attributes('fill')).toBe('#010203')
     expect(wrapper.findAll('use')[0]!.attributes('stroke')).toBe('#112233')
     expect(wrapper.findAll('use')[1]!.attributes('stroke')).toBe('#445566')
@@ -90,20 +90,20 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
   })
 
   it('保留 1 号四角 SVG 几何、默认颜色和原始 SMIL 节奏', async () => {
-    const wrapper = mount(LumaBorderBox, {
+    const wrapper = mount(LumalBorderBox, {
       props: { background: '#010203', variant: 1 },
       slots: { default: '内容' },
     })
     flushAnimationFrames()
     await nextTick()
 
-    expect(wrapper.findAll('svg.luma-border-box__bb1-corner')).toHaveLength(4)
+    expect(wrapper.findAll('svg.lumal-border-box__bb1-corner')).toHaveLength(4)
     expect(wrapper.findAll('animate')).toHaveLength(12)
     expect(wrapper.find('svg > polygon').attributes('fill')).toBe('#010203')
     expect(wrapper.find('animate').attributes('dur')).toBe('0.5s')
-    expect(wrapper.attributes('style')).toContain('--luma-datav-primary: #4fd2dd')
-    expect(wrapper.attributes('style')).toContain('--luma-datav-secondary: #235fa7')
-    expect(wrapper.get('.luma-border-box__content').text()).toBe('内容')
+    expect(wrapper.attributes('style')).toContain('--lumal-datav-primary: #4fd2dd')
+    expect(wrapper.attributes('style')).toContain('--lumal-datav-secondary: #235fa7')
+    expect(wrapper.get('.lumal-border-box__content').text()).toBe('内容')
   })
 
   it('13 种边框均输出上游对应的 SVG 元素签名和默认颜色', async () => {
@@ -124,7 +124,7 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
     ] as const
 
     for (const signature of cases) {
-      const wrapper = mount(LumaBorderBox, { props: { variant: signature.variant } })
+      const wrapper = mount(LumalBorderBox, { props: { variant: signature.variant } })
       flushAnimationFrames()
       await nextTick()
       expect(wrapper.findAll('circle')).toHaveLength(signature.circles)
@@ -132,14 +132,14 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
       expect(wrapper.findAll('path')).toHaveLength(signature.paths)
       expect(wrapper.findAll('polygon')).toHaveLength(signature.polygons)
       expect(wrapper.findAll('polyline')).toHaveLength(signature.polylines)
-      expect(wrapper.attributes('style')).toContain(`--luma-datav-primary: ${signature.color}`)
+      expect(wrapper.attributes('style')).toContain(`--lumal-datav-primary: ${signature.color}`)
       wrapper.unmount()
     }
   })
 
   it('8 号使用唯一 SVG id、真实环绕路径并支持反向和时长', async () => {
-    const first = mount(LumaBorderBox, { props: { duration: 4200, variant: 8 } })
-    const second = mount(LumaBorderBox, { props: { variant: 8 } })
+    const first = mount(LumalBorderBox, { props: { duration: 4200, variant: 8 } })
+    const second = mount(LumalBorderBox, { props: { variant: 8 } })
     flushAnimationFrames()
     await nextTick()
 
@@ -154,7 +154,7 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
     expect(first.get('defs > path').attributes('d')).toBe('M 2.5, 2.5 L 2.5, 217.5 L 397.5, 217.5 L 397.5, 2.5 L 2.5, 2.5')
 
     await first.setProps({ variant: 4 })
-    expect(first.get('.luma-border-box__svg').classes()).toContain('is-frame-reverse')
+    expect(first.get('.lumal-border-box__svg').classes()).toContain('is-frame-reverse')
   })
 
   it('页面、视口和交互暂停会暂停原生 SVG 动画并在卸载时清理', async () => {
@@ -163,7 +163,7 @@ describe('lumaBorderBox DataV SVG fidelity', () => {
     Object.defineProperty(SVGSVGElement.prototype, 'pauseAnimations', { configurable: true, value: pauseAnimations })
     Object.defineProperty(SVGSVGElement.prototype, 'unpauseAnimations', { configurable: true, value: unpauseAnimations })
 
-    const wrapper = mount(LumaBorderBox, { props: { variant: 8 } })
+    const wrapper = mount(LumalBorderBox, { props: { variant: 8 } })
     flushAnimationFrames()
     await nextTick()
     const intersectionObserver = IntersectionObserverMock.instances.at(-1)!

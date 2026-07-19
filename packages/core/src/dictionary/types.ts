@@ -67,4 +67,4 @@ export interface CreateDictionaryFetcherWithFallbackOptions {
   warnOnRemoteFailure?: boolean
 }
 
-export const dictionaryContextKey: InjectionKey<DictionaryContext> = Symbol('luma-dictionary-context')
+export const dictionaryContextKey: InjectionKey<DictionaryContext> = Symbol('lumal-dictionary-context')

@@ -6,7 +6,7 @@ import {
   createPermissionStore,
   hasPermission,
   hasRole,
-  LumaAccessControl,
+  LumalAccessControl,
   providePermissionStore,
   setupPermissionGuard,
   usePermissionStore,
@@ -51,7 +51,7 @@ describe('permission store', () => {
 
   it('accessControl 会响应权限更新并支持 fallback', async () => {
     const store = createPermissionStore({ permissions: ['system:user:list'] })
-    const wrapper = mount(LumaAccessControl, {
+    const wrapper = mount(LumalAccessControl, {
       props: {
         permission: 'system:user:create',
         store,
@@ -73,7 +73,7 @@ describe('permission store', () => {
       permissions: ['report:read'],
       roles: ['admin'],
     })
-    const wrapper = mount(LumaAccessControl, {
+    const wrapper = mount(LumalAccessControl, {
       props: {
         mode: 'some',
         permissions: ['report:read', 'report:write'],

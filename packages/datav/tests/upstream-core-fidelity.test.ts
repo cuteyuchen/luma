@@ -2,10 +2,10 @@ import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import {
-  LumaDigitalFlop,
-  LumaLoading,
-  LumaPercentPond,
-  LumaWaterLevelPond,
+  LumalDigitalFlop,
+  LumalLoading,
+  LumalPercentPond,
+  LumalWaterLevelPond,
 } from '../src'
 
 class ResizeObserverMock {
@@ -59,16 +59,16 @@ beforeEach(() => {
   }))
   vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => frames.delete(id)))
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function () {
-    if (this.classList.contains('luma-percent-pond'))
+    if (this.classList.contains('lumal-percent-pond'))
       return 200
-    if (this.classList.contains('luma-water-level-pond'))
+    if (this.classList.contains('lumal-water-level-pond'))
       return 120
     return 100
   })
   vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function () {
-    if (this.classList.contains('luma-percent-pond'))
+    if (this.classList.contains('lumal-percent-pond'))
       return 100
-    if (this.classList.contains('luma-water-level-pond'))
+    if (this.classList.contains('lumal-water-level-pond'))
       return 120
     return 50
   })
@@ -89,7 +89,7 @@ afterEach(() => {
 
 describe('dataV core component fidelity', () => {
   it('loading 保留上游双圆半径、虚线长度、反向旋转和变色节奏', () => {
-    const wrapper = mount(LumaLoading, { slots: { default: '加载中' } })
+    const wrapper = mount(LumalLoading, { slots: { default: '加载中' } })
     const circles = wrapper.findAll('circle')
     const rotations = wrapper.findAll('animateTransform')
     const colors = wrapper.findAll('animate')
@@ -115,7 +115,7 @@ describe('dataV core component fidelity', () => {
   })
 
   it('digital flop 使用上游 Arial 30px、绿色填充和居中基线', () => {
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: { duration: 0, prefix: '¥', suffix: '万', value: 12.34, precision: 1 },
     })
     const text = wrapper.get('text')
@@ -134,7 +134,7 @@ describe('dataV core component fidelity', () => {
   })
 
   it('digital flop 支持上游 numberText 的多 number、多个 {nt} 和 rowGap', () => {
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: {
         content: '{nt}个\n同比{nt}%',
         duration: 0,
@@ -155,7 +155,7 @@ describe('dataV core component fidelity', () => {
   })
 
   it('digital flop 接受原生 config，并让显式 props 覆盖 config', async () => {
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: {
         color: '#abcdef',
         config: {
@@ -186,7 +186,7 @@ describe('dataV core component fidelity', () => {
   })
 
   it('digital flop 映射上游描边、虚线和阴影样式', () => {
-    const wrapper = mount(LumaDigitalFlop, {
+    const wrapper = mount(LumalDigitalFlop, {
       props: {
         config: {
           animationFrame: 0,
@@ -225,28 +225,28 @@ describe('dataV core component fidelity', () => {
   })
 
   it('percent pond 按上游尺寸公式绘制渐变边框、虚线进度和居中文字', async () => {
-    const wrapper = mount(LumaPercentPond, { props: { value: 25 } })
+    const wrapper = mount(LumalPercentPond, { props: { value: 25 } })
     await flushFrames()
 
-    expect(wrapper.get('.luma-percent-pond__border').attributes()).toMatchObject({
+    expect(wrapper.get('.lumal-percent-pond__border').attributes()).toMatchObject({
       height: '97',
       rx: '5',
       width: '197',
       x: '1.5',
       y: '1.5',
     })
-    expect(wrapper.get('.luma-percent-pond__progress').attributes()).toMatchObject({
+    expect(wrapper.get('.lumal-percent-pond__progress').attributes()).toMatchObject({
       'points': '6,50 53,50.001',
       'stroke-dasharray': '5,1',
       'stroke-width': '88',
     })
     expect(wrapper.findAll('linearGradient')[1]!.attributes('x2')).toBe('175%')
-    expect(wrapper.get('.luma-percent-pond__label').attributes()).toMatchObject({ x: '100', y: '50' })
-    expect(wrapper.get('.luma-percent-pond__label').text()).toBe('25%')
+    expect(wrapper.get('.lumal-percent-pond__label').attributes()).toMatchObject({ x: '100', y: '50' })
+    expect(wrapper.get('.lumal-percent-pond__label').text()).toBe('25%')
   })
 
   it('percent pond 接受原生 config，且显式 value 覆盖 config.value', async () => {
-    const wrapper = mount(LumaPercentPond, {
+    const wrapper = mount(LumalPercentPond, {
       props: {
         config: {
           borderGap: 2,
@@ -264,8 +264,8 @@ describe('dataV core component fidelity', () => {
     })
     await flushFrames()
 
-    const border = wrapper.get('.luma-percent-pond__border')
-    const progress = wrapper.get('.luma-percent-pond__progress')
+    const border = wrapper.get('.lumal-percent-pond__border')
+    const progress = wrapper.get('.lumal-percent-pond__progress')
     expect(border.attributes()).toMatchObject({ 'rx': '8', 'stroke-width': '4', 'x': '2', 'y': '2' })
     expect(progress.attributes()).toMatchObject({
       'points': '6,50 53,50.001',
@@ -275,18 +275,18 @@ describe('dataV core component fidelity', () => {
     expect(progress.attributes('stroke')).toBe(border.attributes('stroke'))
     expect(wrapper.find('clipPath').exists()).toBe(false)
     expect(progress.element.parentElement?.tagName.toLowerCase()).toBe('svg')
-    expect(wrapper.get('.luma-percent-pond__label').attributes('fill')).toBe('#fefefe')
-    expect(wrapper.get('.luma-percent-pond__label').text()).toBe('完成 25')
+    expect(wrapper.get('.lumal-percent-pond__label').attributes('fill')).toBe('#fefefe')
+    expect(wrapper.get('.lumal-percent-pond__label').text()).toBe('完成 25')
   })
 
   it('water level pond 使用 SVG smoothline 路径、画布内缩和边框几何', async () => {
-    const wrapper = mount(LumaWaterLevelPond, { props: { value: 50 } })
+    const wrapper = mount(LumalWaterLevelPond, { props: { value: 50 } })
     await flushFrames()
 
     const paths = (wrapper.vm as unknown as { getWavePaths: () => string[] }).getWavePaths()
     expect(paths).toHaveLength(1)
     expect(paths[0]).toMatch(/^M 146\.66666666666666 60 C /)
-    expect(wrapper.get('.luma-water-level-pond__border').attributes()).toMatchObject({
+    expect(wrapper.get('.lumal-water-level-pond__border').attributes()).toMatchObject({
       height: '116',
       width: '116',
       x: '2',
@@ -297,7 +297,7 @@ describe('dataV core component fidelity', () => {
   })
 
   it('water level pond 按上游 config.data 为每个水位创建独立 smoothline', async () => {
-    const wrapper = mount(LumaWaterLevelPond, {
+    const wrapper = mount(LumalWaterLevelPond, {
       props: {
         config: {
           data: [20, 75],
@@ -328,7 +328,7 @@ describe('dataV core component fidelity', () => {
     Object.defineProperty(SVGSVGElement.prototype, 'unpauseAnimations', { configurable: true, value: unpause })
 
     try {
-      const loading = mount(LumaLoading)
+      const loading = mount(LumalLoading)
       await nextTick()
       const loadingObserver = IntersectionObserverMock.instances.at(-1)!
       loadingObserver.emit(false)
@@ -339,7 +339,7 @@ describe('dataV core component fidelity', () => {
       loading.unmount()
       expect(loadingObserver.disconnect).toHaveBeenCalled()
 
-      const water = mount(LumaWaterLevelPond, { props: { value: 60 } })
+      const water = mount(LumalWaterLevelPond, { props: { value: 60 } })
       await flushFrames()
       const waterIntersection = IntersectionObserverMock.instances.at(-1)!
       const waterResize = ResizeObserverMock.instances.at(-1)!

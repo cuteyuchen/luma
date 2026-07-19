@@ -1,0 +1,79 @@
+import process from 'node:process'
+import { fileURLToPath, URL } from 'node:url'
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+import { createLumalAliases } from '../../packages/vite/src/aliases'
+
+const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
+
+/***********************应用开发配置*********************/
+export default defineConfig(({ command }) => ({
+  plugins: [vue()],
+  server: {
+    // 固定端口，便于 admin 与 mock-api、datav-guide 之间的稳定联调
+    port: 5170,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        changeOrigin: true,
+        target: process.env.LUMAL_MOCK_API_TARGET || 'http://127.0.0.1:5320',
+      },
+    },
+  },
+  build: {
+    chunkSizeWarningLimit: 500,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              maxSize: 420 * 1024,
+              name: 'vendor-echarts',
+              priority: 50,
+              test: /node_modules[\\/](?:echarts|vue-echarts|zrender)[\\/]/,
+            },
+            {
+              maxSize: 420 * 1024,
+              name: 'vendor-element-plus',
+              priority: 40,
+              test: /node_modules[\\/]element-plus[\\/]/,
+            },
+            {
+              maxSize: 420 * 1024,
+              name: 'vendor-vue',
+              priority: 30,
+              test: /node_modules[\\/](?:@vue|pinia|vue|vue-router)[\\/]/,
+            },
+            {
+              maxSize: 420 * 1024,
+              name: 'vendor-lumal',
+              priority: 20,
+              test: /[\\/]packages[\\/](?:charts|core|icons|icons-vue)[\\/](?:dist|src)[\\/]/,
+            },
+            {
+              entriesAware: true,
+              maxSize: 420 * 1024,
+              name: 'vendor',
+              priority: 10,
+              test: /node_modules[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: fileURLToPath(new URL('./src', import.meta.url)),
+      },
+      ...(command === 'serve'
+        ? createLumalAliases({
+            packages: ['charts', 'core', 'icons', 'icons-vue'],
+            workspaceRoot,
+          })
+        : []),
+    ],
+  },
+}))

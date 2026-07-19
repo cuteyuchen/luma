@@ -19,7 +19,7 @@ export interface NormalizeSchemaFormItemsOptions<T extends SchemaFormRecord = Re
 /***********************字段归一化*********************/
 function createSchemaFormItemId(field: string): string {
   const normalizedField = field.replace(/[^\w-]/g, '-')
-  return `luma-schema-form-${normalizedField}`
+  return `lumal-schema-form-${normalizedField}`
 }
 
 function resolveState<T extends SchemaFormRecord>(

@@ -1,11 +1,11 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import { LumaPagination } from '../src/components/pagination'
+import { LumalPagination } from '../src/components/pagination'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
-describe('luma pagination', () => {
+describe('lumal pagination', () => {
   it('会使用 Element Plus 分页组件，点击下一页会更新页码并触发 change', async () => {
-    const wrapper = mount(LumaPagination, {
+    const wrapper = mount(LumalPagination, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -30,7 +30,7 @@ describe('luma pagination', () => {
   })
 
   it('修改每页条数会重置到第一页', async () => {
-    const wrapper = mount(LumaPagination, {
+    const wrapper = mount(LumalPagination, {
       global: {
         stubs: elementPlusStubs,
       },

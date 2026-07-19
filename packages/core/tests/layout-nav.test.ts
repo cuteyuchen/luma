@@ -9,7 +9,7 @@ import {
   closeTabsRight,
   findMenuItemByPath,
   includesMenuPath,
-  LumaTopNav,
+  LumalTopNav,
   resolveActiveTopMenuPath,
   resolveCachedTabPaths,
   resolveNavigationTarget,
@@ -148,9 +148,9 @@ describe('tab strategy helpers', () => {
   })
 })
 
-describe('luma top nav', () => {
+describe('lumal top nav', () => {
   it('点击顶部菜单项会抛出 select 事件', async () => {
-    const wrapper = mount(LumaTopNav, {
+    const wrapper = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: {
         activePath: '/about',
@@ -165,7 +165,7 @@ describe('luma top nav', () => {
   })
 
   it('支持递归菜单、隐藏项、对齐和最大宽度', () => {
-    const wrapper = mount(LumaTopNav, {
+    const wrapper = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: {
         align: 'center',
@@ -178,13 +178,13 @@ describe('luma top nav', () => {
     })
 
     expect(wrapper.classes()).toContain('is-align-center')
-    expect(wrapper.attributes('style')).toContain('--luma-top-nav-max-width: 720px')
+    expect(wrapper.attributes('style')).toContain('--lumal-top-nav-max-width: 720px')
     expect(wrapper.text()).not.toContain('隐藏页')
     expect(wrapper.find('[data-menu-path="/dashboard/workplace"]').exists()).toBe(true)
   })
 
   it('flat 模式会为每个顶级菜单渲染独立节点', () => {
-    const wrapper = mount(LumaTopNav, {
+    const wrapper = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: {
         menus,
@@ -198,7 +198,7 @@ describe('luma top nav', () => {
   })
 
   it('一级叶子菜单在 activePath 命中后会标记 is-active', async () => {
-    const wrapper = mount(LumaTopNav, {
+    const wrapper = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: {
         activePath: '/dashboard/workplace',
@@ -216,7 +216,7 @@ describe('luma top nav', () => {
   })
 
   it('flat 模式会按顶级路径标记选中项', async () => {
-    const wrapper = mount(LumaTopNav, {
+    const wrapper = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: {
         activePath: '/dashboard',

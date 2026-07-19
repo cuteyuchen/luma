@@ -1,26 +1,26 @@
 import { describe, expect, it } from 'vitest'
 import { createApp } from 'vue'
-import LumaDatav, * as datav from '../src'
+import LumalDatav, * as datav from '../src'
 
 const upstreamMappings = [
-  ...Array.from({ length: 13 }, (_, index) => [`borderBox${index + 1}`, 'LumaBorderBox'] as const),
-  ...Array.from({ length: 12 }, (_, index) => [`decoration${index + 1}`, 'LumaDecoration'] as const),
-  ['fullScreenContainer', 'LumaFullScreenContainer'],
-  ['loading', 'LumaLoading'],
-  ['charts', 'LumaCharts'],
-  ['activeRingChart', 'LumaActiveRingChart'],
-  ['capsuleChart', 'LumaCapsuleChart'],
-  ['waterLevelPond', 'LumaWaterLevelPond'],
-  ['percentPond', 'LumaPercentPond'],
-  ['digitalFlop', 'LumaDigitalFlop'],
-  ['flylineChart', 'LumaFlylineChart'],
-  ['flylineChartEnhanced', 'LumaFlylineChartEnhanced'],
-  ['conicalColumnChart', 'LumaConicalColumnChart'],
-  ['scrollBoard', 'LumaScrollBoard'],
-  ['scrollRankingBoard', 'LumaScrollRankingBoard'],
+  ...Array.from({ length: 13 }, (_, index) => [`borderBox${index + 1}`, 'LumalBorderBox'] as const),
+  ...Array.from({ length: 12 }, (_, index) => [`decoration${index + 1}`, 'LumalDecoration'] as const),
+  ['fullScreenContainer', 'LumalFullScreenContainer'],
+  ['loading', 'LumalLoading'],
+  ['charts', 'LumalCharts'],
+  ['activeRingChart', 'LumalActiveRingChart'],
+  ['capsuleChart', 'LumalCapsuleChart'],
+  ['waterLevelPond', 'LumalWaterLevelPond'],
+  ['percentPond', 'LumalPercentPond'],
+  ['digitalFlop', 'LumalDigitalFlop'],
+  ['flylineChart', 'LumalFlylineChart'],
+  ['flylineChartEnhanced', 'LumalFlylineChartEnhanced'],
+  ['conicalColumnChart', 'LumalConicalColumnChart'],
+  ['scrollBoard', 'LumalScrollBoard'],
+  ['scrollRankingBoard', 'LumalScrollRankingBoard'],
 ] as const
 
-describe('@luma/datav public API', () => {
+describe('@lumal/datav public API', () => {
   it('完整映射 DataV 2.10.0 的 38 个组件', () => {
     expect(upstreamMappings).toHaveLength(38)
     expect(new Set(upstreamMappings.map(([name]) => name)).size).toBe(38)
@@ -31,7 +31,7 @@ describe('@luma/datav public API', () => {
 
   it('根 install 注册全部 15 个 Vue 3 组件入口', () => {
     const app = createApp({})
-    app.use(LumaDatav)
+    app.use(LumalDatav)
 
     const componentNames = new Set(upstreamMappings.map(([, name]) => name))
     expect(componentNames.size).toBe(15)

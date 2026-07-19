@@ -1,27 +1,27 @@
-# @luma/datav
+# @lumal/datav
 
-面向 Luma 驾驶舱的 Vue 3 DataV 组件包。当前版本以 DataV 2.10.0（MIT）为基准，完整重构其 38 个组件的默认几何、动效和 `config` 协议，同时提供更明确的现代 props API。
+面向 Lumal 驾驶舱的 Vue 3 DataV 组件包。当前版本以 DataV 2.10.0（MIT）为基准，完整重构其 38 个组件的默认几何、动效和 `config` 协议，同时提供更明确的现代 props API。
 
 ## 安装
 
 ```bash
-pnpm add @luma/datav vue echarts
+pnpm add @lumal/datav vue echarts
 ```
 
 ```ts
 import { createApp } from 'vue'
-import LumaDatav from '@luma/datav'
-import '@luma/datav/style.css'
+import LumalDatav from '@lumal/datav'
+import '@lumal/datav/style.css'
 
-createApp(App).use(LumaDatav).mount('#app')
+createApp(App).use(LumalDatav).mount('#app')
 ```
 
 组件支持根入口和独立子入口按需导入：
 
 ```ts
-import LumaBorderBox from '@luma/datav/border-box'
-import LumaFlylineChart from '@luma/datav/flyline-chart'
-import '@luma/datav/style.css'
+import LumalBorderBox from '@lumal/datav/border-box'
+import LumalFlylineChart from '@lumal/datav/flyline-chart'
+import '@lumal/datav/style.css'
 ```
 
 ### DataV 原生 Charts 与 ECharts 扩展
@@ -29,13 +29,13 @@ import '@luma/datav/style.css'
 `config` 直接交给 DataV 2.10.0 使用的 `@jiaminghi/charts` Canvas 运行时：
 
 ```vue
-<LumaCharts :config="{ xAxis: { data: ['一', '二'] }, yAxis: { data: 'value' }, series: [{ type: 'line', data: [10, 20] }] }" />
+<LumalCharts :config="{ xAxis: { data: ['一', '二'] }, yAxis: { data: 'value' }, series: [{ type: 'line', data: [10, 20] }] }" />
 ```
 
 为兼容既有项目，未传 `config` 时仍可用 ECharts 原生 `option`：
 
 ```vue
-<LumaCharts
+<LumalCharts
   :option="option"
   theme="dark"
   :init-options="{ renderer: 'canvas', devicePixelRatio: 2 }"
@@ -52,16 +52,16 @@ import '@luma/datav/style.css'
 DataV 原生配置可以直接迁移：
 
 ```vue
-<LumaDigitalFlop :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }" />
-<LumaScrollBoard :config="{ header: ['区域', '数量'], data: [['甲区', 20]], rowNum: 5 }" />
+<LumalDigitalFlop :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }" />
+<LumalScrollBoard :config="{ header: ['区域', '数量'], data: [['甲区', 20]], rowNum: 5 }" />
 ```
 
 也可以使用类型更明确的现代 props：
 
 ```vue
-<LumaBorderBox :variant="8" :duration="3000">
-  <LumaDigitalFlop :value="1286" suffix=" 台" />
-</LumaBorderBox>
+<LumalBorderBox :variant="8" :duration="3000">
+  <LumalDigitalFlop :value="1286" suffix=" 台" />
+</LumalBorderBox>
 ```
 
 同一字段同时出现时，优先级为：显式现代 props > DataV `config` > DataV 上游默认值。为了避免注入风险，滚动表中的 HTML 字符串按普通文本渲染，不恢复上游 `v-html`；除此之外保留上游公开视觉、几何、动画和事件语义。
@@ -69,60 +69,60 @@ DataV 原生配置可以直接迁移：
 ## 实现说明
 
 - BorderBox、Decoration、Loading、PercentPond、Flyline 等使用响应式 SVG、CSS 与 SMIL 重构。
-- `LumaWaterLevelPond` 使用响应式 SVG 波浪、裁剪与渐变实现，不依赖 Canvas 运行时。
-- `LumaCharts` 的 `config` 使用 DataV 官方 `@jiaminghi/charts`；既有 `option` API 保留为 ECharts 扩展，两套配置不互转。
-- `LumaActiveRingChart` 在 ECharts 兼容层中模拟每个数据项独立半径，保持上游固定线宽与切换几何。
+- `LumalWaterLevelPond` 使用响应式 SVG 波浪、裁剪与渐变实现，不依赖 Canvas 运行时。
+- `LumalCharts` 的 `config` 使用 DataV 官方 `@jiaminghi/charts`；既有 `option` API 保留为 ECharts 扩展，两套配置不互转。
+- `LumalActiveRingChart` 在 ECharts 兼容层中模拟每个数据项独立半径，保持上游固定线宽与切换几何。
 - 连续动画支持页面隐藏、离开视口、悬停、键盘焦点和 `prefers-reduced-motion` 暂停。
 - ResizeObserver 通过 `requestAnimationFrame` 合并；数字动画和定时器会在更新或卸载时立即清理。
 - 滚动组件使用循环窗口索引，不复制整份数据；现代单行滚动最多渲染 `visibleRows + 1` 行。
 
 ## 38 个 DataV 组件映射
 
-| DataV 2.10.0 | @luma/datav |
+| DataV 2.10.0 | @lumal/datav |
 | --- | --- |
-| borderBox1 | `LumaBorderBox variant=1` |
-| borderBox2 | `LumaBorderBox variant=2` |
-| borderBox3 | `LumaBorderBox variant=3` |
-| borderBox4 | `LumaBorderBox variant=4` |
-| borderBox5 | `LumaBorderBox variant=5` |
-| borderBox6 | `LumaBorderBox variant=6` |
-| borderBox7 | `LumaBorderBox variant=7` |
-| borderBox8 | `LumaBorderBox variant=8` |
-| borderBox9 | `LumaBorderBox variant=9` |
-| borderBox10 | `LumaBorderBox variant=10` |
-| borderBox11 | `LumaBorderBox variant=11` |
-| borderBox12 | `LumaBorderBox variant=12` |
-| borderBox13 | `LumaBorderBox variant=13` |
-| decoration1 | `LumaDecoration variant=1` |
-| decoration2 | `LumaDecoration variant=2` |
-| decoration3 | `LumaDecoration variant=3` |
-| decoration4 | `LumaDecoration variant=4` |
-| decoration5 | `LumaDecoration variant=5` |
-| decoration6 | `LumaDecoration variant=6` |
-| decoration7 | `LumaDecoration variant=7` |
-| decoration8 | `LumaDecoration variant=8` |
-| decoration9 | `LumaDecoration variant=9` |
-| decoration10 | `LumaDecoration variant=10` |
-| decoration11 | `LumaDecoration variant=11` |
-| decoration12 | `LumaDecoration variant=12` |
-| fullScreenContainer | `LumaFullScreenContainer` |
-| loading | `LumaLoading` |
-| charts | `LumaCharts` |
-| activeRingChart | `LumaActiveRingChart` |
-| capsuleChart | `LumaCapsuleChart` |
-| waterLevelPond | `LumaWaterLevelPond` |
-| percentPond | `LumaPercentPond` |
-| digitalFlop | `LumaDigitalFlop` |
-| flylineChart | `LumaFlylineChart` |
-| flylineChartEnhanced | `LumaFlylineChartEnhanced` |
-| conicalColumnChart | `LumaConicalColumnChart` |
-| scrollBoard | `LumaScrollBoard` |
-| scrollRankingBoard | `LumaScrollRankingBoard` |
+| borderBox1 | `LumalBorderBox variant=1` |
+| borderBox2 | `LumalBorderBox variant=2` |
+| borderBox3 | `LumalBorderBox variant=3` |
+| borderBox4 | `LumalBorderBox variant=4` |
+| borderBox5 | `LumalBorderBox variant=5` |
+| borderBox6 | `LumalBorderBox variant=6` |
+| borderBox7 | `LumalBorderBox variant=7` |
+| borderBox8 | `LumalBorderBox variant=8` |
+| borderBox9 | `LumalBorderBox variant=9` |
+| borderBox10 | `LumalBorderBox variant=10` |
+| borderBox11 | `LumalBorderBox variant=11` |
+| borderBox12 | `LumalBorderBox variant=12` |
+| borderBox13 | `LumalBorderBox variant=13` |
+| decoration1 | `LumalDecoration variant=1` |
+| decoration2 | `LumalDecoration variant=2` |
+| decoration3 | `LumalDecoration variant=3` |
+| decoration4 | `LumalDecoration variant=4` |
+| decoration5 | `LumalDecoration variant=5` |
+| decoration6 | `LumalDecoration variant=6` |
+| decoration7 | `LumalDecoration variant=7` |
+| decoration8 | `LumalDecoration variant=8` |
+| decoration9 | `LumalDecoration variant=9` |
+| decoration10 | `LumalDecoration variant=10` |
+| decoration11 | `LumalDecoration variant=11` |
+| decoration12 | `LumalDecoration variant=12` |
+| fullScreenContainer | `LumalFullScreenContainer` |
+| loading | `LumalLoading` |
+| charts | `LumalCharts` |
+| activeRingChart | `LumalActiveRingChart` |
+| capsuleChart | `LumalCapsuleChart` |
+| waterLevelPond | `LumalWaterLevelPond` |
+| percentPond | `LumalPercentPond` |
+| digitalFlop | `LumalDigitalFlop` |
+| flylineChart | `LumalFlylineChart` |
+| flylineChartEnhanced | `LumalFlylineChartEnhanced` |
+| conicalColumnChart | `LumalConicalColumnChart` |
+| scrollBoard | `LumalScrollBoard` |
+| scrollRankingBoard | `LumalScrollRankingBoard` |
 
 15 个独立入口分别为 `border-box`、`decoration`、`full-screen-container`、`loading`、`charts`、`active-ring-chart`、`capsule-chart`、`water-level-pond`、`percent-pond`、`digital-flop`、`flyline-chart`、`flyline-chart-enhanced`、`conical-column-chart`、`scroll-board` 和 `scroll-ranking-board`。
 
 ## 主题变量
 
-组件默认值与 DataV 一致，应用仍可通过 `--luma-datav-*` 语义变量调整现代 API 外观。Cockpit 应在应用层将这些变量映射到 `--luma-cockpit-*` 浅色/深色主题。
+组件默认值与 DataV 一致，应用仍可通过 `--lumal-datav-*` 语义变量调整现代 API 外观。Cockpit 应在应用层将这些变量映射到 `--lumal-cockpit-*` 浅色/深色主题。
 
 DataV 仅作为 MIT 许可下的源码、功能和视觉重构基准，版权声明见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

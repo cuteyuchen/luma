@@ -1,1 +1,1 @@
-export { default as LumaPage } from './LumaPage.vue'
+export { default as LumalPage } from './LumalPage.vue'

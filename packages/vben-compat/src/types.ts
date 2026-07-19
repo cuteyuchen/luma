@@ -9,7 +9,7 @@ import type {
   SchemaTableCellFormatter,
   SchemaTableColumn,
   SchemaTableRow,
-} from '@luma/core/components'
+} from '@lumal/core/components'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 
 export type VbenFormComponent
@@ -65,7 +65,7 @@ export interface UseVbenFormOptions {
 
 export type UseVbenFormInput = MaybeRefOrGetter<UseVbenFormOptions>
 
-export interface LumaSchemaFormCompatProps {
+export interface LumalSchemaFormCompatProps {
   'modelValue': SchemaFormModel
   'onUpdate:modelValue': (model: SchemaFormModel) => void
   'onSubmit': (model: SchemaFormModel) => void
@@ -77,10 +77,10 @@ export interface LumaSchemaFormCompatProps {
 export type VbenFormRegister = (formInstance?: unknown) => void
 
 export interface VbenFormApi {
-  schemaFormProps: ComputedRef<LumaSchemaFormCompatProps>
+  schemaFormProps: ComputedRef<LumalSchemaFormCompatProps>
   getFieldsValue: () => SchemaFormModel
   getFormInstance: () => unknown
-  getLumaSchemas: () => SchemaFormItem[]
+  getLumalSchemas: () => SchemaFormItem[]
   handleSubmit: (model?: SchemaFormModel) => void
   handleUpdateModel: (model: SchemaFormModel) => void
   resetFields: () => void
@@ -181,7 +181,7 @@ export interface UseVbenVxeGridOptions extends VbenGridOptions {
 
 export type UseVbenVxeGridInput = MaybeRefOrGetter<UseVbenVxeGridOptions>
 
-export interface LumaCrudTableCompatProps extends Omit<CrudTableProps, 'columns'> {
+export interface LumalCrudTableCompatProps extends Omit<CrudTableProps, 'columns'> {
   'columns': SchemaTableColumn[]
   'page': number
   'pageSize': number
@@ -197,10 +197,10 @@ export interface LumaCrudTableCompatProps extends Omit<CrudTableProps, 'columns'
 export type VbenGridRegister = (gridInstance?: unknown) => void
 
 export interface VbenGridApi {
-  crudTableProps: ComputedRef<LumaCrudTableCompatProps>
+  crudTableProps: ComputedRef<LumalCrudTableCompatProps>
   getGridInstance: () => unknown
   getError: () => unknown
-  getLumaColumns: () => SchemaTableColumn[]
+  getLumalColumns: () => SchemaTableColumn[]
   getRows: () => SchemaTableRow[]
   getTotal: () => number
   getQueryModel: () => CrudTableQueryModel

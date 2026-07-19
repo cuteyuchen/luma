@@ -1,11 +1,11 @@
 {
-  "name": "@luma/icons-vue",
+  "name": "@lumal/icons-vue",
   "type": "module",
   "version": "0.0.1-beta",
-  "description": "Vue components and reactive adapters for @luma/icons.",
+  "description": "Vue components and reactive adapters for @lumal/icons.",
   "license": "MIT",
   "keywords": [
-    "luma",
+    "lumal",
     "vue",
     "icons",
     "iconify",
@@ -42,6 +42,6 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@luma/icons": "0.0.1-beta"
+    "@lumal/icons": "0.0.1-beta"
   }
 }

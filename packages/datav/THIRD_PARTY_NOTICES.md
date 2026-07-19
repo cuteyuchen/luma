@@ -1,6 +1,6 @@
 # Third-party notices
 
-`@luma/datav` contains Vue 3 refactors derived from the MIT-licensed DataV component geometry, animation definitions and calculation logic. `LumaCharts` also bundles the MIT-licensed `@jiaminghi/charts` runtime and its CRender dependency for DataV-native chart configuration.
+`@lumal/datav` contains Vue 3 refactors derived from the MIT-licensed DataV component geometry, animation definitions and calculation logic. `LumalCharts` also bundles the MIT-licensed `@jiaminghi/charts` runtime and its CRender dependency for DataV-native chart configuration.
 
 ## DataV
 

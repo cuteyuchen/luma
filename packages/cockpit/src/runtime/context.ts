@@ -8,7 +8,7 @@ import { inject } from 'vue'
 /***********************运行时内部环境上下文*********************/
 
 /**
- * 由 LumaCockpit 向整棵运行时子树提供的稳定环境。
+ * 由 LumalCockpit 向整棵运行时子树提供的稳定环境。
  * 不含 categoryId / pageId，这些随页面变化，通过 props 下传。
  */
 export interface CockpitRuntimeEnv {
@@ -24,11 +24,11 @@ export interface CockpitRuntimeEnv {
   cardComponent: CockpitCardComponent
 }
 
-export const cockpitRuntimeEnvKey: InjectionKey<CockpitRuntimeEnv> = Symbol('luma-cockpit-runtime-env')
+export const cockpitRuntimeEnvKey: InjectionKey<CockpitRuntimeEnv> = Symbol('lumal-cockpit-runtime-env')
 
 export function useCockpitRuntimeEnv(): CockpitRuntimeEnv {
   const env = inject(cockpitRuntimeEnvKey, null)
   if (!env)
-    throw new Error('[cockpit] 运行时环境缺失，组件必须在 LumaCockpit 内渲染。')
+    throw new Error('[cockpit] 运行时环境缺失，组件必须在 LumalCockpit 内渲染。')
   return env
 }

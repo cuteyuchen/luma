@@ -1,4 +1,4 @@
-export { default as LumaPagination } from './LumaPagination.vue'
+export { default as LumalPagination } from './LumalPagination.vue'
 export type {
   PaginationChangePayload,
 } from './types'

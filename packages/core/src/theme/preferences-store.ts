@@ -1,6 +1,6 @@
 import type {
   CreatePreferencesStoreOptions,
-  LumaPreferences,
+  LumalPreferences,
   PreferencesStore,
   ResolvedThemeMode,
   ThemeRuntimeEnvironment,
@@ -29,7 +29,7 @@ function resolveRuntime(runtime?: ThemeRuntimeEnvironment): ThemeRuntimeEnvironm
 }
 
 /***********************缓存读写*********************/
-function readPreferences(options: CreatePreferencesStoreOptions): LumaPreferences | undefined {
+function readPreferences(options: CreatePreferencesStoreOptions): LumalPreferences | undefined {
   let raw: string | null = null
 
   try {
@@ -53,7 +53,7 @@ function readPreferences(options: CreatePreferencesStoreOptions): LumaPreference
   }
 }
 
-function writePreferences(options: CreatePreferencesStoreOptions, preferences: LumaPreferences): void {
+function writePreferences(options: CreatePreferencesStoreOptions, preferences: LumalPreferences): void {
   try {
     options.storage.setItem(options.storageKey, JSON.stringify(preferences))
   }
@@ -105,7 +105,7 @@ export function createPreferencesStore(options: CreatePreferencesStoreOptions): 
     }
   }
 
-  function exportCurrent(): LumaPreferences {
+  function exportCurrent(): LumalPreferences {
     return normalizePreferences(state.value, options.defaults)
   }
 

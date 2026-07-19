@@ -1,23 +1,23 @@
 export {
-  createLumaAliases,
+  createLumalAliases,
 } from './aliases'
 export type {
-  CreateLumaAliasesOptions,
-  LumaAliasEntry,
-  LumaAliasPackage,
-  LumaAliasTarget,
+  CreateLumalAliasesOptions,
+  LumalAliasEntry,
+  LumalAliasPackage,
+  LumalAliasTarget,
 } from './aliases'
 export {
-  createLumaComponentResolver,
+  createLumalComponentResolver,
 } from './component-resolver'
 export type {
-  CreateLumaComponentResolverOptions,
-  LumaComponentResolver,
-  LumaComponentResolverResult,
+  CreateLumalComponentResolverOptions,
+  LumalComponentResolver,
+  LumalComponentResolverResult,
 } from './component-resolver'
 export {
-  resolveLumaDevtoolsPlugin,
+  resolveLumalDevtoolsPlugin,
 } from './devtools'
 export type {
-  ResolveLumaDevtoolsPluginOptions,
+  ResolveLumalDevtoolsPluginOptions,
 } from './devtools'

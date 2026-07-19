@@ -34,10 +34,10 @@ function createMemoryStorage(): Storage {
 
 describe('utils cloneDeep', () => {
   it('会深拷贝并解包 Vue 响应式对象', () => {
-    const source = reactive({ list: [{ id: 1 }], name: 'Luma' })
+    const source = reactive({ list: [{ id: 1 }], name: 'Lumal' })
     const cloned = cloneDeep(source)
 
-    expect(cloned).toEqual({ list: [{ id: 1 }], name: 'Luma' })
+    expect(cloned).toEqual({ list: [{ id: 1 }], name: 'Lumal' })
     expect(cloned.list).not.toBe(source.list)
   })
 
@@ -67,10 +67,10 @@ describe('utils serializeQuery', () => {
       empty: null,
       filter: { status: 1 },
       ids: [1, 2],
-      keyword: 'Luma',
+      keyword: 'Lumal',
     })
 
-    expect(result).toBe('filter%5Bstatus%5D=1&ids=1&ids=2&keyword=Luma')
+    expect(result).toBe('filter%5Bstatus%5D=1&ids=1&ids=2&keyword=Lumal')
   })
 })
 
@@ -94,10 +94,10 @@ describe('utils display & color', () => {
 
 describe('utils createStorage', () => {
   it('会以命名空间前缀读写 JSON', () => {
-    const storage = createStorage(createMemoryStorage(), 'luma')
+    const storage = createStorage(createMemoryStorage(), 'lumal')
 
-    storage.set('profile', { name: 'Luma' })
-    expect(storage.get('profile')).toEqual({ name: 'Luma' })
+    storage.set('profile', { name: 'Lumal' })
+    expect(storage.get('profile')).toEqual({ name: 'Lumal' })
 
     storage.remove('profile')
     expect(storage.get('profile')).toBeUndefined()
@@ -106,7 +106,7 @@ describe('utils createStorage', () => {
 
 describe('utils withInstall', () => {
   it('会挂载 install 并按 name 注册组件', () => {
-    const component = withInstall({ name: 'LumaDemo', render: () => null })
+    const component = withInstall({ name: 'LumalDemo', render: () => null })
     const registered: Record<string, unknown> = {}
     const app = {
       component(name: string, comp: unknown) {
@@ -115,6 +115,6 @@ describe('utils withInstall', () => {
     }
 
     component.install(app as never)
-    expect(registered.LumaDemo).toBe(component)
+    expect(registered.LumalDemo).toBe(component)
   })
 })

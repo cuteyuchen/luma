@@ -3,7 +3,7 @@ export {
   applyThemeToElement,
   watchSystemTheme,
 } from './dom'
-export { default as LumaThemeSettingsPanel } from './LumaThemeSettingsPanel.vue'
+export { default as LumalThemeSettingsPanel } from './LumalThemeSettingsPanel.vue'
 export {
   createDefaultPreferences,
   mergePreferences,
@@ -29,12 +29,12 @@ export {
 export type {
   CreatePreferencesStoreOptions,
   DeepPartial,
-  LumaHeaderMenuAlign,
-  LumaLayoutMode,
-  LumaPreferences,
-  LumaPreferencesDefaults,
-  LumaTabStyle,
-  LumaTransitionName,
+  LumalHeaderMenuAlign,
+  LumalLayoutMode,
+  LumalPreferences,
+  LumalPreferencesDefaults,
+  LumalTabStyle,
+  LumalTransitionName,
   PreferencesStorage,
   PreferencesStore,
   ResolvedThemeMode,

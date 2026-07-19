@@ -5,7 +5,7 @@ export type {
   SchemaTableCellDisplay,
   SchemaTableDictionaryTag,
 } from './cell'
-export { default as LumaSchemaTable } from './LumaSchemaTable.vue'
+export { default as LumalSchemaTable } from './LumalSchemaTable.vue'
 export {
   normalizeSchemaTableColumns,
 } from './normalize'

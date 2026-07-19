@@ -24,9 +24,9 @@ onMounted(() => {
     return
   sortable = Sortable.create(libraryRef.value, {
     animation: 160,
-    group: { name: 'luma-cockpit-designer-modules', pull: 'clone', put: false },
+    group: { name: 'lumal-cockpit-designer-modules', pull: 'clone', put: false },
     sort: false,
-    draggable: '.luma-cockpit-designer__library-card',
+    draggable: '.lumal-cockpit-designer__library-card',
     ghostClass: 'is-drag-ghost',
     chosenClass: 'is-drag-chosen',
   })
@@ -38,12 +38,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <aside class="luma-cockpit-designer__library" aria-label="模块库">
-    <div ref="libraryRef" class="luma-cockpit-designer__library-grid">
+  <aside class="lumal-cockpit-designer__library" aria-label="模块库">
+    <div ref="libraryRef" class="lumal-cockpit-designer__library-grid">
       <article
         v-for="widget in widgets"
         :key="widget.type"
-        class="luma-cockpit-designer__library-card"
+        class="lumal-cockpit-designer__library-card"
         :class="{ 'is-selected': selectedType === widget.type }"
         :data-cockpit-library-type="widget.type"
         :data-cockpit-library-title="widget.label"
@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
         />
         <ElButton
           text
-          class="luma-cockpit-designer__library-select"
+          class="lumal-cockpit-designer__library-select"
           :aria-label="`选择或拖动模块：${widget.label}`"
           :aria-pressed="selectedType === widget.type"
           @click="emit('selectWidget', widget)"
@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
           {{ widget.label }}
         </ElButton>
       </article>
-      <ElEmpty v-if="!widgets.length" class="luma-cockpit-designer__library-empty" description="暂无可用模块" :image-size="56" />
+      <ElEmpty v-if="!widgets.length" class="lumal-cockpit-designer__library-empty" description="暂无可用模块" :image-size="56" />
     </div>
   </aside>
 </template>

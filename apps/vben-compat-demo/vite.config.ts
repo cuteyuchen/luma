@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
-import { createLumaAliases } from '../../packages/vite/src/aliases'
+import { createLumalAliases } from '../../packages/vite/src/aliases'
 
 const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
 
@@ -33,7 +33,7 @@ export default defineConfig(({ command }) => ({
             },
             {
               maxSize: 420 * 1024,
-              name: 'vendor-luma',
+              name: 'vendor-lumal',
               priority: 10,
               test: /[\\/]packages[\\/](?:core|icons|icons-vue|vben-compat)[\\/](?:dist|src)[\\/]/,
             },
@@ -49,7 +49,7 @@ export default defineConfig(({ command }) => ({
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
       ...(command === 'serve'
-        ? createLumaAliases({
+        ? createLumalAliases({
             packages: ['core', 'icons', 'icons-vue', 'vben-compat'],
             workspaceRoot,
           })

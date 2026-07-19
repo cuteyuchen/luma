@@ -13,7 +13,7 @@ export {
   hasPermission,
   hasRole,
 } from './helpers'
-export { default as LumaAccessControl } from './LumaAccessControl.vue'
+export { default as LumalAccessControl } from './LumalAccessControl.vue'
 export {
   createPermissionStore,
 } from './store'

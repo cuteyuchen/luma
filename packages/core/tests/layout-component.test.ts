@@ -3,14 +3,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import {
-  LumaBreadcrumb,
-  LumaContent,
-  LumaHeader,
-  LumaLayout,
-  LumaRouterView,
-  LumaSidebar,
-  LumaTabs,
-  LumaTopNav,
+  LumalBreadcrumb,
+  LumalContent,
+  LumalHeader,
+  LumalLayout,
+  LumalRouterView,
+  LumalSidebar,
+  LumalTabs,
+  LumalTopNav,
 } from '../src/layout'
 import { createDefaultPreferences } from '../src/theme'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
@@ -50,9 +50,9 @@ function createLayoutPreferences(layout: 'mixed-nav' | 'sidebar-nav' | 'top-nav'
   return createDefaultPreferences({ app: { layout } })
 }
 
-describe('luma layout', () => {
+describe('lumal layout', () => {
   it('会组合 Element Plus 布局、头部、侧边栏、页签和内容区', () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: {
           ...elementPlusStubs,
@@ -68,7 +68,7 @@ describe('luma layout', () => {
         menus,
         preferences: createLayoutPreferences(),
         tabs,
-        title: 'Luma Admin',
+        title: 'Lumal Admin',
       },
       slots: {
         default: '<section class="layout-body">页面内容</section>',
@@ -77,19 +77,19 @@ describe('luma layout', () => {
     })
 
     expect(wrapper.findComponent({ name: 'ElContainer' }).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaHeader).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaHeader).findComponent(LumaBreadcrumb).exists()).toBe(true)
-    expect(wrapper.find('.luma-layout__main > .luma-breadcrumb').exists()).toBe(false)
-    expect(wrapper.findComponent(LumaSidebar).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaTabs).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaContent).exists()).toBe(true)
-    expect(wrapper.find('.luma-header__title').text()).toBe('Luma Admin')
+    expect(wrapper.findComponent(LumalHeader).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalHeader).findComponent(LumalBreadcrumb).exists()).toBe(true)
+    expect(wrapper.find('.lumal-layout__main > .lumal-breadcrumb').exists()).toBe(false)
+    expect(wrapper.findComponent(LumalSidebar).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalTabs).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalContent).exists()).toBe(true)
+    expect(wrapper.find('.lumal-header__title').text()).toBe('Lumal Admin')
     expect(wrapper.find('.header-action').text()).toBe('退出')
     expect(wrapper.find('.layout-body').text()).toBe('页面内容')
   })
 
   it('showHeader 为 false 时不渲染头部，其余布局保持完整', () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: {
           ...elementPlusStubs,
@@ -110,13 +110,13 @@ describe('luma layout', () => {
       },
     })
 
-    expect(wrapper.findComponent(LumaHeader).exists()).toBe(false)
-    expect(wrapper.findComponent(LumaSidebar).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalHeader).exists()).toBe(false)
+    expect(wrapper.findComponent(LumalSidebar).exists()).toBe(true)
     expect(wrapper.find('.layout-body').text()).toBe('页面内容')
   })
 
   it('头部折叠按钮会由 layout 抛出统一切换事件', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -140,7 +140,7 @@ describe('luma layout', () => {
     }
     vi.stubGlobal('matchMedia', vi.fn(() => mediaQuery))
 
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -151,15 +151,15 @@ describe('luma layout', () => {
     })
 
     expect(wrapper.classes()).toContain('is-mobile-menu-hidden')
-    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes('aria-hidden')).toBe('true')
-    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes()).toHaveProperty('inert')
+    expect(wrapper.find('.lumal-layout__mobile-sidebar').attributes('aria-hidden')).toBe('true')
+    expect(wrapper.find('.lumal-layout__mobile-sidebar').attributes()).toHaveProperty('inert')
     await wrapper.find('[data-action="toggle-sidebar"]').trigger('click')
     expect(wrapper.classes()).not.toContain('is-mobile-menu-hidden')
-    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes('aria-hidden')).toBe('false')
-    expect(wrapper.find('.luma-layout__mobile-sidebar').attributes()).not.toHaveProperty('inert')
+    expect(wrapper.find('.lumal-layout__mobile-sidebar').attributes('aria-hidden')).toBe('false')
+    expect(wrapper.find('.lumal-layout__mobile-sidebar').attributes()).not.toHaveProperty('inert')
     expect(wrapper.emitted('toggleSidebar')).toBeUndefined()
 
-    await wrapper.find('.luma-layout__sidebar-scrim').trigger('click')
+    await wrapper.find('.lumal-layout__sidebar-scrim').trigger('click')
     expect(wrapper.classes()).toContain('is-mobile-menu-hidden')
 
     wrapper.unmount()
@@ -168,7 +168,7 @@ describe('luma layout', () => {
   })
 
   it('顶部导航会从完整菜单树自动渲染并透传最终导航目标', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -179,11 +179,11 @@ describe('luma layout', () => {
       },
     })
 
-    expect(wrapper.findComponent(LumaTopNav).exists()).toBe(true)
-    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system/user')
-    expect(wrapper.find('.luma-header__navigation').exists()).toBe(true)
-    expect(wrapper.findComponent(LumaHeader).findComponent(LumaBreadcrumb).exists()).toBe(false)
-    expect(wrapper.find('.luma-layout__main > .luma-breadcrumb').exists()).toBe(true)
+    expect(wrapper.findComponent(LumalTopNav).exists()).toBe(true)
+    expect(wrapper.findComponent(LumalTopNav).props('activePath')).toBe('/system/user')
+    expect(wrapper.find('.lumal-header__navigation').exists()).toBe(true)
+    expect(wrapper.findComponent(LumalHeader).findComponent(LumalBreadcrumb).exists()).toBe(false)
+    expect(wrapper.find('.lumal-layout__main > .lumal-breadcrumb').exists()).toBe(true)
 
     await wrapper.find('[data-menu-path="/system/user"]').trigger('click')
 
@@ -192,7 +192,7 @@ describe('luma layout', () => {
   })
 
   it('混合导航默认只切换顶级分组并展示其侧栏子菜单', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -203,22 +203,22 @@ describe('luma layout', () => {
       },
     })
 
-    expect(wrapper.findComponent(LumaTopNav).props('mode')).toBe('flat')
+    expect(wrapper.findComponent(LumalTopNav).props('mode')).toBe('flat')
     expect(wrapper.find('[data-menu-path="/system"]').exists()).toBe(true)
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
-    expect(wrapper.findComponent(LumaHeader).findComponent(LumaBreadcrumb).exists()).toBe(false)
-    expect(wrapper.find('.luma-layout__main > .luma-breadcrumb').exists()).toBe(true)
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(false)
+    expect(wrapper.findComponent(LumalHeader).findComponent(LumalBreadcrumb).exists()).toBe(false)
+    expect(wrapper.find('.lumal-layout__main > .lumal-breadcrumb').exists()).toBe(true)
 
     await wrapper.find('[data-menu-path="/system"]').trigger('click')
 
-    expect(wrapper.findComponent(LumaTopNav).props('activePath')).toBe('/system')
-    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.findComponent(LumalTopNav).props('activePath')).toBe('/system')
+    expect(wrapper.findComponent(LumalSidebar).props('menus')).toEqual(menus[1]!.children)
     expect(wrapper.emitted('topMenuSelect')?.at(-1)).toEqual(['/system'])
     expect(wrapper.emitted('menuSelect')).toBeUndefined()
   })
 
   it('混合导航开启自动激活后会优先采用目录重定向', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -234,12 +234,12 @@ describe('luma layout', () => {
 
     await wrapper.find('[data-menu-path="/system"]').trigger('click')
 
-    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.findComponent(LumalSidebar).props('menus')).toEqual(menus[1]!.children)
     expect(wrapper.emitted('menuSelect')?.at(-1)).toEqual(['/system/user'])
   })
 
   it('混合导航会随浏览分组和实际路由同步隐藏或显示侧栏', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -250,22 +250,22 @@ describe('luma layout', () => {
       },
     })
 
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(false)
 
     await wrapper.find('[data-menu-path="/system"]').trigger('click')
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(true)
-    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(true)
+    expect(wrapper.findComponent(LumalSidebar).props('menus')).toEqual(menus[1]!.children)
 
     await wrapper.setProps({ activeMenuPath: '/system/user' })
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(true)
-    expect(wrapper.findComponent(LumaSidebar).props('menus')).toEqual(menus[1]!.children)
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(true)
+    expect(wrapper.findComponent(LumalSidebar).props('menus')).toEqual(menus[1]!.children)
 
     await wrapper.setProps({ activeMenuPath: '/dashboard' })
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(false)
   })
 
   it('混合导航关闭侧栏后使用树形顶部菜单访问子项', async () => {
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -279,8 +279,8 @@ describe('luma layout', () => {
       },
     })
 
-    expect(wrapper.findComponent(LumaTopNav).props('mode')).toBe('tree')
-    expect(wrapper.find('.luma-layout__desktop-sidebar').exists()).toBe(false)
+    expect(wrapper.findComponent(LumalTopNav).props('mode')).toBe('tree')
+    expect(wrapper.find('.lumal-layout__desktop-sidebar').exists()).toBe(false)
 
     await wrapper.find('[data-menu-path="/system/user"]').trigger('click')
     expect(wrapper.emitted('menuSelect')?.at(-1)).toEqual(['/system/user'])
@@ -302,7 +302,7 @@ describe('luma layout', () => {
     await router.push('/dashboard')
     await router.isReady()
 
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         plugins: [router],
         stubs: elementPlusStubs,
@@ -334,9 +334,9 @@ describe('luma layout', () => {
   })
 })
 
-describe('luma sidebar', () => {
+describe('lumal sidebar', () => {
   it('会渲染多级菜单并透传选择事件', async () => {
-    const wrapper = mount(LumaSidebar, {
+    const wrapper = mount(LumalSidebar, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -361,7 +361,7 @@ describe('luma sidebar', () => {
       { externalLink: 'https://self.example.com', path: '/inner', title: '内嵌', externalTarget: '_self' as const },
     ]
 
-    const wrapper = mount(LumaSidebar, {
+    const wrapper = mount(LumalSidebar, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -373,7 +373,7 @@ describe('luma sidebar', () => {
 
     // 新开页外链渲染为原生元素，不带 data-menu-path（即没有 ElMenu 的 :index）
     expect(wrapper.find('[data-menu-path="/docs"]').exists()).toBe(false)
-    const externalItem = wrapper.find('.luma-sidebar-menu-item--external')
+    const externalItem = wrapper.find('.lumal-sidebar-menu-item--external')
     expect(externalItem.exists()).toBe(true)
     expect(externalItem.text()).toContain('文档')
 
@@ -385,9 +385,9 @@ describe('luma sidebar', () => {
   })
 })
 
-describe('luma tabs', () => {
+describe('lumal tabs', () => {
   it('会使用可聚焦标签按钮更新活动页签并透传关闭事件', async () => {
-    const wrapper = mount(LumaTabs, {
+    const wrapper = mount(LumalTabs, {
       props: {
         activePath: '/dashboard',
         tabs,
@@ -411,7 +411,7 @@ describe('luma tabs', () => {
   })
 
   it('允许消费方隐藏常驻刷新按钮', () => {
-    const wrapper = mount(LumaTabs, {
+    const wrapper = mount(LumalTabs, {
       props: {
         activePath: '/dashboard',
         showRefresh: false,
@@ -423,7 +423,7 @@ describe('luma tabs', () => {
   })
 
   it('支持键盘切换和右键菜单批量操作', async () => {
-    const wrapper = mount(LumaTabs, {
+    const wrapper = mount(LumalTabs, {
       attachTo: document.body,
       global: {
         stubs: {
@@ -441,11 +441,11 @@ describe('luma tabs', () => {
     })
 
     const tabButtons = wrapper.findAll('[role="tab"]')
-    await wrapper.findAll('.luma-tabs__item')[1]?.trigger('contextmenu', {
+    await wrapper.findAll('.lumal-tabs__item')[1]?.trigger('contextmenu', {
       clientX: 120,
       clientY: 80,
     })
-    const closeOthers = wrapper.findAll('.luma-tabs-context-menu button')
+    const closeOthers = wrapper.findAll('.lumal-tabs-context-menu button')
       .find(button => button.text().includes('关闭其他'))
     await closeOthers?.trigger('click')
 
@@ -457,13 +457,13 @@ describe('luma tabs', () => {
   })
 
   it('折叠状态使用不会被 Element Plus 隐藏的图标容器', () => {
-    const wrapper = mount(LumaSidebar, {
+    const wrapper = mount(LumalSidebar, {
       global: {
         stubs: {
           ...elementPlusStubs,
-          LumaIcon: {
-            name: 'LumaIcon',
-            template: '<svg class="luma-icon-stub" />',
+          LumalIcon: {
+            name: 'LumalIcon',
+            template: '<svg class="lumal-icon-stub" />',
           },
         },
       },
@@ -473,15 +473,15 @@ describe('luma tabs', () => {
       },
     })
 
-    const icon = wrapper.find('.luma-sidebar-menu-item__icon')
+    const icon = wrapper.find('.lumal-sidebar-menu-item__icon')
     expect(icon.element.tagName).toBe('I')
-    expect(icon.find('.luma-icon-stub').exists()).toBe(true)
+    expect(icon.find('.lumal-icon-stub').exists()).toBe(true)
   })
 })
 
-describe('luma router view', () => {
+describe('lumal router view', () => {
   it('会包裹 RouterView 并保留内容容器', () => {
-    const wrapper = mount(LumaRouterView, {
+    const wrapper = mount(LumalRouterView, {
       global: {
         stubs: {
           RouterView: {
@@ -492,7 +492,7 @@ describe('luma router view', () => {
       },
     })
 
-    expect(wrapper.find('.luma-router-view').exists()).toBe(true)
+    expect(wrapper.find('.lumal-router-view').exists()).toBe(true)
     expect(wrapper.find('.router-view').text()).toBe('路由内容')
   })
 
@@ -510,7 +510,7 @@ describe('luma router view', () => {
       },
     })
 
-    const wrapper = mount(LumaRouterView, {
+    const wrapper = mount(LumalRouterView, {
       global: {
         stubs: {
           'keep-alive': {
@@ -541,14 +541,14 @@ describe('luma router view', () => {
 
     await wrapper.setProps({ viewKey: 'project' })
 
-    expect(wrapper.find('.luma-router-view__progress').exists()).toBe(true)
-    expect(wrapper.find('.luma-router-view__loading').exists()).toBe(true)
+    expect(wrapper.find('.lumal-router-view__progress').exists()).toBe(true)
+    expect(wrapper.find('.lumal-router-view__loading').exists()).toBe(true)
 
     vi.runAllTimers()
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.luma-router-view__progress').exists()).toBe(false)
-    expect(wrapper.find('.luma-router-view__loading').exists()).toBe(false)
+    expect(wrapper.find('.lumal-router-view__progress').exists()).toBe(false)
+    expect(wrapper.find('.lumal-router-view__loading').exists()).toBe(false)
 
     wrapper.unmount()
     vi.useRealTimers()

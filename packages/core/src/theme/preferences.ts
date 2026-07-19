@@ -1,6 +1,6 @@
 import type {
-  LumaPreferences,
-  LumaPreferencesDefaults,
+  LumalPreferences,
+  LumalPreferencesDefaults,
   ResolvedThemeMode,
   ThemeMode,
   ThemeRuntimeEnvironment,
@@ -18,8 +18,8 @@ export interface PreferenceAvailability {
 const SYSTEM_THEME_QUERY = '(prefers-color-scheme: dark)'
 
 /***********************默认偏好*********************/
-export function createDefaultPreferences(defaults: LumaPreferencesDefaults = {}): LumaPreferences {
-  const builtin: LumaPreferences = {
+export function createDefaultPreferences(defaults: LumalPreferencesDefaults = {}): LumalPreferences {
+  const builtin: LumalPreferences = {
     app: {
       dynamicTitle: true,
       layout: 'mixed-nav',
@@ -85,7 +85,7 @@ export function createDefaultPreferences(defaults: LumaPreferencesDefaults = {})
   }
 }
 
-function normalizeThemePreferences(theme: LumaPreferences['theme']): LumaPreferences['theme'] {
+function normalizeThemePreferences(theme: LumalPreferences['theme']): LumalPreferences['theme'] {
   const fontSize = Number.isFinite(theme.fontSize) ? theme.fontSize : 14
 
   return {
@@ -118,39 +118,39 @@ function mergeSection<T extends Record<string, unknown>>(
 /***********************偏好归一化*********************/
 export function normalizePreferences(
   input: unknown,
-  defaults: LumaPreferencesDefaults = {},
-): LumaPreferences {
+  defaults: LumalPreferencesDefaults = {},
+): LumalPreferences {
   const raw = isRecord(input) ? input : {}
   const fallback = createDefaultPreferences(defaults)
 
   return {
-    app: mergeSection(fallback.app, isRecord(raw.app) ? raw.app as Partial<LumaPreferences['app']> : undefined),
+    app: mergeSection(fallback.app, isRecord(raw.app) ? raw.app as Partial<LumalPreferences['app']> : undefined),
     breadcrumb: mergeSection(
       fallback.breadcrumb,
-      isRecord(raw.breadcrumb) ? raw.breadcrumb as Partial<LumaPreferences['breadcrumb']> : undefined,
+      isRecord(raw.breadcrumb) ? raw.breadcrumb as Partial<LumalPreferences['breadcrumb']> : undefined,
     ),
-    header: mergeSection(fallback.header, isRecord(raw.header) ? raw.header as Partial<LumaPreferences['header']> : undefined),
-    sidebar: mergeSection(fallback.sidebar, isRecord(raw.sidebar) ? raw.sidebar as Partial<LumaPreferences['sidebar']> : undefined),
-    tabbar: mergeSection(fallback.tabbar, isRecord(raw.tabbar) ? raw.tabbar as Partial<LumaPreferences['tabbar']> : undefined),
+    header: mergeSection(fallback.header, isRecord(raw.header) ? raw.header as Partial<LumalPreferences['header']> : undefined),
+    sidebar: mergeSection(fallback.sidebar, isRecord(raw.sidebar) ? raw.sidebar as Partial<LumalPreferences['sidebar']> : undefined),
+    tabbar: mergeSection(fallback.tabbar, isRecord(raw.tabbar) ? raw.tabbar as Partial<LumalPreferences['tabbar']> : undefined),
     theme: normalizeThemePreferences(
-      mergeSection(fallback.theme, isRecord(raw.theme) ? raw.theme as Partial<LumaPreferences['theme']> : undefined),
+      mergeSection(fallback.theme, isRecord(raw.theme) ? raw.theme as Partial<LumalPreferences['theme']> : undefined),
     ),
     shortcutKeys: mergeSection(
       fallback.shortcutKeys,
-      isRecord(raw.shortcutKeys) ? raw.shortcutKeys as Partial<LumaPreferences['shortcutKeys']> : undefined,
+      isRecord(raw.shortcutKeys) ? raw.shortcutKeys as Partial<LumalPreferences['shortcutKeys']> : undefined,
     ),
     transition: mergeSection(
       fallback.transition,
-      isRecord(raw.transition) ? raw.transition as Partial<LumaPreferences['transition']> : undefined,
+      isRecord(raw.transition) ? raw.transition as Partial<LumalPreferences['transition']> : undefined,
     ),
   }
 }
 
 export function mergePreferences(
   current: unknown,
-  next: LumaPreferencesDefaults = {},
-  defaults: LumaPreferencesDefaults = {},
-): LumaPreferences {
+  next: LumalPreferencesDefaults = {},
+  defaults: LumalPreferencesDefaults = {},
+): LumalPreferences {
   const normalizedCurrent = normalizePreferences(current, defaults)
 
   return {
@@ -165,7 +165,7 @@ export function mergePreferences(
   }
 }
 
-export function resolvePreferenceAvailability(preferences: LumaPreferences): PreferenceAvailability {
+export function resolvePreferenceAvailability(preferences: LumalPreferences): PreferenceAvailability {
   const headerMenuEnabled = preferences.app.layout !== 'sidebar-nav'
   const sidebarEnabled = preferences.app.layout !== 'top-nav' && preferences.sidebar.enable
 

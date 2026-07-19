@@ -1,48 +1,48 @@
-import type { IconDefinition } from '@luma/icons'
+import type { IconDefinition } from '@lumal/icons'
 import type { App, Component, Plugin } from 'vue'
 import type { DictionaryPluginOptions } from '../dictionary'
 import type { PermissionStore } from '../permission'
 
-export type LumaAdminPreset = 'admin-default' | 'minimal'
+export type LumalAdminPreset = 'admin-default' | 'minimal'
 
-export type LumaRouterPlugin = Plugin & {
+export type LumalRouterPlugin = Plugin & {
   isReady?: () => Promise<void>
 }
 
-export interface LumaElementPlusOptions {
+export interface LumalElementPlusOptions {
   options?: Record<string, unknown>
   plugin: Plugin
 }
 
-export type LumaElementPlusInput = Plugin | LumaElementPlusOptions
+export type LumalElementPlusInput = Plugin | LumalElementPlusOptions
 
-export type LumaComponentSelection = boolean | string[] | Record<string, Component>
+export type LumalComponentSelection = boolean | string[] | Record<string, Component>
 
 /***********************应用上下文类型*********************/
-export interface LumaAdminContext {
+export interface LumalAdminContext {
   app: App
   permissionStore?: PermissionStore
   pinia?: Plugin
-  router?: LumaRouterPlugin
+  router?: LumalRouterPlugin
 }
 
-export interface CreateLumaAdminOptions {
-  components?: LumaComponentSelection
+export interface CreateLumalAdminOptions {
+  components?: LumalComponentSelection
   dictionary?: false | DictionaryPluginOptions
-  elementPlus?: LumaElementPlusInput
+  elementPlus?: LumalElementPlusInput
   icons?: {
     localSvg?: IconDefinition[]
   }
   permissionStore?: PermissionStore
   pinia?: Plugin
-  preset?: LumaAdminPreset
-  router?: LumaRouterPlugin
+  preset?: LumalAdminPreset
+  router?: LumalRouterPlugin
   rootComponent: Component
   rootProps?: Record<string, unknown>
-  setup?: (context: LumaAdminContext) => void | Promise<void>
+  setup?: (context: LumalAdminContext) => void | Promise<void>
 }
 
-export interface LumaAdminInstance extends LumaAdminContext {
+export interface LumalAdminInstance extends LumalAdminContext {
   mount: (container: Element | string) => Promise<ReturnType<App['mount']>>
-  use: (plugin: Plugin, ...options: unknown[]) => LumaAdminInstance
+  use: (plugin: Plugin, ...options: unknown[]) => LumalAdminInstance
 }

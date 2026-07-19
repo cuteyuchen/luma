@@ -1,4 +1,4 @@
-import type { SchemaFormComponentType, SchemaFormItem, SchemaFormOption } from '@luma/core/components'
+import type { SchemaFormComponentType, SchemaFormItem, SchemaFormOption } from '@lumal/core/components'
 import type { VbenFormComponentProps, VbenFormSchema } from '../types'
 
 /***********************组件类型适配*********************/

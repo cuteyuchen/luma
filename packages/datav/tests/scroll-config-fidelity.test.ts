@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaScrollBoard, LumaScrollRankingBoard } from '../src'
+import { LumalScrollBoard, LumalScrollRankingBoard } from '../src'
 
 class ResizeObserverMock {
   disconnect = vi.fn()
@@ -56,7 +56,7 @@ describe('DataV scrollBoard config fidelity', () => {
   it('复原 header、index、列宽、奇偶背景与安全事件 payload', async () => {
     const onClick = vi.fn()
     const onMouseover = vi.fn()
-    const wrapper = mount(LumaScrollBoard, {
+    const wrapper = mount(LumalScrollBoard, {
       props: {
         autoplay: false,
         config: {
@@ -108,7 +108,7 @@ describe('DataV scrollBoard config fidelity', () => {
   })
 
   it('按 waitTime 与 300ms 高度折叠推进，并支持 updateRows', async () => {
-    const wrapper = mount(LumaScrollBoard, {
+    const wrapper = mount(LumalScrollBoard, {
       props: {
         config: {
           data: [['A'], ['B'], ['C']],
@@ -141,7 +141,7 @@ describe('DataV scrollBoard config fidelity', () => {
 describe('DataV scrollRankingBoard config fidelity', () => {
   it('复原负数百分比、排名、formatter、DOM 与两阶段滚动', async () => {
     const valueFormatter = vi.fn(item => `第${item.ranking}名 ${item.value}`)
-    const wrapper = mount(LumaScrollRankingBoard, {
+    const wrapper = mount(LumalScrollRankingBoard, {
       props: {
         config: {
           data: [

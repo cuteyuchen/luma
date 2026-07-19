@@ -41,7 +41,7 @@ export type SessionExpiredHandler = () => void | Promise<void>
 
 /***********************会话聚合*********************/
 export interface AuthSessionOptions {
-  /** token 存储键名，默认 `luma:token`。 */
+  /** token 存储键名，默认 `lumal:token`。 */
   tokenKey?: string
   refreshTokenKey?: string
   expiresAtKey?: string

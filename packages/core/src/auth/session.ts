@@ -1,7 +1,7 @@
 import { createTokenStorage } from './storage'
 
 /***********************默认键名*********************/
-export const DEFAULT_TOKEN_STORAGE_KEY = 'luma:token'
+export const DEFAULT_TOKEN_STORAGE_KEY = 'lumal:token'
 
 /***********************便捷读写*********************/
 /**

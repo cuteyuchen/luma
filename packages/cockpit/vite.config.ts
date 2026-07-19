@@ -21,8 +21,8 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'cjs' ? 'cjs' : 'js'}`,
     },
     rollupOptions: {
-      // vue / element-plus / @luma/core / @luma/icons-vue 作为外部依赖，不打进产物
-      external: id => id === 'vue' || id === 'element-plus' || id === '@luma/icons-vue' || id === '@luma/core' || id.startsWith('@luma/core/'),
+      // vue / element-plus / @lumal/core / @lumal/icons-vue 作为外部依赖，不打进产物
+      external: id => id === 'vue' || id === 'element-plus' || id === '@lumal/icons-vue' || id === '@lumal/core' || id.startsWith('@lumal/core/'),
     },
   },
 })

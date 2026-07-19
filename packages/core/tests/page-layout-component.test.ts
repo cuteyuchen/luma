@@ -1,11 +1,11 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import { LumaPageLayout } from '../src/components/page-layout'
+import { LumalPageLayout } from '../src/components/page-layout'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
-describe('luma page layout', () => {
+describe('lumal page layout', () => {
   it('会组合查询区、工具栏、内容区和分页区', () => {
-    const wrapper = mount(LumaPageLayout, {
+    const wrapper = mount(LumalPageLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -21,9 +21,9 @@ describe('luma page layout', () => {
       },
     })
 
-    expect(wrapper.find('.luma-page-layout__query').exists()).toBe(true)
+    expect(wrapper.find('.lumal-page-layout__query').exists()).toBe(true)
     expect(wrapper.find('.page-query').exists()).toBe(true)
-    expect(wrapper.find('.luma-page-layout__toolbar').text()).toContain('新增')
+    expect(wrapper.find('.lumal-page-layout__toolbar').text()).toContain('新增')
     expect(wrapper.find('.page-table').text()).toBe('表格内容')
     expect(wrapper.find('.page-pagination').text()).toBe('分页')
     expect(wrapper.find('[data-action="search"]').text()).toBe('筛选')
@@ -31,7 +31,7 @@ describe('luma page layout', () => {
   })
 
   it('查询和重置按钮会透传事件', async () => {
-    const wrapper = mount(LumaPageLayout, {
+    const wrapper = mount(LumalPageLayout, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -48,7 +48,7 @@ describe('luma page layout', () => {
   })
 
   it('支持填充高度、内容滚动和无表面布局', () => {
-    const wrapper = mount(LumaPageLayout, {
+    const wrapper = mount(LumalPageLayout, {
       props: {
         contentScrollable: false,
         fill: true,

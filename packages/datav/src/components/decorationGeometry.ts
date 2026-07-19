@@ -58,7 +58,7 @@ let decorationInstance = 0
 
 export function createDecorationInstanceId(vueId: string): string {
   decorationInstance += 1
-  return `luma-decoration-${vueId.replace(/[^\w-]/g, '')}-${decorationInstance}`
+  return `lumal-decoration-${vueId.replace(/[^\w-]/g, '')}-${decorationInstance}`
 }
 
 function gridPoints(width: number, height: number, rows: number, columns: number): DecorationPoint[] {

@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { h, nextTick } from 'vue'
-import { LumaSchemaForm } from '../src/components/schema-form'
+import { LumalSchemaForm } from '../src/components/schema-form'
 import { createDictionaryStore, dictionaryContextKey } from '../src/dictionary'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
 
-describe('luma schema form', () => {
+describe('lumal schema form', () => {
   it('会使用 Element Plus 表单组件渲染可见字段，并在输入后回写模型且保留隐藏字段', async () => {
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -71,7 +71,7 @@ describe('luma schema form', () => {
       }),
     })
 
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: {
@@ -124,7 +124,7 @@ describe('luma schema form', () => {
       }),
     })
 
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: {
         provide: {
           [dictionaryContextKey as symbol]: { store },
@@ -163,14 +163,14 @@ describe('luma schema form', () => {
     await wrapper.setProps({ mode: 'view' })
     await nextTick()
 
-    expect(wrapper.findAll('.luma-schema-form__readonly-value').map(item => item.text())).toEqual([
+    expect(wrapper.findAll('.lumal-schema-form__readonly-value').map(item => item.text())).toEqual([
       '字典启用',
       '高优先级',
     ])
   })
 
   it('会渲染增强控件、透传校验规则并暴露表单方法', async () => {
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: {
         stubs: elementPlusStubs,
       },
@@ -260,28 +260,28 @@ describe('luma schema form', () => {
     }
 
     expect(await exposed.validate()).toBe(true)
-    exposed.setValues({ name: 'Luma' })
+    exposed.setValues({ name: 'Lumal' })
     await nextTick()
     expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toMatchObject({
-      name: 'Luma',
+      name: 'Lumal',
       tags: ['a'],
     })
     expect(exposed.getValues()).toEqual(expect.objectContaining({
-      name: 'Luma',
+      name: 'Lumal',
       tags: ['a'],
     }))
     exposed.setMode('view')
   })
 
   it('会在 view 模式阻止提交并支持字段插槽扩展', async () => {
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: {
         stubs: elementPlusStubs,
       },
       props: {
         mode: 'view',
         modelValue: {
-          name: 'Luma',
+          name: 'Lumal',
           status: 'enabled',
         },
         schemas: [
@@ -304,9 +304,9 @@ describe('luma schema form', () => {
       },
     })
 
-    expect(wrapper.find('.luma-schema-form__actions').exists()).toBe(false)
+    expect(wrapper.find('.lumal-schema-form__actions').exists()).toBe(false)
     expect(wrapper.find('input[name="name"]').exists()).toBe(false)
-    expect(wrapper.find('.luma-schema-form__readonly-value').text()).toBe('格式化：Luma')
+    expect(wrapper.find('.lumal-schema-form__readonly-value').text()).toBe('格式化：Lumal')
     expect(wrapper.find('.field-prefix').text()).toBe('前缀')
     expect(wrapper.find('.field-suffix').text()).toBe('后缀')
     expect(wrapper.find('.custom-field').text()).toBe('enabled')
@@ -316,7 +316,7 @@ describe('luma schema form', () => {
   })
 
   it('多选 Select 会保留数组模型用于编辑回显', () => {
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: { stubs: elementPlusStubs },
       props: {
         modelValue: { roles: ['admin', 'operator'] },
@@ -339,11 +339,11 @@ describe('luma schema form', () => {
   it('编辑模式支持 editDisabled、复合输入文本和 Ref options', async () => {
     const { ref } = await import('vue')
     const options = ref([{ label: '启用', value: 'enabled' }])
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: { stubs: elementPlusStubs },
       props: {
         mode: 'edit',
-        modelValue: { code: 'LUMA', status: 'enabled' },
+        modelValue: { code: 'LUMAL', status: 'enabled' },
         schemas: [
           {
             append: '.com',
@@ -371,7 +371,7 @@ describe('luma schema form', () => {
 
   it('支持基于模型动态解析字段状态、Props、Rules、Options 和说明文本', async () => {
     const onChange = vi.fn()
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: { stubs: elementPlusStubs },
       props: {
         modelValue: { advanced: false, status: 'normal' },
@@ -400,8 +400,8 @@ describe('luma schema form', () => {
     })
 
     expect(wrapper.find('select[name="status"]').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('.luma-schema-form__description').text()).toBe('开启高级模式后可编辑')
-    expect(wrapper.find('.luma-schema-form__help').text()).toBe('状态会随模型实时更新')
+    expect(wrapper.find('.lumal-schema-form__description').text()).toBe('开启高级模式后可编辑')
+    expect(wrapper.find('.lumal-schema-form__help').text()).toBe('状态会随模型实时更新')
 
     await wrapper.find('input[name="advanced"]').setValue(true)
     await nextTick()
@@ -411,11 +411,11 @@ describe('luma schema form', () => {
     const statusItem = wrapper.findAllComponents({ name: 'ElFormItem' }).find(item => item.props('prop') === 'status')
     expect(statusItem?.props('required')).toBe(true)
     expect(wrapper.findAllComponents({ name: 'ElOption' }).at(-1)?.props('label')).toBe('高级')
-    expect(wrapper.find('.luma-schema-form__description').text()).toBe('可选择全部级别')
+    expect(wrapper.find('.lumal-schema-form__description').text()).toBe('可选择全部级别')
   })
 
   it('支持重置按钮、回车提交和扩展控制器方法', async () => {
-    const wrapper = mount(LumaSchemaForm, {
+    const wrapper = mount(LumalSchemaForm, {
       global: { stubs: elementPlusStubs },
       props: {
         modelValue: { name: '初始值' },

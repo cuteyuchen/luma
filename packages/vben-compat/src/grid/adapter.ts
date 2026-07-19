@@ -2,7 +2,7 @@ import type {
   CrudTableQueryModel,
   SchemaTableColumn,
   SchemaTableRow,
-} from '@luma/core/components'
+} from '@lumal/core/components'
 import type {
   UseVbenVxeGridOptions,
   VbenGridColumn,

@@ -2,7 +2,7 @@
 import type { CockpitWidgetDefinition } from '../registry/types'
 import type { CockpitBaseContext } from '../types'
 import type { CockpitMessageBus } from '../messaging/types'
-import { LumaIcon } from '@luma/icons-vue'
+import { LumalIcon } from '@lumal/icons-vue'
 import { computed, onBeforeUnmount, ref, shallowReactive, watchEffect } from 'vue'
 import { useCanvasScale } from '../composables/useCanvasScale'
 import { provideCockpitContext } from '../composables/useCockpitContext'
@@ -61,19 +61,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="previewRef" class="luma-cockpit-designer__widget-preview">
+  <div ref="previewRef" class="lumal-cockpit-designer__widget-preview">
     <img
       v-if="definition.thumbnail"
       :src="definition.thumbnail"
       :alt="`${definition.label}预览`"
-      class="luma-cockpit-designer__widget-preview-image"
+      class="lumal-cockpit-designer__widget-preview-image"
     >
-    <div v-else class="luma-cockpit-designer__widget-preview-stage" :style="stageStyle" inert aria-hidden="true">
+    <div v-else class="lumal-cockpit-designer__widget-preview-stage" :style="stageStyle" inert aria-hidden="true">
       <CockpitErrorBoundary>
         <component :is="resolved" :context="context" />
         <template #error>
-          <div class="luma-cockpit-designer__widget-preview-fallback">
-            <LumaIcon :name="definition.icon || 'luma:grid'" :size="28" />
+          <div class="lumal-cockpit-designer__widget-preview-fallback">
+            <LumalIcon :name="definition.icon || 'lumal:grid'" :size="28" />
             <span>预览不可用</span>
           </div>
         </template>

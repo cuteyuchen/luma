@@ -1,19 +1,19 @@
 import type { App, Component } from 'vue'
-import LumaActiveRingChartComp from './components/LumaActiveRingChart.vue'
-import LumaBorderBoxComp from './components/LumaBorderBox.vue'
-import LumaCapsuleChartComp from './components/LumaCapsuleChart.vue'
-import LumaChartsComp from './components/LumaCharts.vue'
-import LumaConicalColumnChartComp from './components/LumaConicalColumnChart.vue'
-import LumaDecorationComp from './components/LumaDecoration.vue'
-import LumaDigitalFlopComp from './components/LumaDigitalFlop.vue'
-import LumaFlylineChartComp from './components/LumaFlylineChart.vue'
-import LumaFlylineChartEnhancedComp from './components/LumaFlylineChartEnhanced.vue'
-import LumaFullScreenContainerComp from './components/LumaFullScreenContainer.vue'
-import LumaLoadingComp from './components/LumaLoading.vue'
-import LumaPercentPondComp from './components/LumaPercentPond.vue'
-import LumaScrollBoardComp from './components/LumaScrollBoard.vue'
-import LumaScrollRankingBoardComp from './components/LumaScrollRankingBoard.vue'
-import LumaWaterLevelPondComp from './components/LumaWaterLevelPond.vue'
+import LumalActiveRingChartComp from './components/LumalActiveRingChart.vue'
+import LumalBorderBoxComp from './components/LumalBorderBox.vue'
+import LumalCapsuleChartComp from './components/LumalCapsuleChart.vue'
+import LumalChartsComp from './components/LumalCharts.vue'
+import LumalConicalColumnChartComp from './components/LumalConicalColumnChart.vue'
+import LumalDecorationComp from './components/LumalDecoration.vue'
+import LumalDigitalFlopComp from './components/LumalDigitalFlop.vue'
+import LumalFlylineChartComp from './components/LumalFlylineChart.vue'
+import LumalFlylineChartEnhancedComp from './components/LumalFlylineChartEnhanced.vue'
+import LumalFullScreenContainerComp from './components/LumalFullScreenContainer.vue'
+import LumalLoadingComp from './components/LumalLoading.vue'
+import LumalPercentPondComp from './components/LumalPercentPond.vue'
+import LumalScrollBoardComp from './components/LumalScrollBoard.vue'
+import LumalScrollRankingBoardComp from './components/LumalScrollRankingBoard.vue'
+import LumalWaterLevelPondComp from './components/LumalWaterLevelPond.vue'
 import './source-style.css'
 
 type WithInstall<T> = T & { install: (app: App) => void }
@@ -24,38 +24,38 @@ function withInstall<T extends Component>(component: T, name: string): WithInsta
   return installable
 }
 
-export const LumaActiveRingChart = withInstall(LumaActiveRingChartComp, 'LumaActiveRingChart')
-export const LumaBorderBox = withInstall(LumaBorderBoxComp, 'LumaBorderBox')
-export const LumaCapsuleChart = withInstall(LumaCapsuleChartComp, 'LumaCapsuleChart')
-export const LumaCharts = withInstall(LumaChartsComp, 'LumaCharts')
-export const LumaConicalColumnChart = withInstall(LumaConicalColumnChartComp, 'LumaConicalColumnChart')
-export const LumaDecoration = withInstall(LumaDecorationComp, 'LumaDecoration')
-export const LumaDigitalFlop = withInstall(LumaDigitalFlopComp, 'LumaDigitalFlop')
-export const LumaFlylineChart = withInstall(LumaFlylineChartComp, 'LumaFlylineChart')
-export const LumaFlylineChartEnhanced = withInstall(LumaFlylineChartEnhancedComp, 'LumaFlylineChartEnhanced')
-export const LumaFullScreenContainer = withInstall(LumaFullScreenContainerComp, 'LumaFullScreenContainer')
-export const LumaLoading = withInstall(LumaLoadingComp, 'LumaLoading')
-export const LumaPercentPond = withInstall(LumaPercentPondComp, 'LumaPercentPond')
-export const LumaScrollBoard = withInstall(LumaScrollBoardComp, 'LumaScrollBoard')
-export const LumaScrollRankingBoard = withInstall(LumaScrollRankingBoardComp, 'LumaScrollRankingBoard')
-export const LumaWaterLevelPond = withInstall(LumaWaterLevelPondComp, 'LumaWaterLevelPond')
+export const LumalActiveRingChart = withInstall(LumalActiveRingChartComp, 'LumalActiveRingChart')
+export const LumalBorderBox = withInstall(LumalBorderBoxComp, 'LumalBorderBox')
+export const LumalCapsuleChart = withInstall(LumalCapsuleChartComp, 'LumalCapsuleChart')
+export const LumalCharts = withInstall(LumalChartsComp, 'LumalCharts')
+export const LumalConicalColumnChart = withInstall(LumalConicalColumnChartComp, 'LumalConicalColumnChart')
+export const LumalDecoration = withInstall(LumalDecorationComp, 'LumalDecoration')
+export const LumalDigitalFlop = withInstall(LumalDigitalFlopComp, 'LumalDigitalFlop')
+export const LumalFlylineChart = withInstall(LumalFlylineChartComp, 'LumalFlylineChart')
+export const LumalFlylineChartEnhanced = withInstall(LumalFlylineChartEnhancedComp, 'LumalFlylineChartEnhanced')
+export const LumalFullScreenContainer = withInstall(LumalFullScreenContainerComp, 'LumalFullScreenContainer')
+export const LumalLoading = withInstall(LumalLoadingComp, 'LumalLoading')
+export const LumalPercentPond = withInstall(LumalPercentPondComp, 'LumalPercentPond')
+export const LumalScrollBoard = withInstall(LumalScrollBoardComp, 'LumalScrollBoard')
+export const LumalScrollRankingBoard = withInstall(LumalScrollRankingBoardComp, 'LumalScrollRankingBoard')
+export const LumalWaterLevelPond = withInstall(LumalWaterLevelPondComp, 'LumalWaterLevelPond')
 
 const components = [
-  LumaActiveRingChart,
-  LumaBorderBox,
-  LumaCapsuleChart,
-  LumaCharts,
-  LumaConicalColumnChart,
-  LumaDecoration,
-  LumaDigitalFlop,
-  LumaFlylineChart,
-  LumaFlylineChartEnhanced,
-  LumaFullScreenContainer,
-  LumaLoading,
-  LumaPercentPond,
-  LumaScrollBoard,
-  LumaScrollRankingBoard,
-  LumaWaterLevelPond,
+  LumalActiveRingChart,
+  LumalBorderBox,
+  LumalCapsuleChart,
+  LumalCharts,
+  LumalConicalColumnChart,
+  LumalDecoration,
+  LumalDigitalFlop,
+  LumalFlylineChart,
+  LumalFlylineChartEnhanced,
+  LumalFullScreenContainer,
+  LumalLoading,
+  LumalPercentPond,
+  LumalScrollBoard,
+  LumalScrollRankingBoard,
+  LumalWaterLevelPond,
 ]
 
 export function install(app: App): void {
@@ -101,7 +101,7 @@ export type {
   FlylineImageStyle,
   FlylineLineStyle,
   FlylineTextStyle,
-  LumaChartsOption,
+  LumalChartsOption,
   PercentPondConfig,
   RankingItem,
   ScrollBoardColumn,

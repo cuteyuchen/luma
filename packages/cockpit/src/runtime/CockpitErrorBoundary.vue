@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LumaIcon } from '@luma/icons-vue'
+import { LumalIcon } from '@lumal/icons-vue'
 import { ElButton } from 'element-plus'
 import { nextTick, onErrorCaptured, ref } from 'vue'
 
@@ -32,18 +32,18 @@ async function retry(): Promise<void> {
 </script>
 
 <template>
-  <div class="luma-cockpit-error-boundary">
+  <div class="lumal-cockpit-error-boundary">
     <template v-if="failed">
       <slot name="error" :error="capturedError" :retry="retry">
-        <div class="luma-cockpit-error-boundary__fallback" role="alert">
-          <p class="luma-cockpit-error-boundary__message">
+        <div class="lumal-cockpit-error-boundary__fallback" role="alert">
+          <p class="lumal-cockpit-error-boundary__message">
             组件渲染失败
           </p>
           <ElButton
-            class="luma-cockpit-error-boundary__retry"
+            class="lumal-cockpit-error-boundary__retry"
             @click="retry"
           >
-            <LumaIcon name="luma:refresh" :size="15" />
+            <LumalIcon name="lumal:refresh" :size="15" />
             重试
           </ElButton>
         </div>

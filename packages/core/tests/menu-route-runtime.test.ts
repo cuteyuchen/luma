@@ -1,8 +1,8 @@
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type {
-  LumaMenuInputRecord,
-  LumaRouteRecord,
-  LumaStaticMenuRecord,
+  LumalMenuInputRecord,
+  LumalRouteRecord,
+  LumalStaticMenuRecord,
   MenuRouteRuntimeRouterLike,
 } from '../src/router'
 import { describe, expect, it, vi } from 'vitest'
@@ -37,7 +37,7 @@ function asRuntimeRouter(router: Router): MenuRouteRuntimeRouterLike {
   }
 }
 
-function routeComponent(runtimeRoutes: LumaRouteRecord[], name: string): () => Promise<unknown> {
+function routeComponent(runtimeRoutes: LumalRouteRecord[], name: string): () => Promise<unknown> {
   const route = runtimeRoutes.find(item => item.name === name)
   return route?.component as () => Promise<unknown>
 }
@@ -252,8 +252,8 @@ describe('createMenuRouteRuntime', () => {
 
   it('并发加载共享同一个远程请求', async () => {
     const router = createTestRouter()
-    let resolveMenus: ((menus: LumaMenuInputRecord[]) => void) | undefined
-    const loadRemoteMenus = vi.fn(() => new Promise<LumaMenuInputRecord[]>((resolve) => {
+    let resolveMenus: ((menus: LumalMenuInputRecord[]) => void) | undefined
+    const loadRemoteMenus = vi.fn(() => new Promise<LumalMenuInputRecord[]>((resolve) => {
       resolveMenus = resolve
     }))
     const runtime = createMenuRouteRuntime({
@@ -366,7 +366,7 @@ describe('createMenuRouteRuntime', () => {
         meta: { title: '数字名称' },
         name: 42,
         path: '/numeric-name',
-      } as unknown as LumaStaticMenuRecord],
+      } as unknown as LumalStaticMenuRecord],
     })).toThrow(/name 必须是非空字符串/)
   })
 
@@ -549,7 +549,7 @@ describe('createMenuRouteRuntime', () => {
         meta: { title: '非法远程页' },
         name: 'InvalidRemote',
         path: '/invalid-remote',
-      } as unknown as LumaMenuInputRecord],
+      } as unknown as LumalMenuInputRecord],
       router: asRuntimeRouter(router),
     })
 
@@ -708,7 +708,7 @@ describe('createMenuRouteRuntime', () => {
 
   it('resetRemote 会使尚未完成的远程结果失效', async () => {
     const router = createTestRouter()
-    let resolveMenus: ((menus: LumaMenuInputRecord[]) => void) | undefined
+    let resolveMenus: ((menus: LumalMenuInputRecord[]) => void) | undefined
     const runtime = createMenuRouteRuntime({
       componentResolver: () => () => Promise.resolve({ default: {} }),
       loadRemoteMenus: () => new Promise((resolve) => {

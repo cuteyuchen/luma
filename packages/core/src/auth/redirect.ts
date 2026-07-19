@@ -14,7 +14,7 @@ export function resolveLoginRedirect(currentPath: string, options: RedirectOptio
     return loginPath
   }
 
-  const url = new URL(loginPath, 'http://luma.local')
+  const url = new URL(loginPath, 'http://lumal.local')
   url.searchParams.set(redirectQueryKey, normalizedPath)
   return `${url.pathname}${url.search}`
 }

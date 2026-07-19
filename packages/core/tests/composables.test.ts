@@ -34,10 +34,10 @@ describe('usePagination', () => {
       total: 42,
     }))
 
-    const pagination = usePagination(fetchFn, () => ({ keyword: 'Luma' }))
+    const pagination = usePagination(fetchFn, () => ({ keyword: 'Lumal' }))
     await pagination.fetchData()
 
-    expect(fetchFn).toHaveBeenCalledWith({ keyword: 'Luma', page: 1, pageSize: 10 })
+    expect(fetchFn).toHaveBeenCalledWith({ keyword: 'Lumal', page: 1, pageSize: 10 })
     expect(pagination.total.value).toBe(42)
     expect(pagination.items.value).toEqual([{ id: 1 }])
 
@@ -71,7 +71,7 @@ describe('useConfirmAction', () => {
 
 describe('usePersistentState', () => {
   it('会从存储初始化并在变更时写回', async () => {
-    const storage = createStorage(createMemoryStorage(), 'luma')
+    const storage = createStorage(createMemoryStorage(), 'lumal')
     const state = usePersistentState(storage, 'count', 0)
 
     expect(state.value).toBe(0)

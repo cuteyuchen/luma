@@ -1,11 +1,11 @@
 {
-  "name": "@luma/core",
+  "name": "@lumal/core",
   "type": "module",
   "version": "0.0.1-beta",
-  "description": "Luma lightweight Vue admin core components and services.",
+  "description": "Lumal lightweight Vue admin core components and services.",
   "license": "MIT",
   "keywords": [
-    "luma",
+    "lumal",
     "vue",
     "admin",
     "element-plus",
@@ -114,8 +114,8 @@
     }
   },
   "dependencies": {
-    "@luma/icons": "0.0.1-beta",
-    "@luma/icons-vue": "0.0.1-beta",
+    "@lumal/icons": "0.0.1-beta",
+    "@lumal/icons-vue": "0.0.1-beta",
     "sortablejs": "^1.15.7"
   },
   "devDependencies": {

@@ -50,8 +50,8 @@ describe('theme runtime', () => {
       compact: false,
       mode: 'light',
     })
-    expect(tokens['--luma-color-primary']).toBe('#1677ff')
-    expect(tokens['--luma-density-padding']).toBe('16px')
+    expect(tokens['--lumal-color-primary']).toBe('#1677ff')
+    expect(tokens['--lumal-density-padding']).toBe('16px')
   })
 
   it('会更新主题色、明暗模式和紧凑模式', () => {
@@ -78,13 +78,13 @@ describe('theme runtime', () => {
 
     applyThemeToElement(element, store.state)
 
-    expect(element.dataset.lumaTheme).toBe('dark')
-    expect(element.dataset.lumaCompact).toBe('true')
-    expect(element.style.getPropertyValue('--luma-color-primary')).toBe('#22c55e')
-    expect(element.style.getPropertyValue('--luma-density-padding')).toBe('12px')
+    expect(element.dataset.lumalTheme).toBe('dark')
+    expect(element.dataset.lumalCompact).toBe('true')
+    expect(element.style.getPropertyValue('--lumal-color-primary')).toBe('#22c55e')
+    expect(element.style.getPropertyValue('--lumal-density-padding')).toBe('12px')
   })
 
-  it('会创建并合并 Luma 偏好配置', () => {
+  it('会创建并合并 Lumal 偏好配置', () => {
     const preferences = createDefaultPreferences({
       theme: {
         colorPrimary: '#22c55e',
@@ -217,14 +217,14 @@ describe('theme runtime', () => {
     expect(resolveThemeMode('system', { matchMedia })).toBe('dark')
     expect(resolvedMode).toBe('dark')
     expect(element.classList.contains('dark')).toBe(true)
-    expect(element.dataset.lumaTheme).toBe('dark')
-    expect(element.style.getPropertyValue('--luma-color-primary')).toBe('#16a34a')
+    expect(element.dataset.lumalTheme).toBe('dark')
+    expect(element.style.getPropertyValue('--lumal-color-primary')).toBe('#16a34a')
     expect(element.style.getPropertyValue('--el-color-primary')).toBe('#16a34a')
-    expect(element.style.getPropertyValue('--luma-radius-scale')).toBe('0.75')
-    expect(element.style.getPropertyValue('--luma-header-height')).toBe('50px')
-    expect(element.style.getPropertyValue('--luma-tabbar-height')).toBe('40px')
-    expect(element.style.getPropertyValue('--luma-sidebar-width')).toBe('280px')
-    expect(element.style.getPropertyValue('--luma-font-size-base')).toBe('18px')
+    expect(element.style.getPropertyValue('--lumal-radius-scale')).toBe('0.75')
+    expect(element.style.getPropertyValue('--lumal-header-height')).toBe('50px')
+    expect(element.style.getPropertyValue('--lumal-tabbar-height')).toBe('40px')
+    expect(element.style.getPropertyValue('--lumal-sidebar-width')).toBe('280px')
+    expect(element.style.getPropertyValue('--lumal-font-size-base')).toBe('18px')
     expect(element.style.getPropertyValue('--el-font-size-base')).toBe('18px')
     expect(element.style.getPropertyValue('--el-font-size-small')).toBe('17px')
     expect(element.style.getPropertyValue('--el-font-size-extra-small')).toBe('16px')
@@ -235,14 +235,14 @@ describe('theme runtime', () => {
 
   it('核心布局与业务组件会消费全局字号变量', () => {
     const sources = [
-      '../src/layout/LumaHeader.vue',
-      '../src/components/page/LumaPage.vue',
-      '../src/components/info-table/LumaInfoTable.vue',
-      '../src/components/schema-form/LumaSchemaForm.vue',
-      '../src/components/schema-table/LumaSchemaTable.vue',
+      '../src/layout/LumalHeader.vue',
+      '../src/components/page/LumalPage.vue',
+      '../src/components/info-table/LumalInfoTable.vue',
+      '../src/components/schema-form/LumalSchemaForm.vue',
+      '../src/components/schema-table/LumalSchemaTable.vue',
     ].map(path => readFileSync(new URL(path, import.meta.url), 'utf8'))
 
-    expect(sources.every(source => source.includes('var(--luma-font-size-base, 14px)'))).toBe(true)
+    expect(sources.every(source => source.includes('var(--lumal-font-size-base, 14px)'))).toBe(true)
     expect(sources.some(source => /font-size:\s*(?:12|13|14|16|18)px/.test(source))).toBe(false)
   })
 

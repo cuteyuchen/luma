@@ -1,4 +1,4 @@
-import type { LumaPreferences, ResolvedThemeMode, ThemeRuntimeEnvironment, ThemeState } from './types'
+import type { LumalPreferences, ResolvedThemeMode, ThemeRuntimeEnvironment, ThemeState } from './types'
 import { normalizePreferences, resolveThemeMode } from './preferences'
 import { resolveThemeTokens } from './tokens'
 
@@ -6,8 +6,8 @@ import { resolveThemeTokens } from './tokens'
 export function applyThemeToElement(element: HTMLElement, state: ThemeState): void {
   const tokens = resolveThemeTokens(state)
 
-  element.dataset.lumaTheme = state.mode
-  element.dataset.lumaCompact = String(state.compact)
+  element.dataset.lumalTheme = state.mode
+  element.dataset.lumalCompact = String(state.compact)
 
   Object.entries(tokens).forEach(([key, value]) => {
     element.style.setProperty(key, value)
@@ -59,7 +59,7 @@ export function watchSystemTheme(
 /***********************Element Plus 变量*********************/
 function applyElementPlusThemeVariables(
   element: HTMLElement,
-  preferences: LumaPreferences,
+  preferences: LumalPreferences,
   mode: ResolvedThemeMode,
 ): void {
   const color = preferences.theme.colorPrimary
@@ -70,20 +70,20 @@ function applyElementPlusThemeVariables(
   element.style.setProperty('--el-color-primary-light-7', mixHexColor(color, mode === 'dark' ? '#000000' : '#ffffff', 0.7))
   element.style.setProperty('--el-color-primary-light-9', mixHexColor(color, mode === 'dark' ? '#000000' : '#ffffff', 0.9))
   element.style.setProperty('--el-color-primary-dark-2', mixHexColor(color, mode === 'dark' ? '#ffffff' : '#000000', 0.2))
-  element.style.setProperty('--luma-radius-scale', String(preferences.theme.radiusScale))
+  element.style.setProperty('--lumal-radius-scale', String(preferences.theme.radiusScale))
   element.style.setProperty('--el-border-radius-base', `${Math.round(8 * preferences.theme.radiusScale)}px`)
   element.style.setProperty('--el-border-radius-small', `${Math.round(6 * preferences.theme.radiusScale)}px`)
 }
 
 /***********************布局变量*********************/
-function applyLayoutThemeVariables(element: HTMLElement, preferences: LumaPreferences): void {
+function applyLayoutThemeVariables(element: HTMLElement, preferences: LumalPreferences): void {
   const fontSize = `${preferences.theme.fontSize}px`
 
-  element.style.setProperty('--luma-sidebar-width', `${preferences.sidebar.width}px`)
-  element.style.setProperty('--luma-header-height', '50px')
-  element.style.setProperty('--luma-tabbar-height', '40px')
-  element.style.setProperty('--luma-page-gutter', '20px')
-  element.style.setProperty('--luma-font-size-base', fontSize)
+  element.style.setProperty('--lumal-sidebar-width', `${preferences.sidebar.width}px`)
+  element.style.setProperty('--lumal-header-height', '50px')
+  element.style.setProperty('--lumal-tabbar-height', '40px')
+  element.style.setProperty('--lumal-page-gutter', '20px')
+  element.style.setProperty('--lumal-font-size-base', fontSize)
   element.style.setProperty('--el-font-size-large', `${preferences.theme.fontSize + 4}px`)
   element.style.setProperty('--el-font-size-medium', `${preferences.theme.fontSize + 2}px`)
   element.style.setProperty('--el-font-size-base', fontSize)

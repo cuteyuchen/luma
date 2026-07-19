@@ -2,7 +2,7 @@ import type { Ref } from 'vue'
 import { ref } from 'vue'
 
 /***********************分页结果*********************/
-/** Luma 标准分页结果结构。 */
+/** Lumal 标准分页结果结构。 */
 export interface PaginationResult<T> {
   items: T[]
   total: number
@@ -43,7 +43,7 @@ function defaultParser<T>(response: unknown): PaginationResult<T> {
 
 /**
  * 列表分页组合式逻辑：管理页码、每页条数、loading 与数据加载。
- * 不绑定具体后端字段，默认按 Luma 标准 `{ items, total }` 解析，可通过 parser 适配。
+ * 不绑定具体后端字段，默认按 Lumal 标准 `{ items, total }` 解析，可通过 parser 适配。
  */
 export function usePagination<T = unknown, TResponse = unknown>(
   fetchFn: (params: Record<string, unknown>) => Promise<TResponse>,

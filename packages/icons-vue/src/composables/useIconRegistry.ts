@@ -1,11 +1,11 @@
-import type { IconDefinition, IconGroupDefinition, IconKey } from '@luma/icons'
+import type { IconDefinition, IconGroupDefinition, IconKey } from '@lumal/icons'
 import type { ComputedRef } from 'vue'
 import {
   getRegisteredIconDefinitions,
   getRegisteredIconGroups,
   resolveIconDefinition,
   subscribeIconRegistry,
-} from '@luma/icons'
+} from '@lumal/icons'
 import { computed, onScopeDispose, shallowRef } from 'vue'
 
 export interface UseIconRegistryReturn {

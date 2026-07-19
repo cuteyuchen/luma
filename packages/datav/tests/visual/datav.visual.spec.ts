@@ -9,17 +9,17 @@ const viewports = [
 test('DataV 特征动效与复杂装饰结构已接入', async ({ page }) => {
   await page.goto('/')
 
-  expect(await page.locator('.luma-decoration[data-variant="1"] .luma-decoration__mark').count()).toBeGreaterThan(0)
-  await expect(page.locator('.luma-decoration[data-variant="9"] .luma-decoration__ring')).toHaveCount(4)
-  await expect(page.locator('.luma-decoration[data-variant="10"] .luma-decoration__segment')).toHaveCount(3)
+  expect(await page.locator('.lumal-decoration[data-variant="1"] .lumal-decoration__mark').count()).toBeGreaterThan(0)
+  await expect(page.locator('.lumal-decoration[data-variant="9"] .lumal-decoration__ring')).toHaveCount(4)
+  await expect(page.locator('.lumal-decoration[data-variant="10"] .lumal-decoration__segment')).toHaveCount(3)
 
-  const borderOne = page.locator('.luma-border-box[data-variant="1"]')
-  const borderEight = page.locator('.luma-border-box[data-variant="8"]')
+  const borderOne = page.locator('.lumal-border-box[data-variant="1"]')
+  const borderEight = page.locator('.lumal-border-box[data-variant="8"]')
 
   await expect(borderOne.locator('animate')).toHaveCount(12)
   await expect(borderEight.locator('animateMotion')).toHaveCount(1)
   await expect(borderEight.locator('use animate[attributeName="stroke-dasharray"]')).toHaveCount(1)
-  await expect(page.locator('.luma-decoration[data-variant="12"] animateTransform')).toHaveCount(1)
+  await expect(page.locator('.lumal-decoration[data-variant="12"] animateTransform')).toHaveCount(1)
 
   const borderEightSvg = borderEight.locator('svg')
   const startTime = await borderEightSvg.evaluate(element => (element as SVGSVGElement).getCurrentTime())
@@ -55,7 +55,7 @@ test('飞线图在固定 SMIL 时间保持 DataV 2.10.0 视觉', async ({ page }
     expect(Number(from?.split(',')[1])).toBeCloseTo(length, 5)
   }
 
-  await page.locator('.luma-flyline-chart svg, .luma-flyline-chart-enhanced svg').evaluateAll((svgs) => {
+  await page.locator('.lumal-flyline-chart svg, .lumal-flyline-chart-enhanced svg').evaluateAll((svgs) => {
     svgs.forEach((svg) => {
       const animated = svg as SVGSVGElement
       animated.pauseAnimations()
@@ -81,8 +81,8 @@ for (const theme of themes) {
       await page.goto('/')
 
       const gallery = page.locator('main.gallery')
-      await expect(page.locator('.luma-border-box')).toHaveCount(13)
-      await expect(page.locator('.luma-decoration')).toHaveCount(12)
+      await expect(page.locator('.lumal-border-box')).toHaveCount(13)
+      await expect(page.locator('.lumal-decoration')).toHaveCount(12)
 
       if (theme === 'light') {
         await page.getByRole('button', { name: '切换浅色' }).click()
@@ -92,7 +92,7 @@ for (const theme of themes) {
       const screenshot = await page.screenshot({
         animations: 'disabled',
         fullPage: true,
-        mask: [1, 3, 6, 9].map(variant => page.locator(`.luma-decoration[data-variant="${variant}"]`)),
+        mask: [1, 3, 6, 9].map(variant => page.locator(`.lumal-decoration[data-variant="${variant}"]`)),
         maskColor: '#081322',
       })
       expect(screenshot).toMatchSnapshot(`datav-${theme}-${viewport.label}.png`, {

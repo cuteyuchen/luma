@@ -1,10 +1,10 @@
-import { registerIcons } from '@luma/icons'
+import { registerIcons } from '@lumal/icons'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import { LumaIcon, LumaIconPicker, LumaIconPickerDialog } from '../src'
+import { LumalIcon, LumalIconPicker, LumalIconPickerDialog } from '../src'
 
-describe('lumaIcon', () => {
+describe('lumalIcon', () => {
   it('可以渲染已注册的 SVG 图标', () => {
     registerIcons([
       {
@@ -15,7 +15,7 @@ describe('lumaIcon', () => {
       },
     ])
 
-    const wrapper = mount(LumaIcon, {
+    const wrapper = mount(LumalIcon, {
       props: {
         name: 'app:component',
         color: '#1677ff',
@@ -23,13 +23,13 @@ describe('lumaIcon', () => {
       },
     })
 
-    expect(wrapper.classes()).toContain('luma-icon')
+    expect(wrapper.classes()).toContain('lumal-icon')
     expect(wrapper.html()).toContain('#1677ff')
-    expect(wrapper.attributes('style')).toContain('--luma-icon-size: 20px')
+    expect(wrapper.attributes('style')).toContain('--lumal-icon-size: 20px')
   })
 
   it('注册表变化后选择器可以搜索、分页并选择图标', async () => {
-    const wrapper = mount(LumaIconPicker, {
+    const wrapper = mount(LumalIconPicker, {
       props: {
         pageSize: 1,
         showLabels: true,
@@ -65,7 +65,7 @@ describe('lumaIcon', () => {
 
   it('弹窗仅在确认后更新外部图标值', async () => {
     const onUpdate = vi.fn()
-    const wrapper = mount(LumaIconPickerDialog, {
+    const wrapper = mount(LumalIconPickerDialog, {
       props: {
         'modelValue': 'app:component',
         'visible': true,
@@ -77,7 +77,7 @@ describe('lumaIcon', () => {
     await wrapper.get('[aria-label="响应式图标二"]').trigger('click')
     expect(onUpdate).not.toHaveBeenCalled()
 
-    await wrapper.get('.luma-icon-picker-dialog__footer .is-primary').trigger('click')
+    await wrapper.get('.lumal-icon-picker-dialog__footer .is-primary').trigger('click')
     expect(onUpdate).toHaveBeenCalledWith('reactive-test:second')
     expect(wrapper.emitted('confirm')).toEqual([['reactive-test:second']])
   })

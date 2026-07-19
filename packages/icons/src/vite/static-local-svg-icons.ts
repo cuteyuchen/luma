@@ -14,8 +14,8 @@ interface VitePluginLike {
   load?: (id: string) => string | null | undefined
 }
 
-const PROXY_ID = '\0@luma/icons/static-local-svg'
-const ICONS_ENTRY_ID = '@luma/icons'
+const PROXY_ID = '\0@lumal/icons/static-local-svg'
+const ICONS_ENTRY_ID = '@lumal/icons'
 
 /***********************配置归一化*********************/
 function normalizeSource(
@@ -35,7 +35,7 @@ export function createStaticLocalSvgIconsPlugin(
   const source = normalizeSource(options.localSvg)
 
   return {
-    name: 'luma:static-local-svg-icons',
+    name: 'lumal:static-local-svg-icons',
     enforce: 'pre',
     resolveId(id) {
       if (!source || id !== ICONS_ENTRY_ID) {
@@ -57,7 +57,7 @@ export function createStaticLocalSvgIconsPlugin(
       return [
         importStatement,
         `export * from ${JSON.stringify(ICONS_ENTRY_ID)};`,
-        'import { registerStaticLocalSvgIcons } from "@luma/icons";',
+        'import { registerStaticLocalSvgIcons } from "@lumal/icons";',
         'registerStaticLocalSvgIcons(Array.isArray(staticLocalSvgIcons) ? staticLocalSvgIcons : []);',
       ].join('\n')
     },

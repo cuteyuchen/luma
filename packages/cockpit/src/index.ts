@@ -1,9 +1,9 @@
-/***********************@luma/cockpit 公共入口*********************/
+/***********************@lumal/cockpit 公共入口*********************/
 // 汇总类型、注册表、消息、配置、composables 与运行时。
-// 注意：Designer 不在此导出，只读驾驶舱应从 @luma/cockpit/runtime 消费，
-// 需要编辑能力时再单独从 @luma/cockpit/designer 引入，避免同步加载 Designer。
+// 注意：Designer 不在此导出，只读驾驶舱应从 @lumal/cockpit/runtime 消费，
+// 需要编辑能力时再单独从 @lumal/cockpit/designer 引入，避免同步加载 Designer。
 
-// 引入基础样式，确保库构建产出 dist/cockpit.css（应用通过 @luma/cockpit/style.css 消费）
+// 引入基础样式，确保库构建产出 dist/cockpit.css（应用通过 @lumal/cockpit/style.css 消费）
 import './style/index.scss'
 
 /***********************composables*********************/
@@ -73,8 +73,8 @@ export type {
 } from './registry/types'
 /***********************运行时*********************/
 export {
-  LumaCockpit,
-  LumaCockpitCard,
+  LumalCockpit,
+  LumalCockpitCard,
   useCockpitRuntimeEnv,
 } from './runtime'
 

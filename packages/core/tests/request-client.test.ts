@@ -35,7 +35,7 @@ describe('create request client', () => {
 
     const result = await client.get('/users', {
       query: {
-        keyword: 'Luma',
+        keyword: 'Lumal',
         page: 1,
       },
     })
@@ -43,7 +43,7 @@ describe('create request client', () => {
     const [url, init] = fetchMock.mock.calls[0] ?? []
     const headers = new Headers(init?.headers)
 
-    expect(String(url)).toBe('https://api.example.com/users?keyword=Luma&page=1')
+    expect(String(url)).toBe('https://api.example.com/users?keyword=Lumal&page=1')
     expect(init?.method).toBe('GET')
     expect(headers.get('Authorization')).toBe('Bearer token-001')
     expect(result).toEqual({
@@ -63,7 +63,7 @@ describe('create request client', () => {
 
     const result = await client.post('/projects', {
       body: {
-        name: 'Luma',
+        name: 'Lumal',
       },
     })
 
@@ -72,7 +72,7 @@ describe('create request client', () => {
 
     expect(init?.method).toBe('POST')
     expect(headers.get('content-type')).toBe('application/json')
-    expect(init?.body).toBe(JSON.stringify({ name: 'Luma' }))
+    expect(init?.body).toBe(JSON.stringify({ name: 'Lumal' }))
     expect(result).toEqual({
       ok: true,
     })
@@ -92,12 +92,12 @@ describe('create request client', () => {
 
     const firstRequest = client.post('/projects', {
       body: {
-        name: 'Luma',
+        name: 'Lumal',
       },
     })
     const duplicateRequest = client.post('/projects', {
       body: {
-        name: 'Luma',
+        name: 'Lumal',
       },
     })
 
@@ -183,13 +183,13 @@ describe('create request client', () => {
       getToken: () => token,
     })
 
-    await expect(client.post('/projects', { body: { name: 'Luma' } })).rejects.toMatchObject({
+    await expect(client.post('/projects', { body: { name: 'Lumal' } })).rejects.toMatchObject({
       kind: 'session',
     })
     expect(refresh).not.toHaveBeenCalled()
 
     await expect(client.post('/projects', {
-      body: { name: 'Luma' },
+      body: { name: 'Lumal' },
       retryOnAuthRefresh: true,
     })).resolves.toEqual({ saved: true })
     expect(refresh).toHaveBeenCalledTimes(1)
@@ -359,13 +359,13 @@ describe('parse standard response', () => {
   })
 
   it('createStandardResponseParser 可直接用作 onResponse', async () => {
-    const fetchMock = vi.fn(async () => createJsonResponse({ code: 0, data: { name: 'Luma' } }))
+    const fetchMock = vi.fn(async () => createJsonResponse({ code: 0, data: { name: 'Lumal' } }))
     const client = createRequestClient({
       fetch: fetchMock,
       onResponse: createStandardResponseParser(),
     })
 
-    await expect(client.get('/profile')).resolves.toEqual({ name: 'Luma' })
+    await expect(client.get('/profile')).resolves.toEqual({ name: 'Lumal' })
   })
 })
 

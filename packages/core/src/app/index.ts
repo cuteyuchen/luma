@@ -1,11 +1,11 @@
-export { createLumaAdmin } from './createLumaAdmin'
+export { createLumalAdmin } from './createLumalAdmin'
 export type {
-  CreateLumaAdminOptions,
-  LumaAdminContext,
-  LumaAdminInstance,
-  LumaAdminPreset,
-  LumaComponentSelection,
-  LumaElementPlusInput,
-  LumaElementPlusOptions,
-  LumaRouterPlugin,
+  CreateLumalAdminOptions,
+  LumalAdminContext,
+  LumalAdminInstance,
+  LumalAdminPreset,
+  LumalComponentSelection,
+  LumalElementPlusInput,
+  LumalElementPlusOptions,
+  LumalRouterPlugin,
 } from './types'

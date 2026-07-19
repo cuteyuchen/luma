@@ -14,7 +14,7 @@ describe('schema form normalize', () => {
         field: 'name',
         label: '名称',
         component: 'input',
-        defaultValue: 'Luma',
+        defaultValue: 'Lumal',
       },
     ])
 
@@ -25,7 +25,7 @@ describe('schema form normalize', () => {
     expect(schemas[1]?.renderable).toBe(true)
     expect(model).toEqual({
       id: '1001',
-      name: 'Luma',
+      name: 'Lumal',
     })
   })
 

@@ -1,4 +1,4 @@
-import type { LumaLayoutTabItem } from '../src/layout/types'
+import type { LumalLayoutTabItem } from '../src/layout/types'
 import { describe, expect, it } from 'vitest'
 import {
   clearTabSnapshot,
@@ -11,11 +11,11 @@ import {
   writeTabSnapshot,
 } from '../src/layout'
 
-const fixedTabs: LumaLayoutTabItem[] = [
+const fixedTabs: LumalLayoutTabItem[] = [
   { closable: false, path: '/home', pinned: true, title: '首页' },
 ]
 
-function buildTabs(): LumaLayoutTabItem[] {
+function buildTabs(): LumalLayoutTabItem[] {
   return [
     { closable: false, path: '/home', pinned: true, title: '首页' },
     { closable: true, path: '/work', pinned: false, title: '工作台' },

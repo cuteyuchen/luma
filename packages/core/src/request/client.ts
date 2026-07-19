@@ -29,7 +29,7 @@ function appendQuery(url: string, query: RequestQuery | undefined): string {
     return url
   }
 
-  const requestUrl = new URL(url, isAbsoluteUrl(url) ? undefined : 'http://luma.local')
+  const requestUrl = new URL(url, isAbsoluteUrl(url) ? undefined : 'http://lumal.local')
 
   Object.entries(query).forEach(([key, value]) => {
     const values = Array.isArray(value) ? value : [value]
@@ -163,7 +163,7 @@ function resolveRequestId(options: RequestClientOptions): string | undefined {
   }
 
   requestIdSeed += 1
-  return `luma-${requestIdSeed.toString(36)}-${requestIdSeed}`
+  return `lumal-${requestIdSeed.toString(36)}-${requestIdSeed}`
 }
 
 /***********************客户端创建*********************/

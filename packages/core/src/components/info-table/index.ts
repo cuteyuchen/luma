@@ -1,4 +1,4 @@
-export { default as LumaInfoTable } from './LumaInfoTable.vue'
+export { default as LumalInfoTable } from './LumalInfoTable.vue'
 export type {
   InfoTableItem,
   InfoTableProps,

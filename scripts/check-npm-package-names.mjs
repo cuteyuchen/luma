@@ -17,7 +17,7 @@ const publishPackageJsonPaths = [
   'packages/cockpit/package.json',
   'packages/vben-compat/package.json',
   'packages/vite/package.json',
-  'packages/create-luma-admin/package.json',
+  'packages/create-lumal-admin/package.json',
 ]
 
 /***********************包名收集*********************/
@@ -104,5 +104,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   }
 
   console.log('npm 包名检查通过：目标包名当前未在 registry 查询到。')
-  console.log('注意：这不能证明当前 npm 账号拥有或可创建 @luma scope，正式发布前仍需用发布账号确认。')
+  console.log('注意：这不能证明当前 npm 账号拥有或可创建 @lumal scope，正式发布前仍需用发布账号确认。')
 }

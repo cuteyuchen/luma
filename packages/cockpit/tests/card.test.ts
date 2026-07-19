@@ -3,7 +3,7 @@ import type { CockpitWidgetInstance } from '../src/types'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { h, nextTick } from 'vue'
-import LumaCockpitCard from '../src/runtime/LumaCockpitCard.vue'
+import LumalCockpitCard from '../src/runtime/LumalCockpitCard.vue'
 
 const widgets: CockpitWidgetInstance[] = [
   { id: 'widget-a', type: 'stub', title: '模块甲' },
@@ -17,28 +17,28 @@ const tabs: CockpitCardTab[] = widgets.map(widget => ({
   widget,
 }))
 
-describe('luma cockpit card', () => {
+describe('lumal cockpit card', () => {
   it('渲染单标题和内容，不创建 Tab 语义', () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       props: { title: '运行概览', widget: widgets[0] },
       slots: { default: () => h('div', { class: 'card-content' }, '模块内容') },
     })
 
-    expect(wrapper.find('.luma-cockpit-card__title').text()).toBe('运行概览')
+    expect(wrapper.find('.lumal-cockpit-card__title').text()).toBe('运行概览')
     expect(wrapper.find('[role="tab"]').exists()).toBe(false)
     expect(wrapper.find('[role="tabpanel"]').exists()).toBe(false)
     expect(wrapper.find('.card-content').text()).toBe('模块内容')
   })
 
   it('单个 Tab 退化为普通标题', () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       props: { tabs: [tabs[0]] },
       slots: {
         default: ({ activeTabId }: { activeTabId: string | undefined }) => h('div', { class: 'active-id' }, activeTabId),
       },
     })
 
-    expect(wrapper.find('.luma-cockpit-card__title').text()).toBe('模块甲')
+    expect(wrapper.find('.lumal-cockpit-card__title').text()).toBe('模块甲')
     expect(wrapper.find('[role="tablist"]').exists()).toBe(false)
     expect(wrapper.find('[role="tab"]').exists()).toBe(false)
     expect(wrapper.find('[role="tabpanel"]').exists()).toBe(false)
@@ -46,7 +46,7 @@ describe('luma cockpit card', () => {
   })
 
   it('按受控值选择 Tab，并建立完整的 Tab 与面板 ARIA 关联', () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       props: { tabs, activeTabId: 'widget-b' },
       slots: {
         default: ({ activeTabId }: { activeTabId: string | undefined }) => h('div', { class: 'active-id' }, activeTabId),
@@ -64,7 +64,7 @@ describe('luma cockpit card', () => {
   })
 
   it('非法受控值回退到首个 Tab 并请求同步受控状态', () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       props: { tabs, activeTabId: 'missing-widget' },
     })
 
@@ -75,7 +75,7 @@ describe('luma cockpit card', () => {
   })
 
   it('点击 Tab 发出更新，并在受控值更新后切换面板关联', async () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       props: { tabs, activeTabId: 'widget-a' },
     })
 
@@ -89,7 +89,7 @@ describe('luma cockpit card', () => {
   })
 
   it('支持方向键、Home 和 End 切换并移动焦点', async () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       attachTo: document.body,
       props: { tabs, activeTabId: 'widget-b' },
     })
@@ -125,7 +125,7 @@ describe('luma cockpit card', () => {
   })
 
   it('tab 重排后仍按稳定 id 移动焦点', async () => {
-    const wrapper = mount(LumaCockpitCard, {
+    const wrapper = mount(LumalCockpitCard, {
       attachTo: document.body,
       props: { tabs, activeTabId: 'widget-b' },
     })

@@ -9,15 +9,15 @@ import {
 describe('getPublishPackageNames', () => {
   it('会返回需要发布到 npm 的包名', () => {
     expect(getPublishPackageNames()).toEqual([
-      '@luma/icons',
-      '@luma/icons-vue',
-      '@luma/core',
-      '@luma/charts',
-      '@luma/datav',
-      '@luma/cockpit',
-      '@luma/vben-compat',
-      '@luma/vite',
-      'create-luma-admin',
+      '@lumal/icons',
+      '@lumal/icons-vue',
+      '@lumal/core',
+      '@lumal/charts',
+      '@lumal/datav',
+      '@lumal/cockpit',
+      '@lumal/vben-compat',
+      '@lumal/vite',
+      'create-lumal-admin',
     ])
   })
 })
@@ -50,23 +50,23 @@ describe('classifyNpmViewResult', () => {
 describe('createPackageNameReport', () => {
   it('全部未占用时返回通过状态', () => {
     const report = createPackageNameReport([
-      { name: '@luma/core', status: 'not-found' },
-      { name: 'create-luma-admin', status: 'not-found' },
+      { name: '@lumal/core', status: 'not-found' },
+      { name: 'create-lumal-admin', status: 'not-found' },
     ])
 
     expect(report.ok).toBe(true)
-    expect(report.lines).toContain('[not-found] @luma/core')
-    expect(report.lines).toContain('[not-found] create-luma-admin')
+    expect(report.lines).toContain('[not-found] @lumal/core')
+    expect(report.lines).toContain('[not-found] create-lumal-admin')
   })
 
   it('存在已占用或未知状态时返回失败状态', () => {
     const report = createPackageNameReport([
-      { name: '@luma/core', status: 'taken' },
-      { name: 'create-luma-admin', status: 'unknown' },
+      { name: '@lumal/core', status: 'taken' },
+      { name: 'create-lumal-admin', status: 'unknown' },
     ])
 
     expect(report.ok).toBe(false)
-    expect(report.lines).toContain('[taken] @luma/core')
-    expect(report.lines).toContain('[unknown] create-luma-admin')
+    expect(report.lines).toContain('[taken] @lumal/core')
+    expect(report.lines).toContain('[unknown] create-lumal-admin')
   })
 })

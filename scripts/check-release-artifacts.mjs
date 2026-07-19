@@ -30,9 +30,9 @@ const requiredArtifacts = [
   'packages/vben-compat/dist/index.cjs',
   'packages/vite/dist/index.js',
   'packages/vite/dist/index.cjs',
-  'packages/create-luma-admin/dist/index.js',
-  'packages/create-luma-admin/dist/cli.js',
-  'apps/luma-admin/dist/index.html',
+  'packages/create-lumal-admin/dist/index.js',
+  'packages/create-lumal-admin/dist/cli.js',
+  'apps/lumal-admin/dist/index.html',
 ]
 
 const datavComponentEntries = [
@@ -72,7 +72,7 @@ for (const [relativePath, maxSize, label, readableMaxSize] of datavSizeLimits) {
     const size = statSync(filePath).size
 
     if (size > maxSize) {
-      errors.push(`@luma/datav ${label} 超过 ${readableMaxSize}：${relativePath} (${size} bytes)`)
+      errors.push(`@lumal/datav ${label} 超过 ${readableMaxSize}：${relativePath} (${size} bytes)`)
     }
   }
 }
@@ -86,11 +86,11 @@ for (const fileName of datavEsArtifacts) {
   const filePath = join(datavDistDir, fileName)
   const size = statSync(filePath).size
   if (size > maxDatavEsSize) {
-    errors.push(`@luma/datav ES JS 超过 80 KiB：packages/datav/dist/${fileName} (${size} bytes)`)
+    errors.push(`@lumal/datav ES JS 超过 80 KiB：packages/datav/dist/${fileName} (${size} bytes)`)
   }
 }
 
-const adminAssetsDir = join(rootDir, 'apps/luma-admin/dist/assets')
+const adminAssetsDir = join(rootDir, 'apps/lumal-admin/dist/assets')
 const javascriptAssets = existsSync(adminAssetsDir)
   ? readdirSync(adminAssetsDir)
       .filter(fileName => fileName.endsWith('.js'))
@@ -106,7 +106,7 @@ for (const asset of javascriptAssets) {
   }
 }
 
-for (const vendorName of ['vendor-echarts', 'vendor-element-plus', 'vendor-luma']) {
+for (const vendorName of ['vendor-echarts', 'vendor-element-plus', 'vendor-lumal']) {
   if (!javascriptAssets.some(asset => asset.fileName.startsWith(vendorName))) {
     errors.push(`Admin 缺少明确分包：${vendorName}`)
   }
@@ -117,10 +117,10 @@ if (javascriptAssets.length === 0) {
 }
 
 if (errors.length > 0) {
-  console.error('Luma 发布产物检查失败：')
+  console.error('Lumal 发布产物检查失败：')
   errors.forEach(error => console.error(`- ${error}`))
   process.exit(1)
 }
 
 const largestAsset = javascriptAssets.sort((left, right) => right.size - left.size)[0]
-console.log(`Luma 发布产物检查通过。Admin 最大 JS 块：${largestAsset.fileName} (${largestAsset.size} bytes)。`)
+console.log(`Lumal 发布产物检查通过。Admin 最大 JS 块：${largestAsset.fileName} (${largestAsset.size} bytes)。`)

@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   reporter: [['list']],
   retries: process.env.CI ? 1 : 0,
-  testDir: 'apps/luma-admin/e2e',
+  testDir: 'apps/lumal-admin/e2e',
   timeout: 45_000,
   use: {
     baseURL: adminUrl,
@@ -28,7 +28,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm exec nitro dev --host 127.0.0.1 --port 5321',
-      cwd: 'apps/luma-mock-api',
+      cwd: 'apps/lumal-mock-api',
       env: {
         MOCK_LOGIN_RATE_LIMIT: '1000',
         MOCK_RATE_LIMIT: '10000',
@@ -39,9 +39,9 @@ export default defineConfig({
     },
     {
       command: 'node ../../node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4174',
-      cwd: 'apps/luma-admin',
+      cwd: 'apps/lumal-admin',
       env: {
-        LUMA_MOCK_API_TARGET: mockApiUrl,
+        LUMAL_MOCK_API_TARGET: mockApiUrl,
       },
       reuseExistingServer: false,
       timeout: 120_000,

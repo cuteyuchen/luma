@@ -44,7 +44,7 @@ function resolveStorage(storage?: Storage): Storage {
  * 不绑定任何具体登录接口或 token 字段名，仅负责会话状态管理。
  */
 export function createAuthSession(options: AuthSessionOptions = {}): AuthSession {
-  const key = options.tokenKey ?? 'luma:token'
+  const key = options.tokenKey ?? 'lumal:token'
   const storage = resolveStorage(options.storage)
   const tokenStorage: TokenStorage = createTokenStorage(storage, key)
   const refreshTokenStorage = createTokenStorage(storage, options.refreshTokenKey ?? `${key}:refresh`)

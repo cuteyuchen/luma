@@ -1,55 +1,55 @@
-export interface LumaComponentResolverResult {
+export interface LumalComponentResolverResult {
   from: string
   name: string
   sideEffects?: string
 }
 
-export interface LumaComponentResolver {
+export interface LumalComponentResolver {
   type: 'component'
-  resolve: (name: string) => LumaComponentResolverResult | undefined
+  resolve: (name: string) => LumalComponentResolverResult | undefined
 }
 
-export interface CreateLumaComponentResolverOptions {
+export interface CreateLumalComponentResolverOptions {
   customComponents?: Record<string, string>
   importStyle?: boolean
 }
 
 const COMPONENT_PACKAGES = new Map<string, string>([
-  ['LumaChart', '@luma/charts'],
-  ['LumaChartPanel', '@luma/charts'],
-  ['LumaContent', '@luma/core/layout'],
-  ['LumaCrudTable', '@luma/core/components'],
-  ['LumaHeader', '@luma/core/layout'],
-  ['LumaIcon', '@luma/icons-vue'],
-  ['LumaIconPicker', '@luma/icons-vue'],
-  ['LumaIconPickerDialog', '@luma/icons-vue'],
-  ['LumaInfoTable', '@luma/core/components'],
-  ['LumaLayout', '@luma/core/layout'],
-  ['LumaPage', '@luma/core/components'],
-  ['LumaPageLayout', '@luma/core/components'],
-  ['LumaPagination', '@luma/core/components'],
-  ['LumaRouterView', '@luma/core/layout'],
-  ['LumaSchemaForm', '@luma/core/components'],
-  ['LumaSchemaTable', '@luma/core/components'],
-  ['LumaSidebar', '@luma/core/layout'],
-  ['LumaTabs', '@luma/core/layout'],
-  ['LumaTopNav', '@luma/core/layout'],
+  ['LumalChart', '@lumal/charts'],
+  ['LumalChartPanel', '@lumal/charts'],
+  ['LumalContent', '@lumal/core/layout'],
+  ['LumalCrudTable', '@lumal/core/components'],
+  ['LumalHeader', '@lumal/core/layout'],
+  ['LumalIcon', '@lumal/icons-vue'],
+  ['LumalIconPicker', '@lumal/icons-vue'],
+  ['LumalIconPickerDialog', '@lumal/icons-vue'],
+  ['LumalInfoTable', '@lumal/core/components'],
+  ['LumalLayout', '@lumal/core/layout'],
+  ['LumalPage', '@lumal/core/components'],
+  ['LumalPageLayout', '@lumal/core/components'],
+  ['LumalPagination', '@lumal/core/components'],
+  ['LumalRouterView', '@lumal/core/layout'],
+  ['LumalSchemaForm', '@lumal/core/components'],
+  ['LumalSchemaTable', '@lumal/core/components'],
+  ['LumalSidebar', '@lumal/core/layout'],
+  ['LumalTabs', '@lumal/core/layout'],
+  ['LumalTopNav', '@lumal/core/layout'],
 ])
 
 function resolveStyle(packageName: string): string | undefined {
-  if (packageName.startsWith('@luma/core')) {
-    return '@luma/core/style.css'
+  if (packageName.startsWith('@lumal/core')) {
+    return '@lumal/core/style.css'
   }
-  if (packageName === '@luma/icons-vue' || packageName === '@luma/charts') {
+  if (packageName === '@lumal/icons-vue' || packageName === '@lumal/charts') {
     return `${packageName}/style.css`
   }
 
   return undefined
 }
 
-export function createLumaComponentResolver(
-  options: CreateLumaComponentResolverOptions = {},
-): LumaComponentResolver {
+export function createLumalComponentResolver(
+  options: CreateLumalComponentResolverOptions = {},
+): LumalComponentResolver {
   const components = new Map(COMPONENT_PACKAGES)
 
   for (const [name, packageName] of Object.entries(options.customComponents ?? {})) {

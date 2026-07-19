@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import {
-  LumaBreadcrumb,
-  LumaGlobalSearch,
-  LumaLayout,
-  LumaSidebar,
-  LumaTopNav,
+  LumalBreadcrumb,
+  LumalGlobalSearch,
+  LumalLayout,
+  LumalSidebar,
+  LumalTopNav,
 } from '../src/layout'
 import { createDefaultPreferences } from '../src/theme'
 import { elementPlusStubs } from './helpers/element-plus-stubs'
@@ -26,7 +26,7 @@ const menus = [
 
 describe('layout discovery components', () => {
   it('面包屑会解析菜单层级、补充首页并透传选择', async () => {
-    const wrapper = mount(LumaBreadcrumb, {
+    const wrapper = mount(LumalBreadcrumb, {
       props: {
         activePath: '/system/user',
         menus,
@@ -37,12 +37,12 @@ describe('layout discovery components', () => {
     expect(wrapper.text()).toContain('系统管理')
     expect(wrapper.text()).toContain('用户管理')
 
-    await wrapper.find('.luma-breadcrumb__link').trigger('click')
+    await wrapper.find('.lumal-breadcrumb__link').trigger('click')
     expect(wrapper.emitted('select')?.[0]).toEqual(['/dashboard'])
   })
 
   it('全局搜索支持快捷键、过滤和键盘选择', async () => {
-    const wrapper = mount(LumaGlobalSearch, {
+    const wrapper = mount(LumalGlobalSearch, {
       global: {
         stubs: { Teleport: true },
       },
@@ -64,22 +64,22 @@ describe('layout discovery components', () => {
   })
 
   it('侧栏、树形顶栏和扁平顶栏都渲染菜单徽标', () => {
-    const sidebar = mount(LumaSidebar, {
+    const sidebar = mount(LumalSidebar, {
       global: { stubs: elementPlusStubs },
       props: { menus },
     })
-    const tree = mount(LumaTopNav, {
+    const tree = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: { menus, mode: 'tree' },
     })
-    const flat = mount(LumaTopNav, {
+    const flat = mount(LumalTopNav, {
       global: { stubs: elementPlusStubs },
       props: { menus, mode: 'flat' },
     })
 
-    expect(sidebar.findAll('.luma-menu-badge')).toHaveLength(3)
-    expect(tree.findAll('.luma-menu-badge')).toHaveLength(3)
-    expect(flat.findAll('.luma-menu-badge')).toHaveLength(2)
+    expect(sidebar.findAll('.lumal-menu-badge')).toHaveLength(3)
+    expect(tree.findAll('.lumal-menu-badge')).toHaveLength(3)
+    expect(flat.findAll('.lumal-menu-badge')).toHaveLength(2)
     expect(sidebar.find('[aria-label="工作台：3"]').classes()).toContain('is-danger')
     expect(tree.find('[aria-label="系统管理有新内容"]').classes()).toContain('is-dot')
   })
@@ -104,7 +104,7 @@ describe('layout discovery components', () => {
     await router.push('/system/user/detail')
     await router.isReady()
 
-    const wrapper = mount(LumaLayout, {
+    const wrapper = mount(LumalLayout, {
       global: {
         plugins: [router],
         stubs: elementPlusStubs,
@@ -113,14 +113,14 @@ describe('layout discovery components', () => {
         activeMenuPath: '/system/user/detail',
         menus,
         preferences: createDefaultPreferences({ app: { layout: 'sidebar-nav' } }),
-        title: 'Luma Admin',
+        title: 'Lumal Admin',
       },
     })
 
     expect(wrapper.findComponent({ name: 'ElMenu' }).props('defaultActive')).toBe('/system/user')
-    expect(wrapper.findComponent(LumaBreadcrumb).text()).toContain('用户详情')
-    expect(wrapper.findComponent(LumaGlobalSearch).props('menus')).toEqual(menus)
-    expect(document.title).toBe('用户详情 - Luma Admin')
+    expect(wrapper.findComponent(LumalBreadcrumb).text()).toContain('用户详情')
+    expect(wrapper.findComponent(LumalGlobalSearch).props('menus')).toEqual(menus)
+    expect(document.title).toBe('用户详情 - Lumal Admin')
 
     await router.push('/dashboard')
     await wrapper.vm.$nextTick()
@@ -131,7 +131,7 @@ describe('layout discovery components', () => {
         app: { dynamicTitle: false, layout: 'sidebar-nav' },
       }),
     })
-    expect(document.title).toBe('Luma Admin')
+    expect(document.title).toBe('Lumal Admin')
     wrapper.unmount()
   })
 
@@ -164,7 +164,7 @@ describe('layout discovery components', () => {
     await router.push('/system/user/detail')
     await router.isReady()
 
-    const wrapper = mount(LumaBreadcrumb, {
+    const wrapper = mount(LumalBreadcrumb, {
       global: { plugins: [router] },
       props: {
         activeMenuPath: '/system/user',
@@ -177,7 +177,7 @@ describe('layout discovery components', () => {
     expect(wrapper.text()).toContain('系统管理')
     expect(wrapper.text()).toContain('用户管理')
     expect(wrapper.text()).not.toContain('用户详情')
-    expect(wrapper.findAll('.luma-breadcrumb__item')).toHaveLength(2)
+    expect(wrapper.findAll('.lumal-breadcrumb__item')).toHaveLength(2)
     wrapper.unmount()
   })
 })

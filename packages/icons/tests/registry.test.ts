@@ -9,18 +9,18 @@ import {
   resolveIconDefinition,
 } from '../src'
 
-describe('@luma/icons registry', () => {
+describe('@lumal/icons registry', () => {
   it('会预注册框架通用图标', () => {
-    expect(resolveIconDefinition('luma:sun')).toMatchObject({ label: '浅色模式' })
-    expect(resolveIconDefinition('luma:moon')).toMatchObject({ label: '深色模式' })
-    expect(resolveIconDefinition('luma:monitor')).toMatchObject({ label: '跟随系统' })
-    expect(resolveIconDefinition('luma:settings')).toBeTruthy()
-    expect(resolveIconDefinition('luma:plus')).toMatchObject({ label: '新增' })
-    expect(resolveIconDefinition('luma:refresh')).toMatchObject({ label: '刷新' })
-    expect(resolveIconDefinition('luma:fullscreen')).toMatchObject({ label: '全屏' })
-    expect(resolveIconDefinition('luma:fullscreen-exit')).toMatchObject({ label: '退出全屏' })
-    expect(resolveIconDefinition('luma:grid')).toMatchObject({ label: '列设置' })
-    expect(resolveIconDefinition('luma:filter')).toMatchObject({ label: '筛选' })
+    expect(resolveIconDefinition('lumal:sun')).toMatchObject({ label: '浅色模式' })
+    expect(resolveIconDefinition('lumal:moon')).toMatchObject({ label: '深色模式' })
+    expect(resolveIconDefinition('lumal:monitor')).toMatchObject({ label: '跟随系统' })
+    expect(resolveIconDefinition('lumal:settings')).toBeTruthy()
+    expect(resolveIconDefinition('lumal:plus')).toMatchObject({ label: '新增' })
+    expect(resolveIconDefinition('lumal:refresh')).toMatchObject({ label: '刷新' })
+    expect(resolveIconDefinition('lumal:fullscreen')).toMatchObject({ label: '全屏' })
+    expect(resolveIconDefinition('lumal:fullscreen-exit')).toMatchObject({ label: '退出全屏' })
+    expect(resolveIconDefinition('lumal:grid')).toMatchObject({ label: '列设置' })
+    expect(resolveIconDefinition('lumal:filter')).toMatchObject({ label: '筛选' })
   })
 
   it('注册图标后可以按 key 同步解析', () => {

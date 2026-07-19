@@ -4,7 +4,7 @@ import { inject, provide } from 'vue'
 
 /***********************渲染上下文 provide/inject*********************/
 
-export const cockpitContextKey: InjectionKey<CockpitBaseContext> = Symbol('luma-cockpit-context')
+export const cockpitContextKey: InjectionKey<CockpitBaseContext> = Symbol('lumal-cockpit-context')
 
 /**
  * 由中央组件 Host 与模块 Host 为每个实例提供独立上下文。
@@ -23,6 +23,6 @@ export function useCockpitContext(optional?: false): CockpitBaseContext
 export function useCockpitContext(optional = false): CockpitBaseContext | null {
   const context = inject(cockpitContextKey, null)
   if (!context && !optional)
-    throw new Error('[cockpit] 未找到驾驶舱渲染上下文，请确认组件在 LumaCockpit 内渲染。')
+    throw new Error('[cockpit] 未找到驾驶舱渲染上下文，请确认组件在 LumalCockpit 内渲染。')
   return context
 }

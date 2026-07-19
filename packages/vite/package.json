@@ -1,11 +1,11 @@
 {
-  "name": "@luma/vite",
+  "name": "@lumal/vite",
   "type": "module",
   "version": "0.0.1-beta",
-  "description": "Luma Vite component resolver, workspace aliases and optional devtools helpers.",
+  "description": "Lumal Vite component resolver, workspace aliases and optional devtools helpers.",
   "license": "MIT",
   "keywords": [
-    "luma",
+    "lumal",
     "vite",
     "vue",
     "resolver"

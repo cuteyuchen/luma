@@ -2,8 +2,8 @@ import type { IconDefinition } from './types'
 
 function icon(key: string, label: string, body: string): IconDefinition {
   return {
-    group: 'luma',
-    key: `luma:${key}`,
+    group: 'lumal',
+    key: `lumal:${key}`,
     label,
     source: 'local-svg',
     svgText: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">${body}</svg>`,

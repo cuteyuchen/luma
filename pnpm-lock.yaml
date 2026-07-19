@@ -60,18 +60,18 @@ importers:
         specifier: ^3.1.1
         version: 3.3.7(typescript@6.0.3)
 
-  apps/luma-admin:
+  apps/lumal-admin:
     dependencies:
-      '@luma/charts':
+      '@lumal/charts':
         specifier: 0.0.1-beta
         version: link:../../packages/charts
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../../packages/core
-      '@luma/icons':
+      '@lumal/icons':
         specifier: 0.0.1-beta
         version: link:../../packages/icons
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       echarts:
@@ -103,21 +103,21 @@ importers:
         specifier: ^3.1.1
         version: 3.3.7(typescript@6.0.3)
 
-  apps/luma-cockpit:
+  apps/lumal-cockpit:
     dependencies:
-      '@luma/charts':
+      '@lumal/charts':
         specifier: 0.0.1-beta
         version: link:../../packages/charts
-      '@luma/cockpit':
+      '@lumal/cockpit':
         specifier: 0.0.1-beta
         version: link:../../packages/cockpit
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../../packages/core
-      '@luma/datav':
+      '@lumal/datav':
         specifier: 0.0.1-beta
         version: link:../../packages/datav
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       cesium:
@@ -161,18 +161,18 @@ importers:
         specifier: ^3.1.1
         version: 3.3.7(typescript@6.0.3)
 
-  apps/luma-datav-guide:
+  apps/lumal-datav-guide:
     dependencies:
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../../packages/core
-      '@luma/datav':
+      '@lumal/datav':
         specifier: 0.0.1-beta
         version: link:../../packages/datav
-      '@luma/icons':
+      '@lumal/icons':
         specifier: 0.0.1-beta
         version: link:../../packages/icons
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       echarts:
@@ -201,15 +201,15 @@ importers:
         specifier: ^3.1.1
         version: 3.3.7(typescript@6.0.3)
 
-  apps/luma-docs:
+  apps/lumal-docs:
     devDependencies:
       vitepress:
         specifier: ^1.6.4
         version: 1.6.4(@algolia/client-search@5.56.0)(@types/node@24.13.3)(async-validator@4.2.5)(change-case@5.4.4)(lightningcss@1.32.0)(postcss@8.5.16)(sass-embedded@1.100.0)(sass@1.100.0)(search-insights@2.17.3)(sortablejs@1.15.7)(terser@5.49.0)(typescript@6.0.3)
 
-  apps/luma-mock-api:
+  apps/lumal-mock-api:
     dependencies:
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../../packages/core
       h3:
@@ -231,16 +231,16 @@ importers:
 
   apps/vben-compat-demo:
     dependencies:
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../../packages/core
-      '@luma/icons':
+      '@lumal/icons':
         specifier: 0.0.1-beta
         version: link:../../packages/icons
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
-      '@luma/vben-compat':
+      '@lumal/vben-compat':
         specifier: 0.0.1-beta
         version: link:../../packages/vben-compat
       element-plus:
@@ -278,10 +278,10 @@ importers:
 
   packages/cockpit:
     dependencies:
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../core
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../icons-vue
       element-plus:
@@ -300,10 +300,10 @@ importers:
 
   packages/core:
     dependencies:
-      '@luma/icons':
+      '@lumal/icons':
         specifier: 0.0.1-beta
         version: link:../icons
-      '@luma/icons-vue':
+      '@lumal/icons-vue':
         specifier: 0.0.1-beta
         version: link:../icons-vue
       element-plus:
@@ -326,7 +326,7 @@ importers:
         specifier: ^1.15.9
         version: 1.15.9
 
-  packages/create-luma-admin: {}
+  packages/create-lumal-admin: {}
 
   packages/datav:
     dependencies:
@@ -348,7 +348,7 @@ importers:
       '@iconify/vue':
         specifier: ^5.0.0
         version: 5.0.1(vue@3.5.39(typescript@6.0.3))
-      '@luma/icons':
+      '@lumal/icons':
         specifier: 0.0.1-beta
         version: link:../icons
       vue:
@@ -357,7 +357,7 @@ importers:
 
   packages/vben-compat:
     dependencies:
-      '@luma/core':
+      '@lumal/core':
         specifier: 0.0.1-beta
         version: link:../core
       vue:

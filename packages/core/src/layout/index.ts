@@ -1,12 +1,12 @@
-export { default as LumaBreadcrumb } from './LumaBreadcrumb.vue'
-export { default as LumaContent } from './LumaContent.vue'
-export { default as LumaGlobalSearch } from './LumaGlobalSearch.vue'
-export { default as LumaHeader } from './LumaHeader.vue'
-export { default as LumaLayout } from './LumaLayout.vue'
-export { default as LumaRouterView } from './LumaRouterView.vue'
-export { default as LumaSidebar } from './LumaSidebar.vue'
-export { default as LumaTabs } from './LumaTabs.vue'
-export { default as LumaTopNav } from './LumaTopNav.vue'
+export { default as LumalBreadcrumb } from './LumalBreadcrumb.vue'
+export { default as LumalContent } from './LumalContent.vue'
+export { default as LumalGlobalSearch } from './LumalGlobalSearch.vue'
+export { default as LumalHeader } from './LumalHeader.vue'
+export { default as LumalLayout } from './LumalLayout.vue'
+export { default as LumalRouterView } from './LumalRouterView.vue'
+export { default as LumalSidebar } from './LumalSidebar.vue'
+export { default as LumalTabs } from './LumalTabs.vue'
+export { default as LumalTopNav } from './LumalTopNav.vue'
 export {
   findMenuItemByPath,
   findMenuTrailByPath,
@@ -61,11 +61,11 @@ export type {
   VisitHistoryOptions,
 } from './state/tab-strategy'
 export type {
-  LumaLayoutMenuItem,
-  LumaLayoutRouteTabFilter,
-  LumaLayoutRouteTabResolver,
-  LumaLayoutTabItem,
-  LumaMenuBadgeTone,
-  LumaMenuBadgeType,
-  LumaTabStyle,
+  LumalLayoutMenuItem,
+  LumalLayoutRouteTabFilter,
+  LumalLayoutRouteTabResolver,
+  LumalLayoutTabItem,
+  LumalMenuBadgeTone,
+  LumalMenuBadgeType,
+  LumalTabStyle,
 } from './types'
