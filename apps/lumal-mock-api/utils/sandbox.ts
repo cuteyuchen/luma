@@ -114,6 +114,17 @@ export function getSandbox(id: string): Sandbox {
   return sandbox
 }
 
+export function ensureSandbox(id: string): Sandbox {
+  try {
+    return getSandbox(id)
+  }
+  catch (error) {
+    if (process.env.VERCEL)
+      return createSandbox(id)
+    throw error
+  }
+}
+
 export function deleteSandbox(id: string): void {
   sandboxes.delete(id)
 }

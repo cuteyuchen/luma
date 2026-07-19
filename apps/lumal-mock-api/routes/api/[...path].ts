@@ -67,7 +67,7 @@ import { ApiError, fail, ok, page } from '../../utils/http'
 import {
   createSandbox,
   deleteSandbox,
-  getSandbox,
+  ensureSandbox,
   resetSandbox,
   withSandbox,
 } from '../../utils/sandbox'
@@ -159,7 +159,7 @@ function authFromHeader(event: Parameters<typeof getHeader>[0], kind: 'access' |
 
 async function authenticate(event: Parameters<typeof getHeader>[0]): Promise<AuthContext> {
   const payload = authFromHeader(event)
-  getSandbox(payload.sid)
+  ensureSandbox(payload.sid)
   return withSandbox(payload.sid, () => {
     const account = getCurrentAccount(payload.sub)
     if (!account || !account.enabled)
@@ -228,7 +228,7 @@ export default defineEventHandler(async (event) => {
       let payload
       try {
         payload = verifyToken(body.refreshToken, 'refresh')
-        getSandbox(payload.sid)
+        ensureSandbox(payload.sid)
       }
       catch {
         throw new ApiError('刷新凭据已失效', 401, 'AUTH_EXPIRED')
