@@ -76,8 +76,16 @@ const stageStyle = computed(() => {
             </div>
           </slot>
         </main>
-        <LumaCockpitRegion class="luma-cockpit-canvas__left" side="left" :layout-id="layout.id" :region="layout.left" />
-        <LumaCockpitRegion class="luma-cockpit-canvas__right" side="right" :layout-id="layout.id" :region="layout.right" />
+        <div class="luma-cockpit-canvas__left">
+          <slot name="left" :layout="layout" :region="layout.left" side="left">
+            <LumaCockpitRegion side="left" :layout-id="layout.id" :region="layout.left" />
+          </slot>
+        </div>
+        <div class="luma-cockpit-canvas__right">
+          <slot name="right" :layout="layout" :region="layout.right" side="right">
+            <LumaCockpitRegion side="right" :layout-id="layout.id" :region="layout.right" />
+          </slot>
+        </div>
       </div>
     </div>
   </div>

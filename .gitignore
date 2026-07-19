@@ -20,3 +20,8 @@ playwright-report/
 .playwright-mcp/
 output
 .tmp-ref
+docs/.vitepress/cache
+docs/.vitepress/dist
+apps/luma-docs/dist
+apps/luma-docs/.vitepress/cache
+apps/luma-docs/src/.vitepress/cache

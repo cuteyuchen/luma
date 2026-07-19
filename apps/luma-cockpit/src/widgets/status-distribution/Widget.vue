@@ -5,6 +5,7 @@ import { useCockpitContext } from '@luma/cockpit'
 import { LumaCharts } from '@luma/datav'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import WidgetState from '../../components/WidgetState.vue'
+import { useDemoRefresh } from '../../composables/useDemoRefresh'
 import { demoScene, getSceneEntity, statusDistribution } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
 import { standaloneResolvedThemeMode } from '../../services/preferences'
@@ -12,7 +13,7 @@ import { standaloneResolvedThemeMode } from '../../services/preferences'
 /***********************区域状态分布图（@luma/datav LumaCharts）*********************/
 
 const context = useCockpitContext()
-const loading = false
+const { loading } = useDemoRefresh()
 const error = ''
 const filterStatus = ref<SceneFilterPayload['status']>()
 const selectedId = ref('')

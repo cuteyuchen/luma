@@ -131,12 +131,19 @@ pnpm release:check
 
 ## 文档
 
-- [开发路线图](docs/development-roadmap.md)
-- [架构说明](docs/architecture.md)
-- [Core API](docs/core-api.md)
-- [Mock API 与线上 Demo 部署](docs/mock-api.md)
-- [图标系统](docs/icons.md)
-- [DataV 组件示例](docs/datav-examples.md)
-- [包边界](docs/package-boundaries.md)
-- [发布检查清单](docs/release-checklist.md)
-- [从 Vben 迁移](docs/migration-from-vben.md)
+VitePress 文档站位于 `apps/luma-docs`（信息架构对齐 [Vben 文档](https://doc.vben.pro/)：指南 / 包使用 / 组件 / 参考）：
+
+```bash
+pnpm docs:dev      # http://127.0.0.1:5173
+pnpm docs:build    # 产物 apps/luma-docs/dist
+pnpm docs:preview
+```
+
+- 指南：简介 · 基础 · 深入 · 工程 · FAQ
+- 包使用：`@luma/*` 与 `create-luma-admin`（含本地路径 / npm 占位表）
+- 组件：Layout · Schema 表单表格 · Charts · DataV · Cockpit
+- 参考：同步自根目录 `docs/*.md`
+
+外链占位配置：`apps/luma-docs/src/.vitepress/config/links.ts`（`LUMA_DOCS_URL`、`LUMA_ADMIN_DEMO_URL`、`LUMA_GITHUB_URL` 等）。
+
+仓库内 Markdown 索引见 [docs/README.md](docs/README.md)。

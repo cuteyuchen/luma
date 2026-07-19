@@ -11,7 +11,12 @@ import type {
   CockpitViewportMode,
 } from '../types'
 import type { CockpitCardComponent } from './card'
+import { ElSwitch, ElTooltip } from 'element-plus'
 import { computed, provide, ref, useSlots, watch } from 'vue'
+import {
+  DEFAULT_COCKPIT_AUTO_REFRESH_INTERVAL_MS,
+  useCockpitAutoRefresh,
+} from '../composables/useCockpitAutoRefresh'
 import { useCockpit } from '../composables/useCockpit'
 import { normalizeCockpitConfig } from '../config/normalize'
 import { createCockpitMessageBus } from '../messaging/createCockpitMessageBus'
@@ -32,12 +37,18 @@ const props = withDefaults(defineProps<{
   viewportMode?: CockpitViewportMode
   messageBus?: ReturnType<typeof createCockpitMessageBus>
   cardComponent?: CockpitCardComponent
+  /** 是否启用右上角全局自动刷新开关（默认关闭，由消费方 opt-in）。 */
+  autoRefresh?: boolean
+  /** 自动刷新间隔（ms），默认 5 分钟。 */
+  autoRefreshIntervalMs?: number
 }>(), {
   baseWidth: 1920,
   baseHeight: 1080,
   cachePages: true,
   renderMode: 'runtime',
   viewportMode: 'scale',
+  autoRefresh: false,
+  autoRefreshIntervalMs: DEFAULT_COCKPIT_AUTO_REFRESH_INTERVAL_MS,
 })
 
 const emit = defineEmits<{
@@ -48,6 +59,7 @@ const emit = defineEmits<{
 
 const activeLayoutId = defineModel<string | undefined>('activeLayoutId')
 const themeMode = defineModel<CockpitThemeMode>('themeMode', { default: 'dark' })
+const autoRefreshEnabled = defineModel<boolean>('autoRefreshEnabled', { default: false })
 const slots = useSlots()
 
 const normalizedResult = computed<{ config: CockpitConfig | null, error: unknown }>(() => {
@@ -96,6 +108,28 @@ const centerContext = computed<CockpitCenterContext | undefined>(() => {
   }
 })
 
+// 仅在 opt-in 开启时驱动定时器；开关状态仍由 autoRefreshEnabled 承载
+const autoRefreshTimerEnabled = ref(false)
+watch(
+  [() => props.autoRefresh, autoRefreshEnabled],
+  ([feature, on]) => {
+    autoRefreshTimerEnabled.value = Boolean(feature && on)
+  },
+  { immediate: true },
+)
+
+const autoRefreshIntervalLabel = computed(() => {
+  const minutes = Math.round(props.autoRefreshIntervalMs / 60_000)
+  return minutes >= 1 ? `${minutes} 分钟` : `${Math.round(props.autoRefreshIntervalMs / 1000)} 秒`
+})
+
+const { refreshNow } = useCockpitAutoRefresh({
+  messages,
+  sourceId: () => normalized.value?.id ?? props.config.id,
+  intervalMs: () => props.autoRefreshIntervalMs,
+  enabled: autoRefreshTimerEnabled,
+})
+
 const rootRef = ref<HTMLElement | null>(null)
 async function enterFullscreen(): Promise<void> {
   if (rootRef.value?.requestFullscreen)
@@ -108,7 +142,7 @@ async function exitFullscreen(): Promise<void> {
 function toggleTheme(): void {
   themeMode.value = themeMode.value === 'dark' ? 'light' : 'dark'
 }
-defineExpose({ enterFullscreen, exitFullscreen, messages, toggleTheme })
+defineExpose({ enterFullscreen, exitFullscreen, messages, toggleTheme, refreshNow })
 
 const hasConfig = computed(() => Boolean(normalized.value?.layouts.length))
 
@@ -170,10 +204,29 @@ function handleNodeClick(event: MouseEvent): void {
           <slot name="header-title" v-bind="slotProps" />
         </template>
         <template #header-actions>
+          <div v-if="autoRefresh" class="luma-cockpit__auto-refresh">
+            <ElTooltip :content="autoRefreshEnabled ? `关闭自动刷新（每 ${autoRefreshIntervalLabel}）` : `开启自动刷新（每 ${autoRefreshIntervalLabel}）`">
+              <label class="luma-cockpit__auto-refresh-control">
+                <span>自动刷新</span>
+                <ElSwitch
+                  v-model="autoRefreshEnabled"
+                  size="small"
+                  data-action="cockpit-auto-refresh"
+                  :aria-label="`全局自动刷新，间隔 ${autoRefreshIntervalLabel}`"
+                />
+              </label>
+            </ElTooltip>
+          </div>
           <slot name="header-actions" />
         </template>
         <template #center="slotProps">
           <slot name="center" v-bind="slotProps" />
+        </template>
+        <template #left="slotProps">
+          <slot name="left" v-bind="slotProps" />
+        </template>
+        <template #right="slotProps">
+          <slot name="right" v-bind="slotProps" />
         </template>
       </LumaCockpitCanvas>
       <slot name="configure-trigger" :configure="requestConfigure" />

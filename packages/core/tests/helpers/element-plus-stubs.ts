@@ -11,11 +11,13 @@ export const elementPlusStubs = {
   }),
   ElButton: defineComponent({
     name: 'ElButton',
+    inheritAttrs: false,
     props: {
       disabled: Boolean,
       type: String,
     },
-    template: '<button class="el-button" :disabled="disabled" v-bind="$attrs"><slot /></button>',
+    emits: ['click'],
+    template: '<button class="el-button" :disabled="disabled" v-bind="$attrs" @click="$emit(\'click\', $event)"><slot /></button>',
   }),
   ElContainer: defineComponent({
     name: 'ElContainer',

@@ -248,31 +248,35 @@ describe('system user view', () => {
     const wrapper = mountUserView()
     await flushPromises()
 
-    const panel = wrapper.get('#user-organization-panel')
+    const isPanelShown = () => {
+      const panel = wrapper.get('#user-organization-panel')
+      const style = panel.attributes('style') ?? ''
+      return !/display:\s*none/.test(style)
+    }
     const openButton = wrapper.get('button[aria-label="展开机构导航"]')
     expect(wrapper.get('.luma-admin-user-page__organization-summary').text()).toContain('当前机构：全部机构')
     expect(openButton.attributes('aria-expanded')).toBe('false')
-    expect(panel.isVisible()).toBe(false)
+    expect(isPanelShown()).toBe(false)
 
     await openButton.trigger('click')
     expect(wrapper.get('button[aria-label="收起机构导航"]').attributes('aria-expanded')).toBe('true')
-    expect(panel.isVisible()).toBe(true)
-    expect(wrapper.get('input[aria-label="搜索机构名称或编码"]').isVisible()).toBe(true)
+    expect(isPanelShown()).toBe(true)
+    expect(wrapper.find('input[aria-label="搜索机构名称或编码"]').exists()).toBe(true)
 
     await wrapper.get('[data-organization-id="organization-2"]').trigger('click')
     expect(wrapper.get('.luma-admin-user-page__organization-summary').text()).toContain('平台研发中心')
 
     await wrapper.get('button[aria-label="收起机构导航"]').trigger('click')
-    expect(panel.isVisible()).toBe(false)
+    expect(isPanelShown()).toBe(false)
 
     setViewportWidth(1024)
     await nextTick()
-    expect(panel.isVisible()).toBe(true)
+    expect(isPanelShown()).toBe(true)
     expect(wrapper.find('.luma-admin-user-page__organization-toggle').exists()).toBe(false)
 
     setViewportWidth(375)
     await nextTick()
-    expect(panel.isVisible()).toBe(false)
+    expect(isPanelShown()).toBe(false)
     expect(wrapper.get('button[aria-label="展开机构导航"]').attributes('aria-expanded')).toBe('false')
   })
 

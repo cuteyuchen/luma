@@ -1,0 +1,150 @@
+# 图标系统
+
+Luma 图标系统拆为两个包：
+
+- `@luma/icons`：框架无关的纯 TypeScript 图标内核，提供注册表、SVG 改色、渐变、合成、校验、Data URI 和 Vite 静态 SVG 插件。
+- `@luma/icons-vue`：Vue 3 组件与响应式适配层，提供 `LumaIcon`、图标选择器和 `useIconRegistry`。
+
+## 安装
+
+只使用纯 TypeScript 能力：
+
+```bash
+pnpm add @luma/icons
+```
+
+Vue 项目同时安装适配层：
+
+```bash
+pnpm add @luma/icons @luma/icons-vue vue @iconify/vue
+```
+
+## 注册图标
+
+```ts
+import {
+  createIconifyIconDefinitions,
+  registerIcons,
+} from '@luma/icons'
+
+registerIcons([
+  {
+    key: 'app:dashboard',
+    label: '控制台',
+    source: 'local-svg',
+    svgText: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="..."/></svg>',
+  },
+])
+
+registerIcons(createIconifyIconDefinitions('mdi', [
+  'home',
+  'account',
+]))
+```
+
+源 SVG 应保持单色并使用 `currentColor`。注册表使用普通 `Map` 保存数据，框架适配器可以通过 `subscribeIconRegistry()` 订阅变更。
+
+`IconDefinition<TComponent = unknown>` 把组件实现视为不透明载荷，因此纯 TypeScript 包不依赖 Vue、React 或其他 UI 框架。Vue 组件图标可以这样注册：
+
+```ts
+import { createComponentIconDefinitions, registerIcons } from '@luma/icons'
+import { Edit } from '@element-plus/icons-vue'
+
+registerIcons(createComponentIconDefinitions('element-plus', {
+  Edit,
+}))
+```
+
+## Vue 渲染
+
+```vue
+<script setup lang="ts">
+import { LumaIcon } from '@luma/icons-vue'
+import '@luma/icons-vue/style.css'
+</script>
+
+<template>
+  <LumaIcon name="app:dashboard" color="#1677ff" :size="24" />
+</template>
+```
+
+`LumaIcon` 只负责 Vue 渲染。SVG 改色和渐变仍调用 `@luma/icons` 的纯 TypeScript 实现，不在 Vue 包内复制算法。
+
+## Vue 响应式注册表
+
+```ts
+import { useIconRegistry } from '@luma/icons-vue'
+
+const { icons, groups, resolve } = useIconRegistry()
+```
+
+该 composable 把 `@luma/icons` 的订阅接口转换为 Vue `computed`，运行时注册新图标或分组后会自动更新。
+
+## 图标分组
+
+```ts
+import { registerIconGroups } from '@luma/icons'
+
+registerIconGroups([
+  { key: 'app', label: '应用图标', order: 1 },
+])
+```
+
+## SVG 改色与渐变
+
+```ts
+import {
+  applySvgGradient,
+  getGradientIconDataUri,
+  recolorSvgString,
+} from '@luma/icons'
+
+const blueSvg = recolorSvgString(svgText, '#1677ff')
+const gradientSvg = applySvgGradient(svgText, {
+  from: '#1677ff',
+  to: '#0f766e',
+})
+const uri = getGradientIconDataUri('app:dashboard', {
+  from: '#1677ff',
+  to: '#0f766e',
+})
+```
+
+## Data URI、校验与合成
+
+```ts
+import {
+  composeSvgIcons,
+  getIconDataUri,
+  validateMonochromeSvg,
+} from '@luma/icons'
+
+const uri = getIconDataUri('app:dashboard', '#1677ff')
+const validation = validateMonochromeSvg(svgText)
+const composed = composeSvgIcons([backgroundSvg, foregroundSvg])
+```
+
+运行时最多缓存 256 个 Data URI。校验会拒绝脚本、事件属性、外部 HTTP 资源和固定 `fill/stroke` 颜色。
+
+## 图标选择器
+
+```vue
+<script setup lang="ts">
+import { LumaIconPicker, LumaIconPickerDialog } from '@luma/icons-vue'
+import { shallowRef } from 'vue'
+
+const value = shallowRef('app:dashboard')
+const dialogVisible = shallowRef(false)
+</script>
+
+<template>
+  <LumaIconPicker v-model="value" group="app" show-labels />
+  <LumaIconPickerDialog v-model="value" v-model:visible="dialogVisible" />
+</template>
+```
+
+选择器支持搜索、分组、分页、选中态和键盘焦点；弹窗确认后才更新外部模型。
+
+## Vite 静态 SVG 插件
+
+`@luma/icons/vite` 暴露 `createStaticLocalSvgIconsPlugin`，用于构建期收集静态 SVG。该入口同样不依赖 Vue。

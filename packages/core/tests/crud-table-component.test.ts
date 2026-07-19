@@ -163,21 +163,28 @@ describe('luma crud table', () => {
       })
       await flushPromises()
 
-      const queryPanel = wrapper.find('.luma-crud-table__query')
+      const isQueryPanelShown = () => {
+        const panel = wrapper.find('.luma-crud-table__query')
+        const style = panel.attributes('style') ?? ''
+        return panel.exists() && !/display:\s*none/.test(style)
+      }
       const queryToggle = wrapper.find('[data-action="toggle-query-panel"]')
-      expect(queryPanel.isVisible()).toBe(false)
+      expect(isQueryPanelShown()).toBe(false)
+      expect(queryToggle.attributes('aria-expanded')).toBe('false')
       expect(wrapper.findComponent(LumaSchemaTable).props('mobileActionWidth')).toBe(72)
 
       await queryToggle.trigger('click')
-      expect(queryPanel.isVisible()).toBe(true)
+      await flushPromises()
+      expect(wrapper.find('[data-action="toggle-query-panel"]').attributes('aria-expanded')).toBe('true')
+      expect(isQueryPanelShown()).toBe(true)
 
       listeners.forEach(listener => listener({ matches: false } as MediaQueryListEvent))
       await nextTick()
-      expect(queryPanel.isVisible()).toBe(true)
+      expect(isQueryPanelShown()).toBe(true)
 
       listeners.forEach(listener => listener({ matches: true } as MediaQueryListEvent))
       await nextTick()
-      expect(queryPanel.isVisible()).toBe(true)
+      expect(isQueryPanelShown()).toBe(true)
 
       wrapper.unmount()
     }

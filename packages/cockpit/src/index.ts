@@ -9,13 +9,18 @@ import './style/index.scss'
 /***********************composables*********************/
 export {
   computeCanvasScale,
+  DEFAULT_COCKPIT_AUTO_REFRESH_INTERVAL_MS,
   useCanvasScale,
   useCockpit,
+  useCockpitAutoRefresh,
   useCockpitContext,
+  useCockpitRefresh,
 } from './composables'
 
 export type {
   CanvasScaleResult,
+  UseCockpitAutoRefreshOptions,
+  UseCockpitAutoRefreshReturn,
   UseCockpitOptions,
   UseCockpitReturn,
 } from './composables'
@@ -47,7 +52,11 @@ export type {
 } from './config'
 /***********************消息总线*********************/
 export { createCockpitMessageBus } from './messaging/createCockpitMessageBus'
+export { COCKPIT_REFRESH_TOPIC } from './messaging/topics'
 
+export type {
+  CockpitRefreshPayload,
+} from './messaging/topics'
 export type {
   CockpitMessage,
   CockpitMessageBus,

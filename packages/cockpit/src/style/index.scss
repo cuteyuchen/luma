@@ -51,6 +51,26 @@
   background: var(--luma-cockpit-bg);
 }
 
+.luma-cockpit__auto-refresh {
+  display: inline-flex;
+  align-items: center;
+}
+
+.luma-cockpit__auto-refresh-control {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--luma-cockpit-border), transparent 18%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--luma-cockpit-floating-bg), transparent 14%);
+  color: var(--luma-cockpit-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 /***********************画布缩放*********************/
 .luma-cockpit-canvas {
   position: absolute;
@@ -144,7 +164,9 @@
     top: 0;
     bottom: 0;
     z-index: 2;
+    display: flex;
     min-width: 0;
+    height: 100%;
   }
 
   &__left {
@@ -153,6 +175,7 @@
 
   &__right {
     right: 0;
+    justify-content: flex-end;
   }
 
   &__center {

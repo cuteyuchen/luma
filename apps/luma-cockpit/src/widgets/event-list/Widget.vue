@@ -4,6 +4,7 @@ import { useCockpitContext } from '@luma/cockpit'
 import { LumaScrollBoard } from '@luma/datav'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import WidgetState from '../../components/WidgetState.vue'
+import { useDemoRefresh } from '../../composables/useDemoRefresh'
 import { demoEvents } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
 
@@ -12,7 +13,7 @@ import { cockpitTopics } from '../../messages/topics'
 type DemoEvent = typeof demoEvents[number]
 
 const context = useCockpitContext()
-const loading = false
+const { loading } = useDemoRefresh()
 const error = ''
 const selectedId = ref('')
 const events = computed(() => demoEvents)

@@ -5,13 +5,14 @@ import { useCockpitContext } from '@luma/cockpit'
 import { LumaScrollRankingBoard } from '@luma/datav'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import WidgetState from '../../components/WidgetState.vue'
+import { useDemoRefresh } from '../../composables/useDemoRefresh'
 import { demoScene, getSceneEntity } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
 
 /***********************区域运行指数模块*********************/
 
 const context = useCockpitContext()
-const loading = false
+const { loading } = useDemoRefresh()
 const error = ''
 const selectedId = ref('')
 const root = useTemplateRef<HTMLElement>('root')

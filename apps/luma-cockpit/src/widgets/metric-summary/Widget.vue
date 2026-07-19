@@ -2,11 +2,12 @@
 import { LumaDigitalFlop, LumaPercentPond } from '@luma/datav'
 import { computed } from 'vue'
 import WidgetState from '../../components/WidgetState.vue'
+import { useDemoRefresh } from '../../composables/useDemoRefresh'
 import { metricSummaries } from '../../data/demo-scene'
 
 /***********************核心运行指标模块*********************/
 
-const loading = false
+const { loading } = useDemoRefresh()
 const error = ''
 const items = computed(() => metricSummaries)
 </script>

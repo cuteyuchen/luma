@@ -2,7 +2,7 @@
 import type { CockpitConfig, CockpitDesignerSavePayload, CockpitViewportMode } from '@luma/cockpit'
 import type { ThemeMode } from '@luma/core/theme'
 import { LumaCockpitDesigner } from '@luma/cockpit/designer'
-import { LumaCockpit } from '@luma/cockpit/runtime'
+import { LumaCockpit, LumaCockpitRegion } from '@luma/cockpit/runtime'
 import { LumaFullScreenContainer } from '@luma/datav'
 import { LumaIcon } from '@luma/icons-vue'
 import { ElButton, ElTooltip } from 'element-plus'
@@ -10,6 +10,7 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import designerTitleImage from './assets/cockpit-designer/dialog-header-bg.png'
 import SceneCenter from './centers/scene-center/Center.vue'
 import CockpitCard from './components/CockpitCard.vue'
+import RegionCollapse from './components/RegionCollapse.vue'
 import { standaloneCockpitRegistry } from './registry'
 import { loadStandaloneConfig, saveStandaloneConfig } from './services/config'
 import {
@@ -143,6 +144,7 @@ onBeforeUnmount(() => {
       <LumaCockpit
         ref="cockpitRef"
         v-model:active-layout-id="activeLayoutId"
+        auto-refresh
         :card-component="CockpitCard"
         :config="config"
         :registry="standaloneCockpitRegistry"
@@ -198,6 +200,16 @@ onBeforeUnmount(() => {
         </template>
         <template #center="{ context }">
           <SceneCenter :key="context.instanceId" :context="context" />
+        </template>
+        <template #left="{ layout, region }">
+          <RegionCollapse side="left">
+            <LumaCockpitRegion side="left" :layout-id="layout.id" :region="region" />
+          </RegionCollapse>
+        </template>
+        <template #right="{ layout, region }">
+          <RegionCollapse side="right">
+            <LumaCockpitRegion side="right" :layout-id="layout.id" :region="region" />
+          </RegionCollapse>
         </template>
       </LumaCockpit>
     </component>
