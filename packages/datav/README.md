@@ -24,9 +24,15 @@ import LumaFlylineChart from '@luma/datav/flyline-chart'
 import '@luma/datav/style.css'
 ```
 
-### 原生 ECharts
+### DataV 原生 Charts 与 ECharts 扩展
 
-`LumaCharts` 的 `option` 类型就是 ECharts 原生 `EChartsOption`，不会过滤或转换任何图表属性：
+`config` 直接交给 DataV 2.10.0 使用的 `@jiaminghi/charts` Canvas 运行时：
+
+```vue
+<LumaCharts :config="{ xAxis: { data: ['一', '二'] }, yAxis: { data: 'value' }, series: [{ type: 'line', data: [10, 20] }] }" />
+```
+
+为兼容既有项目，未传 `config` 时仍可用 ECharts 原生 `option`：
 
 ```vue
 <LumaCharts
@@ -39,7 +45,7 @@ import '@luma/datav/style.css'
 />
 ```
 
-组件支持 `theme`、`initOptions`、`setOptionOptions`、`group`、`loading`、`loadingType`、`loadingOptions` 和 `autoResize`。通过组件 ref 可以取得 `getInstance()`，也可以直接调用 `setOption`、`resize`、`dispatchAction`、`convertToPixel`、`convertFromPixel`、`containPixel`、`appendData`、`getDataURL`、`getConnectedDataURL`、`showLoading`、`hideLoading`、`on`、`off`、`clear` 与 `dispose`。
+`autoResize` 对两种运行时都有效；`theme`、事件、loading 与 ECharts 实例方法仅属于 `option` 扩展模式。组件 ref 提供 `getInstance()`、`getNativeInstance()`、`setConfig()`、`setOption()` 与 `resize()`。
 
 ## 两套 API
 
@@ -64,8 +70,8 @@ DataV 原生配置可以直接迁移：
 
 - BorderBox、Decoration、Loading、PercentPond、Flyline 等使用响应式 SVG、CSS 与 SMIL 重构。
 - `LumaWaterLevelPond` 使用响应式 SVG 波浪、裁剪与渐变实现，不依赖 Canvas 运行时。
-- `LumaCharts` 直接封装原生 ECharts，`option` 使用完整 `EChartsOption`，并暴露 ECharts 实例、事件和常用实例方法。
-- `LumaActiveRingChart` 使用 ECharts 双层 Pie 实现活动扇区，不依赖 DataV 的旧图表运行时。
+- `LumaCharts` 的 `config` 使用 DataV 官方 `@jiaminghi/charts`；既有 `option` API 保留为 ECharts 扩展，两套配置不互转。
+- `LumaActiveRingChart` 在 ECharts 兼容层中模拟每个数据项独立半径，保持上游固定线宽与切换几何。
 - 连续动画支持页面隐藏、离开视口、悬停、键盘焦点和 `prefers-reduced-motion` 暂停。
 - ResizeObserver 通过 `requestAnimationFrame` 合并；数字动画和定时器会在更新或卸载时立即清理。
 - 滚动组件使用循环窗口索引，不复制整份数据；现代单行滚动最多渲染 `visibleRows + 1` 行。

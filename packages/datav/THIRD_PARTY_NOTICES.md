@@ -1,6 +1,6 @@
 # Third-party notices
 
-`@luma/datav` contains Vue 3 refactors derived from the MIT-licensed DataV component geometry, animation definitions and calculation logic. The original Vue 2 component architecture and its Charts/CRender runtimes are not bundled.
+`@luma/datav` contains Vue 3 refactors derived from the MIT-licensed DataV component geometry, animation definitions and calculation logic. `LumaCharts` also bundles the MIT-licensed `@jiaminghi/charts` runtime and its CRender dependency for DataV-native chart configuration.
 
 ## DataV
 
@@ -9,6 +9,8 @@
 - Copyright: Copyright (c) 2019-present, DataV-Team
 
 The DataV project is distributed under the MIT license. Its required notice follows.
+
+The same notice applies to `@jiaminghi/charts`; `@jiaminghi/c-render` is MIT licensed, Copyright (c) 2019-present, JiaMing.
 
 ```text
 The MIT License (MIT)

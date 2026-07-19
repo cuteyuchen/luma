@@ -84,4 +84,4 @@ const options = shallowRef<EChartsOption>({
 ## 与 DataV 区别
 
 - `@luma/charts`：后台场景的图表工作流面板
-- `@luma/datav` 的 `LumaCharts`：大屏场景原生 ECharts 封装，见 [datav](./datav)
+- `@luma/datav` 的 `LumaCharts`：大屏场景 DataV 原生 Charts，并保留 ECharts 扩展，见 [datav](./datav)

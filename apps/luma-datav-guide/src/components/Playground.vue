@@ -146,7 +146,11 @@ function attrFor(control: PlaygroundControl, value: unknown): string | null {
     return null
 
   const name = kebab(control.key)
-  const useString = control.asString ?? (control.type === 'text' || control.type === 'color')
+  const useString = control.asString ?? (
+    control.type === 'text'
+    || control.type === 'color'
+    || (control.type === 'select' && typeof value === 'string')
+  )
   if (useString) {
     // 空串已在上面过滤；字符串字面量走静态属性。
     return `${name}="${String(value)}"`
@@ -170,7 +174,7 @@ const generatedCode = computed(() => {
 
   const attrLines = attrs.length ? `\n  ${attrs.join('\n  ')}\n` : ''
   if (!inner)
-    return `<${tag}${attrLines ? attrLines : ' '}/>`
+    return `<${tag}${attrLines || ' '}/>`
 
   const indentedInner = inner.split('\n').map(line => `  ${line}`).join('\n')
   return `<${tag}${attrLines || ' '}>\n${indentedInner}\n</${tag}>`

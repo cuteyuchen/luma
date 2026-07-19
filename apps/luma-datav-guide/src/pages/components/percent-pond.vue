@@ -88,7 +88,7 @@ const propRows: PropRow[] = [
 
     <DemoBlock
       title="原生条形与扩展胶囊"
-      description="默认 bar 对齐 DataV；shape=\"capsule\" 为 Luma 扩展。"
+      description="默认 bar 对齐 DataV；shape=&quot;capsule&quot; 为 Luma 扩展。"
       :code="modernCode"
     >
       <div class="pond-stack">

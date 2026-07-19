@@ -69,7 +69,19 @@ DataV 原生配置：
 
 滚动表中的 HTML 字符串按**普通文本**渲染，不恢复上游 `v-html`。
 
-## 原生 ECharts（`LumaCharts`）
+## DataV 原生 Charts（`LumaCharts`）
+
+```vue
+<LumaCharts
+  :config="{
+    xAxis: { data: ['一', '二', '三'] },
+    yAxis: { data: 'value' },
+    series: [{ type: 'line', data: [120, 200, 150] }],
+  }"
+/>
+```
+
+`config` 由 DataV 使用的 `@jiaminghi/charts` 直接解释。既有 ECharts 调用继续通过 `option` 扩展兼容：
 
 ```vue
 <LumaCharts
@@ -82,7 +94,7 @@ DataV 原生配置：
 />
 ```
 
-支持 `theme`、`initOptions`、`setOptionOptions`、`group`、`loading`、`autoResize` 等；ref 可 `getInstance()` 及常用 ECharts 实例方法。
+`autoResize` 对两种模式生效；`theme`、事件、loading 和 ECharts 实例方法只在 `option` 模式生效。
 
 ## 组件映射（DataV → Luma）
 

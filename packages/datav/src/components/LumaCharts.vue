@@ -8,7 +8,7 @@ import type {
   SetOptionOpts,
 } from 'echarts'
 import type { DataVChartsOption } from '../types'
-import ChartsRuntime from '@jiaminghi/charts'
+import ChartsModule from '@jiaminghi/charts'
 import * as echarts from 'echarts'
 import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, useAttrs, useTemplateRef, watch, watchEffect } from 'vue'
 
@@ -44,6 +44,7 @@ const props = withDefaults(defineProps<{
   theme: undefined,
 })
 
+const ChartsRuntime = ((ChartsModule as unknown as { default?: typeof Charts }).default ?? ChartsModule) as typeof Charts
 const attrs = useAttrs()
 const rootRef = useTemplateRef<HTMLElement>('rootRef')
 const chartHostRef = useTemplateRef<HTMLElement>('chartHostRef')
