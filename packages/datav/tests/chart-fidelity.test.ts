@@ -135,6 +135,7 @@ describe('DataV chart fidelity', () => {
     expect(firstOption.color).toEqual(['#37a2da', '#32c5e9'])
     expect(firstOption.series[0]!.type).toBe('pie')
     expect(firstOption.series.map(series => series.radius)).toEqual([[35, 45], [45, 55]])
+    expect(firstOption.series[0]!.data.map(item => item.itemStyle.opacity)).toEqual([0, 1])
     expect(firstOption.series[1]!.data.map(item => item.itemStyle.opacity)).toEqual([1, 0])
     expect(wrapper.get('.active-ring-name').text()).toBe('甲')
     expect(wrapper.get('.dv-digital-flop text').attributes()).toMatchObject({
@@ -155,6 +156,7 @@ describe('DataV chart fidelity', () => {
     await vi.advanceTimersByTimeAsync(600)
     await nextTick()
     const nextOption = instance.setOption.mock.calls.at(-1)![0] as typeof firstOption
+    expect(nextOption.series[0]!.data.map(item => item.itemStyle.opacity)).toEqual([1, 0])
     expect(nextOption.series[1]!.data.map(item => item.itemStyle.opacity)).toEqual([0, 1])
     expect(wrapper.attributes('data-active-index')).toBe('1')
     expect(wrapper.get('.active-ring-name').text()).toBe('乙')
@@ -162,6 +164,29 @@ describe('DataV chart fidelity', () => {
     wrapper.unmount()
     expect(instance.dispose).toHaveBeenCalled()
     expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('active ring 使用完整上游调色板并允许低于 250ms 的切换间隔', async () => {
+    const wrapper = mount(LumaActiveRingChart, {
+      props: {
+        config: {
+          activeTimeGap: 100,
+          animationFrame: 0,
+          data: Array.from({ length: 13 }, (_, index) => ({ name: `${index}`, value: 1 })),
+        },
+      },
+    })
+    await flushFrames()
+
+    const option = chartMocks.instances[0]!.setOption.mock.calls.at(-1)![0] as { color: string[] }
+    expect(option.color).toEqual([
+      '#37a2da', '#32c5e9', '#67e0e3', '#9fe6b8', '#ffdb5c', '#ff9f7f', '#fb7293',
+      '#e062ae', '#e690d1', '#e7bcf3', '#9d96f5', '#8378ea', '#96bfff',
+    ])
+
+    await vi.advanceTimersByTimeAsync(101)
+    expect(wrapper.attributes('data-active-index')).toBe('1')
+    wrapper.unmount()
   })
 
   it('capsule 保留上游标签列、五等分刻度、数组深合并颜色与独立单位', () => {

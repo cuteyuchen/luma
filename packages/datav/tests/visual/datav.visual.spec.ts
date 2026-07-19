@@ -35,6 +35,44 @@ test('DataV 特征动效与复杂装饰结构已接入', async ({ page }) => {
   expect(Math.abs(stillPausedTime - pausedTime)).toBeLessThan(0.03)
 })
 
+test('飞线图在固定 SMIL 时间保持 DataV 2.10.0 视觉', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/fidelity.html')
+
+  const flyline = page.locator('[data-component="flylineChart"]')
+  const enhanced = page.locator('[data-component="flylineChartEnhanced"]')
+  await expect(flyline.locator('svg')).toBeVisible()
+  await expect(enhanced.locator('svg')).toBeVisible()
+
+  for (const chart of [flyline, enhanced]) {
+    const path = chart.locator('path[data-flyline-path]').first()
+    const dashAnimation = chart.locator('animate[attributeName="stroke-dasharray"]').first()
+    await expect(dashAnimation).toBeAttached()
+    const [length, from] = await Promise.all([
+      path.evaluate(element => (element as SVGPathElement).getTotalLength()),
+      dashAnimation.getAttribute('from'),
+    ])
+    expect(Number(from?.split(',')[1])).toBeCloseTo(length, 5)
+  }
+
+  await page.locator('.luma-flyline-chart svg, .luma-flyline-chart-enhanced svg').evaluateAll((svgs) => {
+    svgs.forEach((svg) => {
+      const animated = svg as SVGSVGElement
+      animated.pauseAnimations()
+      animated.setCurrentTime(1)
+    })
+  })
+
+  await expect(flyline).toHaveScreenshot('flyline-chart-upstream-t1.png', {
+    animations: 'allow',
+    maxDiffPixels: 12,
+  })
+  await expect(enhanced).toHaveScreenshot('flyline-chart-enhanced-upstream-t1.png', {
+    animations: 'allow',
+    maxDiffPixels: 12,
+  })
+})
+
 for (const theme of themes) {
   for (const viewport of viewports) {
     test(`${theme} ${viewport.label}`, async ({ page }) => {

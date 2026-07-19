@@ -300,6 +300,7 @@ for (const match of appSourceAliasMatches) {
 
 const oldNameMatches = findTextMatches(rootDir, oldNamePattern, new Set([
   'docs/release-checklist.md',
+  'apps/luma-docs/src/reference/release-checklist.md',
   'scripts/check-release-boundaries.mjs',
 ]))
 

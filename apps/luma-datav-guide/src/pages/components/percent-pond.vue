@@ -11,7 +11,7 @@ import PropsTable from '@/components/PropsTable.vue'
 // 在线调试的属性模型与默认值
 const playModel = reactive<Record<string, unknown>>({
   value: 72,
-  shape: 'capsule',
+  shape: 'bar',
   showLabel: true,
   borderWidth: 3,
   borderRadius: 5,
@@ -36,10 +36,11 @@ const playControls: PlaygroundControl[] = [
   { key: 'localGradient', label: '局部渐变 localGradient', type: 'boolean' },
 ]
 
-const modernCode = `<LumaPercentPond :value="72" shape="capsule" />
-<LumaPercentPond :value="45" shape="bar" :colors="['#6ff7cd', '#35c8ff']" />`
+const modernCode = `<LumaPercentPond :value="72" />
+<!-- shape="capsule" 是 Luma 扩展 -->
+<LumaPercentPond :value="45" shape="capsule" :colors="['#6ff7cd', '#35c8ff']" />`
 
-const configCode = `<LumaPercentPond :config="{ value: 72, colors: ['#00c0ff', '#4dfffe'], formatter: '{value}%' }" />`
+const configCode = `<LumaPercentPond :config="{ value: 72, borderRadius: 24, colors: ['#00c0ff', '#4dfffe'], formatter: '{value}%' }" />`
 
 const propRows: PropRow[] = [
   { name: 'value', type: 'number', default: 'undefined', description: '百分比数值（0–100）。' },
@@ -48,10 +49,10 @@ const propRows: PropRow[] = [
   { name: 'colors', type: 'string[]', default: '内置渐变', description: '填充渐变色。' },
   { name: 'formatter', type: '(value) => string', default: "'{value}%'", description: '文本格式化。' },
   { name: 'showLabel', type: 'boolean', default: 'true', description: '是否显示中间文本。' },
-  { name: 'borderWidth', type: 'number', default: '按上游', description: '边框宽度。' },
-  { name: 'borderGap', type: 'number', default: '按上游', description: '边框与填充间距。' },
-  { name: 'borderRadius', type: 'number', default: '按上游', description: '圆角半径。' },
-  { name: 'textColor', type: 'string', default: '按上游', description: '文本颜色。' },
+  { name: 'borderWidth', type: 'number', default: '3', description: '边框宽度。' },
+  { name: 'borderGap', type: 'number', default: '3', description: '边框与填充间距。' },
+  { name: 'borderRadius', type: 'number', default: '5', description: '边框圆角；与上游一致，不额外裁剪内部进度线。' },
+  { name: 'textColor', type: 'string', default: "'#fff'", description: '文本颜色。' },
   { name: 'localGradient', type: 'boolean', default: 'false', description: '渐变是否随填充长度局部计算。' },
 ]
 </script>
@@ -61,11 +62,11 @@ const propRows: PropRow[] = [
     title="PercentPond 占比池"
     component-name="LumaPercentPond"
     datav-name="percentPond"
-    intro="百分比进度池，支持条形与胶囊两种外形。适合展示单一指标的完成率或占比。"
+    intro="对齐 DataV 百分比池：圆角只作用于渐变边框，内部虚线进度保持原生 polyline 几何；另保留 capsule 外形扩展。"
   >
     <Playground
       title="在线调试"
-      description="实时修改属性，预览效果与代码同步更新。"
+      description="实时调整 borderRadius；较大圆角只改变边框，不会裁剪内部进度线。"
       component-name="LumaPercentPond"
       :controls="playControls"
       v-model="playModel"
@@ -86,23 +87,23 @@ const propRows: PropRow[] = [
     </Playground>
 
     <DemoBlock
-      title="两种外形"
-      description="shape 切换 bar / capsule。"
+      title="原生条形与扩展胶囊"
+      description="默认 bar 对齐 DataV；shape=\"capsule\" 为 Luma 扩展。"
       :code="modernCode"
     >
       <div class="pond-stack">
-        <LumaPercentPond :value="72" shape="capsule" style="width: 320px; height: 60px;" />
-        <LumaPercentPond :value="45" shape="bar" :colors="['#6ff7cd', '#35c8ff']" style="width: 320px; height: 40px;" />
+        <LumaPercentPond :value="72" style="width: 320px; height: 60px;" />
+        <LumaPercentPond :value="45" shape="capsule" :colors="['#6ff7cd', '#35c8ff']" style="width: 320px; height: 40px;" />
       </div>
     </DemoBlock>
 
     <DemoBlock
       title="DataV 原生 config"
-      description="colors 与 formatter 兼容上游写法。"
+      description="大 borderRadius 用于验证上游只绘制圆角边框、不裁剪进度线的行为。"
       :code="configCode"
     >
       <LumaPercentPond
-        :config="{ value: 72, colors: ['#00c0ff', '#4dfffe'], formatter: '{value}%' }"
+        :config="{ value: 72, borderRadius: 24, colors: ['#00c0ff', '#4dfffe'], formatter: '{value}%' }"
         style="width: 320px; height: 60px;"
       />
     </DemoBlock>

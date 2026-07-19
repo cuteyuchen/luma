@@ -10,10 +10,10 @@
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
-    "@luma/core": "workspace:*",
-    "@luma/datav": "workspace:*",
-    "@luma/icons": "workspace:*",
-    "@luma/icons-vue": "workspace:*",
+    "@luma/core": "0.0.1-beta",
+    "@luma/datav": "0.0.1-beta",
+    "@luma/icons": "0.0.1-beta",
+    "@luma/icons-vue": "0.0.1-beta",
     "echarts": "^5.6.0",
     "element-plus": "^2.11.0",
     "vue": "^3.5.0",

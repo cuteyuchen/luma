@@ -63,16 +63,16 @@ importers:
   apps/luma-admin:
     dependencies:
       '@luma/charts':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/charts
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/core
       '@luma/icons':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       echarts:
         specifier: ^5.5.0
@@ -106,19 +106,19 @@ importers:
   apps/luma-cockpit:
     dependencies:
       '@luma/charts':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/charts
       '@luma/cockpit':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/cockpit
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/core
       '@luma/datav':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/datav
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       cesium:
         specifier: 1.143.0
@@ -164,16 +164,16 @@ importers:
   apps/luma-datav-guide:
     dependencies:
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/core
       '@luma/datav':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/datav
       '@luma/icons':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       echarts:
         specifier: ^5.6.0
@@ -210,7 +210,7 @@ importers:
   apps/luma-mock-api:
     dependencies:
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/core
       h3:
         specifier: 1.15.11
@@ -232,16 +232,16 @@ importers:
   apps/vben-compat-demo:
     dependencies:
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/core
       '@luma/icons':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/icons-vue
       '@luma/vben-compat':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../../packages/vben-compat
       element-plus:
         specifier: ^2.11.0
@@ -279,10 +279,10 @@ importers:
   packages/cockpit:
     dependencies:
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../core
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../icons-vue
       element-plus:
         specifier: ^2.11.0
@@ -301,10 +301,10 @@ importers:
   packages/core:
     dependencies:
       '@luma/icons':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../icons
       '@luma/icons-vue':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../icons-vue
       element-plus:
         specifier: ^2.11.0
@@ -330,6 +330,9 @@ importers:
 
   packages/datav:
     dependencies:
+      '@jiaminghi/charts':
+        specifier: 0.2.18
+        version: 0.2.18
       vue:
         specifier: ^3.5.0
         version: 3.5.39(typescript@6.0.3)
@@ -346,7 +349,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.1(vue@3.5.39(typescript@6.0.3))
       '@luma/icons':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../icons
       vue:
         specifier: ^3.5.0
@@ -355,7 +358,7 @@ importers:
   packages/vben-compat:
     dependencies:
       '@luma/core':
-        specifier: workspace:*
+        specifier: 0.0.1-beta
         version: link:../core
       vue:
         specifier: ^3.5.0
@@ -1150,6 +1153,21 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
+
+  '@jiaminghi/bezier-curve@0.0.9':
+    resolution: {integrity: sha512-u9xJPOEl6Dri2E9FfmJoGxYQY7vYJkURNX04Vj64tdi535tPrpkuf9Sm0lNr3QTKdHQh0DdNRsaa62FLQNQEEw==}
+
+  '@jiaminghi/c-render@0.4.3':
+    resolution: {integrity: sha512-FJfzj5hGj7MLqqqI2D7vEzHKbQ1Ynnn7PJKgzsjXaZpJzTqs2Yw5OSeZnm6l7Qj7jyPAP53lFvEQNH4o4j6s+Q==}
+
+  '@jiaminghi/charts@0.2.18':
+    resolution: {integrity: sha512-K+HXaOOeWG9OOY1VG6M4mBreeeIAPhb9X+khG651AbnwEwL6G2UtcAQ8GWCq6GzhczcLwwhIhuaHqRygwHC0sA==}
+
+  '@jiaminghi/color@1.1.3':
+    resolution: {integrity: sha512-ZY3hdorgODk4OSTbxyXBPxAxHPIVf9rPlKJyK1C1db46a50J0reFKpAvfZG8zMG3lvM60IR7Qawgcu4ZDO3+Hg==}
+
+  '@jiaminghi/transition@1.1.11':
+    resolution: {integrity: sha512-owBggipoHMikDHHDW5Gc7RZYlVuvxHADiU4bxfjBVkHDAmmck+fCkm46n2JzC3j33hWvP9nSCAeh37t6stgWeg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -6415,6 +6433,28 @@ snapshots:
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
       minipass: 7.1.3
+
+  '@jiaminghi/bezier-curve@0.0.9':
+    dependencies:
+      '@babel/runtime': 7.29.7
+
+  '@jiaminghi/c-render@0.4.3':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@jiaminghi/bezier-curve': 0.0.9
+      '@jiaminghi/color': 1.1.3
+      '@jiaminghi/transition': 1.1.11
+
+  '@jiaminghi/charts@0.2.18':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@jiaminghi/c-render': 0.4.3
+
+  '@jiaminghi/color@1.1.3': {}
+
+  '@jiaminghi/transition@1.1.11':
+    dependencies:
+      '@babel/runtime': 7.29.7
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

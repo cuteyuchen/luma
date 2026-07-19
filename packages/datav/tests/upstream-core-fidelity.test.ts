@@ -185,6 +185,45 @@ describe('dataV core component fidelity', () => {
     expect(wrapper.get('text').text()).toBe('99')
   })
 
+  it('digital flop 映射上游描边、虚线和阴影样式', () => {
+    const wrapper = mount(LumaDigitalFlop, {
+      props: {
+        config: {
+          animationFrame: 0,
+          content: '{nt}',
+          number: [42],
+          style: {
+            lineCap: 'round',
+            lineDash: [3, 2],
+            lineDashOffset: 1,
+            lineJoin: 'bevel',
+            lineWidth: 2,
+            shadowBlur: 6,
+            shadowColor: '#123456',
+            shadowOffsetX: 4,
+            shadowOffsetY: 5,
+            stroke: '#ffffff',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.get('text').attributes()).toMatchObject({
+      'stroke': '#ffffff',
+      'stroke-dasharray': '3,2',
+      'stroke-dashoffset': '1',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'bevel',
+      'stroke-width': '2',
+    })
+    expect(wrapper.get('feDropShadow').attributes()).toMatchObject({
+      'dx': '4',
+      'dy': '5',
+      'flood-color': '#123456',
+      'stdDeviation': '3',
+    })
+  })
+
   it('percent pond 按上游尺寸公式绘制渐变边框、虚线进度和居中文字', async () => {
     const wrapper = mount(LumaPercentPond, { props: { value: 25 } })
     await flushFrames()
@@ -234,6 +273,8 @@ describe('dataV core component fidelity', () => {
       'stroke-width': '88',
     })
     expect(progress.attributes('stroke')).toBe(border.attributes('stroke'))
+    expect(wrapper.find('clipPath').exists()).toBe(false)
+    expect(progress.element.parentElement?.tagName.toLowerCase()).toBe('svg')
     expect(wrapper.get('.luma-percent-pond__label').attributes('fill')).toBe('#fefefe')
     expect(wrapper.get('.luma-percent-pond__label').text()).toBe('完成 25')
   })

@@ -21,6 +21,15 @@ const chartMocks = vi.hoisted(() => ({
   }>,
 }))
 
+const dataVChartMocks = vi.hoisted(() => ({
+  instances: [] as Array<{
+    option: Record<string, unknown> | null
+    render: { graphs: Array<{ animationEnd: ReturnType<typeof vi.fn> }> }
+    resize: ReturnType<typeof vi.fn>
+    setOption: ReturnType<typeof vi.fn>
+  }>,
+}))
+
 vi.mock('echarts', () => ({
   init: chartMocks.init.mockImplementation(() => {
     const instance = {
@@ -30,6 +39,20 @@ vi.mock('echarts', () => ({
     chartMocks.instances.push(instance)
     return instance
   }),
+}))
+
+vi.mock('@jiaminghi/charts', () => ({
+  default: class ChartsMock {
+    option: Record<string, unknown> | null = null
+    render = { graphs: [{ animationEnd: vi.fn() }] }
+    resize = vi.fn()
+    setOption = vi.fn((option: Record<string, unknown>) => {
+      this.option = option
+    })
+    constructor(_element: HTMLElement) {
+      dataVChartMocks.instances.push(this)
+    }
+  },
 }))
 
 class ResizeObserverMock {
@@ -56,6 +79,7 @@ async function flushFrames(): Promise<void> {
 beforeEach(() => {
   chartMocks.init.mockClear()
   chartMocks.instances = []
+  dataVChartMocks.instances = []
   frames = []
   frameId = 0
   vi.stubGlobal('ResizeObserver', ResizeObserverMock)
@@ -164,6 +188,22 @@ describe('remaining DataV components', () => {
     expect(onPosition).toHaveBeenCalled()
   })
 
+  it('flyline animation keeps running while hovered like DataV 2.10.0', async () => {
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
+    const wrapper = mount(LumaFlylineChart, {
+      props: {
+        config: {
+          centerPoint: [0.5, 0.5],
+          points: [[0.1, 0.2]],
+        },
+      },
+    })
+    await flushFrames()
+
+    await wrapper.trigger('mouseenter')
+    expect(wrapper.classes()).not.toContain('is-animation-paused')
+  })
+
   it('flyline keeps the DataV 2.10.0 config field names and legacy aliases', async () => {
     const wrapper = mount(LumaFlylineChart, {
       props: {
@@ -231,5 +271,32 @@ describe('remaining DataV components', () => {
     expect(instance.setOption).toHaveBeenLastCalledWith({ title: { text: '更新' } }, { lazyUpdate: true })
     wrapper.unmount()
     expect(instance.dispose).toHaveBeenCalled()
+  })
+
+  it('charts config 使用 DataV 官方运行时，并保留 ECharts option 扩展', async () => {
+    const config = {
+      series: [{ data: [10, 20, 30], type: 'line' }],
+      xAxis: { data: ['一', '二', '三'] },
+      yAxis: { data: 'value' },
+    }
+    const wrapper = mount(LumaCharts, { props: { config } })
+    await flushFrames()
+    await nextTick()
+
+    expect(wrapper.attributes('data-renderer')).toBe('datav')
+    expect(chartMocks.init).not.toHaveBeenCalled()
+    const instance = dataVChartMocks.instances[0]!
+    expect(instance.setOption).toHaveBeenCalledWith(config)
+
+    const updated = { ...config, title: { text: '更新' } }
+    await wrapper.setProps({ config: updated })
+    expect(instance.setOption).toHaveBeenLastCalledWith(updated, true)
+
+    ;(wrapper.vm as unknown as { resize: () => void }).resize()
+    await flushFrames()
+    expect(instance.resize).toHaveBeenCalled()
+
+    wrapper.unmount()
+    expect(instance.render.graphs[0]!.animationEnd).toHaveBeenCalled()
   })
 })

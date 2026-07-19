@@ -108,6 +108,32 @@ describe('numeric components', () => {
     expect(callbacks.size).toBe(0)
   })
 
+  it('digital flop 按 animationCurve 区分上游缓动曲线', async () => {
+    const callbacks = new Map<number, FrameRequestCallback>()
+    let nextFrame = 0
+    vi.spyOn(performance, 'now').mockReturnValue(0)
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      nextFrame += 1
+      callbacks.set(nextFrame, callback)
+      return nextFrame
+    }))
+    vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => callbacks.delete(id)))
+
+    const wrapper = mount(LumaDigitalFlop, {
+      props: { animationCurve: 'easeInQuad', duration: 100, precision: 0, value: 0 },
+    })
+    await wrapper.setProps({ value: 100 })
+    callbacks.get(1)?.(50)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toBe('25')
+
+    await wrapper.setProps({ animationCurve: 'easeOutCubic', value: 200 })
+    callbacks.get(Math.max(...callbacks.keys()))?.(50)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toBe('178')
+    wrapper.unmount()
+  })
+
   it('percent pond 将输入限制在 0 到 100 并支持格式化', async () => {
     const wrapper = mount(LumaPercentPond, { props: { value: 125 } })
     expect(wrapper.attributes('aria-valuenow')).toBe('100')

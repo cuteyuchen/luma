@@ -1,7 +1,7 @@
 {
   "name": "@luma/vben-compat",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-beta",
   "description": "Luma compatibility adapters for common Vben Admin APIs.",
   "license": "MIT",
   "keywords": [
@@ -38,6 +38,6 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@luma/core": "workspace:*"
+    "@luma/core": "0.0.1-beta"
   }
 }

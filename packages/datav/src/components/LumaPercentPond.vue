@@ -29,7 +29,6 @@ const size = useElementSize(root)
 const instanceId = useId().replaceAll(':', '')
 const borderGradientId = `luma-percent-pond-border-${instanceId}`
 const progressGradientId = `luma-percent-pond-progress-${instanceId}`
-const progressClipId = `luma-percent-pond-clip-${instanceId}`
 
 const percent = computed(() => clampPercent(props.value ?? props.config?.value ?? 0))
 const width = computed(() => size.value.width)
@@ -49,12 +48,7 @@ const borderRadius = computed(() => shape.value === 'capsule'
   ? Math.max(0, height.value / 2)
   : Math.max(0, props.borderRadius ?? props.config?.borderRadius ?? 5))
 
-/**
- * 进度条几何与 DataV percentPond 一致：
- * - 内缩 inset = borderWidth + borderGap
- * - polyline 线宽 = height - inset * 2
- * 粗 stroke 的方形端点会超出圆角边框，因此用内缩圆角 rect 做 clipPath 裁剪。
- */
+/** DataV percentPond 原生几何：进度线不按圆角边框额外裁剪。 */
 const inset = computed(() => safeBorderWidth.value + safeBorderGap.value)
 const polylineWidth = computed(() => Math.max(0, height.value - inset.value * 2))
 const points = computed(() => {
@@ -63,25 +57,6 @@ const points = computed(() => {
   const end = start + available / 100 * percent.value
   const halfHeight = height.value / 2
   return `${start},${halfHeight} ${end},${halfHeight + 0.001}`
-})
-
-/** 内缩区域圆角：外圆角减去边框厚度与间距，避免裁剪区域比边框更圆导致露边。 */
-const innerRadius = computed(() => {
-  const outer = borderRadius.value
-  if (outer <= 0)
-    return 0
-  return Math.max(0, outer - safeBorderWidth.value)
-})
-
-const clipRect = computed(() => {
-  const pad = inset.value
-  return {
-    x: pad,
-    y: pad,
-    width: Math.max(0, width.value - pad * 2),
-    height: Math.max(0, height.value - pad * 2),
-    rx: Math.min(innerRadius.value, Math.max(0, height.value - pad * 2) / 2),
-  }
 })
 
 const gradientStops = computed(() => {
@@ -133,16 +108,6 @@ const viewBox = computed(() => `0 0 ${Math.max(1, width.value)} ${Math.max(1, he
             :stop-color="stop.color"
           />
         </linearGradient>
-        <clipPath :id="progressClipId">
-          <rect
-            :x="clipRect.x"
-            :y="clipRect.y"
-            :width="clipRect.width"
-            :height="clipRect.height"
-            :rx="clipRect.rx"
-            :ry="clipRect.rx"
-          />
-        </clipPath>
       </defs>
 
       <rect
@@ -157,16 +122,14 @@ const viewBox = computed(() => `0 0 ${Math.max(1, width.value)} ${Math.max(1, he
         :width="rectWidth"
         :height="rectHeight"
       />
-      <g :clip-path="`url(#${progressClipId})`">
-        <polyline
-          class="luma-percent-pond__progress"
-          fill="none"
-          :stroke-width="polylineWidth"
-          :stroke-dasharray="lineDash.join(',')"
-          :stroke="`url(#${polylineGradientId})`"
-          :points="points"
-        />
-      </g>
+      <polyline
+        class="luma-percent-pond__progress"
+        fill="none"
+        :stroke-width="polylineWidth"
+        :stroke-dasharray="lineDash.join(',')"
+        :stroke="`url(#${polylineGradientId})`"
+        :points="points"
+      />
       <text
         v-if="showLabel"
         class="luma-percent-pond__label"

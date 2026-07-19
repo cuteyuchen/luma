@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import type { DigitalFlopConfig } from '../types'
-import { computed, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useAnimationPause } from '../composables/useAnimationPause'
 import { useReducedMotion } from '../composables/useReducedMotion'
 
@@ -27,6 +27,7 @@ const props = defineProps<{
 }>()
 
 const root = useTemplateRef<HTMLElement>('root')
+const shadowFilterId = `luma-digital-flop-shadow-${useId().replaceAll(':', '')}`
 const reducedMotion = useReducedMotion()
 const viewportPaused = useAnimationPause(root)
 const configStyle = computed(() => props.config?.style)
@@ -42,8 +43,83 @@ const fontVariant = computed(() => configStyle.value?.fontVarient ?? 'normal')
 const fontWeight = computed(() => props.fontWeight ?? configStyle.value?.fontWeight ?? 'normal')
 const opacity = computed(() => configStyle.value?.opacity ?? 1)
 const stroke = computed(() => configStyle.value?.stroke ?? 'transparent')
+const lineCap = computed(() => configStyle.value?.lineCap)
+const lineDash = computed(() => configStyle.value?.lineDash)
+const lineDashOffset = computed(() => configStyle.value?.lineDashOffset ?? 0)
+const lineJoin = computed(() => configStyle.value?.lineJoin)
+const lineWidth = computed(() => configStyle.value?.lineWidth ?? 0)
+const shadowBlur = computed(() => Math.max(0, configStyle.value?.shadowBlur ?? 0))
+const shadowColor = computed(() => configStyle.value?.shadowColor ?? 'transparent')
+const shadowOffsetX = computed(() => configStyle.value?.shadowOffsetX ?? 0)
+const shadowOffsetY = computed(() => configStyle.value?.shadowOffsetY ?? 0)
+const hasShadow = computed(() => shadowBlur.value > 0 || shadowOffsetX.value !== 0 || shadowOffsetY.value !== 0)
 const textAlign = computed(() => props.textAlign ?? props.config?.textAlign ?? 'center')
 let frame: number | undefined
+
+function ease(name: string, progress: number): number {
+  const t = progress
+  const sine = {
+    easeInSine: () => 1 - Math.cos(t * Math.PI / 2),
+    easeOutSine: () => Math.sin(t * Math.PI / 2),
+    easeInOutSine: () => -(Math.cos(Math.PI * t) - 1) / 2,
+  }[name]
+  if (sine)
+    return sine()
+
+  const powerMatch = /^ease(In|Out|InOut)(Quad|Cubic|Quart|Quint)$/.exec(name)
+  if (powerMatch) {
+    const power = { Quad: 2, Cubic: 3, Quart: 4, Quint: 5 }[powerMatch[2]!]!
+    if (powerMatch[1] === 'In')
+      return t ** power
+    if (powerMatch[1] === 'Out')
+      return 1 - (1 - t) ** power
+    return t < 0.5 ? (2 * t) ** power / 2 : 1 - (-2 * t + 2) ** power / 2
+  }
+
+  const c1 = 1.70158
+  if (name === 'easeInBack')
+    return (c1 + 1) * t ** 3 - c1 * t ** 2
+  if (name === 'easeOutBack')
+    return 1 + (c1 + 1) * (t - 1) ** 3 + c1 * (t - 1) ** 2
+  if (name === 'easeInOutBack') {
+    const c2 = c1 * 1.525
+    return t < 0.5
+      ? (2 * t) ** 2 * ((c2 + 1) * 2 * t - c2) / 2
+      : ((2 * t - 2) ** 2 * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
+  }
+
+  const bounceOut = (value: number): number => {
+    const n1 = 7.5625
+    const d1 = 2.75
+    if (value < 1 / d1)
+      return n1 * value * value
+    if (value < 2 / d1)
+      return n1 * (value -= 1.5 / d1) * value + 0.75
+    if (value < 2.5 / d1)
+      return n1 * (value -= 2.25 / d1) * value + 0.9375
+    return n1 * (value -= 2.625 / d1) * value + 0.984375
+  }
+  if (name === 'easeInBounce')
+    return 1 - bounceOut(1 - t)
+  if (name === 'easeOutBounce')
+    return bounceOut(t)
+  if (name === 'easeInOutBounce')
+    return t < 0.5 ? (1 - bounceOut(1 - 2 * t)) / 2 : (1 + bounceOut(2 * t - 1)) / 2
+
+  if (name.includes('Elastic')) {
+    if (t === 0 || t === 1)
+      return t
+    if (name === 'easeInElastic')
+      return -(2 ** (10 * t - 10)) * Math.sin((t * 10 - 10.75) * (2 * Math.PI / 3))
+    if (name === 'easeOutElastic')
+      return 2 ** (-10 * t) * Math.sin((t * 10 - 0.75) * (2 * Math.PI / 3)) + 1
+    return t < 0.5
+      ? -(2 ** (20 * t - 10) * Math.sin((20 * t - 11.125) * (2 * Math.PI / 4.5))) / 2
+      : 2 ** (-20 * t + 10) * Math.sin((20 * t - 11.125) * (2 * Math.PI / 4.5)) / 2 + 1
+  }
+
+  return name === 'linear' ? t : 1 - (1 - t) ** 3
+}
 
 function finiteValue(value: number | undefined): number {
   return Number.isFinite(value) ? value! : 0
@@ -105,7 +181,7 @@ function animate(): void {
   const startedAt = typeof performance === 'undefined' ? Date.now() : performance.now()
   const step = (now: number): void => {
     const progress = Math.min(1, Math.max(0, (now - startedAt) / duration))
-    const eased = animationCurve.value === 'linear' ? progress : 1 - (1 - progress) ** 3
+    const eased = ease(animationCurve.value, progress)
     displayed.value = target.map((value, index) => start[index]! + (value - start[index]!) * eased)
     if (progress < 1)
       frame = requestFrame(step)
@@ -160,6 +236,16 @@ onBeforeUnmount(cancelAnimation)
   >
     <!-- 与 DataV canvas 一致：铺满容器；绝对定位避免作为内容撑高根节点 -->
     <svg class="luma-digital-flop__svg" aria-hidden="true">
+      <defs v-if="hasShadow">
+        <filter :id="shadowFilterId" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow
+            :dx="shadowOffsetX"
+            :dy="shadowOffsetY"
+            :stdDeviation="shadowBlur / 2"
+            :flood-color="shadowColor"
+          />
+        </filter>
+      </defs>
       <text
         class="luma-digital-flop__value"
         :x="textX"
@@ -172,7 +258,13 @@ onBeforeUnmount(cancelAnimation)
         :font-weight="fontWeight"
         :opacity="opacity"
         :stroke="stroke"
+        :stroke-dasharray="lineDash?.join(',')"
+        :stroke-dashoffset="lineDashOffset"
+        :stroke-linecap="lineCap"
+        :stroke-linejoin="lineJoin"
+        :stroke-width="lineWidth"
         :text-anchor="textAnchor"
+        :filter="hasShadow ? `url(#${shadowFilterId})` : undefined"
         dominant-baseline="middle"
       >
         <tspan

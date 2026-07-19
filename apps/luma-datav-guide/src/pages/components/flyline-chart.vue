@@ -17,14 +17,14 @@ const config: Partial<FlylineChartConfig> = {
     { position: [0.68, 0.82], text: '广州' },
     { position: [0.2, 0.78], text: '成都' },
   ],
-  flylineColor: '#35c8ff',
-  orbitColor: 'rgb(103 224 227 / 30%)',
+  flylineColor: '#ffde93',
+  orbitColor: 'rgba(103, 224, 227, .2)',
 }
 
 // 在线调试可调属性（centerPoint/points 为坐标数据，保持固定，仅暴露标量/颜色字段）
 const playModel = reactive<Record<string, unknown>>({
-  flylineColor: '#35c8ff',
-  orbitColor: '#67e0e3',
+  flylineColor: '#ffde93',
+  orbitColor: 'rgba(103, 224, 227, .2)',
   lineWidth: 1,
   curvature: 5,
   relative: true,
@@ -32,7 +32,7 @@ const playModel = reactive<Record<string, unknown>>({
 
 const playControls: PlaygroundControl[] = [
   { key: 'flylineColor', label: '飞线色 flylineColor', type: 'color', omitFromCode: true },
-  { key: 'orbitColor', label: '轨道色 orbitColor', type: 'color', omitFromCode: true },
+  { key: 'orbitColor', label: '轨道色 orbitColor', type: 'text', omitFromCode: true },
   { key: 'lineWidth', label: '飞线宽度 lineWidth', type: 'number', min: 1, max: 6, step: 1, omitFromCode: true },
   { key: 'curvature', label: '飞线曲率 curvature', type: 'number', min: 1, max: 10, step: 1, omitFromCode: true },
   { key: 'relative', label: '相对坐标 relative', type: 'boolean', omitFromCode: true },
@@ -73,8 +73,8 @@ const config = {
     { position: [0.78, 0.32], text: '上海' },
     { position: [0.68, 0.82], text: '广州' },
   ],
-  flylineColor: '#35c8ff',
-  orbitColor: 'rgb(103 224 227 / 30%)',
+  flylineColor: '#ffde93',
+  orbitColor: 'rgba(103, 224, 227, .2)',
 }
 <\/script>
 

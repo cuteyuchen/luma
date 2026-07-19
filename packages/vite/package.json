@@ -1,7 +1,7 @@
 {
   "name": "@luma/vite",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-beta",
   "description": "Luma Vite component resolver, workspace aliases and optional devtools helpers.",
   "license": "MIT",
   "keywords": [

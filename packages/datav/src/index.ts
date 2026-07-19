@@ -83,6 +83,7 @@ export type {
   ConicalColumnChartConfig,
   DataValueItem,
   DataValueKey,
+  DataVChartsOption,
   DecorationVariant,
   DigitalFlopConfig,
   DigitalFlopStyle,

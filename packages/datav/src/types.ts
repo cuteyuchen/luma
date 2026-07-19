@@ -10,6 +10,7 @@ export type DecorationVariant = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 export type FullScreenContainerMode = 'width' | 'scale' | 'vwvh'
 export type DataValueKey = string | number
 export type { EChartsOption as LumaChartsOption } from 'echarts'
+export type DataVChartsOption = Record<string, unknown>
 
 export interface DataValueItem {
   key: DataValueKey

@@ -21,12 +21,12 @@ const config: FlylineEnhancedConfig = {
     { source: '北京', target: '广州' },
     { source: '成都', target: '北京' },
   ],
-  line: { color: '#35c8ff', width: 1 },
+  line: { color: '#ffde93', width: 1 },
 }
 
 // 在线调试可调属性（points/lines 为拓扑数据，保持固定，仅暴露标量/颜色字段）
 const playModel = reactive<Record<string, unknown>>({
-  lineColor: '#35c8ff',
+  lineColor: '#ffde93',
   lineWidth: 1,
   curvature: 5,
   relative: true,
@@ -75,7 +75,7 @@ const config = {
     { source: '北京', target: '广州' },
     { source: '成都', target: '北京' },
   ],
-  line: { color: '#35c8ff', width: 1 },
+  line: { color: '#ffde93', width: 1 },
 }
 <\/script>
 

@@ -14,6 +14,7 @@ const playModel = reactive<Record<string, unknown>>({
   suffix: ' 台',
   precision: 0,
   duration: 1000,
+  animationCurve: 'easeOutCubic',
   color: '#6ff7cd',
   fontSize: 40,
   fontWeight: 'normal',
@@ -26,6 +27,17 @@ const playControls: PlaygroundControl[] = [
   { key: 'suffix', label: '后缀 suffix', type: 'text' },
   { key: 'precision', label: '小数位 precision', type: 'number', min: 0, max: 4, step: 1 },
   { key: 'duration', label: '动画时长 duration', type: 'number', min: 0, max: 4000, step: 100, hint: '毫秒' },
+  {
+    key: 'animationCurve',
+    label: '缓动 animationCurve',
+    type: 'select',
+    options: [
+      { label: 'easeOutCubic', value: 'easeOutCubic' },
+      { label: 'linear', value: 'linear' },
+      { label: 'easeInQuad', value: 'easeInQuad' },
+      { label: 'easeOutBounce', value: 'easeOutBounce' },
+    ],
+  },
   { key: 'color', label: '颜色 color', type: 'color' },
   { key: 'fontSize', label: '字号 fontSize', type: 'number', min: 12, max: 96, step: 2 },
   {
@@ -71,8 +83,23 @@ const modernCode = `<LumaDigitalFlop
   style="width: 160px; height: 56px;"
 />`
 
-const configCode = `<!-- DataV 原生 config：number 为数组，content 用 {nt} 占位 -->
-<LumaDigitalFlop :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }" />`
+const configCode = `<!-- DataV 原生 config：numberText 的 shape 与 style 均可配置 -->
+<LumaDigitalFlop
+  :config="{
+    number: [1286],
+    content: '{nt} 台',
+    toFixed: 0,
+    animationCurve: 'easeOutBounce',
+    style: {
+      fill: '#6ff7cd',
+      stroke: '#123456',
+      lineWidth: 1,
+      lineDash: [3, 2],
+      shadowBlur: 6,
+      shadowColor: '#35c8ff',
+    },
+  }"
+/>`
 
 const liveCode = `<script setup>
 const live = ref(1286)
@@ -90,6 +117,8 @@ const propRows: PropRow[] = [
   { name: 'suffix', type: 'string', default: "''", description: '数字后缀文本。' },
   { name: 'precision', type: 'number', default: '0', description: '小数位数（等价 config.toFixed）。' },
   { name: 'duration', type: 'number', default: 'undefined', description: '滚动动画时长，毫秒。' },
+  { name: 'animationCurve', type: 'string', default: "'easeOutCubic'", description: 'DataV/CRender 缓动曲线名称。' },
+  { name: 'animationFrame', type: 'number', default: '50', description: 'DataV config 动画帧数；未传 duration 时换算为时长。' },
   { name: 'formatter', type: '(value, index) => string', default: 'undefined', description: '自定义每段数字格式化。' },
   { name: 'color', type: 'string', default: "'#3de7c9'", description: '数字颜色。' },
   { name: 'fontSize', type: 'number', default: '30', description: '字号，像素。' },
@@ -103,7 +132,7 @@ const propRows: PropRow[] = [
     title="DigitalFlop 数字翻牌"
     component-name="LumaDigitalFlop"
     datav-name="digitalFlop"
-    intro="数字滚动翻牌，数值变化时以动画过渡。支持前后缀、小数位、模板串与自定义格式化。"
+    intro="对齐 DataV numberText：数值按 CRender 缓动曲线过渡，并映射填充、描边、虚线与阴影等原生 style。"
   >
     <Playground
       title="在线调试"
@@ -119,6 +148,7 @@ const propRows: PropRow[] = [
         :suffix="playModel.suffix as string"
         :precision="playModel.precision as number"
         :duration="playModel.duration as number"
+        :animation-curve="playModel.animationCurve as string"
         :color="playModel.color as string"
         :font-size="playModel.fontSize as number"
         :font-weight="playModel.fontWeight as string"
@@ -153,13 +183,26 @@ const propRows: PropRow[] = [
 
     <DemoBlock
       title="DataV 原生 config"
-      description="number 数组与 {nt} 模板串保持上游语义。"
+      description="number、{nt} 模板、animationCurve 与 CRender style 保持上游语义。"
       :code="configCode"
       :min-height="140"
     >
       <LumaDigitalFlop
-        :config="{ number: [1286], content: '{nt} 台', toFixed: 0 }"
-        :font-size="40"
+        :config="{
+          number: [1286],
+          content: '{nt} 台',
+          toFixed: 0,
+          animationFrame: 0,
+          style: {
+            fill: '#6ff7cd',
+            fontSize: 40,
+            stroke: '#123456',
+            lineWidth: 1,
+            lineDash: [3, 2],
+            shadowBlur: 6,
+            shadowColor: '#35c8ff',
+          },
+        }"
         style="width: 200px; height: 56px;"
       />
     </DemoBlock>

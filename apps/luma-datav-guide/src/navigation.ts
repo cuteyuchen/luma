@@ -57,7 +57,7 @@ export const navGroups: GuideNavGroup[] = [
     key: 'chart',
     label: '图表',
     items: [
-      { slug: 'charts', title: 'Charts 原生 ECharts', component: 'LumaCharts', summary: '完整 EChartsOption 封装' },
+      { slug: 'charts', title: 'Charts 图表容器', component: 'LumaCharts', summary: 'DataV 原生 Charts + ECharts 扩展' },
       { slug: 'active-ring-chart', title: 'ActiveRingChart 活动环图', component: 'LumaActiveRingChart', summary: '自动轮播的活动扇区' },
       { slug: 'capsule-chart', title: 'CapsuleChart 胶囊图', component: 'LumaCapsuleChart', summary: '横向胶囊排行' },
       { slug: 'conical-column-chart', title: 'ConicalColumnChart 锥形柱图', component: 'LumaConicalColumnChart', summary: '锥形柱状对比' },

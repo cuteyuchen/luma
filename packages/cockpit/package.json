@@ -1,7 +1,7 @@
 {
   "name": "@luma/cockpit",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-beta",
   "description": "Luma generic cockpit orchestration framework: layout runtime, component registry, designer and message bus.",
   "license": "MIT",
   "keywords": [
@@ -63,8 +63,8 @@
     }
   },
   "dependencies": {
-    "@luma/core": "workspace:*",
-    "@luma/icons-vue": "workspace:*",
+    "@luma/core": "0.0.1-beta",
+    "@luma/icons-vue": "0.0.1-beta",
     "sortablejs": "^1.15.7"
   },
   "devDependencies": {

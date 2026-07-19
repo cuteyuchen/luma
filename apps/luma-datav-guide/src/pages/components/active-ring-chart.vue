@@ -30,7 +30,7 @@ const playControls: PlaygroundControl[] = [
   { key: 'interval', label: '切换间隔 interval', type: 'number', min: 500, max: 6000, step: 250, hint: '毫秒' },
   { key: 'autoplay', label: '自动轮播 autoplay', type: 'boolean' },
   { key: 'radius', label: '基础半径 radius(%)', type: 'number', min: 30, max: 80, step: 1, omitFromCode: true },
-  { key: 'activeRadius', label: '激活半径 activeRadius(%)', type: 'number', min: 40, max: 90, step: 1, omitFromCode: true },
+  { key: 'activeRadius', label: '激活半径 activeRadius(%)', type: 'number', min: 20, max: 90, step: 1, hint: '可小于基础半径，激活项会向内收缩', omitFromCode: true },
   { key: 'lineWidth', label: '线宽 lineWidth', type: 'number', min: 4, max: 40, step: 1, omitFromCode: true },
   { key: 'unit', label: '中心单位 unit', type: 'text', omitFromCode: true },
   { key: 'showOriginValue', label: '显示原值 showOriginValue', type: 'boolean', omitFromCode: true },
@@ -76,7 +76,7 @@ const configCode = `<LumaActiveRingChart
 const propRows: PropRow[] = [
   { name: 'items', type: 'DataValueItem[]', description: '现代数据项：key、label、value、可选 color。' },
   { name: 'config', type: 'ActiveRingChartConfig', description: 'DataV 兼容配置，data 使用 name/value 结构。' },
-  { name: 'interval', type: 'number', default: '2000', description: '活动扇区自动切换间隔（毫秒）。' },
+  { name: 'interval', type: 'number', default: 'undefined', description: '活动扇区自动切换间隔（毫秒），优先于 config.activeTimeGap。' },
   { name: 'autoplay', type: 'boolean', default: 'true', description: '是否自动轮播活动扇区。' },
   { name: 'v-model:activeKey', type: 'DataValueKey', description: '当前激活项的受控绑定。' },
   { name: 'ariaLabel', type: 'string', default: "'活动环图'", description: '无障碍标签。' },
@@ -101,11 +101,11 @@ const configRows: PropRow[] = [
     title="ActiveRingChart 活动环图"
     component-name="LumaActiveRingChart"
     datav-name="activeRingChart"
-    intro="使用 ECharts 双层 Pie 实现活动扇区，自动轮播高亮当前项并在中心以数字翻牌显示占比。"
+    intro="对齐 DataV 活动环几何：每个扇区保持固定线宽，当前项按 activeRadius 向外放大或向内收缩，中心数字同步显示占比。"
   >
     <Playground
       title="在线调试"
-      description="实时修改属性，预览效果与代码同步更新。"
+      description="实时修改基础半径与激活半径；将 activeRadius 调到 radius 以下可验证向内收缩行为。"
       component-name="LumaActiveRingChart"
       :controls="playControls"
       v-model="playModel"

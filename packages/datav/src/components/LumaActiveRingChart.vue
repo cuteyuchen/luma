@@ -9,14 +9,27 @@ import type {
   DigitalFlopConfig,
   DigitalFlopStyle,
 } from '../types'
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { useElementSize } from '../composables/useElementSize'
-import { usePausableAutoplay } from '../composables/usePausableAutoplay'
 import { useReducedMotion } from '../composables/useReducedMotion'
 import LumaCharts from './LumaCharts.vue'
 import LumaDigitalFlop from './LumaDigitalFlop.vue'
 
-const DEFAULT_COLORS = ['#37a2da', '#32c5e9', '#67e0e3', '#9fe6b8', '#ffdb5c', '#ff9f7f', '#fb7293'] as const
+const DEFAULT_COLORS = [
+  '#37a2da',
+  '#32c5e9',
+  '#67e0e3',
+  '#9fe6b8',
+  '#ffdb5c',
+  '#ff9f7f',
+  '#fb7293',
+  '#e062ae',
+  '#e690d1',
+  '#e7bcf3',
+  '#9d96f5',
+  '#8378ea',
+  '#96bfff',
+] as const
 
 const props = withDefaults(defineProps<{
   items?: readonly DataValueItem[]
@@ -34,11 +47,11 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ select: [item: DataValueItem] }>()
 const activeKey = defineModel<DataValueKey>('activeKey')
-const rootRef = useTemplateRef<HTMLElement>('rootRef')
 const chartHostRef = useTemplateRef<HTMLElement>('chartHostRef')
 const size = useElementSize(chartHostRef)
 const reducedMotion = useReducedMotion()
 const activeIndex = shallowRef(0)
+let animationHandler: ReturnType<typeof setTimeout> | undefined
 
 interface RingEntry { data: ActiveRingChartDataItem, item: DataValueItem }
 
@@ -95,7 +108,10 @@ const chartOption = computed<EChartsOption>(() => {
   const baseData = entries.value.map((entry, index) => ({
     name: entry.data.name,
     value: entry.data.value,
-    itemStyle: { color: colors.value[index % colors.value.length] },
+    itemStyle: {
+      color: colors.value[index % colors.value.length],
+      opacity: index === activeIndex.value ? 0 : 1,
+    },
   }))
   const activeData = baseData.map((item, index) => ({
     ...item,
@@ -139,12 +155,27 @@ function resetActiveIndex(): void {
   activeIndex.value = requested >= 0 ? requested : 0
 }
 
-const autoplay = usePausableAutoplay({
-  element: rootRef,
-  enabled: computed(() => props.autoplay && (props.interval ?? props.config.activeTimeGap ?? 3000) > 0 && entries.value.length > 1),
-  interval: computed(() => props.interval ?? props.config.activeTimeGap ?? 3000),
-  tick: selectNext,
-})
+const autoplayDelay = computed(() => props.interval ?? props.config.activeTimeGap ?? 3000)
+const autoplayEnabled = computed(() => props.autoplay
+  && autoplayDelay.value > 0
+  && entries.value.length > 1
+  && !reducedMotion.value)
+
+function clearAnimation(): void {
+  if (animationHandler !== undefined)
+    clearTimeout(animationHandler)
+  animationHandler = undefined
+}
+
+function scheduleAnimation(): void {
+  clearAnimation()
+  if (!autoplayEnabled.value)
+    return
+  animationHandler = setTimeout(() => {
+    selectNext()
+    scheduleAnimation()
+  }, autoplayDelay.value)
+}
 
 watch(() => activeKey.value, (key) => {
   const index = entries.value.findIndex(entry => entry.item.key === key)
@@ -152,19 +183,18 @@ watch(() => activeKey.value, (key) => {
     activeIndex.value = index
 })
 watch([() => props.config, () => props.items], resetActiveIndex)
+watch([autoplayEnabled, autoplayDelay], scheduleAnimation)
+
+onMounted(scheduleAnimation)
+onBeforeUnmount(clearAnimation)
 </script>
 
 <template>
   <div
-    ref="rootRef"
     class="dv-active-ring-chart"
     role="group"
     :aria-label="ariaLabel"
     :data-active-index="activeIndex"
-    @mouseenter="autoplay.onMouseEnter"
-    @mouseleave="autoplay.onMouseLeave"
-    @focusin="autoplay.onFocusIn"
-    @focusout="autoplay.onFocusOut"
   >
     <div ref="chartHostRef" class="active-ring-chart-container">
       <LumaCharts :option="chartOption" :aria-label="ariaLabel" />

@@ -1,7 +1,7 @@
 {
   "name": "@luma/icons-vue",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-beta",
   "description": "Vue components and reactive adapters for @luma/icons.",
   "license": "MIT",
   "keywords": [
@@ -42,6 +42,6 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@luma/icons": "workspace:*"
+    "@luma/icons": "0.0.1-beta"
   }
 }

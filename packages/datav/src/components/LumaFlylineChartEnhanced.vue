@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import type { FlylineEnhancedConfig, FlylineHaloStyle, FlylineIconStyle, FlylineLineStyle, FlylineTextStyle } from '../types'
-import { computed, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useElementSize } from '../composables/useElementSize'
 import { useSvgAnimationPause } from '../composables/useSvgAnimationPause'
 import { createFlylinePath, randomDuration, resolveCoordinate, svgId } from '../flyline-utils'
@@ -87,6 +87,19 @@ const lines = computed(() => {
     }]
   })
 })
+const pathLengths = shallowRef<Record<string, number>>({})
+
+async function syncPathLengths(): Promise<void> {
+  await nextTick()
+  const elements = svgRef.value?.querySelectorAll<SVGPathElement>('path[data-flyline-path]')
+  const lengths: Record<string, number> = {}
+  lines.value.forEach((line, index) => {
+    lengths[line.key] = elements?.[index]?.getTotalLength?.() ?? 0
+  })
+  pathLengths.value = lengths
+}
+
+watch([lines, svgRef], () => void syncPathLengths(), { flush: 'post', immediate: true })
 
 const rootStyle = computed<CSSProperties>(() => ({
   backgroundImage: resolvedConfig.value.backgroundImage ? `url("${resolvedConfig.value.backgroundImage}")` : undefined,
@@ -110,13 +123,9 @@ function handleClick(event: MouseEvent): void {
     class="luma-flyline-chart-enhanced"
     role="img"
     :aria-label="ariaLabel"
-    :class="{ 'is-animation-paused': animation.paused }"
+    :class="{ 'is-animation-paused': animation.paused.value }"
     :style="rootStyle"
     @click="handleClick"
-    @mouseenter="animation.onMouseEnter"
-    @mouseleave="animation.onMouseLeave"
-    @focusin="animation.onFocusIn"
-    @focusout="animation.onFocusOut"
   >
     <svg v-if="size.width && size.height && lines.length" ref="svgRef" :viewBox="`0 0 ${size.width} ${size.height}`" aria-hidden="true">
       <defs>
@@ -138,7 +147,7 @@ function handleClick(event: MouseEvent): void {
           </mask>
         </template>
         <template v-for="line in lines" :key="`line-definition-${line.key}`">
-          <path :id="`${id}-path-${line.key}`" :d="line.d" pathLength="1" fill="transparent" />
+          <path :id="`${id}-path-${line.key}`" :d="line.d" data-flyline-path fill="transparent" />
           <mask :id="`${id}-line-mask-${line.key}`">
             <circle cx="0" cy="0" :r="line.radius" :fill="`url(#${id}-flyline-gradient)`">
               <animateMotion :dur="line.time" :path="line.d" rotate="auto" repeatCount="indefinite" />
@@ -174,13 +183,20 @@ function handleClick(event: MouseEvent): void {
       <g v-for="line in lines" :key="line.key">
         <use :href="`#${id}-path-${line.key}`" :stroke-width="line.width" :stroke="line.orbitColor" fill="none" />
         <use
+          v-if="pathLengths[line.key]"
           :href="`#${id}-path-${line.key}`"
           :stroke-width="line.width"
           :stroke="line.color"
           :mask="`url(#${id}-line-mask-${line.key})`"
           fill="none"
         >
-          <animate attributeName="stroke-dasharray" from="0, 1" to="1, 0" :dur="line.time" repeatCount="indefinite" />
+          <animate
+            attributeName="stroke-dasharray"
+            :from="`0, ${pathLengths[line.key]}`"
+            :to="`${pathLengths[line.key]}, 0`"
+            :dur="line.time"
+            repeatCount="indefinite"
+          />
         </use>
       </g>
     </svg>

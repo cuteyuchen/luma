@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import type { FlylineChartConfig, FlylineChartPoint, FlylineImageStyle, FlylineTextStyle } from '../types'
-import { computed, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useElementSize } from '../composables/useElementSize'
 import { useSvgAnimationPause } from '../composables/useSvgAnimationPause'
 import { createFlylinePath, randomDuration, resolveCoordinate, svgId } from '../flyline-utils'
@@ -64,6 +64,7 @@ function durationSeconds(duration: number | readonly [number, number]): number {
 }
 
 const haloDuration = computed(() => durationSeconds(resolvedConfig.value.halo.duration))
+const pathLengths = shallowRef<Record<string, number>>({})
 
 const paths = computed(() => {
   const config = resolvedConfig.value
@@ -82,6 +83,18 @@ const paths = computed(() => {
     }
   })
 })
+
+async function syncPathLengths(): Promise<void> {
+  await nextTick()
+  const elements = svgRef.value?.querySelectorAll<SVGPathElement>('path[data-flyline-path]')
+  const lengths: Record<string, number> = {}
+  paths.value.forEach((path, index) => {
+    lengths[path.key] = elements?.[index]?.getTotalLength?.() ?? 0
+  })
+  pathLengths.value = lengths
+}
+
+watch([paths, svgRef], () => void syncPathLengths(), { flush: 'post', immediate: true })
 
 const rootStyle = computed<CSSProperties>(() => ({
   backgroundImage: resolvedConfig.value.backgroundImage ? `url("${resolvedConfig.value.backgroundImage}")` : undefined,
@@ -105,13 +118,9 @@ function handleClick(event: MouseEvent): void {
     class="luma-flyline-chart"
     role="img"
     :aria-label="ariaLabel"
-    :class="{ 'is-animation-paused': animation.paused }"
+    :class="{ 'is-animation-paused': animation.paused.value }"
     :style="rootStyle"
     @click="handleClick"
-    @mouseenter="animation.onMouseEnter"
-    @mouseleave="animation.onMouseLeave"
-    @focusin="animation.onFocusIn"
-    @focusout="animation.onFocusOut"
   >
     <svg v-if="size.width && size.height" ref="svgRef" :viewBox="`0 0 ${size.width} ${size.height}`" aria-hidden="true">
       <defs>
@@ -124,7 +133,7 @@ function handleClick(event: MouseEvent): void {
           <stop offset="100%" stop-color="#fff" stop-opacity="1" />
         </radialGradient>
         <template v-for="path in paths" :key="`definition-${path.key}`">
-          <path :id="`${id}-path-${path.key}`" :d="path.d" pathLength="1" fill="transparent" />
+          <path :id="`${id}-path-${path.key}`" :d="path.d" data-flyline-path fill="transparent" />
           <mask :id="`${id}-mask-${path.key}`">
             <circle cx="0" cy="0" :r="resolvedConfig.flylineRadius" :fill="`url(#${id}-flyline-gradient)`">
               <animateMotion :dur="path.time" :path="path.d" rotate="auto" repeatCount="indefinite" />
@@ -157,6 +166,7 @@ function handleClick(event: MouseEvent): void {
 
       <g v-for="path in paths" :key="path.key">
         <use
+          v-if="pathLengths[path.key]"
           :href="`#${id}-path-${path.key}`"
           :stroke-width="resolvedConfig.lineWidth"
           :stroke="resolvedConfig.orbitColor"
@@ -169,7 +179,13 @@ function handleClick(event: MouseEvent): void {
           :mask="`url(#${id}-mask-${path.key})`"
           fill="none"
         >
-          <animate attributeName="stroke-dasharray" from="0, 1" to="1, 0" :dur="path.time" repeatCount="indefinite" />
+          <animate
+            attributeName="stroke-dasharray"
+            :from="`0, ${pathLengths[path.key]}`"
+            :to="`${pathLengths[path.key]}, 0`"
+            :dur="path.time"
+            repeatCount="indefinite"
+          />
         </use>
         <image
           v-if="resolvedConfig.pointImage.url"
