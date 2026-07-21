@@ -1,12 +1,11 @@
 import type { LumalMenuRecord, LumalStaticMenuRecord } from '@lumal/core/router'
 
 /***********************外链地址*********************/
-// DataV 组件指南站按环境区分：开发用本地 dev server，生产用独立部署域名，
-// 均通过 VITE_DATAV_GUIDE_URL 注入，缺省时回退到本地地址。
+// DataV 组件指南站按环境区分：开发可注入本地 dev server，生产默认使用线上域名。
 // 说明：此处作为后端菜单种子的一部分，运行时由 mock-api 进程读取环境变量。
 // 内嵌时带 embed=1，指南站据此隐藏自身 Header（iframe 上下文也会自动隐藏）。
 const datavGuideUrl = (() => {
-  const base = process.env.VITE_DATAV_GUIDE_URL || 'http://localhost:5175/'
+  const base = process.env.VITE_DATAV_GUIDE_URL || 'https://lumal-datav-guide.vercel.app/'
   try {
     const url = new URL(base)
     url.searchParams.set('embed', '1')

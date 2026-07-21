@@ -36,7 +36,7 @@ const preferences = adminPreferences
 const settingsVisible = adminSettingsVisible
 const resolvedThemeMode = adminResolvedThemeMode
 const routeRefreshKey = shallowRef(0)
-const cockpitUrl = import.meta.env.VITE_COCKPIT_URL?.trim() || 'http://localhost:5180/'
+const cockpitUrl = import.meta.env.VITE_COCKPIT_URL?.trim() || 'https://lumal-cockpit-demo.vercel.app/'
 
 /***********************路由状态*********************/
 const route = useRoute()
