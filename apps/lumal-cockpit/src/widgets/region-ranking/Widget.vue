@@ -10,7 +10,6 @@ import { demoScene, getSceneEntity } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
 
 /***********************区域运行指数模块*********************/
-
 const context = useCockpitContext()
 const { loading } = useDemoRefresh()
 const error = ''
@@ -111,24 +110,24 @@ onBeforeUnmount(unsubscribeSelection)
 
 .region-ranking__table {
   display: grid;
-  grid-template-rows: 30px minmax(0, 1fr);
-  gap: 5px;
+  grid-template-rows: 32px minmax(0, 1fr);
+  gap: 7px;
 }
 
 .region-ranking__head,
 .region-ranking__scroll :deep(button) {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 52px 46px;
+  grid-template-columns: 36px minmax(0, 1fr) 52px 46px;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .region-ranking__head {
-  padding: 0 9px;
-  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 42%);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 88%), transparent);
+  padding: 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 30%);
   color: var(--lumal-cockpit-text-muted);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .region-ranking__head span:last-child {
@@ -142,23 +141,28 @@ onBeforeUnmount(unsubscribeSelection)
 .region-ranking__scroll :deep(button) {
   position: relative;
   width: 100%;
-  min-height: 42px;
-  padding: 6px 9px 9px;
+  min-height: 44px;
+  padding: 7px 10px 10px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 28%);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 12%);
+  border-radius: 9px;
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 93%), transparent 52%),
-    color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 22%);
+    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 97%), transparent 54%),
+    color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 20%);
   color: inherit;
   cursor: pointer;
-  transition: border-color 180ms ease, background-color 180ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.region-ranking__scroll :deep(button:hover) {
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 58%);
+  transform: translateX(1px);
 }
 
 .region-ranking__scroll :deep(button.is-active) {
-  border-color: var(--lumal-cockpit-accent);
-  background: var(--lumal-cockpit-selected);
-  box-shadow: inset 3px 0 0 var(--lumal-cockpit-accent), 0 0 10px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 78%);
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 46%);
+  background: color-mix(in srgb, var(--lumal-cockpit-selected), transparent 12%);
+  box-shadow: inset 3px 0 0 var(--lumal-cockpit-accent);
 }
 
 .region-ranking__scroll :deep(button:focus-visible) {
@@ -170,27 +174,28 @@ onBeforeUnmount(unsubscribeSelection)
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-accent), transparent 48%);
-  background: color-mix(in srgb, var(--lumal-cockpit-selected), transparent 26%);
+  width: 26px;
+  height: 26px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-accent), transparent 58%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 93%);
   color: var(--lumal-cockpit-accent);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  transform: skewX(-8deg);
 }
 
 .region-ranking__scroll :deep(button.is-top) .region-ranking__index {
-  border-color: var(--lumal-cockpit-warning);
+  border-color: color-mix(in srgb, var(--lumal-cockpit-warning), transparent 46%);
+  background: color-mix(in srgb, var(--lumal-cockpit-warning), transparent 92%);
   color: var(--lumal-cockpit-warning);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--lumal-cockpit-warning), transparent 54%);
 }
 
 .region-ranking__name {
   overflow: hidden;
   color: var(--lumal-cockpit-text);
   font-size: 11px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -219,17 +224,19 @@ button[data-status='watch'] .region-ranking__status {
 
 .region-ranking__bar {
   position: absolute;
-  right: 9px;
-  bottom: 4px;
-  left: 50px;
+  right: 10px;
+  bottom: 5px;
+  left: 54px;
   height: 2px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 90%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 92%);
 }
 
 .region-ranking__bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--lumal-cockpit-accent), transparent);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--lumal-cockpit-accent), color-mix(in srgb, var(--lumal-cockpit-accent), transparent 52%));
 }
 </style>
