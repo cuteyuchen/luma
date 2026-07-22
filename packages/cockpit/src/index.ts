@@ -5,6 +5,7 @@
 
 // 引入基础样式，确保库构建产出 dist/cockpit.css（应用通过 @lumal/cockpit/style.css 消费）
 import './style/index.scss'
+import './style/designer-polish.scss'
 
 /***********************composables*********************/
 export {
