@@ -1,0 +1,435 @@
+/***********************Designer 精致化覆盖*********************/
+// 保留现有布局、拖拽与表单逻辑，仅重新组织视觉层级与空间关系。
+
+.lumal-cockpit-designer {
+  --lumal-cockpit-designer-panel-radius: 12px;
+  --lumal-cockpit-designer-card-radius: 8px;
+  --lumal-cockpit-designer-divider: color-mix(in srgb, var(--lumal-cockpit-border), transparent 42%);
+  --lumal-cockpit-designer-panel-fill: color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 5%);
+  --lumal-cockpit-designer-soft-fill: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 22%);
+
+  grid-template-rows: 64px 72px auto minmax(0, 1fr) 68px;
+  min-width: 1180px;
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 93%), transparent 48%),
+    color-mix(in srgb, var(--lumal-cockpit-designer-body-bg), #020b12 8%);
+  box-shadow: none;
+
+  &__titlebar {
+    padding: 0 28px;
+    border-bottom: 1px solid var(--lumal-cockpit-designer-divider);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%), transparent 28%),
+      color-mix(in srgb, var(--lumal-cockpit-panel-bg), #020b12 8%);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 3%);
+  }
+
+  &__heading {
+    gap: 10px;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+  }
+
+  &__heading .lumal-icon {
+    color: var(--lumal-cockpit-accent);
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 48%));
+  }
+
+  &__controlbar {
+    padding: 0 28px;
+    border-bottom: 1px solid var(--lumal-cockpit-designer-divider);
+    background: color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 18%);
+  }
+
+  &__layout-controls {
+    gap: 12px;
+  }
+
+  &__layout-controls > &__field {
+    gap: 12px;
+    color: var(--lumal-cockpit-text-secondary);
+    font-size: 13px;
+  }
+
+  &__layout-controls .el-select {
+    width: 220px;
+  }
+
+  &__layout-controls > .el-input {
+    width: 210px;
+  }
+
+  &__layout-tools {
+    gap: 8px;
+    margin-left: 4px;
+    padding-left: 12px;
+    border-left: 1px solid var(--lumal-cockpit-designer-divider);
+  }
+
+  &__issues {
+    padding: 8px 28px;
+    background: color-mix(in srgb, var(--lumal-cockpit-danger), transparent 94%);
+  }
+
+  &__workspace {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 14px;
+    padding: 14px 18px;
+    background:
+      linear-gradient(rgb(116 239 255 / 1.8%) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgb(116 239 255 / 1.8%) 1px, transparent 1px) 0 0 / 32px 32px,
+      color-mix(in srgb, var(--lumal-cockpit-bg), #000 10%);
+  }
+
+  &__assembly,
+  &__library {
+    border: 1px solid var(--lumal-cockpit-designer-divider);
+    border-radius: var(--lumal-cockpit-designer-panel-radius);
+    background: var(--lumal-cockpit-designer-panel-fill);
+    box-shadow:
+      0 16px 36px rgb(0 0 0 / 16%),
+      inset 0 1px 0 rgb(255 255 255 / 4%);
+  }
+
+  &__assembly {
+    padding: 12px;
+  }
+
+  &__assembly-stage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  &__region {
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 34%);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--lumal-cockpit-bg), transparent 28%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+    overflow: hidden;
+  }
+
+  &__region-head {
+    gap: 8px 10px;
+    min-height: 58px;
+    padding: 8px 10px;
+    border: 0;
+    border-bottom: 1px solid var(--lumal-cockpit-designer-divider);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  &__region-head-meta {
+    min-width: 118px;
+  }
+
+  &__region-head-meta strong {
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  &__region-head-meta span {
+    margin-top: 3px;
+    font-size: 11px;
+  }
+
+  &__region-head .el-input-number {
+    width: 112px;
+  }
+
+  &__region-width-field.lumal-cockpit-designer__field .el-input-number {
+    width: 126px;
+  }
+
+  &__grid-rows {
+    gap: 10px;
+    padding-right: 2px;
+    overflow: auto;
+  }
+
+  &__grid-row {
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 42%);
+    border-radius: var(--lumal-cockpit-designer-card-radius);
+    background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 45%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 2.5%);
+  }
+
+  &__grid-row-head {
+    min-height: 36px;
+    padding: 4px 6px;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 55%);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  &__grid-row-head > strong {
+    position: relative;
+    padding-left: 12px;
+    color: var(--lumal-cockpit-title-text);
+    font-size: 12px;
+  }
+
+  &__grid-row-head > strong::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--lumal-cockpit-accent);
+    content: '';
+    transform: translateY(-50%);
+  }
+
+  &__grid-row-head .el-input-number {
+    width: 112px;
+  }
+
+  &__grid-cells {
+    gap: 8px;
+  }
+
+  &__empty-cell.el-button {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 62%);
+    border-radius: var(--lumal-cockpit-designer-card-radius);
+    background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 97%);
+    color: var(--lumal-cockpit-text-muted);
+    font-size: 13px;
+  }
+
+  &__empty-cell.el-button:not(:disabled):hover {
+    border-color: var(--lumal-cockpit-accent);
+    background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 93%);
+  }
+
+  &__placed-widget,
+  &__tab-card {
+    border-color: color-mix(in srgb, var(--lumal-cockpit-slot-border), transparent 20%);
+    border-radius: var(--lumal-cockpit-designer-card-radius);
+    background: color-mix(in srgb, var(--lumal-cockpit-bg), transparent 22%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+  }
+
+  &__placed-widget:hover,
+  &__placed-widget:focus-within,
+  &__tab-card:focus-within {
+    border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 15%);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 20%);
+  }
+
+  &__placed-widget-header,
+  &__tab-list {
+    min-height: 36px;
+    border-bottom-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 46%);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%), transparent 52%),
+      color-mix(in srgb, var(--lumal-cockpit-caption-bg), transparent 8%);
+  }
+
+  &__placed-widget-header {
+    padding-inline: 10px 5px;
+  }
+
+  &__placed-widget-header > span {
+    font-size: 12px;
+    letter-spacing: 0.01em;
+  }
+
+  &__widget-action.el-button,
+  &__tab-action.el-button,
+  &__tab-target.el-button {
+    border-color: transparent;
+    background: transparent;
+    opacity: 0.62;
+  }
+
+  &__widget-action.el-button:hover,
+  &__tab-action.el-button:hover,
+  &__tab-target.el-button:hover {
+    border-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 36%);
+    background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 90%);
+    opacity: 1;
+  }
+
+  &__library {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  &__library-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 66px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--lumal-cockpit-designer-divider);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%), transparent 72%),
+      color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 18%);
+  }
+
+  &__library-head-copy {
+    min-width: 0;
+    margin-right: auto;
+  }
+
+  &__library-head strong,
+  &__library-head span {
+    display: block;
+  }
+
+  &__library-head strong {
+    color: var(--lumal-cockpit-title-text);
+    font-size: 16px;
+  }
+
+  &__library-head-copy > span {
+    margin-top: 3px;
+    color: var(--lumal-cockpit-text-muted);
+    font-size: 11px;
+  }
+
+  &__library-count {
+    flex: none;
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 38%);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 92%);
+    color: var(--lumal-cockpit-accent) !important;
+    font-size: 11px !important;
+  }
+
+  &__library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 10px;
+    height: auto;
+    padding: 12px;
+    overflow: auto;
+  }
+
+  &__library-card {
+    height: 132px;
+    border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 34%);
+    border-radius: var(--lumal-cockpit-designer-card-radius);
+    background: color-mix(in srgb, var(--lumal-cockpit-bg), transparent 30%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  &__library-card:hover,
+  &__library-card:focus-within,
+  &__library-card.is-selected {
+    border-color: var(--lumal-cockpit-accent);
+    background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 22%);
+    transform: translateY(-1px);
+  }
+
+  &__library-card.is-selected {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 42%),
+      0 8px 22px rgb(0 0 0 / 22%);
+  }
+
+  &__library-select.el-button {
+    min-height: 32px;
+    padding: 6px 8px;
+    border-top: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 48%);
+    background: color-mix(in srgb, var(--lumal-cockpit-caption-bg), transparent 8%);
+    color: var(--lumal-cockpit-text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__footer {
+    gap: 16px;
+    padding: 0 18px;
+    border-top: 1px solid var(--lumal-cockpit-designer-divider);
+    background: color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 12%);
+  }
+
+  &__placement-status {
+    margin-right: auto !important;
+    color: var(--lumal-cockpit-text-muted);
+    font-size: 12px !important;
+  }
+
+  &__footer-actions {
+    gap: 10px;
+  }
+
+  &__footer-actions .el-button {
+    min-width: 88px;
+  }
+
+  &__save.el-button {
+    min-width: 112px;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 76%);
+  }
+
+  .el-input__wrapper,
+  .el-select__wrapper,
+  .el-input-number .el-input__wrapper {
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--lumal-cockpit-control-bg), transparent 8%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--el-input-border-color), transparent 20%) inset;
+  }
+
+  .el-button {
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 1380px) {
+  .lumal-cockpit-designer {
+    min-width: 1080px;
+
+    &__workspace {
+      grid-template-columns: minmax(0, 1fr) 288px;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+
+    &__assembly {
+      padding: 9px;
+    }
+
+    &__assembly-stage,
+    &__grid-rows {
+      gap: 8px;
+    }
+
+    &__region {
+      padding: 8px;
+    }
+
+    &__region-head {
+      gap: 6px 8px;
+    }
+
+    &__region-head-meta {
+      flex-basis: 100%;
+      margin-right: 0;
+    }
+
+    &__library-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumal-cockpit-designer__library-card {
+    transition: none;
+  }
+}
