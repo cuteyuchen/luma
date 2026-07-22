@@ -91,7 +91,11 @@ function clearAdminTabSnapshot(): void {
 
 let reLoginPrompt: Promise<void> | undefined
 
-export async function promptReLoginAndRedirect(): Promise<void> {
+/**
+ * 提示会话失效并跳转登录页。
+ * 通过模块级 `reLoginPrompt` 单例保证并发 401 只弹出一个确认框。
+ */
+async function promptReLoginAndRedirect(): Promise<void> {
   if (reLoginPrompt)
     return reLoginPrompt
 
@@ -119,6 +123,15 @@ export async function promptReLoginAndRedirect(): Promise<void> {
   })
 
   return reLoginPrompt
+}
+
+/**
+ * 会话失效的统一处理入口：清理本地会话状态、提示重新登录并跳转登录页。
+ * request 层收到 401 时仅需调用此函数，无需感知内部清理与提示的拆分。
+ */
+export async function handleAdminSessionExpired(): Promise<void> {
+  await adminSession.handleSessionExpired()
+  await promptReLoginAndRedirect()
 }
 
 export const adminSession = createAuthSession({

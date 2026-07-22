@@ -1,5 +1,6 @@
 import { MenuRouteConflictError } from '@lumal/core/router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { ElMessageBox } from 'element-plus'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory } from 'vue-router'
 import {
   createAdminRouter,
@@ -13,6 +14,7 @@ import { adminSession, login, logout } from '../src/services/session'
 
 describe('lumal admin router', () => {
   afterEach(async () => {
+    vi.restoreAllMocks()
     await logout()
   })
 
@@ -242,6 +244,7 @@ describe('lumal admin router', () => {
   })
 
   it('刷新凭据失效时进入受保护页面会重定向到登录页', async () => {
+    vi.spyOn(ElMessageBox, 'alert').mockResolvedValue('confirm' as never)
     await login('admin')
     adminSession.setSession({
       accessToken: 'expired-access',

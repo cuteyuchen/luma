@@ -26,10 +26,11 @@ describe('admin request service', () => {
   it('刷新失败时清理会话并提示重新登录后跳转登录页', async () => {
     const alert = vi.spyOn(ElMessageBox, 'alert').mockResolvedValue('confirm' as never)
     const { router } = await import('../src/router')
+
+    await login('operator')
     await router.push('/profile')
     const replace = vi.spyOn(router, 'replace').mockResolvedValue(undefined as never)
 
-    await login('operator')
     adminSession.setSession({
       accessToken: 'expired-access',
       refreshToken: 'invalid-refresh',
