@@ -2,7 +2,7 @@
 import type { CockpitRegistry, CockpitWidgetDefinition } from '../registry/types'
 import { ElButton, ElEmpty } from 'element-plus'
 import Sortable from 'sortablejs'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import CockpitWidgetPreview from './CockpitWidgetPreview.vue'
 
 /***********************Designer 模块库*********************/
@@ -15,7 +15,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ selectWidget: [widget: CockpitWidgetDefinition] }>()
 const libraryRef = ref<HTMLElement | null>(null)
-const livePreviewType = shallowRef<string>()
 let sortable: Sortable | undefined
 
 const widgets = computed(() => props.registry.listWidgets())
@@ -56,17 +55,13 @@ onBeforeUnmount(() => {
         :class="{ 'is-selected': selectedType === widget.type }"
         :data-cockpit-library-type="widget.type"
         :data-cockpit-library-title="widget.label"
-        @pointerenter="livePreviewType = widget.type"
-        @pointerleave="livePreviewType = undefined"
-        @focusin="livePreviewType = widget.type"
-        @focusout="livePreviewType = undefined"
       >
         <CockpitWidgetPreview
           :cockpit-id="cockpitId"
           :definition="widget"
           :instance-id="`library-preview:${widget.type}`"
           :layout-id="layoutId"
-          :live="livePreviewType === widget.type"
+          live
         />
         <ElButton
           text

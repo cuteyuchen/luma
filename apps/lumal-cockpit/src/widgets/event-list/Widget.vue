@@ -9,7 +9,6 @@ import { demoEvents } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
 
 /***********************实时告警动态模块*********************/
-
 type DemoEvent = typeof demoEvents[number]
 
 const context = useCockpitContext()
@@ -92,24 +91,24 @@ onBeforeUnmount(unsubscribeSelection)
 
 .event-list__table {
   display: grid;
-  grid-template-rows: 30px minmax(0, 1fr);
-  gap: 5px;
+  grid-template-rows: 32px minmax(0, 1fr);
+  gap: 7px;
 }
 
 .event-list__head,
 .event-list__row {
   display: grid;
-  grid-template-columns: 52px 50px minmax(0, 1fr);
+  grid-template-columns: 54px 54px minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .event-list__head {
-  padding: 0 9px;
-  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 42%);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 88%), transparent);
+  padding: 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 30%);
   color: var(--lumal-cockpit-text-muted);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .event-list__scroll {
@@ -124,20 +123,39 @@ onBeforeUnmount(unsubscribeSelection)
 }
 
 .event-list__row {
+  --event-tone: var(--lumal-cockpit-accent);
+
   position: relative;
   width: 100%;
-  min-height: 42px;
-  padding: 6px 9px;
+  min-height: 44px;
+  padding: 7px 10px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 28%);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 12%);
+  border-radius: 9px;
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 92%), transparent 48%),
-    color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 22%);
+    linear-gradient(90deg, color-mix(in srgb, var(--event-tone), transparent 96%), transparent 52%),
+    color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 20%);
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 180ms ease, background-color 180ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.event-list__row::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--event-tone);
+  content: '';
+  opacity: 0.78;
+}
+
+.event-list__row:hover {
+  border-color: color-mix(in srgb, var(--event-tone), transparent 52%);
+  transform: translateX(1px);
 }
 
 .event-list__row:focus-visible {
@@ -145,38 +163,27 @@ onBeforeUnmount(unsubscribeSelection)
   outline-offset: -2px;
 }
 
-.event-list__row::after {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  background: var(--lumal-cockpit-accent);
-  opacity: 0.36;
-  content: '';
-}
-
 .event-list__row[data-level='danger'] {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-danger), transparent 52%);
+  --event-tone: var(--lumal-cockpit-danger);
 }
 
 .event-list__row[data-level='warning'] {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-warning), transparent 58%);
+  --event-tone: var(--lumal-cockpit-warning);
 }
 
 .event-list__row[data-level='success'] {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-success), transparent 62%);
+  --event-tone: var(--lumal-cockpit-success);
 }
 
 .event-list__row.is-active {
-  border-color: var(--lumal-cockpit-accent);
-  background: var(--lumal-cockpit-selected);
-  box-shadow: inset 3px 0 0 var(--lumal-cockpit-accent), 0 0 10px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 78%);
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 46%);
+  background: color-mix(in srgb, var(--lumal-cockpit-selected), transparent 12%);
+  box-shadow: inset 3px 0 0 var(--lumal-cockpit-accent);
 }
 
 .event-list__time {
   color: var(--lumal-cockpit-text-muted);
-  font-size: 11px;
+  font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -184,25 +191,13 @@ onBeforeUnmount(unsubscribeSelection)
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 22px;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-accent), transparent 46%);
-  color: var(--lumal-cockpit-accent);
+  min-height: 24px;
+  border: 1px solid color-mix(in srgb, var(--event-tone), transparent 54%);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--event-tone), transparent 93%);
+  color: var(--event-tone);
   font-size: 10px;
-}
-
-.event-list__row[data-level='danger'] .event-list__level {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-danger), transparent 36%);
-  color: var(--lumal-cockpit-danger);
-}
-
-.event-list__row[data-level='warning'] .event-list__level {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-warning), transparent 36%);
-  color: var(--lumal-cockpit-warning);
-}
-
-.event-list__row[data-level='success'] .event-list__level {
-  border-color: color-mix(in srgb, var(--lumal-cockpit-success), transparent 36%);
-  color: var(--lumal-cockpit-success);
+  font-weight: 650;
 }
 
 .event-list__title {

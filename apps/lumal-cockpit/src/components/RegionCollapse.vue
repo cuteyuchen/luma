@@ -3,7 +3,6 @@ import { LumalIcon } from '@lumal/icons-vue'
 import { computed, ref } from 'vue'
 
 /***********************左右区域收起/展开（消费方）*********************/
-// 参考 fuyang HideComponent：宽度过渡 + 侧边箭头按钮。
 
 const props = defineProps<{
   side: 'left' | 'right'
@@ -49,7 +48,7 @@ function toggle(): void {
       :data-action="`collapse-${side}`"
       @click="toggle"
     >
-      <LumalIcon :name="expandIcon" :size="14" />
+      <LumalIcon :name="expandIcon" :size="15" />
     </button>
   </div>
 </template>
@@ -59,7 +58,7 @@ function toggle(): void {
   position: relative;
   height: 100%;
   min-width: 0;
-  transition: width 0.45s ease;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .region-collapse.is-collapsed {
@@ -74,48 +73,63 @@ function toggle(): void {
 .region-collapse__btn {
   position: absolute;
   top: 50%;
-  z-index: 5;
+  z-index: 8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 60px;
+  width: 30px;
+  height: 56px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border, rgb(6 183 253 / 50%)), transparent 18%);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--lumal-cockpit-floating-bg, #19374b), transparent 8%);
-  color: var(--lumal-cockpit-text-secondary, #a8b7c8);
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 18%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 12%);
+  color: var(--lumal-cockpit-text-muted);
   cursor: pointer;
+  opacity: 0.68;
   transform: translateY(-50%);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--lumal-cockpit-accent, #00cbf4), transparent 78%);
+  box-shadow:
+    0 10px 24px rgb(0 0 0 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+  backdrop-filter: blur(12px);
+  transition: opacity 160ms ease, color 160ms ease, border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
 }
 
 .region-collapse.is-left .region-collapse__btn {
-  right: -25px;
+  right: -36px;
 }
 
 .region-collapse.is-right .region-collapse__btn {
-  left: -25px;
+  left: -36px;
 }
 
 .region-collapse.is-collapsed.is-left .region-collapse__btn {
   right: auto;
-  left: 0;
+  left: 4px;
 }
 
 .region-collapse.is-collapsed.is-right .region-collapse__btn {
+  right: 4px;
   left: auto;
-  right: 0;
 }
 
 .region-collapse__btn:hover {
-  border-color: var(--lumal-cockpit-accent, #00cbf4);
-  color: var(--lumal-cockpit-title-text, #fff);
-  background: color-mix(in srgb, var(--lumal-cockpit-accent, #00cbf4), transparent 84%);
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 46%);
+  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%);
+  color: var(--lumal-cockpit-title-text);
+  opacity: 1;
+  transform: translateY(-50%) scale(1.03);
 }
 
 .region-collapse__btn:focus-visible {
-  outline: 2px solid var(--lumal-cockpit-focus-ring, #409eff);
+  outline: 2px solid var(--lumal-cockpit-focus-ring);
   outline-offset: 2px;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region-collapse,
+  .region-collapse__btn {
+    transition: none;
+  }
 }
 </style>
