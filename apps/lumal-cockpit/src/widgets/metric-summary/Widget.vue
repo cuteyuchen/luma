@@ -6,7 +6,6 @@ import { useDemoRefresh } from '../../composables/useDemoRefresh'
 import { metricSummaries } from '../../data/demo-scene'
 
 /***********************核心运行指标模块*********************/
-
 const { loading } = useDemoRefresh()
 const error = ''
 const items = computed(() => metricSummaries)
@@ -53,49 +52,39 @@ const items = computed(() => metricSummaries)
 .metric-summary__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
   height: 100%;
   margin: 0;
 }
 
 .metric-summary__item {
+  --metric-tone: var(--lumal-cockpit-accent);
+
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
-  min-height: 82px;
-  padding: 10px 11px 9px;
+  min-height: 86px;
+  padding: 12px 13px 11px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 28%);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 18%);
+  border-radius: 10px;
   background:
-    linear-gradient(180deg, var(--metric-tone, var(--lumal-cockpit-accent)), transparent) right bottom / 1px 22px no-repeat,
-    linear-gradient(90deg, var(--metric-tone, var(--lumal-cockpit-accent)), transparent) right bottom / 22px 1px no-repeat,
-    linear-gradient(135deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 89%), transparent 48%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--metric-tone), transparent 92%), transparent 52%),
     color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 18%);
-  box-shadow: inset 0 0 18px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%);
-}
-
-.metric-summary__item::before,
-.metric-summary__item::after {
-  position: absolute;
-  content: '';
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
 }
 
 .metric-summary__item::before {
-  top: 0;
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
   left: 0;
-  width: 36px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--metric-tone, var(--lumal-cockpit-accent)), transparent);
-}
-
-.metric-summary__item::after {
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 30px;
-  background: linear-gradient(180deg, var(--metric-tone, var(--lumal-cockpit-accent)), transparent);
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--metric-tone);
+  content: '';
+  opacity: 0.88;
 }
 
 .metric-summary__item[data-tone='green'] {
@@ -107,7 +96,7 @@ const items = computed(() => metricSummaries)
 }
 
 .metric-summary__item[data-tone='blue'] {
-  --metric-tone: #4e8dff;
+  --metric-tone: #6f8cff;
 }
 
 .metric-summary__heading,
@@ -121,46 +110,46 @@ const items = computed(() => metricSummaries)
 .metric-summary__heading > span:first-child {
   color: var(--lumal-cockpit-text-secondary);
   font-size: 11px;
+  font-weight: 600;
 }
 
-.metric-summary__heading span {
-  color: color-mix(in srgb, var(--metric-tone, var(--lumal-cockpit-accent)), transparent 38%);
+.metric-summary__heading span:last-child {
+  color: color-mix(in srgb, var(--metric-tone), transparent 42%);
   font-size: 9px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
 }
 
 .metric-summary__value {
   align-items: end;
   justify-content: flex-start;
-  margin: 4px 0 0;
-  color: var(--metric-tone, var(--lumal-cockpit-accent));
-  font-size: 27px;
-  font-weight: 700;
+  margin: 5px 0 0;
+  color: var(--metric-tone);
+  font-size: 29px;
+  font-weight: 720;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  text-shadow: 0 0 12px color-mix(in srgb, var(--metric-tone, var(--lumal-cockpit-accent)), transparent 54%);
 }
 
 .metric-summary__pond-value {
-  width: min(100%, 136px);
+  width: min(100%, 142px);
   min-width: 0;
   font-size: 12px !important;
-  text-shadow: none !important;
 }
 
 .metric-summary__pond-value :deep(.lumal-percent-pond) {
   width: 100%;
 }
 
-.metric-summary__value span {
+.metric-summary__value > span:last-child {
   margin-bottom: 2px;
   color: var(--lumal-cockpit-text-muted);
   font-size: 10px;
+  font-weight: 500;
 }
 
 .metric-summary__trend {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   color: var(--lumal-cockpit-text-muted);
   font-size: 10px;
 }
