@@ -6,6 +6,7 @@
 }
 
 .lumal-cockpit-canvas__center {
+  position: relative;
   isolation: isolate;
 }
 
