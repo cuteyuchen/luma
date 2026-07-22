@@ -1,8 +1,8 @@
-/***********************独立应用品牌与全局样式*********************/
+/***********************Lumal Cockpit 独立应用视觉系统*********************/
 :root {
   color-scheme: light dark;
-  --standalone-bg-light: #f3f7fc;
-  --standalone-bg-dark: #07111f;
+  --standalone-bg-light: #edf4f8;
+  --standalone-bg-dark: #050d16;
 }
 
 * {
@@ -12,64 +12,79 @@
 html,
 body,
 #app {
-  margin: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
 }
 
 body {
-  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+  overflow: hidden;
+  color: var(--el-text-color-primary, #183342);
+  font-family: Inter, "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   background: var(--standalone-bg-light);
-  color: var(--el-text-color-primary, #1f2d3d);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 :root[data-lumal-theme='dark'] body {
+  color: #dcecf2;
   background: var(--standalone-bg-dark);
-  color: var(--el-text-color-primary, #e5edf7);
 }
 
-/* 消费应用负责 Cockpit 的全部主题皮肤，框架只读取这些语义 token。 */
+/***********************语义 Token*********************/
 .lumal-cockpit,
 .standalone-app__designer,
 .standalone-app__designer .lumal-cockpit-designer {
-  --lumal-cockpit-bg: #eef6fb;
-  --lumal-cockpit-panel-bg: rgb(255 255 255 / 92%);
-  --lumal-cockpit-surface: rgb(235 247 252 / 94%);
-  --lumal-cockpit-floating-bg: rgb(247 252 255 / 96%);
-  --lumal-cockpit-workspace-bg: #dceaf1;
-  --lumal-cockpit-preview-bg: #e2f0f6;
-  --lumal-cockpit-empty-bg: rgb(27 132 174 / 5%);
-  --lumal-cockpit-border: rgb(39 139 178 / 48%);
-  --lumal-cockpit-shadow: 0 10px 28px rgb(30 90 116 / 12%);
-  --lumal-cockpit-title-bg: linear-gradient(90deg, #d8eef7 0%, #f5fbfe 62%, #d7edf6 100%);
-  --lumal-cockpit-title-text: #0b3347;
-  --lumal-cockpit-text: #15394a;
-  --lumal-cockpit-text-secondary: #456879;
-  --lumal-cockpit-text-muted: #6d8a98;
-  --lumal-cockpit-accent: #087faf;
-  --lumal-cockpit-success: #00966d;
-  --lumal-cockpit-warning: #b77900;
-  --lumal-cockpit-danger: #d9465f;
-  --lumal-cockpit-drop-target: rgb(8 127 175 / 28%);
-  --lumal-cockpit-selected: rgb(0 150 109 / 18%);
-  --lumal-cockpit-focus-ring: #087faf;
-  --lumal-cockpit-radius: 4px;
-  --lumal-cockpit-tabbar-bg: linear-gradient(90deg, rgb(8 127 175 / 10%), transparent 74%);
-  --lumal-cockpit-slot-border: rgb(39 139 178 / 58%);
-  --lumal-cockpit-stage-bg: rgb(224 242 249 / 88%);
-  --lumal-cockpit-center-bg: radial-gradient(circle at center, rgb(8 127 175 / 8%), transparent 68%);
-  --lumal-cockpit-center-border: rgb(39 139 178 / 28%);
-  --lumal-cockpit-caption-bg: rgb(236 248 252 / 88%);
-  --lumal-cockpit-designer-body-bg: rgb(245 251 254 / 96%);
-  --lumal-cockpit-designer-inset-shadow: inset 0 0 30px rgb(39 139 178 / 16%);
-  --lumal-cockpit-panel-border: rgb(39 139 178 / 48%);
-  --lumal-cockpit-control-bg: rgb(255 255 255 / 72%);
+  --lumal-cockpit-bg:
+    radial-gradient(circle at 50% 44%, rgb(26 135 153 / 9%), transparent 44%),
+    linear-gradient(180deg, #edf5f8 0%, #e8f0f5 100%);
+  --lumal-cockpit-panel-bg: rgb(255 255 255 / 90%);
+  --lumal-cockpit-surface: rgb(248 252 254 / 94%);
+  --lumal-cockpit-floating-bg: rgb(255 255 255 / 94%);
+  --lumal-cockpit-workspace-bg: #e6eff4;
+  --lumal-cockpit-preview-bg: #e9f2f6;
+  --lumal-cockpit-empty-bg: rgb(13 125 158 / 4%);
+  --lumal-cockpit-border: rgb(38 124 151 / 22%);
+  --lumal-cockpit-panel-border: rgb(38 124 151 / 24%);
+  --lumal-cockpit-slot-border: rgb(38 124 151 / 30%);
+  --lumal-cockpit-shadow: 0 16px 36px rgb(31 71 91 / 10%);
+  --lumal-cockpit-title-bg: transparent;
+  --lumal-cockpit-title-text: #0f2e3c;
+  --lumal-cockpit-text: #193b4a;
+  --lumal-cockpit-text-secondary: #4f6f7d;
+  --lumal-cockpit-text-muted: #78929d;
+  --lumal-cockpit-accent: #087fa8;
+  --lumal-cockpit-success: #008c70;
+  --lumal-cockpit-warning: #b67800;
+  --lumal-cockpit-danger: #d9475f;
+  --lumal-cockpit-drop-target: rgb(8 127 168 / 24%);
+  --lumal-cockpit-selected: rgb(0 140 112 / 14%);
+  --lumal-cockpit-focus-ring: #087fa8;
+  --lumal-cockpit-radius: 14px;
+  --lumal-cockpit-gap-size: 14px;
+  --lumal-cockpit-tabbar-bg: transparent;
+  --lumal-cockpit-stage-bg: rgb(240 247 250 / 86%);
+  --lumal-cockpit-center-bg:
+    radial-gradient(circle at 50% 48%, rgb(8 127 168 / 7%), transparent 62%),
+    rgb(236 245 248 / 84%);
+  --lumal-cockpit-center-border: rgb(38 124 151 / 18%);
+  --lumal-cockpit-caption-bg: rgb(248 252 254 / 88%);
+  --lumal-cockpit-control-bg: rgb(255 255 255 / 78%);
+  --lumal-cockpit-designer-body-bg: #edf4f8;
+  --lumal-cockpit-designer-inset-shadow: none;
+
   --lumal-datav-primary: var(--lumal-cockpit-accent);
   --lumal-datav-secondary: var(--lumal-cockpit-success);
   --lumal-datav-accent: var(--lumal-cockpit-warning);
-  --lumal-datav-background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 12%);
+  --lumal-datav-background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 10%);
   --lumal-datav-surface: var(--lumal-cockpit-surface);
-  --lumal-datav-surface-muted: color-mix(in srgb, var(--lumal-cockpit-surface), transparent 28%);
+  --lumal-datav-surface-muted: color-mix(in srgb, var(--lumal-cockpit-surface), transparent 24%);
   --lumal-datav-text: var(--lumal-cockpit-text);
   --lumal-datav-muted: var(--lumal-cockpit-text-muted);
   --lumal-datav-text-muted: var(--lumal-cockpit-text-muted);
@@ -80,7 +95,8 @@ body {
   --lumal-datav-danger: var(--lumal-cockpit-danger);
   --lumal-datav-focus-ring: var(--lumal-cockpit-focus-ring);
   --lumal-datav-radius: var(--lumal-cockpit-radius);
-  --lumal-datav-font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --lumal-datav-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
   font-family: inherit;
 }
 
@@ -88,43 +104,44 @@ body {
 :root[data-lumal-theme='dark'] .standalone-app__designer,
 :root[data-lumal-theme='dark'] .standalone-app__designer .lumal-cockpit-designer {
   --lumal-cockpit-bg:
-    radial-gradient(circle at 50% 46%, rgb(0 126 164 / 18%), transparent 42%),
-    linear-gradient(rgb(32 216 255 / 3%) 1px, transparent 1px) 0 0 / 48px 48px,
-    linear-gradient(90deg, rgb(32 216 255 / 3%) 1px, transparent 1px) 0 0 / 48px 48px,
-    linear-gradient(180deg, #041623 0%, #052c3c 48%, #031722 100%);
-  --lumal-cockpit-panel-bg: rgb(3 40 55 / 88%);
-  --lumal-cockpit-surface: rgb(4 47 63 / 88%);
-  --lumal-cockpit-floating-bg: rgb(3 38 52 / 94%);
-  --lumal-cockpit-workspace-bg: linear-gradient(180deg, rgb(2 45 65 / 88%), rgb(1 58 70 / 92%));
-  --lumal-cockpit-preview-bg: rgb(5 52 67 / 96%);
-  --lumal-cockpit-empty-bg: rgb(0 192 230 / 4%);
-  --lumal-cockpit-border: rgb(32 216 255 / 56%);
-  --lumal-cockpit-shadow: 0 0 22px rgb(0 193 238 / 10%), inset 0 1px 0 rgb(122 232 255 / 10%);
-  --lumal-cockpit-title-bg:
-    linear-gradient(115deg, rgb(0 215 255 / 14%) 0 18%, transparent 18% 100%),
-    linear-gradient(90deg, rgb(3 45 68 / 98%), rgb(5 59 77 / 88%) 64%, rgb(3 38 58 / 96%));
-  --lumal-cockpit-title-text: #f0fbff;
-  --lumal-cockpit-text: #d9f4ff;
-  --lumal-cockpit-text-secondary: #a9d6e3;
-  --lumal-cockpit-text-muted: #6fa4b5;
-  --lumal-cockpit-accent: #00d7ff;
-  --lumal-cockpit-success: #00e5a0;
-  --lumal-cockpit-warning: #ffc857;
-  --lumal-cockpit-danger: #ff667d;
-  --lumal-cockpit-drop-target: rgb(0 215 255 / 34%);
-  --lumal-cockpit-selected: rgb(0 229 160 / 20%);
-  --lumal-cockpit-focus-ring: #00e5ff;
-  --lumal-cockpit-radius: 2px;
-  --lumal-cockpit-tabbar-bg: linear-gradient(90deg, rgb(0 215 255 / 13%), transparent 78%);
-  --lumal-cockpit-slot-border: rgb(6 183 253 / 50%);
-  --lumal-cockpit-stage-bg: rgb(0 74 106 / 20%);
-  --lumal-cockpit-center-bg: radial-gradient(circle at center, rgb(0 132 181 / 22%), rgb(1 35 50 / 22%) 64%, transparent 100%);
-  --lumal-cockpit-center-border: rgb(6 183 253 / 20%);
-  --lumal-cockpit-caption-bg: rgb(2 35 49 / 72%);
-  --lumal-cockpit-designer-body-bg: rgb(6 46 64 / 80%);
-  --lumal-cockpit-designer-inset-shadow: inset 0 0 30px rgb(6 183 253 / 64%);
-  --lumal-cockpit-panel-border: rgb(6 183 253 / 40%);
-  --lumal-cockpit-control-bg: rgb(0 74 106 / 40%);
+    radial-gradient(circle at 50% 46%, rgb(24 125 143 / 17%), transparent 44%),
+    linear-gradient(rgb(86 211 236 / 1.8%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, rgb(86 211 236 / 1.8%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(180deg, #050d16 0%, #071724 52%, #050e17 100%);
+  --lumal-cockpit-panel-bg: rgb(8 27 42 / 88%);
+  --lumal-cockpit-surface: rgb(8 31 47 / 90%);
+  --lumal-cockpit-floating-bg: rgb(7 27 42 / 94%);
+  --lumal-cockpit-workspace-bg: #06131f;
+  --lumal-cockpit-preview-bg: #071b2a;
+  --lumal-cockpit-empty-bg: rgb(36 216 238 / 2.5%);
+  --lumal-cockpit-border: rgb(72 187 211 / 22%);
+  --lumal-cockpit-panel-border: rgb(72 187 211 / 24%);
+  --lumal-cockpit-slot-border: rgb(72 187 211 / 28%);
+  --lumal-cockpit-shadow: 0 18px 44px rgb(0 0 0 / 24%);
+  --lumal-cockpit-title-text: #eefbff;
+  --lumal-cockpit-text: #dceef4;
+  --lumal-cockpit-text-secondary: #a2c1cc;
+  --lumal-cockpit-text-muted: #678b98;
+  --lumal-cockpit-accent: #24d8ee;
+  --lumal-cockpit-success: #2de2b8;
+  --lumal-cockpit-warning: #ffc45e;
+  --lumal-cockpit-danger: #ff647c;
+  --lumal-cockpit-drop-target: rgb(36 216 238 / 26%);
+  --lumal-cockpit-selected: rgb(45 226 184 / 15%);
+  --lumal-cockpit-focus-ring: #24d8ee;
+  --lumal-cockpit-stage-bg: rgb(6 22 35 / 78%);
+  --lumal-cockpit-center-bg:
+    radial-gradient(circle at 50% 48%, rgb(24 134 153 / 15%), transparent 58%),
+    rgb(5 18 29 / 62%);
+  --lumal-cockpit-center-border: rgb(72 187 211 / 14%);
+  --lumal-cockpit-caption-bg: rgb(7 27 42 / 90%);
+  --lumal-cockpit-control-bg: rgb(6 35 51 / 88%);
+  --lumal-cockpit-designer-body-bg: #06131f;
+}
+
+/***********************运行页背景与画布*********************/
+.lumal-cockpit {
+  isolation: isolate;
 }
 
 .lumal-cockpit::before {
@@ -132,8 +149,8 @@ body {
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(90deg, rgb(2 10 18 / 54%), transparent 16%, transparent 84%, rgb(2 10 18 / 54%)),
-    radial-gradient(circle at 50% 52%, transparent 36%, rgb(1 12 20 / 38%) 100%);
+    linear-gradient(90deg, rgb(0 0 0 / 18%), transparent 18%, transparent 82%, rgb(0 0 0 / 18%)),
+    radial-gradient(circle at 50% 50%, transparent 42%, rgb(0 0 0 / 18%) 100%);
   content: '';
   pointer-events: none;
 }
@@ -142,223 +159,210 @@ body {
   z-index: 1;
 }
 
-.lumal-cockpit-canvas__header {
-  position: relative;
-  overflow: hidden;
-  border-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 18%);
-  border-radius: 2px;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 86%), transparent 22%, transparent 78%, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 88%)),
-    color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 4%);
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--lumal-cockpit-accent), transparent 58%), 0 8px 24px rgb(0 10 18 / 28%);
+.lumal-cockpit-canvas__stage {
+  padding: 14px 16px 16px;
 }
 
-.lumal-cockpit-canvas__header::before,
-.lumal-cockpit-canvas__header::after {
-  position: absolute;
-  top: 50%;
-  width: 180px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--lumal-cockpit-accent));
-  content: '';
-  opacity: 0.52;
-  pointer-events: none;
+.lumal-cockpit-canvas__header {
+  position: relative;
+  min-height: 72px;
+  padding-inline: 22px;
+  overflow: hidden;
+  border: 1px solid var(--lumal-cockpit-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%), transparent 44%),
+    color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 2%);
+  box-shadow:
+    0 16px 40px rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+  backdrop-filter: blur(16px);
 }
 
 .lumal-cockpit-canvas__header::before {
-  left: 16px;
+  position: absolute;
+  right: 22px;
+  bottom: 0;
+  left: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 56%), transparent);
+  content: '';
+  pointer-events: none;
 }
 
 .lumal-cockpit-canvas__header::after {
-  right: 16px;
-  transform: rotate(180deg);
+  display: none;
 }
 
-.lumal-cockpit-canvas__title {
-  position: relative;
-  z-index: 1;
+.lumal-cockpit-canvas__body {
+  overflow: visible;
 }
 
-.lumal-cockpit-canvas__title h1 {
+.lumal-cockpit-canvas__left,
+.lumal-cockpit-canvas__right {
+  filter: none;
+}
+
+.lumal-cockpit-canvas__center {
+  overflow: hidden;
+  border: 1px solid var(--lumal-cockpit-center-border);
+  border-radius: 16px;
+  background: var(--lumal-cockpit-center-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 3%),
+    0 18px 48px rgb(0 0 0 / 12%);
+}
+
+.lumal-cockpit-region,
+.lumal-cockpit-column {
+  gap: 14px;
+}
+
+/***********************导航与操作控件*********************/
+.lumal-cockpit-canvas__page,
+.lumal-cockpit-canvas__category,
+.lumal-cockpit-card__tab {
+  border-color: transparent;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.lumal-cockpit-canvas__page:hover,
+.lumal-cockpit-canvas__category:hover,
+.lumal-cockpit-card__tab:hover {
+  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 92%);
   color: var(--lumal-cockpit-title-text);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 0 rgb(255 255 255 / 68%);
 }
 
-:root[data-lumal-theme='dark'] .lumal-cockpit-canvas__title h1 {
-  background: linear-gradient(180deg, #fff 24%, #8ff4ff 100%);
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 16px rgb(32 216 255 / 22%);
+.lumal-cockpit-canvas__page.is-active,
+.lumal-cockpit-canvas__category.is-active,
+.lumal-cockpit-card__tab.is-active {
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 72%);
+  background: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 90%);
+  box-shadow: inset 0 -2px 0 var(--lumal-cockpit-accent);
 }
 
-/* 消费方驾驶舱皮肤，参考富阳驾驶舱的信息面板与 Tab 表现。 */
+/***********************卡片系统*********************/
 .lumal-cockpit-card {
-  --lumal-cockpit-card-body-padding: 10px 12px 12px;
+  --lumal-cockpit-card-body-padding: 12px 14px 14px;
 
   position: relative;
   isolation: isolate;
+  border: 1px solid var(--lumal-cockpit-border);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 1%), color-mix(in srgb, var(--lumal-cockpit-surface), transparent 5%));
+  box-shadow:
+    0 16px 38px rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
   overflow: hidden;
-  border-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 22%);
-  border-top-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 48%);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--lumal-cockpit-panel-bg), transparent 4%),
-    color-mix(in srgb, var(--lumal-cockpit-surface), transparent 6%)
-  );
-  box-shadow: var(--lumal-cockpit-shadow), inset 0 0 30px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .lumal-cockpit-card::before {
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    linear-gradient(rgb(116 239 255 / 2.5%) 1px, transparent 1px) 0 0 / 22px 22px,
-    linear-gradient(90deg, rgb(116 239 255 / 2.5%) 1px, transparent 1px) 0 0 / 22px 22px;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  z-index: 2;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 58%), transparent);
   content: '';
   pointer-events: none;
 }
 
 .lumal-cockpit-card::after {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 3;
-  width: 24%;
-  background: linear-gradient(90deg, transparent, rgb(116 239 255 / 10%), transparent);
-  content: '';
-  opacity: 0;
-  transform: translateX(-150%) skewX(-18deg);
-  animation: cockpit-card-scan 9s ease-in-out infinite;
-  pointer-events: none;
+  display: none;
 }
 
 .lumal-cockpit-card__header {
   position: relative;
   z-index: 1;
-  min-height: 40px;
-  padding: 0 12px;
-  border-bottom: 0;
+  min-height: 44px;
+  padding: 0 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 30%);
   background:
-    linear-gradient(108deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 82%) 0 18%, transparent 18% 100%),
-    var(--lumal-cockpit-title-bg);
+    linear-gradient(90deg, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%), transparent 55%),
+    transparent;
 }
 
-.lumal-cockpit-card__header::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 3px;
-  background: linear-gradient(180deg, transparent, var(--lumal-cockpit-accent), transparent);
-  box-shadow: 0 0 10px var(--lumal-cockpit-accent);
-  content: '';
-}
-
+.lumal-cockpit-card__header::before,
 .lumal-cockpit-card__header::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--lumal-cockpit-accent), color-mix(in srgb, var(--lumal-cockpit-border), transparent 60%) 48%, transparent 92%);
-  opacity: 0.78;
-  content: '';
+  display: none;
 }
 
 .lumal-cockpit-card__title {
   width: 100%;
   color: var(--lumal-cockpit-title-text);
   font-size: 14px;
-  letter-spacing: 0.04em;
-  text-shadow: 0 0 10px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 68%);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-shadow: none;
 }
 
 .lumal-cockpit-card__tablist {
   width: 100%;
   gap: 4px;
-  background: var(--lumal-cockpit-tabbar-bg, transparent);
-}
-
-.lumal-cockpit-card__tab {
-  min-width: 92px;
-  min-height: 44px;
-  padding: 0 10px;
-  border-color: transparent;
-  border-radius: 0;
+  padding: 4px;
   background: transparent;
 }
 
-.lumal-cockpit-card__tab.is-active {
-  border-color: transparent;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--lumal-cockpit-selected), transparent 16%), transparent);
-  font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--lumal-cockpit-accent);
-}
-
-.lumal-cockpit-card__tab:focus-visible {
-  outline: 2px solid var(--lumal-cockpit-focus-ring);
-  outline-offset: -2px;
+.lumal-cockpit-card__tab {
+  min-width: 82px;
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
 .lumal-cockpit-card__body {
+  position: relative;
   z-index: 1;
-  border-right: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 56%);
-  border-bottom: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 32%);
-  border-left: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 56%);
+  border: 0;
   background:
-    linear-gradient(0deg, var(--lumal-cockpit-accent), transparent) left bottom / 2px 48px no-repeat,
-    linear-gradient(90deg, var(--lumal-cockpit-accent), transparent) left bottom / 48px 2px no-repeat,
-    linear-gradient(0deg, var(--lumal-cockpit-accent), transparent) right bottom / 2px 48px no-repeat,
-    linear-gradient(-90deg, var(--lumal-cockpit-accent), transparent) right bottom / 48px 2px no-repeat,
-    radial-gradient(circle at 50% 0, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%), transparent 54%);
+    radial-gradient(circle at 50% 0, color-mix(in srgb, var(--lumal-cockpit-accent), transparent 97%), transparent 52%);
 }
 
-@keyframes cockpit-card-scan {
-  0%, 68% {
-    opacity: 0;
-    transform: translateX(-150%) skewX(-18deg);
-  }
-
-  74% {
-    opacity: 0.72;
-  }
-
-  90%, 100% {
-    opacity: 0;
-    transform: translateX(520%) skewX(-18deg);
-  }
+.lumal-cockpit-card:hover {
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 62%);
 }
 
-.standalone-app__designer {
-  overflow: hidden;
-  background: var(--lumal-cockpit-designer-body-bg, rgb(6 46 64 / 80%));
+/***********************Element Plus 运行页按钮*********************/
+.lumal-cockpit .el-button {
+  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 6%);
+  --el-button-border-color: var(--lumal-cockpit-border);
+  --el-button-text-color: var(--lumal-cockpit-text-secondary);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%);
+  --el-button-hover-border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 52%);
+  --el-button-hover-text-color: var(--lumal-cockpit-title-text);
+  --el-button-active-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 86%);
+  --el-button-active-border-color: var(--lumal-cockpit-accent);
+  --el-button-active-text-color: var(--lumal-cockpit-title-text);
+
+  border-radius: 10px;
+  box-shadow: none;
 }
 
-/* 下拉/对话框 teleport 到 body，按全局主题注入 EP 弹层 token */
+/***********************弹层*********************/
 :root {
-  --lumal-cockpit-ep-overlay-bg: rgb(247 252 255 / 98%);
-  --lumal-cockpit-ep-panel-bg: rgb(255 255 255 / 96%);
-  --lumal-cockpit-ep-text: #15394a;
-  --lumal-cockpit-ep-text-secondary: #456879;
-  --lumal-cockpit-ep-border: rgb(39 139 178 / 48%);
-  --lumal-cockpit-ep-fill: rgb(8 127 175 / 8%);
-  --lumal-cockpit-ep-accent: #087faf;
-  --lumal-cockpit-ep-danger: #d9465f;
+  --lumal-cockpit-ep-overlay-bg: rgb(250 253 254 / 98%);
+  --lumal-cockpit-ep-panel-bg: rgb(255 255 255 / 98%);
+  --lumal-cockpit-ep-text: #173746;
+  --lumal-cockpit-ep-text-secondary: #54717e;
+  --lumal-cockpit-ep-border: rgb(38 124 151 / 24%);
+  --lumal-cockpit-ep-fill: rgb(8 127 168 / 8%);
+  --lumal-cockpit-ep-accent: #087fa8;
+  --lumal-cockpit-ep-danger: #d9475f;
 }
 
 :root[data-lumal-theme='dark'] {
-  --lumal-cockpit-ep-overlay-bg: rgb(3 38 52 / 98%);
-  --lumal-cockpit-ep-panel-bg: rgb(3 40 55 / 96%);
-  --lumal-cockpit-ep-text: #d9f4ff;
-  --lumal-cockpit-ep-text-secondary: #a9d6e3;
-  --lumal-cockpit-ep-border: rgb(32 216 255 / 56%);
-  --lumal-cockpit-ep-fill: rgb(0 215 255 / 10%);
-  --lumal-cockpit-ep-accent: #00d7ff;
-  --lumal-cockpit-ep-danger: #ff667d;
+  --lumal-cockpit-ep-overlay-bg: rgb(7 27 42 / 98%);
+  --lumal-cockpit-ep-panel-bg: rgb(8 31 47 / 98%);
+  --lumal-cockpit-ep-text: #dceef4;
+  --lumal-cockpit-ep-text-secondary: #9fbfca;
+  --lumal-cockpit-ep-border: rgb(72 187 211 / 28%);
+  --lumal-cockpit-ep-fill: rgb(36 216 238 / 8%);
+  --lumal-cockpit-ep-accent: #24d8ee;
+  --lumal-cockpit-ep-danger: #ff647c;
 }
 
 .el-popper.el-select__popper,
@@ -373,13 +377,15 @@ body {
   --el-fill-color-light: var(--lumal-cockpit-ep-fill);
   --el-color-primary: var(--lumal-cockpit-ep-accent);
   --el-color-danger: var(--lumal-cockpit-ep-danger);
-  --el-border-radius-base: 4px;
+  --el-border-radius-base: 10px;
 }
 
-.el-popper.el-select__popper {
+.el-popper.el-select__popper,
+.el-message-box {
   border: 1px solid var(--lumal-cockpit-ep-border);
-  background: var(--lumal-cockpit-ep-overlay-bg);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
+  background: var(--lumal-cockpit-ep-panel-bg);
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 28%);
 }
 
 .el-popper.el-select__popper .el-select-dropdown__item {
@@ -393,13 +399,7 @@ body {
 
 .el-popper.el-select__popper .el-select-dropdown__item.is-selected {
   color: var(--lumal-cockpit-ep-accent);
-  font-weight: 600;
-}
-
-.el-message-box {
-  border: 1px solid var(--lumal-cockpit-ep-border);
-  background: var(--lumal-cockpit-ep-panel-bg);
-  border-radius: 6px;
+  font-weight: 650;
 }
 
 .el-message-box__title,
@@ -407,25 +407,18 @@ body {
   color: var(--lumal-cockpit-ep-text);
 }
 
-.standalone-app__designer .lumal-cockpit-designer__empty-cell:hover:not(:disabled),
-.standalone-app__designer .lumal-cockpit-designer__library-card:hover,
-.standalone-app__designer .lumal-cockpit-designer__placed-widget:hover {
-  box-shadow: 0 0 16px var(--lumal-cockpit-drop-target);
-}
-
-button {
-  font: inherit;
+/***********************可访问性与动效*********************/
+:focus-visible {
+  outline-color: var(--lumal-cockpit-focus-ring, #087fa8);
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
+    scroll-behavior: auto !important;
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
-  }
-
-  .lumal-cockpit-card::after {
-    display: none;
+    animation-iteration-count: 1 !important;
   }
 }
