@@ -1,5 +1,6 @@
 import type { AdminAccountKey, AdminLoginRequest, AdminUser } from '../api/auth'
 import { createAuthSession } from '@lumal/core/auth'
+import { ElMessageBox } from 'element-plus'
 import { readonly, shallowRef } from 'vue'
 import { adminAccountOptions, loginAdmin, logoutAdmin } from '../api/auth'
 import { clearAdminAccess, syncAdminAccess } from './permission'
@@ -7,6 +8,7 @@ import { clearAdminAccess, syncAdminAccess } from './permission'
 const tokenStorageKey = 'lumal-admin:token'
 const userStorageKey = 'lumal-admin:user'
 export const adminTabSnapshotStorageKey = 'lumal-admin:tabs'
+const loginPath = '/login'
 
 /***********************存储兜底*********************/
 function createMemoryStorage(): Storage {
@@ -87,8 +89,41 @@ function clearAdminTabSnapshot(): void {
   }
 }
 
+let reLoginPrompt: Promise<void> | undefined
+
+export async function promptReLoginAndRedirect(): Promise<void> {
+  if (reLoginPrompt)
+    return reLoginPrompt
+
+  reLoginPrompt = (async () => {
+    try {
+      await ElMessageBox.alert('登录状态已失效，请重新登录', '登录已过期', {
+        closeOnClickModal: false,
+        closeOnPressEscape: false,
+        confirmButtonText: '重新登录',
+        showClose: false,
+        type: 'warning',
+      })
+    }
+    catch {
+      // 确认框被关闭时仍跳转登录页。
+    }
+
+    const { router } = await import('../router')
+    if (router.currentRoute.value.path === loginPath)
+      return
+
+    await router.replace(adminSession.resolveRedirect(router.currentRoute.value.fullPath))
+  })().finally(() => {
+    reLoginPrompt = undefined
+  })
+
+  return reLoginPrompt
+}
+
 export const adminSession = createAuthSession({
   onSessionExpired: clearCurrentSessionState,
+  redirect: { loginPath, redirectQueryKey: 'redirect' },
   storage: sessionStorage,
   tokenKey: tokenStorageKey,
 })

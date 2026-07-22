@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { ElMessageBox } from 'element-plus'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { permissionStore } from '../src/router'
 import {
   adminSession,
@@ -40,6 +41,7 @@ describe('admin session service', () => {
   })
 
   it('登出会清理 token、当前用户、权限和角色', async () => {
+    const alert = vi.spyOn(ElMessageBox, 'alert').mockResolvedValue('confirm' as never)
     await login('operator')
 
     await logout()
@@ -49,6 +51,8 @@ describe('admin session service', () => {
     expect(currentUser.value).toBeNull()
     expect(permissionStore.permissions).toEqual([])
     expect(permissionStore.roles).toEqual([])
+    expect(alert).not.toHaveBeenCalled()
+    alert.mockRestore()
   })
 
   it('更新当前用户昵称会同步会话快照', async () => {

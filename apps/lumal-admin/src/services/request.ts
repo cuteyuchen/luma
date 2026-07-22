@@ -1,7 +1,7 @@
 import type { RequestClient } from '@lumal/core/request'
 import { createRequestClient, RequestError } from '@lumal/core/request'
 import { parseAdminResponse, parseAdminSession } from '../api/adapters'
-import { adminSession } from './session'
+import { adminSession, promptReLoginAndRedirect } from './session'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
 
@@ -44,7 +44,10 @@ export function createAdminRequestClient(fetcher: typeof fetch = globalThis.fetc
     getToken: () => adminSession.getToken() || undefined,
     onResponseError: ({ error }) => normalizeErrorMessage(error),
     onResponse: <TResult>({ data }: { data: unknown }) => parseAdminResponse<TResult>(data),
-    onSessionExpired: () => adminSession.handleSessionExpired(),
+    onSessionExpired: async () => {
+      await adminSession.handleSessionExpired()
+      await promptReLoginAndRedirect()
+    },
   })
 }
 

@@ -1,9 +1,11 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { ElMessageBox } from 'element-plus'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createAdminRequestClient } from '../src/services/request'
 import { adminSession, currentUser, login, logout } from '../src/services/session'
 
 describe('admin request service', () => {
   afterEach(async () => {
+    vi.restoreAllMocks()
     await logout()
   })
 
@@ -21,7 +23,12 @@ describe('admin request service', () => {
     expect(currentUser.value?.username).toBe('admin')
   })
 
-  it('刷新失败时清理会话、用户和权限状态', async () => {
+  it('刷新失败时清理会话并提示重新登录后跳转登录页', async () => {
+    const alert = vi.spyOn(ElMessageBox, 'alert').mockResolvedValue('confirm' as never)
+    const { router } = await import('../src/router')
+    await router.push('/profile')
+    const replace = vi.spyOn(router, 'replace').mockResolvedValue(undefined as never)
+
     await login('operator')
     adminSession.setSession({
       accessToken: 'expired-access',
@@ -32,5 +39,11 @@ describe('admin request service', () => {
     await expect(request.get('/profile')).rejects.toMatchObject({ kind: 'session' })
     expect(adminSession.getSession()).toBeNull()
     expect(currentUser.value).toBeNull()
+    expect(alert).toHaveBeenCalledWith(
+      '登录状态已失效，请重新登录',
+      '登录已过期',
+      expect.objectContaining({ confirmButtonText: '重新登录' }),
+    )
+    expect(replace).toHaveBeenCalledWith('/login?redirect=%2Fprofile')
   })
 })

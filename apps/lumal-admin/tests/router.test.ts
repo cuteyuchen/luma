@@ -9,7 +9,7 @@ import {
   permissionStore,
 } from '../src/router'
 import { staticAdminRouteRecords } from '../src/router/routes'
-import { login, logout } from '../src/services/session'
+import { adminSession, login, logout } from '../src/services/session'
 
 describe('lumal admin router', () => {
   afterEach(async () => {
@@ -239,6 +239,21 @@ describe('lumal admin router', () => {
 
     expect(router.currentRoute.value.path).toBe('/dashboard')
     expect(router.hasRoute('Dashboard')).toBe(true)
+  })
+
+  it('刷新凭据失效时进入受保护页面会重定向到登录页', async () => {
+    await login('admin')
+    adminSession.setSession({
+      accessToken: 'expired-access',
+      refreshToken: 'invalid-refresh',
+    })
+    const router = createAdminRouter(createMemoryHistory())
+
+    await expect(router.push('/system/user')).resolves.toBeUndefined()
+
+    expect(router.currentRoute.value.path).toBe('/login')
+    expect(router.currentRoute.value.query.redirect).toBe('/system/user')
+    expect(adminSession.getSession()).toBeNull()
   })
 
   it('并发初始化只注册一份动态路由', async () => {

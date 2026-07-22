@@ -220,13 +220,27 @@ export function createAdminRouter(
       return true
     }
 
-    if (to.path === '/login') {
+    const needsRematch = !runtime.menuRoutes.remoteLoaded
+    try {
       await ensureAdminRoutes(targetRouter)
-      return resolveFirstAccessibleAdminPath(targetRouter)
+    }
+    catch (error) {
+      if (!isAuthenticated()) {
+        if (to.path === '/login')
+          return true
+
+        return {
+          path: '/login',
+          query: { redirect: to.fullPath },
+        }
+      }
+
+      throw error
     }
 
-    const needsRematch = !runtime.menuRoutes.remoteLoaded
-    await ensureAdminRoutes(targetRouter)
+    if (to.path === '/login') {
+      return resolveFirstAccessibleAdminPath(targetRouter)
+    }
 
     if (to.path === '/') {
       return resolveFirstAccessibleAdminPath(targetRouter)
