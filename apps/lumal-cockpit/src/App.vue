@@ -254,12 +254,10 @@ onBeforeUnmount(() => {
   inset: 0;
 }
 
-/* 非 container 模式：透传包裹，不影响 LumalCockpit 原有 fixed 铺满定位 */
 .standalone-app__passthrough {
   display: contents;
 }
 
-/* container 模式：LumalCockpit 相对全屏容器 stage 铺满，替代其自身 fixed 定位 */
 .standalone-app__stage :deep(.lumal-cockpit) {
   position: absolute;
   inset: 0;
@@ -272,84 +270,112 @@ onBeforeUnmount(() => {
 }
 
 .standalone-app__designer-close {
-  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg, #19374b), transparent 14%);
-  --el-button-border-color: color-mix(in srgb, var(--lumal-cockpit-border, rgb(6 183 253 / 50%)), transparent 18%);
-  --el-button-text-color: var(--lumal-cockpit-title-text, #fff);
-  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent, #00cbf4), transparent 84%);
-  --el-button-hover-border-color: var(--lumal-cockpit-accent, #00cbf4);
-  --el-button-hover-text-color: var(--lumal-cockpit-title-text, #fff);
-}
-
-.standalone-app__actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg, #071b2a), transparent 4%);
+  --el-button-border-color: var(--lumal-cockpit-border, rgb(72 187 211 / 22%));
+  --el-button-text-color: var(--lumal-cockpit-title-text, #eefbff);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent, #24d8ee), transparent 90%);
+  --el-button-hover-border-color: var(--lumal-cockpit-accent, #24d8ee);
+  --el-button-hover-text-color: var(--lumal-cockpit-title-text, #eefbff);
 }
 
 .standalone-app__heading {
   display: flex;
-  gap: 28px;
   align-items: center;
+  gap: 30px;
+  min-width: 0;
 }
 
 .standalone-app__brand {
+  position: relative;
   display: grid;
-  gap: 2px;
+  gap: 3px;
+  min-width: 230px;
+  padding-left: 14px;
+}
+
+.standalone-app__brand::before {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--lumal-cockpit-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 58%);
+  content: '';
 }
 
 .standalone-app__brand h1 {
   margin: 0;
+  color: var(--lumal-cockpit-title-text);
   font: inherit;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1.08;
 }
 
 .standalone-app__brand span {
-  color: var(--lumal-cockpit-text-secondary);
+  color: var(--lumal-cockpit-text-muted);
   font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   white-space: nowrap;
 }
 
 :global(:root[data-lumal-theme='dark']) .standalone-app__brand span {
-  color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 36%);
+  color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 48%);
 }
 
 .standalone-app__layouts {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 24%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 10%);
 }
 
 .standalone-app__layouts :deep(.el-button) {
-  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 14%);
-  --el-button-border-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 18%);
+  --el-button-bg-color: transparent;
+  --el-button-border-color: transparent;
   --el-button-text-color: var(--lumal-cockpit-text-secondary);
-  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 88%);
-  --el-button-hover-border-color: var(--lumal-cockpit-accent);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 92%);
+  --el-button-hover-border-color: transparent;
   --el-button-hover-text-color: var(--lumal-cockpit-title-text);
-  min-height: 36px;
-  padding: 0 16px;
-  border-radius: 2px;
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  min-height: 34px;
+  padding: 0 15px;
+  border-radius: 9px;
   box-shadow: none;
 }
 
 .standalone-app__layouts :deep(.el-button.is-active) {
-  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 84%);
-  --el-button-border-color: var(--lumal-cockpit-accent);
+  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 90%);
+  --el-button-border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 72%);
   --el-button-text-color: var(--lumal-cockpit-title-text);
-  box-shadow: inset 0 -2px 0 var(--lumal-cockpit-accent), 0 0 12px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 78%);
+  box-shadow: inset 0 -2px 0 var(--lumal-cockpit-accent);
+}
+
+.standalone-app__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .standalone-app__live {
   display: inline-flex;
-  gap: 6px;
   align-items: center;
-  min-height: 32px;
-  padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-success), transparent 60%);
-  background: color-mix(in srgb, var(--lumal-cockpit-success), transparent 92%);
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-success), transparent 66%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lumal-cockpit-success), transparent 94%);
   color: var(--lumal-cockpit-success);
   font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -358,30 +384,50 @@ onBeforeUnmount(() => {
   height: 7px;
   border-radius: 50%;
   background: var(--lumal-cockpit-success);
-  box-shadow: 0 0 8px var(--lumal-cockpit-success);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--lumal-cockpit-success), transparent 20%);
 }
 
 .standalone-app__actions :deep(.el-button) {
-  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 14%);
-  --el-button-border-color: color-mix(in srgb, var(--lumal-cockpit-border), transparent 18%);
+  --el-button-bg-color: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 6%);
+  --el-button-border-color: var(--lumal-cockpit-border);
   --el-button-text-color: var(--lumal-cockpit-text-secondary);
-  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 88%);
-  --el-button-hover-border-color: var(--lumal-cockpit-accent);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 91%);
+  --el-button-hover-border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 52%);
   --el-button-hover-text-color: var(--lumal-cockpit-title-text);
-  --el-button-active-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 80%);
+  --el-button-active-bg-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 86%);
   --el-button-active-border-color: var(--lumal-cockpit-accent);
   --el-button-active-text-color: var(--lumal-cockpit-title-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  min-width: 44px;
-  border-radius: 2px;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 10px;
   box-shadow: none;
 }
 
 .standalone-app__actions button:focus-visible {
   outline: 2px solid var(--lumal-cockpit-focus-ring);
   outline-offset: 2px;
+}
+
+@media (max-width: 1360px) {
+  .standalone-app__heading {
+    gap: 18px;
+  }
+
+  .standalone-app__brand {
+    min-width: 190px;
+  }
+
+  .standalone-app__brand h1 {
+    font-size: 22px;
+  }
+
+  .standalone-app__layouts :deep(.el-button) {
+    padding-inline: 11px;
+  }
 }
 </style>
