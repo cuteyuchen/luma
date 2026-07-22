@@ -1,0 +1,107 @@
+/* 大屏环境动效：低频、低透明度，不干扰图表阅读。 */
+
+.lumal-cockpit-canvas__header {
+  background-size: 160% 100%, auto;
+  animation: cockpit-header-ambient 14s ease-in-out infinite alternate;
+}
+
+.lumal-cockpit-canvas__center {
+  isolation: isolate;
+}
+
+.lumal-cockpit-canvas__center::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, transparent 38%, rgb(72 219 237 / 3.5%) 49%, transparent 60%) -120% 0 / 80% 100% no-repeat,
+    radial-gradient(circle at 50% 50%, transparent 48%, rgb(36 216 238 / 3%) 72%, transparent 74%);
+  content: '';
+  pointer-events: none;
+  animation: cockpit-center-sweep 12s linear infinite;
+}
+
+.lumal-cockpit-card {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.lumal-cockpit-card:hover {
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 20%),
+    inset 0 1px 0 rgb(255 255 255 / 4%),
+    inset 0 0 30px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 97%);
+}
+
+.lumal-cockpit-card[data-widget-type='node-pulse'],
+.lumal-cockpit-card[data-widget-type='capacity-monitor'] {
+  border-color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 68%);
+}
+
+.lumal-cockpit-card[data-widget-type='node-pulse']::before,
+.lumal-cockpit-card[data-widget-type='capacity-monitor']::before {
+  opacity: 0.9;
+  animation: cockpit-card-signal 5.8s ease-in-out infinite;
+}
+
+.standalone-app__live i,
+.scene-center__status-dot {
+  animation: cockpit-status-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes cockpit-header-ambient {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 100% 0, 0 0;
+  }
+}
+
+@keyframes cockpit-center-sweep {
+  0% {
+    background-position: -120% 0, 0 0;
+  }
+
+  100% {
+    background-position: 260% 0, 0 0;
+  }
+}
+
+@keyframes cockpit-card-signal {
+  0%, 100% {
+    opacity: 0.38;
+  }
+
+  50% {
+    opacity: 0.96;
+  }
+}
+
+@keyframes cockpit-status-pulse {
+  0%, 100% {
+    opacity: 0.72;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumal-cockpit-canvas__header,
+  .lumal-cockpit-canvas__center::before,
+  .lumal-cockpit-card[data-widget-type='node-pulse']::before,
+  .lumal-cockpit-card[data-widget-type='capacity-monitor']::before,
+  .standalone-app__live i,
+  .scene-center__status-dot {
+    animation: none !important;
+  }
+
+  .lumal-cockpit-card {
+    transition: none;
+  }
+}
