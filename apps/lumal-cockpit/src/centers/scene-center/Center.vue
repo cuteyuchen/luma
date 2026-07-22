@@ -3,6 +3,7 @@ import type { CockpitCenterContext } from '@lumal/cockpit'
 import type { Component } from 'vue'
 import type { SceneFilterPayload, SceneFocusPayload, SceneSelectionPayload } from '../../messages/topics'
 import type { CenterEngine, CenterTheme } from '../types'
+import { LumalDecoration, LumalDigitalFlop } from '@lumal/datav'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import { demoScene, getSceneEntity } from '../../data/demo-scene'
 import { cockpitTopics } from '../../messages/topics'
@@ -37,6 +38,9 @@ const reducedMotion = ref(false)
 
 const activeRenderer = computed(() => renderers[activeEngine.value])
 const activeEntity = computed(() => getSceneEntity(focusedId.value || selectedIds.value[0]))
+const onlineNodeCount = computed(() => demoScene.points.filter(point => point.status !== 'watch').length)
+const activeLinkCount = computed(() => demoScene.lines.filter(line => line.status === 'active').length)
+const watchRegionCount = computed(() => demoScene.regions.filter(region => region.status === 'watch').length)
 const statusLabels = {
   active: '活跃',
   stable: '稳定',
@@ -166,6 +170,46 @@ onBeforeUnmount(() => {
       </template>
     </Suspense>
 
+    <div class="scene-center__ambient" aria-hidden="true">
+      <LumalDecoration
+        class="scene-center__signal scene-center__signal--left"
+        :variant="3"
+        :colors="['var(--lumal-cockpit-accent)', 'var(--lumal-cockpit-success)']"
+        :duration="4600"
+      />
+      <LumalDecoration
+        class="scene-center__signal scene-center__signal--right"
+        :variant="3"
+        :reverse="true"
+        :colors="['var(--lumal-cockpit-accent)', 'var(--lumal-cockpit-warning)']"
+        :duration="5100"
+      />
+      <LumalDecoration
+        class="scene-center__scan-line"
+        :variant="2"
+        :colors="['var(--lumal-cockpit-accent)', 'var(--lumal-cockpit-success)']"
+        :duration="6800"
+      />
+    </div>
+
+    <div class="scene-center__telemetry scene-center__telemetry--left" aria-label="节点遥测">
+      <span>在线节点</span>
+      <div>
+        <LumalDigitalFlop :value="onlineNodeCount" :duration="420" />
+        <small>/ {{ demoScene.points.length }}</small>
+      </div>
+      <em>NODE ONLINE</em>
+    </div>
+
+    <div class="scene-center__telemetry scene-center__telemetry--right" aria-label="链路遥测">
+      <span>高载链路</span>
+      <div>
+        <LumalDigitalFlop :value="activeLinkCount" :duration="420" />
+        <small>条</small>
+      </div>
+      <em>WATCH {{ watchRegionCount }} REGIONS</em>
+    </div>
+
     <div ref="engineSwitchRef" class="scene-center__engine-switch" role="tablist" aria-label="地图引擎">
       <button
         v-for="(engine, index) in engines"
@@ -187,7 +231,12 @@ onBeforeUnmount(() => {
       <span class="scene-center__status-dot" :data-status="activeEntity?.status ?? 'stable'" />
       <span>{{ activeEntity ? statusLabels[activeEntity.status] : '全国态势' }}</span>
       <strong>{{ activeEntity?.name ?? '实时运行中' }}</strong>
-      <span v-if="activeEntity" class="scene-center__status-value">{{ activeEntity.value }}</span>
+      <LumalDigitalFlop
+        v-if="activeEntity"
+        class="scene-center__status-flop"
+        :value="activeEntity.value"
+        :duration="360"
+      />
     </div>
   </section>
 </template>
@@ -217,12 +266,115 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+.scene-center::after {
+  position: absolute;
+  inset: 12% 18%;
+  z-index: 1;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 70px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 94%),
+    inset 0 0 70px color-mix(in srgb, var(--lumal-cockpit-accent), transparent 96%);
+  content: '';
+  pointer-events: none;
+}
+
+.scene-center__ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.scene-center__signal {
+  position: absolute;
+  top: 78px;
+  width: 210px;
+  height: 24px;
+  opacity: 0.36;
+}
+
+.scene-center__signal--left {
+  left: 24px;
+}
+
+.scene-center__signal--right {
+  right: 24px;
+}
+
+.scene-center__scan-line {
+  position: absolute;
+  right: 21%;
+  bottom: 72px;
+  left: 21%;
+  height: 12px;
+  opacity: 0.28;
+}
+
 .scene-center__loading {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
   color: var(--lumal-cockpit-text-secondary);
+}
+
+.scene-center__telemetry {
+  position: absolute;
+  top: 112px;
+  z-index: 9;
+  display: grid;
+  gap: 4px;
+  min-width: 126px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--lumal-cockpit-border), transparent 34%);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--lumal-cockpit-floating-bg), transparent 17%);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
+  backdrop-filter: blur(10px);
+}
+
+.scene-center__telemetry--left {
+  left: 20px;
+}
+
+.scene-center__telemetry--right {
+  right: 20px;
+  text-align: right;
+}
+
+.scene-center__telemetry > span {
+  color: var(--lumal-cockpit-text-muted);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+.scene-center__telemetry > div {
+  display: flex;
+  align-items: end;
+  gap: 5px;
+}
+
+.scene-center__telemetry--right > div {
+  justify-content: flex-end;
+}
+
+.scene-center__telemetry :deep(.lumal-digital-flop) {
+  width: 46px;
+  height: 26px;
+}
+
+.scene-center__telemetry small {
+  padding-bottom: 3px;
+  color: var(--lumal-cockpit-text-secondary);
+  font-size: 9px;
+}
+
+.scene-center__telemetry em {
+  color: color-mix(in srgb, var(--lumal-cockpit-accent), transparent 42%);
+  font-size: 8px;
+  font-style: normal;
+  letter-spacing: 0.09em;
 }
 
 .scene-center__engine-switch {
@@ -297,17 +449,15 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(14px);
 }
 
-.scene-center__status strong,
-.scene-center__status-value {
+.scene-center__status strong {
   color: var(--lumal-cockpit-title-text);
   font-variant-numeric: tabular-nums;
 }
 
-.scene-center__status-value {
-  padding-left: 4px;
+.scene-center__status-flop {
+  width: 34px;
+  height: 22px;
   color: var(--lumal-cockpit-accent);
-  font-size: 17px;
-  font-weight: 700;
 }
 
 .scene-center__status-dot {
@@ -324,6 +474,12 @@ onBeforeUnmount(() => {
 
 .scene-center__status-dot[data-status='watch'] {
   background: var(--lumal-cockpit-warning);
+}
+
+@media (max-width: 1080px) {
+  .scene-center__telemetry {
+    display: none;
+  }
 }
 
 @media (max-width: 900px) {
