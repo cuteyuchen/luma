@@ -1,0 +1,508 @@
+/* Cockpit 模块设置页：独立应用视觉皮肤
+ * 仅覆盖展示层，布局草稿、拖拽、行列、合并列、保存等逻辑保持不变。
+ */
+
+.standalone-app__designer {
+  --lumal-cockpit-bg: #06131f;
+  --lumal-cockpit-panel-bg: rgb(8 29 44 / 96%);
+  --lumal-cockpit-surface: rgb(9 34 50 / 96%);
+  --lumal-cockpit-floating-bg: rgb(8 31 47 / 98%);
+  --lumal-cockpit-workspace-bg: #06131f;
+  --lumal-cockpit-preview-bg: #071b2a;
+  --lumal-cockpit-empty-bg: rgb(34 211 238 / 3%);
+  --lumal-cockpit-border: rgb(57 196 226 / 30%);
+  --lumal-cockpit-panel-border: rgb(57 196 226 / 32%);
+  --lumal-cockpit-slot-border: rgb(57 196 226 / 38%);
+  --lumal-cockpit-caption-bg: rgb(7 27 42 / 94%);
+  --lumal-cockpit-control-bg: rgb(6 37 54 / 92%);
+  --lumal-cockpit-designer-body-bg: #06131f;
+  --lumal-cockpit-designer-inset-shadow: none;
+  --lumal-cockpit-title-text: #eefbff;
+  --lumal-cockpit-text: #d9edf4;
+  --lumal-cockpit-text-secondary: #9fc2ce;
+  --lumal-cockpit-text-muted: #648a98;
+  --lumal-cockpit-accent: #24d8ee;
+  --lumal-cockpit-success: #2de2b8;
+  --lumal-cockpit-warning: #ffc45e;
+  --lumal-cockpit-danger: #ff647c;
+  --lumal-cockpit-focus-ring: #24d8ee;
+  --lumal-cockpit-drop-target: rgb(36 216 238 / 28%);
+  --lumal-cockpit-selected: rgb(45 226 184 / 16%);
+
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 48% 42%, rgb(20 105 122 / 18%), transparent 45%),
+    linear-gradient(180deg, #06131f 0%, #071b2a 100%);
+}
+
+.standalone-app__designer::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(rgb(88 216 240 / 2%) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgb(88 216 240 / 2%) 1px, transparent 1px) 0 0 / 48px 48px;
+  content: '';
+  pointer-events: none;
+}
+
+.standalone-app__designer .lumal-cockpit-designer {
+  position: relative;
+  z-index: 1;
+  grid-template-rows: 72px 68px auto minmax(0, 1fr) 70px;
+  min-width: 1280px;
+  min-height: 720px;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 顶栏 */
+.standalone-app__designer .lumal-cockpit-designer__titlebar {
+  min-height: 72px;
+  padding: 0 28px;
+  border-bottom: 1px solid rgb(57 196 226 / 22%);
+  background-image: none !important;
+  background:
+    linear-gradient(90deg, rgb(36 216 238 / 8%), transparent 34%),
+    rgb(5 22 35 / 94%);
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 3%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__heading {
+  gap: 11px;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__heading .lumal-icon {
+  color: var(--lumal-cockpit-accent);
+  filter: drop-shadow(0 0 8px rgb(36 216 238 / 36%));
+}
+
+.standalone-app__designer .standalone-app__designer-close.el-button {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  border-radius: 8px;
+  background: rgb(8 31 47 / 84%);
+}
+
+/* 模板控制栏 */
+.standalone-app__designer .lumal-cockpit-designer__controlbar {
+  min-height: 68px;
+  padding: 0 28px;
+  border-bottom: 1px solid rgb(57 196 226 / 16%);
+  background: rgb(7 27 42 / 76%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-controls {
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-controls > .lumal-cockpit-designer__field {
+  gap: 12px;
+  color: var(--lumal-cockpit-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-controls .el-select {
+  width: 220px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-controls > .el-input {
+  width: 210px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-tools {
+  gap: 8px;
+  margin-left: 2px;
+  padding-left: 12px;
+  border-left: 1px solid rgb(57 196 226 / 20%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-tools > .el-button:first-child {
+  width: auto;
+  min-width: 78px;
+  padding-inline: 12px;
+  border-radius: 7px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__layout-tools > .el-button:first-child::after {
+  margin-left: 6px;
+  content: '新增';
+}
+
+.standalone-app__designer .lumal-cockpit-designer__issues {
+  padding: 8px 28px;
+}
+
+/* 主工作区：左区域、右区域、模块选择三列 */
+.standalone-app__designer .lumal-cockpit-designer__workspace {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 360px;
+  gap: 14px;
+  padding: 14px 18px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__assembly,
+.standalone-app__designer .lumal-cockpit-designer__assembly-stage {
+  display: contents;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region,
+.standalone-app__designer .lumal-cockpit-designer__library {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  border: 1px solid rgb(57 196 226 / 28%);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgb(10 36 52 / 92%), rgb(7 27 42 / 94%));
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 20%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+  overflow: hidden;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region::before,
+.standalone-app__designer .lumal-cockpit-designer__library::before {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  z-index: 2;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(36 216 238 / 58%), transparent);
+  content: '';
+  pointer-events: none;
+}
+
+/* 左右区域 */
+.standalone-app__designer .lumal-cockpit-designer__region {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head {
+  min-height: 104px;
+  padding: 14px 14px 12px;
+  gap: 10px 12px;
+  align-content: flex-start;
+  border: 0;
+  border-bottom: 1px solid rgb(57 196 226 / 18%);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(36 216 238 / 7%), transparent 62%),
+    rgb(7 29 44 / 74%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head-meta {
+  flex-basis: 100%;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head-meta strong {
+  color: var(--lumal-cockpit-title-text);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head-meta span {
+  margin-top: 4px;
+  color: var(--lumal-cockpit-text-muted);
+  font-size: 11px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head .lumal-cockpit-designer__field {
+  gap: 6px;
+  color: var(--lumal-cockpit-text-secondary);
+  font-size: 12px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-head .el-input-number {
+  width: 102px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__region-width-field.lumal-cockpit-designer__field .el-input-number {
+  width: 116px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-rows {
+  flex: 1 1 auto;
+  gap: 10px;
+  min-height: 0;
+  padding: 12px;
+  overflow: auto;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-row {
+  gap: 8px;
+  min-height: 150px;
+  padding: 8px;
+  border: 1px solid rgb(57 196 226 / 22%);
+  border-radius: 9px;
+  background: rgb(5 24 38 / 64%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-row-head {
+  min-height: 38px;
+  padding: 4px 6px;
+  border: 0;
+  border-bottom: 1px solid rgb(57 196 226 / 16%);
+  border-radius: 0;
+  background: transparent;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-row-head > strong {
+  position: relative;
+  padding-left: 13px;
+  color: var(--lumal-cockpit-title-text);
+  font-size: 12px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-row-head > strong::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 17px;
+  border-radius: 3px;
+  background: var(--lumal-cockpit-accent);
+  box-shadow: 0 0 8px rgb(36 216 238 / 34%);
+  content: '';
+  transform: translateY(-50%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-row-head .el-input-number {
+  width: 108px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__tabs-switch {
+  font-size: 11px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__grid-cells {
+  gap: 8px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__empty-cell.el-button {
+  border: 1px dashed rgb(36 216 238 / 30%);
+  border-radius: 8px;
+  background: rgb(36 216 238 / 2%);
+  color: var(--lumal-cockpit-text-muted);
+  font-size: 13px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placed-widget,
+.standalone-app__designer .lumal-cockpit-designer__tab-card {
+  border-color: rgb(57 196 226 / 28%);
+  border-radius: 8px;
+  background: rgb(6 25 39 / 82%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placed-widget:hover,
+.standalone-app__designer .lumal-cockpit-designer__placed-widget:focus-within,
+.standalone-app__designer .lumal-cockpit-designer__tab-card:focus-within {
+  border-color: rgb(36 216 238 / 70%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placed-widget-header,
+.standalone-app__designer .lumal-cockpit-designer__tab-list {
+  min-height: 38px;
+  border-bottom-color: rgb(57 196 226 / 18%);
+  background:
+    linear-gradient(90deg, rgb(36 216 238 / 8%), transparent 55%),
+    rgb(7 27 42 / 92%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placed-widget-header {
+  padding-inline: 10px 5px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placed-widget-header > span {
+  color: var(--lumal-cockpit-title-text);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__widget-action.el-button,
+.standalone-app__designer .lumal-cockpit-designer__tab-action.el-button,
+.standalone-app__designer .lumal-cockpit-designer__tab-target.el-button {
+  border-color: transparent;
+  background: transparent;
+  opacity: 0.62;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__widget-action.el-button:hover,
+.standalone-app__designer .lumal-cockpit-designer__tab-action.el-button:hover,
+.standalone-app__designer .lumal-cockpit-designer__tab-target.el-button:hover {
+  border-color: rgb(57 196 226 / 24%);
+  background: rgb(36 216 238 / 9%);
+  opacity: 1;
+}
+
+/* 模块选择栏 */
+.standalone-app__designer .lumal-cockpit-designer__library {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 0;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-head {
+  min-height: 76px;
+  padding: 14px;
+  border-bottom: 1px solid rgb(57 196 226 / 18%);
+  background:
+    linear-gradient(90deg, rgb(36 216 238 / 8%), transparent 74%),
+    rgb(7 29 44 / 86%);
+}
+
+.standal-app__designer .lumal-cockpit-designer__library-head-copy,
+.standalone-app__designer .lumal-cockpit-designer__library-head-copy {
+  min-width: 0;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-head strong {
+  color: var(--lumal-cockpit-title-text);
+  font-size: 17px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-head-copy > span {
+  max-width: 245px;
+  margin-top: 4px;
+  color: var(--lumal-cockpit-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-count {
+  padding: 5px 9px;
+  border-color: rgb(36 216 238 / 34%);
+  background: rgb(36 216 238 / 8%);
+  color: var(--lumal-cockpit-accent) !important;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px;
+  height: auto;
+  padding: 12px;
+  overflow: auto;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-card {
+  height: 146px;
+  border: 1px solid rgb(57 196 226 / 24%);
+  border-radius: 8px;
+  background: rgb(5 24 38 / 72%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-card:hover,
+.standalone-app__designer .lumal-cockpit-designer__library-card:focus-within,
+.standalone-app__designer .lumal-cockpit-designer__library-card.is-selected {
+  border-color: rgb(36 216 238 / 76%);
+  background: rgb(36 216 238 / 5%);
+  box-shadow: 0 9px 24px rgb(0 0 0 / 24%);
+  transform: translateY(-1px);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__library-select.el-button {
+  min-height: 34px;
+  padding: 6px 8px;
+  border-top: 1px solid rgb(57 196 226 / 18%);
+  background: rgb(7 27 42 / 92%);
+  color: var(--lumal-cockpit-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Element Plus 控件 */
+.standalone-app__designer .lumal-cockpit-designer .el-input__wrapper,
+.standalone-app__designer .lumal-cockpit-designer .el-select__wrapper,
+.standalone-app__designer .lumal-cockpit-designer .el-input-number .el-input__wrapper {
+  border-radius: 7px;
+  background: rgb(5 33 49 / 90%);
+  box-shadow: 0 0 0 1px rgb(57 196 226 / 24%) inset;
+}
+
+.standalone-app__designer .lumal-cockpit-designer .el-input__wrapper:hover,
+.standalone-app__designer .lumal-cockpit-designer .el-select__wrapper:hover,
+.standalone-app__designer .lumal-cockpit-designer .el-input-number .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px rgb(36 216 238 / 66%) inset;
+}
+
+.standalone-app__designer .lumal-cockpit-designer .el-button {
+  border-radius: 7px;
+}
+
+/* 底部操作 */
+.standalone-app__designer .lumal-cockpit-designer__footer {
+  gap: 16px;
+  min-height: 70px;
+  padding: 0 18px 0 28px;
+  border-top: 1px solid rgb(57 196 226 / 18%);
+  background: rgb(7 27 42 / 82%);
+}
+
+.standalone-app__designer .lumal-cockpit-designer__placement-status {
+  margin-right: auto !important;
+  color: var(--lumal-cockpit-text-muted);
+  font-size: 12px !important;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__footer-actions {
+  gap: 10px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__footer-actions .el-button {
+  min-width: 92px;
+  height: 38px;
+}
+
+.standalone-app__designer .lumal-cockpit-designer__save.el-button {
+  min-width: 118px;
+  box-shadow: 0 8px 20px rgb(36 216 238 / 20%);
+}
+
+@media (max-width: 1560px) {
+  .standalone-app__designer .lumal-cockpit-designer {
+    min-width: 1120px;
+  }
+
+  .standalone-app__designer .lumal-cockpit-designer__workspace {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) 300px;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .standalone-app__designer .lumal-cockpit-designer__region-head {
+    min-height: 112px;
+  }
+
+  .standalone-app__designer .lumal-cockpit-designer__library-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .standalone-app__designer .lumal-cockpit-designer__library-card {
+    transition: none;
+  }
+}
