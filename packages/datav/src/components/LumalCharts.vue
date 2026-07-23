@@ -55,6 +55,31 @@ const dataVMode = computed(() => props.config !== undefined)
 const resolvedAriaLabel = computed(() => props.ariaLabel ?? (dataVMode.value ? 'DataV 图表' : 'ECharts 图表'))
 let resizeObserver: ResizeObserver | undefined
 let resizeFrame = 0
+let pendingOption = false
+let pendingConfig = false
+
+interface ChartHostSize {
+  height: number
+  width: number
+}
+
+function chartHostSize(): ChartHostSize | undefined {
+  const element = chartHostRef.value
+  if (!element)
+    return undefined
+  const width = Math.floor(element.clientWidth)
+  const height = Math.floor(element.clientHeight)
+  if (width <= 0 || height <= 0)
+    return undefined
+  return { height, width }
+}
+
+function cancelScheduledResize(): void {
+  if (!resizeFrame)
+    return
+  cancelAnimationFrame(resizeFrame)
+  resizeFrame = 0
+}
 
 function attrEventName(key: string): string | undefined {
   if (!key.startsWith('on') || key.length <= 2)
@@ -100,21 +125,39 @@ function disposeCharts(): void {
 
 function applyEChartsOption(option: EChartsOption): void {
   const chart = echartsRef.value
-  if (!chart)
+  if (!chart || !chartHostSize()) {
+    pendingOption = true
     return
+  }
   if (props.setOptionOptions)
     chart.setOption(option, props.setOptionOptions)
   else
     chart.setOption(option)
+  pendingOption = false
 }
 
 function applyDataVConfig(config: DataVChartsOption, animationEnd = true): void {
-  dataVRef.value?.setOption(config, animationEnd)
+  if (!dataVRef.value || !chartHostSize()) {
+    pendingConfig = true
+    return
+  }
+  dataVRef.value.setOption(config, animationEnd)
+  pendingConfig = false
+}
+
+function flushPendingRender(): void {
+  if (!chartHostSize())
+    return
+  if (dataVRef.value && pendingConfig && props.config !== undefined)
+    applyDataVConfig(props.config)
+  if (echartsRef.value && pendingOption)
+    applyEChartsOption(props.option)
 }
 
 function createChart(): void {
   const element = chartHostRef.value
-  if (!element || !element.clientWidth || !element.clientHeight)
+  const size = chartHostSize()
+  if (!element || !size)
     return
 
   disposeCharts()
@@ -122,10 +165,16 @@ function createChart(): void {
     const chart = new ChartsRuntime(element)
     dataVRef.value = chart
     chart.setOption(props.config ?? {})
+    pendingConfig = false
     return
   }
 
-  const chart = echarts.init(element, props.theme, props.initOptions)
+  const initOptions: EChartsInitOpts = {
+    ...props.initOptions,
+    height: props.initOptions?.height ?? size.height,
+    width: props.initOptions?.width ?? size.width,
+  }
+  const chart = echarts.init(element, props.theme, initOptions)
   echartsRef.value = chart
   if (props.group)
     chart.group = props.group
@@ -136,17 +185,28 @@ function createChart(): void {
 }
 
 function scheduleResize(options?: ResizeOpts): void {
-  cancelAnimationFrame(resizeFrame)
+  cancelScheduledResize()
   resizeFrame = requestAnimationFrame(() => {
+    resizeFrame = 0
+    const size = chartHostSize()
+    if (!size)
+      return
+
+    if (!dataVRef.value && !echartsRef.value) {
+      createChart()
+      return
+    }
+
     if (dataVRef.value)
       dataVRef.value.resize()
     else
-      echartsRef.value?.resize(options)
+      echartsRef.value?.resize({ ...options, height: options?.height ?? size.height, width: options?.width ?? size.width })
+    flushPendingRender()
   })
 }
 
 watch(() => props.config, (config) => {
-  if (config !== undefined && dataVRef.value)
+  if (config !== undefined)
     applyDataVConfig(config)
 }, { deep: false })
 watch(() => props.option, (option) => {
@@ -165,7 +225,7 @@ watchEffect(() => {
 })
 watch(() => props.loading, (loading) => {
   const chart = echartsRef.value
-  if (!chart)
+  if (!chart || !chartHostSize())
     return
   if (loading)
     chart.showLoading(props.loadingType, props.loadingOptions)
@@ -181,6 +241,8 @@ onMounted(async () => {
   await nextTick()
   if (props.autoResize && rootRef.value && typeof ResizeObserver !== 'undefined') {
     resizeObserver = new ResizeObserver(() => {
+      if (!chartHostSize())
+        return
       if (dataVRef.value || echartsRef.value)
         scheduleResize()
       else
@@ -189,12 +251,10 @@ onMounted(async () => {
     resizeObserver.observe(rootRef.value)
   }
   createChart()
-  if (!dataVRef.value && !echartsRef.value)
-    resizeFrame = requestAnimationFrame(createChart)
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(resizeFrame)
+  cancelScheduledResize()
   resizeObserver?.disconnect()
   disposeCharts()
 })
@@ -221,9 +281,16 @@ defineExpose({
   setConfig: (config: DataVChartsOption, animationEnd = true) => applyDataVConfig(config, animationEnd),
   setOption: (option: EChartsOption | DataVChartsOption, options?: SetOptionOpts | boolean) => {
     if (dataVRef.value)
-      dataVRef.value.setOption(option as DataVChartsOption, typeof options === 'boolean' ? options : true)
+      applyDataVConfig(option as DataVChartsOption, typeof options === 'boolean' ? options : true)
+    else if (typeof options === 'object') {
+      if (!chartHostSize()) {
+        pendingOption = true
+        return
+      }
+      echartsRef.value?.setOption(option as EChartsOption, options)
+    }
     else
-      echartsRef.value?.setOption(option as EChartsOption, typeof options === 'object' ? options : undefined)
+      applyEChartsOption(option as EChartsOption)
   },
   showLoading: (...args: Parameters<EChartsType['showLoading']>) => echartsRef.value?.showLoading(...args),
 })
