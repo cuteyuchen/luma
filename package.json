@@ -9,6 +9,9 @@
   },
   "scripts": {
     "build": "pnpm --filter @lumal/icons build && pnpm --filter @lumal/icons-vue build && pnpm --filter @lumal/core build && pnpm --filter @lumal/charts build && pnpm --filter @lumal/datav build && pnpm --filter @lumal/cockpit build && pnpm --filter @lumal/vben-compat build && pnpm --filter @lumal/vite build && pnpm --filter create-lumal-admin build && pnpm --filter lumal-mock-api build",
+    "cockpit:build": "pnpm --filter lumal-cockpit... build",
+    "datav-guide:build": "pnpm --filter lumal-datav-guide... build",
+    "deploy:check": "pnpm docs:build && pnpm cockpit:build && pnpm datav-guide:build",
     "changeset": "changeset",
     "changeset:status": "changeset status",
     "changeset:version": "changeset version",
