@@ -30,10 +30,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm docs:build
       - run: pnpm admin:build
-      - run: pnpm --filter @lumal/cockpit build
-      - run: pnpm --filter lumal-cockpit build
-      - run: pnpm --filter @lumal/datav build
-      - run: pnpm --filter lumal-datav-guide build
+      - run: pnpm cockpit:build
+      - run: pnpm datav-guide:build
       - run: pnpm compat:build
 
       - name: Upload static site artifacts
