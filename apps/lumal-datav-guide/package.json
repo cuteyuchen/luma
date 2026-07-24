@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "build": "pnpm --workspace-root datav-guide:build",
+    "build:app": "vue-tsc --noEmit -p tsconfig.json && vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "preview": "vite preview --host 127.0.0.1"
   },
